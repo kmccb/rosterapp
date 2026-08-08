@@ -20,7 +20,7 @@ export type FieldKind =
   | 'grade'
   | 'ignore';
 
-export type Delimiter = 'tab' | 'comma' | 'semicolon' | 'spaces';
+export type Delimiter = 'tab' | 'pipe' | 'comma' | 'semicolon' | 'spaces';
 
 export type ParsedRow = {
   player: Player;
@@ -177,6 +177,13 @@ const nameScore = (s: string): number => {
   return /[,\s]/.test(t) ? 1 : 0.5;
 };
 
+/**
+ * Rosters mark players with footnote symbols — an asterisk per varsity letter,
+ * a dagger for a captain. They belong to the printed sheet, not the name.
+ */
+export const stripNameMarks = (s: string): string =>
+  clean(s.replace(/[*†‡^~+]+/g, ''));
+
 /** "Smith, John" / "John Smith" / "Smith" -> first + last. */
 export const splitName = (input: string): { firstName: string; lastName: string } => {
   const s = clean(input).replace(/\s+,/, ',');
@@ -209,6 +216,7 @@ export const detectDelimiter = (lines: string[]): Delimiter => {
     return withAny / Math.max(1, counts.length);
   };
   if (consistent(/\t/g) > 0.8) return 'tab';
+  if (consistent(/\|/g) > 0.8) return 'pipe';
   if (consistent(/,/g) > 0.8) return 'comma';
   if (consistent(/;/g) > 0.8) return 'semicolon';
   return 'spaces';
@@ -243,6 +251,13 @@ export const splitLine = (line: string, delimiter: Delimiter): string[] => {
   switch (delimiter) {
     case 'tab':
       return line.split('\t').map((c) => clean(unquote(c)));
+    case 'pipe': {
+      const cells = line.split('|').map((c) => clean(unquote(c)));
+      // Markdown-style tables wrap every row in pipes, leaving empty ends.
+      if (cells.length > 1 && cells[0] === '') cells.shift();
+      if (cells.length > 1 && cells[cells.length - 1] === '') cells.pop();
+      return cells;
+    }
     case 'comma':
       return splitQuoted(line, ',');
     case 'semicolon':
@@ -447,13 +462,13 @@ const buildRow = (raw: string[], columns: FieldKind[]): ParsedRow => {
         player.number = normalizeNumber(value);
         break;
       case 'name':
-        nameCombined = value;
+        nameCombined = stripNameMarks(value);
         break;
       case 'firstName':
-        player.firstName = clean(value);
+        player.firstName = stripNameMarks(value);
         break;
       case 'lastName':
-        player.lastName = clean(value);
+        player.lastName = stripNameMarks(value);
         break;
       case 'position':
         player.position = clean(value).toUpperCase();
@@ -499,7 +514,8 @@ export const parseRoster = (text: string): ParseResult => {
   const lines = text
     .replace(/\r\n?/g, '\n')
     .split('\n')
-    .filter((l) => l.trim() !== '');
+    // Drop blanks and the |---|---| rule row a markdown table carries.
+    .filter((l) => l.trim() !== '' && !/^[\s|:+-]*[-|][\s|:+-]*$/.test(l));
 
   if (lines.length === 0) {
     return { rows: [], columns: [], delimiter: 'tab' };

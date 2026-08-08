@@ -250,6 +250,80 @@ describe('parseRoster — space-separated text', () => {
   });
 });
 
+describe('parseRoster — pipe-delimited team sheet', () => {
+  // The shape a real program roster arrives in: pipes, a header, footnote
+  // asterisks marking varsity letters, heights with no closing inch mark, and
+  // nearly everyone listed at two positions because they go both ways.
+  // (Names here are invented — real roster data stays on the device.)
+  const text = [
+    `# | NAME | HT | WT | POS | YR`,
+    `1 | Aaron Whitfield* | 5'8 | 185 | QB/DB | JR`,
+    `5 | Devon Marsh** | 5'8 | 165 | RB/DB | SR`,
+    `13 | Petros Anagnostou | 5'6 | 125 | WR/DB | JR`,
+    `42 | Nolan Pierce* | 5'8 | 185 | RB/DL | SR`,
+    `71 | Isaac Bourne* | 6'4 | 270 | OL/DL | JR`,
+    `75 | Wesley Cain | 6'0 | 270 | OL/DL | FR`,
+    `81 | Mateo Ferraro* | 6'2 | 190 | PK | SO`,
+  ].join('\n');
+
+  it('splits on pipes and reads the header', () => {
+    const result = parseRoster(text);
+    expect(result.delimiter).toBe('pipe');
+    expect(result.header).toEqual(['#', 'NAME', 'HT', 'WT', 'POS', 'YR']);
+    // Column order follows the sheet: HT and WT come before POS.
+    expect(result.columns).toEqual(['number', 'name', 'height', 'weight', 'position', 'grade']);
+  });
+
+  it('parses every row without complaint', () => {
+    const { rows } = parseRoster(text);
+    expect(rows).toHaveLength(7);
+    expect(rows.flatMap((r) => r.issues)).toEqual([]);
+  });
+
+  it('drops the footnote asterisks from names', () => {
+    const players = byNumber(text);
+    expect(players.get('1')).toMatchObject({ firstName: 'Aaron', lastName: 'Whitfield' });
+    expect(players.get('5')).toMatchObject({ firstName: 'Devon', lastName: 'Marsh' });
+  });
+
+  it("reads heights written without the closing inch mark", () => {
+    const players = byNumber(text);
+    expect(players.get('1')?.heightIn).toBe(68); // 5'8
+    expect(players.get('71')?.heightIn).toBe(76); // 6'4
+    expect(players.get('13')?.heightIn).toBe(66); // 5'6
+  });
+
+  it('leaves the side blank for two-way players and flags the kicker', () => {
+    const players = byNumber(text);
+    expect(players.get('1')).toMatchObject({ position: 'QB/DB', side: '' });
+    expect(players.get('42')).toMatchObject({ position: 'RB/DL', side: '' });
+    expect(players.get('81')).toMatchObject({ position: 'PK', side: 'ST' });
+  });
+
+  it('keeps FR through SR straight', () => {
+    const players = byNumber(text);
+    expect(players.get('75')?.grade).toBe('Fr');
+    expect(players.get('81')?.grade).toBe('So');
+    expect(players.get('1')?.grade).toBe('Jr');
+    expect(players.get('5')?.grade).toBe('Sr');
+  });
+});
+
+describe('parseRoster — markdown table', () => {
+  it('ignores the rule row and the wrapping pipes', () => {
+    const text = [
+      '| # | Name | Pos | Ht | Wt |',
+      '| --- | --- | :-: | --- | --- |',
+      `| 7 | Jake Miller | QB | 6-1 | 185 |`,
+      `| 72 | Marcus Webb | OT | 6-4 | 285 |`,
+    ].join('\n');
+    const { rows, columns } = parseRoster(text);
+    expect(columns).toEqual(['number', 'name', 'position', 'height', 'weight']);
+    expect(rows).toHaveLength(2);
+    expect(rows[0].player).toMatchObject({ number: '7', lastName: 'Miller', heightIn: 73 });
+  });
+});
+
 describe('numberMatches', () => {
   it('treats the typed digits as a prefix', () => {
     expect(numberMatches('7', '7')).toBe(true);
