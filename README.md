@@ -47,7 +47,8 @@ where to go when a real roster paste doesn't come out right.
 
 ## Deploying
 
-Pushing to `main` builds and publishes to GitHub Pages via `.github/workflows/deploy.yml`.
+Live at **https://roster.scottforge.ai**. Pushing to `main` builds and publishes via
+`.github/workflows/deploy.yml`.
 
 One-time setup, in order:
 
@@ -56,12 +57,15 @@ One-time setup, in order:
    repo, and none ends up in the built site either. Players are entered on the device and stay
    there.
 2. **Settings → Pages → Source: GitHub Actions.**
-3. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
-   button only appears for workflows that already exist on the default branch — so nothing
-   deploys while this lives on a feature branch.
+3. **DNS**: a `CNAME` record for `roster` pointing at `kmccb.github.io.` (that's the GitHub user,
+   not the repo, and the trailing dot matters on some providers).
+4. **Settings → Pages → Custom domain**: `roster.scottforge.ai`, then tick **Enforce HTTPS** once
+   the certificate finishes provisioning — that can take a few minutes to an hour after DNS
+   resolves.
+5. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
+   button only appears for workflows already on the default branch — so nothing deploys while this
+   lives on a feature branch.
 
-The site is served from a `/rosterapp/` subpath, which is why `vite.config.ts` sets `base`; if you
-rename the repo, change that to match.
-
-Hosting it somewhere else (Cloudflare Pages, Netlify, Vercel) works too and doesn't care about repo
-visibility — drop the `base` setting, since those serve from the domain root.
+`public/CNAME` carries the domain into every build, which is what keeps the custom domain from
+being dropped on each deploy. Because a custom domain serves from the root, `vite.config.ts` sets
+`base: '/'`; reverting to plain `github.io` hosting means putting `/rosterapp/` back.

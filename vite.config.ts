@@ -2,9 +2,11 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Project pages are served from https://<user>.github.io/rosterapp/
+// Served from the custom domain in public/CNAME, so the site lives at the root.
+// If you ever drop the custom domain, this has to go back to '/rosterapp/' to
+// match the github.io project-pages subpath.
 export default defineConfig({
-  base: '/rosterapp/',
+  base: '/',
   plugins: [
     react(),
     VitePWA({
