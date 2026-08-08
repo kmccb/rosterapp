@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Roster Lookup">
+  <rect width="512" height="512" rx="112" fill="#0b0f14" />
+  <rect x="28" y="28" width="456" height="456" rx="92" fill="none" stroke="#2b3543" stroke-width="8" />
+  <text
+    x="256"
+    y="256"
+    fill="#ffd60a"
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    font-size="300"
+    font-weight="800"
+    text-anchor="middle"
+    dominant-baseline="central"
+    letter-spacing="-10"
+  >7</text>
+</svg>
