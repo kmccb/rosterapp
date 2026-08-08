@@ -49,6 +49,19 @@ where to go when a real roster paste doesn't come out right.
 
 Pushing to `main` builds and publishes to GitHub Pages via `.github/workflows/deploy.yml`.
 
-One-time setup: **Settings → Pages → Source: GitHub Actions** in the repo. The site is served from
-a `/rosterapp/` subpath, which is why `vite.config.ts` sets `base`; if you rename the repo, change
-that to match.
+One-time setup, in order:
+
+1. **The repo must be public**, unless the account is on GitHub Pro or higher — Pages doesn't
+   publish from a private repo on the free plan. Public is fine here: no roster data is in the
+   repo, and none ends up in the built site either. Players are entered on the device and stay
+   there.
+2. **Settings → Pages → Source: GitHub Actions.**
+3. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
+   button only appears for workflows that already exist on the default branch — so nothing
+   deploys while this lives on a feature branch.
+
+The site is served from a `/rosterapp/` subpath, which is why `vite.config.ts` sets `base`; if you
+rename the repo, change that to match.
+
+Hosting it somewhere else (Cloudflare Pages, Netlify, Vercel) works too and doesn't care about repo
+visibility — drop the `base` setting, since those serve from the domain root.
