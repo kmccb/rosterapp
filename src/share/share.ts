@@ -83,7 +83,11 @@ const rpc = async <T>(fn: string, body: Record<string, unknown>): Promise<T> => 
     throw new ShareError(message || `The server said no (${res.status}).`);
   }
 
-  return (await res.json()) as T;
+  // A void-returning function comes back 204 with no body, and res.json() throws
+  // on that. Left unhandled it fails *after* the delete has already happened,
+  // which strands the panel showing a code that no longer exists.
+  const text = await res.text();
+  return (text ? JSON.parse(text) : null) as T;
 };
 
 // ------------------------------------------------------------------ public
