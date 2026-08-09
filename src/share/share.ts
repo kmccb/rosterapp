@@ -7,6 +7,7 @@
  * none of the query-builder surface would get used.
  */
 
+import type { StatsStore } from '../stats/statsStore';
 import type { Player, Roster } from '../types';
 
 const BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -115,7 +116,21 @@ export const takeCodeFromUrl = (): string | null => {
 
 // --------------------------------------------------------------------- rpc
 
-class ShareError extends Error {}
+class ShareError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/*
+ * PostgREST's "no function matches these arguments". It's what you get when the
+ * app has been deployed but the database migration hasn't run yet — the two
+ * can't land at the same instant, and a coach shouldn't lose the ability to
+ * publish in the gap.
+ */
+const SCHEMA_BEHIND = 'PGRST202';
 
 const rpc = async <T>(
   fn: string,
@@ -150,9 +165,11 @@ const rpc = async <T>(
   }
 
   if (!res.ok) {
-    const detail = await res.json().catch(() => null);
-    const message = (detail as { message?: string } | null)?.message;
-    throw new ShareError(message || `The server said no (${res.status}).`);
+    const detail = (await res.json().catch(() => null)) as {
+      message?: string;
+      code?: string;
+    } | null;
+    throw new ShareError(detail?.message || `The server said no (${res.status}).`, detail?.code);
   }
 
   // A void-returning function comes back 204 with no body, and res.json() throws
@@ -164,10 +181,32 @@ const rpc = async <T>(
 
 // ------------------------------------------------------------------ public
 
+/**
+ * Sends the stats too, and quietly retries without them if the database is
+ * still on the old schema. Reports which happened so the UI can be honest about
+ * whether the link is carrying stats yet.
+ */
+const rpcWithStats = async <T>(
+  fn: string,
+  body: Record<string, unknown>,
+  stats: StatsStore,
+): Promise<{ result: T; statsShared: boolean }> => {
+  try {
+    return { result: await rpc<T>(fn, { ...body, p_stats: stats }), statsShared: true };
+  } catch (err) {
+    if (err instanceof ShareError && err.code === SCHEMA_BEHIND) {
+      return { result: await rpc<T>(fn, body), statsShared: false };
+    }
+    throw err;
+  }
+};
+
 type FetchedRow = {
   team_name: string;
   season: string;
   players: Player[];
+  /** Absent until the database carries the stats column. */
+  stats?: StatsStore;
   updated_at: string;
 };
 
@@ -175,6 +214,8 @@ export type FetchedRoster = {
   teamName: string;
   season: string;
   players: Player[];
+  /** Empty when the publisher had none, or the database predates the column. */
+  stats: StatsStore;
   updatedAt: string;
 };
 
@@ -201,34 +242,51 @@ export const fetchShared = async (
       ...p,
       id: crypto.randomUUID(),
     })),
+    stats: row.stats && typeof row.stats === 'object' ? row.stats : {},
     updatedAt: row.updated_at,
   };
 };
 
-export const createShare = async (roster: Roster): Promise<ShareKey> => {
-  const rows = await rpc<Array<{ code: string; edit_token: string }>>('roster_create', {
-    p_team_name: roster.teamName,
-    p_season: roster.season,
-    p_players: roster.players,
-  });
+export const createShare = async (
+  roster: Roster,
+  stats: StatsStore,
+): Promise<ShareKey & { statsShared: boolean }> => {
+  const { result, statsShared } = await rpcWithStats<Array<{ code: string; edit_token: string }>>(
+    'roster_create',
+    {
+      p_team_name: roster.teamName,
+      p_season: roster.season,
+      p_players: roster.players,
+    },
+    stats,
+  );
 
-  const row = rows?.[0];
+  const row = result?.[0];
   if (!row) throw new ShareError('The server did not hand back a code.');
 
   const key = { code: row.code, editToken: row.edit_token };
   saveShareKey(key);
   rememberSource(key.code);
-  return key;
+  return { ...key, statsShared };
 };
 
-export const updateShare = async (key: ShareKey, roster: Roster): Promise<void> => {
-  await rpc('roster_update', {
-    p_code: key.code,
-    p_edit_token: key.editToken,
-    p_team_name: roster.teamName,
-    p_season: roster.season,
-    p_players: roster.players,
-  });
+export const updateShare = async (
+  key: ShareKey,
+  roster: Roster,
+  stats: StatsStore,
+): Promise<{ statsShared: boolean }> => {
+  const { statsShared } = await rpcWithStats(
+    'roster_update',
+    {
+      p_code: key.code,
+      p_edit_token: key.editToken,
+      p_team_name: roster.teamName,
+      p_season: roster.season,
+      p_players: roster.players,
+    },
+    stats,
+  );
+  return { statsShared };
 };
 
 export const deleteShare = async (key: ShareKey): Promise<void> => {

@@ -8,13 +8,14 @@ import {
   updateShare,
   type ShareKey,
 } from '../share/share';
+import type { StatsStore } from '../stats/statsStore';
 import type { Roster } from '../types';
 
-type Props = { roster: Roster };
+type Props = { roster: Roster; stats: StatsStore };
 
 type Busy = 'publish' | 'update' | 'stop' | null;
 
-export function SharePanel({ roster }: Props) {
+export function SharePanel({ roster, stats }: Props) {
   const [key, setKey] = useState<ShareKey | null>(() => loadShareKey());
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState('');
@@ -38,18 +39,25 @@ export function SharePanel({ roster }: Props) {
 
   const publish = () =>
     run('publish', async () => {
-      const next = await createShare(roster);
+      const next = await createShare(roster, stats);
       setKey(next);
-      return `Published. The code is ${formatCode(next.code)}.`;
+      return next.statsShared
+        ? `Published, stats included. The code is ${formatCode(next.code)}.`
+        : `Published. The code is ${formatCode(next.code)}. Stats stayed on this phone — the database can’t carry them yet.`;
     });
 
   const update = () =>
     run('update', async () => {
       if (!key) throw new Error('Nothing is published from this phone yet.');
-      await updateShare(key, roster);
+      const { statsShared } = await updateShare(key, roster, stats);
+      if (!statsShared) {
+        setUploaded(true);
+        window.setTimeout(() => setUploaded(false), 2500);
+        return 'Roster uploaded. Stats stayed here — the database can’t carry them yet.';
+      }
       setUploaded(true);
       window.setTimeout(() => setUploaded(false), 2500);
-      return 'Uploaded. The link now gives out this version.';
+      return 'Uploaded. The link now gives out this roster and these stats.';
     });
 
   const stop = () =>
@@ -90,8 +98,8 @@ export function SharePanel({ roster }: Props) {
       {key ? (
         <>
           <p className="hint">
-            Send the link to the team. Opening it loads the roster — no typing, no accounts. The
-            code below is the same thing for anyone you'd rather read it out to.
+            Send the link to the team. Opening it loads the roster and the stats — no typing, no
+            accounts. The code below is the same thing for anyone you'd rather read it out to.
           </p>
           <p className="code">{formatCode(key.code)}</p>
 

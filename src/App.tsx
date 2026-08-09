@@ -8,7 +8,7 @@ import {
   sharingAvailable,
   takeCodeFromUrl,
 } from './share/share';
-import { loadStats, type StatsStore } from './stats/statsStore';
+import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
@@ -106,6 +106,13 @@ export default function App() {
           players: found.players,
           updatedAt: new Date().toISOString(),
         });
+        // Only overwrite local stats when the share actually carried some. An
+        // older publish, or one from a phone that never pasted any, must not
+        // wipe what's already here.
+        if (Object.keys(found.stats).length > 0) {
+          saveStats(found.stats);
+          setStats(found.stats);
+        }
         // A followed link ties this device to that roster from now on, so it
         // restores itself later exactly like a code typed in by hand.
         rememberSource(code);
@@ -164,6 +171,10 @@ export default function App() {
       // Only once it's saved: pulling a code and then abandoning the review
       // shouldn't tie this device to someone else's roster.
       if (meta?.sourceCode) rememberSource(meta.sourceCode);
+      if (meta?.stats && Object.keys(meta.stats).length > 0) {
+        saveStats(meta.stats);
+        setStats(meta.stats);
+      }
     },
     [persist, roster],
   );
@@ -236,6 +247,7 @@ export default function App() {
             roster={roster}
             onChange={(patch) => persist({ ...roster, ...patch })}
             onBack={() => setTab('roster')}
+            stats={stats}
             onClear={() => {
               clearRoster();
               // Drop the share code too, or the next launch would helpfully

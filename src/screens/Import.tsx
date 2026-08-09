@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseHeight, parseRoster, parseWeight, sideFromPosition, splitName } from '../parse/rosterParse';
 import { fetchShared, formatCode, normalizeCode, sharingAvailable } from '../share/share';
+import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, fullName, type Player, type Roster, type Side } from '../types';
 
 type EditRow = {
@@ -19,7 +20,13 @@ type EditRow = {
  * `sourceCode` is the share code it came from, which the app keeps so it can
  * restore itself if browser storage is ever emptied.
  */
-export type ImportMeta = { teamName?: string; season?: string; sourceCode?: string };
+export type ImportMeta = {
+  teamName?: string;
+  season?: string;
+  sourceCode?: string;
+  /** Stats that travelled with a shared roster. */
+  stats?: StatsStore;
+};
 
 type Props = {
   roster: Roster;
@@ -160,6 +167,7 @@ export function Import({
         teamName: found.teamName,
         season: found.season,
         sourceCode: normalizeCode(which),
+        stats: found.stats,
       });
       setRows(found.players.map(fromPlayer));
       setSaved(false);

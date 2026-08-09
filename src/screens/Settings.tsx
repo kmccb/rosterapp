@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { SharePanel } from '../components/SharePanel';
 import { sharingAvailable } from '../share/share';
+import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, fullName, type Roster } from '../types';
 
 type Props = {
   roster: Roster;
   onChange: (patch: Partial<Roster>) => void;
   onBack: () => void;
+  stats: StatsStore;
   onClear: () => void;
 };
 
@@ -29,7 +31,7 @@ const toCsv = (roster: Roster): string => {
   return [head, ...lines].join('\n');
 };
 
-export function Settings({ roster, onChange, onBack, onClear }: Props) {
+export function Settings({ roster, onChange, onBack, onClear, stats }: Props) {
   const [copied, setCopied] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -112,7 +114,7 @@ export function Settings({ roster, onChange, onBack, onClear }: Props) {
         </>
       )}
 
-      {sharingAvailable && <SharePanel roster={roster} />}
+      {sharingAvailable && <SharePanel roster={roster} stats={stats} />}
 
       <h2 className="section">Danger zone</h2>
       {confirmClear ? (
