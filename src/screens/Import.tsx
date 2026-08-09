@@ -20,6 +20,8 @@ export type ImportMeta = { teamName?: string; season?: string };
 type Props = {
   roster: Roster;
   onSave: (players: Player[], meta?: ImportMeta) => void;
+  onGoToSettings: () => void;
+  onFinish: () => void;
 };
 
 const SIDES: Array<{ value: Side; label: string }> = [
@@ -81,7 +83,7 @@ const SAMPLE = `#\tName\tPos\tHt\tWt\tGrade
 12\tAnthony Rodriguez\tWR\t5-10\t165\tSo
 72\tMarcus Webb\tOT\t6-4\t285\tSr`;
 
-export function Import({ roster, onSave }: Props) {
+export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
   const [text, setText] = useState('');
   const [rows, setRows] = useState<EditRow[] | null>(null);
   const [meta, setMeta] = useState<ImportMeta>({});
@@ -284,13 +286,29 @@ export function Import({ roster, onSave }: Props) {
 
   return (
     <div className="screen">
-      {saved && <p className="success">Roster saved. Head to Lookup and try a number.</p>}
-
-      {roster.players.length > 0 && (
-        <p className="hint">
-          {roster.players.length} players saved
-          {roster.teamName ? ` for ${roster.teamName}` : ''}. Importing replaces them.
+      {saved && (
+        <p className="success">
+          Roster saved. Publish it or set the team name before you finish — this screen is the way
+          back to those, and it closes once you leave.
         </p>
+      )}
+
+      {/*
+        Saving keeps you here rather than jumping to Lookup, because leaving is
+        what locks setup: the press has to be deliberate. Keyed off the saved
+        roster rather than the `saved` flag, which is component state and would
+        be lost the moment you stepped into Settings and came back.
+      */}
+      {roster.players.length > 0 && (
+        <>
+          <p className="hint">
+            {roster.players.length} players saved
+            {roster.teamName ? ` for ${roster.teamName}` : ''}. Importing replaces them.
+          </p>
+          <button type="button" className="btn btn-primary" onClick={onFinish}>
+            Done — go to Lookup
+          </button>
+        </>
       )}
 
       {sharingAvailable && (
@@ -374,6 +392,15 @@ export function Import({ roster, onSave }: Props) {
           Review
         </button>
       </div>
+
+      {/* Settings has no tab any more, so this is the only door to it. */}
+      <p className="footnote">
+        Team name, season, sharing and backup are in{' '}
+        <button type="button" className="link-btn" onClick={onGoToSettings}>
+          Settings
+        </button>
+        .
+      </p>
     </div>
   );
 }

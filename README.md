@@ -13,8 +13,8 @@ and getting an answer before the next snap.
 
 ## Getting the roster in
 
-Open **Import roster** from the menu, paste the rows straight out of the spreadsheet (or pick a
-`.csv`/`.tsv` file), and hit Review. It works out which column is the number, the name, the position, the height, the weight
+Tap **Add the roster** on the empty Lookup screen, paste the rows straight out of the spreadsheet
+(or pick a `.csv`/`.tsv` file), and hit Review. It works out which column is the number, the name, the position, the height, the weight
 and the grade — with or without a header row, tab- comma- or space-separated, names as either
 `Jake Miller` or `Miller, Jake`, heights as `6-1`, `6'1"` or `73`.
 
@@ -27,7 +27,7 @@ switch phones, the roster goes with it.
 ## Sharing by code
 
 One person types the roster in and hits **Settings → Publish to a code**. That returns eight
-characters like `BXQ4-T9KM`. Everyone else opens **Import roster** from the menu, enters the code,
+characters like `BXQ4-T9KM`. Everyone else opens the app, taps **Add the roster**, enters the code,
 checks the same review table, and saves. From then on it's a local roster like any other and works
 with no signal.
 
@@ -44,15 +44,25 @@ and return at most one roster. There is no function that lists, counts or search
 
 ## Screens
 
-The keypad is the landing page. Everything else is behind the menu button in the top corner —
-between plays you want a number pad, not a nav bar.
+Only the two screens a spectator uses are on the tab bar. Setting a roster up is a once-a-season
+job, so it sits behind the "No roster yet" state instead of a permanent tab that's wrong for
+everyone holding a phone in the stands.
 
-| Screen | What it does |
-| --- | --- |
-| Number lookup | The keypad, and the page you land on. Number in, player out. |
-| Full roster | Every player by number, searchable by name or position — the reverse lookup. |
-| Import roster | Paste, or enter a share code, then review before saving. |
-| Settings | Team name, season, sharing, CSV/JSON backup, delete. |
+| Screen | What it does | How you get there |
+| --- | --- | --- |
+| Lookup | The keypad, and the page you land on. Number in, player out. | Tab |
+| Team | Every player by number, filtered by area and position, searchable by name — the reverse lookup. | Tab |
+| Roster | Paste, or enter a share code, then review before saving. | "Add the roster", on the empty Lookup screen |
+| Settings | Team name, season, sharing, CSV/JSON backup, delete. | Link at the foot of Roster |
+
+**Setup is one sitting, and leaving ends it.** The empty state is the only entrance, so saving a
+roster deliberately keeps you on the Roster screen rather than bouncing you to Lookup — publishing
+needs a saved roster *and* a route to Settings, and that is the only moment you have both. Pressing
+"Done — go to Lookup" is what closes the door. After that nothing reaches Roster or Settings again
+until the roster is deleted, which drops you back on the empty state and reopens it.
+
+That is deliberate, and it is a real constraint: on a phone with a roster loaded there is no
+re-import, no re-publish and no backup without deleting first.
 
 ## Development
 

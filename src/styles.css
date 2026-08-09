@@ -108,142 +108,46 @@ textarea {
 /*
  * Chrome sits on a darker, blurred plate at the top and bottom of the screen.
  * That pins the watermark to the middle of the view, where there is nothing
- * small to read, and keeps the keys off the busiest part of the art.
+ * small to read, and keeps the tabs and keys off the busiest part of the art.
  */
 .header {
   flex: none;
-  padding: 8px 12px;
+  padding: 10px 12px 0;
   border-bottom: 1px solid var(--line);
   background: var(--chrome);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 40px;
-}
-
 .title {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/*
- * The landing page is the keypad and nothing else. Standing in the stands you
- * want a number pad, not a nav bar — everything else is one tap away behind
- * the menu.
- */
-
-.back-btn {
-  border: 0;
-  background: none;
-  padding: 4px 0;
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menu-btn {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  margin: -8px -10px -8px 0;
-  border: 0;
-  background: none;
-  color: var(--text);
-  cursor: pointer;
+.tabs {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 4px;
 }
 
-/* Three bars, drawn rather than shipped as an icon font. */
-.menu-icon,
-.menu-icon::before,
-.menu-icon::after {
-  display: block;
-  width: 20px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
-}
-
-.menu-icon {
-  position: relative;
-}
-
-.menu-icon::before,
-.menu-icon::after {
-  content: '';
-  position: absolute;
-  left: 0;
-}
-
-.menu-icon::before {
-  top: -6px;
-}
-
-.menu-icon::after {
-  top: 6px;
-}
-
-.scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
+.tab {
+  flex: 1;
+  padding: 10px 4px;
   border: 0;
-  padding: 0;
-  background: rgba(2, 3, 30, 0.62);
-  cursor: default;
-}
-
-/* Opaque, not translucent: this sits over the busiest part of the artwork. */
-.menu {
-  position: fixed;
-  z-index: 11;
-  top: calc(56px + env(safe-area-inset-top));
-  right: 10px;
-  min-width: 210px;
-  padding: 6px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #0d1a4d;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
-}
-
-.menu-item {
-  display: block;
-  width: 100%;
-  min-height: var(--tap);
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 10px;
+  border-bottom: 3px solid transparent;
   background: none;
-  color: var(--text);
-  font-size: 17px;
+  color: var(--muted);
+  font-size: 15px;
   font-weight: 600;
-  text-align: left;
   cursor: pointer;
 }
 
-.menu-item:active {
-  background: var(--surface-2);
+.tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
 
 .main {
@@ -493,9 +397,7 @@ textarea {
 .input:focus-visible,
 .btn:focus-visible,
 .key:focus-visible,
-.menu-btn:focus-visible,
-.menu-item:focus-visible,
-.back-btn:focus-visible {
+.tab:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -558,6 +460,62 @@ textarea {
  */
 .warn {
   color: var(--warn);
+}
+
+/* A button that has to sit inside a sentence without looking like a button. */
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/*
+ * Filter chips. A full squad can carry 15+ distinct positions, which would wrap
+ * into a block deep enough to push the roster off the screen — so the row
+ * scrolls sideways instead, and the scrollbar is hidden because on a phone the
+ * row is dragged rather than clicked.
+ */
+.chips {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: none;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--accent-ink);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .btn {

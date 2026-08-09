@@ -6,6 +6,7 @@ import { formatHeight, fullName, type Roster } from '../types';
 type Props = {
   roster: Roster;
   onChange: (patch: Partial<Roster>) => void;
+  onBack: () => void;
   onClear: () => void;
 };
 
@@ -28,7 +29,7 @@ const toCsv = (roster: Roster): string => {
   return [head, ...lines].join('\n');
 };
 
-export function Settings({ roster, onChange, onClear }: Props) {
+export function Settings({ roster, onChange, onBack, onClear }: Props) {
   const [copied, setCopied] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -43,6 +44,11 @@ export function Settings({ roster, onChange, onClear }: Props) {
 
   return (
     <div className="screen">
+      {/* No tab bar entry for this screen, so it carries its own way out. */}
+      <button type="button" className="card-back" onClick={onBack}>
+        ‹ Back to the roster
+      </button>
+
       <label className="label" htmlFor="team">
         Team
       </label>
@@ -68,7 +74,7 @@ export function Settings({ roster, onChange, onClear }: Props) {
       <h2 className="section">Backup</h2>
       <p className="hint">
         The roster lives only on this phone. Copy it somewhere safe, or send it to another parent —
-        both formats paste straight back in under Import roster.
+        both formats paste straight back in on the screen you just came from.
       </p>
       <div className="review-actions">
         <button

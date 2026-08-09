@@ -74,8 +74,8 @@ export function SharePanel({ roster }: Props) {
       {key ? (
         <>
           <p className="hint">
-            Anyone who enters this code under Import roster gets a copy. Read it out, or send it
-            in the team group chat.
+            Anyone who opens the app and taps “Add the roster” can enter this code to get a copy.
+            Read it out, or send it in the team group chat.
           </p>
           <p className="code">{formatCode(key.code)}</p>
 
