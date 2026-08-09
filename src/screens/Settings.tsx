@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { SharePanel } from '../components/SharePanel';
+import { ThemePanel } from '../components/ThemePanel';
+import type { Theme } from '../theme/theme';
 import { sharingAvailable } from '../share/share';
 import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, fullName, type Roster } from '../types';
@@ -9,6 +11,8 @@ type Props = {
   onChange: (patch: Partial<Roster>) => void;
   onBack: () => void;
   onGoToStats: () => void;
+  theme: Theme | null;
+  onThemeChange: (next: Theme | null) => void;
   stats: StatsStore;
   onClear: () => void;
 };
@@ -32,7 +36,16 @@ const toCsv = (roster: Roster): string => {
   return [head, ...lines].join('\n');
 };
 
-export function Settings({ roster, onChange, onBack, onGoToStats, onClear, stats }: Props) {
+export function Settings({
+  roster,
+  onChange,
+  onBack,
+  onGoToStats,
+  onClear,
+  stats,
+  theme,
+  onThemeChange,
+}: Props) {
   const [copied, setCopied] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -121,7 +134,9 @@ export function Settings({ roster, onChange, onBack, onGoToStats, onClear, stats
         </>
       )}
 
-      {sharingAvailable && <SharePanel roster={roster} stats={stats} />}
+      <ThemePanel theme={theme} onChange={onThemeChange} />
+
+      {sharingAvailable && <SharePanel roster={roster} stats={stats} theme={theme} />}
 
       <h2 className="section">Danger zone</h2>
       {confirmClear ? (

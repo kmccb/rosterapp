@@ -9,13 +9,14 @@ import {
   type ShareKey,
 } from '../share/share';
 import type { StatsStore } from '../stats/statsStore';
+import type { Theme } from '../theme/theme';
 import type { Roster } from '../types';
 
-type Props = { roster: Roster; stats: StatsStore };
+type Props = { roster: Roster; stats: StatsStore; theme: Theme | null };
 
 type Busy = 'publish' | 'update' | 'stop' | null;
 
-export function SharePanel({ roster, stats }: Props) {
+export function SharePanel({ roster, stats, theme }: Props) {
   const [key, setKey] = useState<ShareKey | null>(() => loadShareKey());
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState('');
@@ -39,7 +40,7 @@ export function SharePanel({ roster, stats }: Props) {
 
   const publish = () =>
     run('publish', async () => {
-      const next = await createShare(roster, stats);
+      const next = await createShare(roster, stats, theme);
       setKey(next);
       return next.statsShared
         ? `Published, stats included. The code is ${formatCode(next.code)}.`
@@ -49,7 +50,7 @@ export function SharePanel({ roster, stats }: Props) {
   const update = () =>
     run('update', async () => {
       if (!key) throw new Error('Nothing is published from this phone yet.');
-      const { statsShared } = await updateShare(key, roster, stats);
+      const { statsShared } = await updateShare(key, roster, stats, theme);
       if (!statsShared) {
         setUploaded(true);
         window.setTimeout(() => setUploaded(false), 2500);

@@ -8,6 +8,7 @@
  */
 
 import type { StatsStore } from '../stats/statsStore';
+import type { Theme } from '../theme/theme';
 import type { Player, Roster } from '../types';
 
 const BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -213,19 +214,30 @@ const rpc = async <T>(
  * still on the old schema. Reports which happened so the UI can be honest about
  * whether the link is carrying stats yet.
  */
-const rpcWithStats = async <T>(
+const rpcWithExtras = async <T>(
   fn: string,
   body: Record<string, unknown>,
   stats: StatsStore,
-): Promise<{ result: T; statsShared: boolean }> => {
+  theme: Theme | null,
+): Promise<{ result: T; statsShared: boolean; themeShared: boolean }> => {
+  // Newest shape first, then fall back a step at a time. The database and the
+  // deploy can't land together, and a coach shouldn't lose the ability to
+  // publish while they're out of step.
   try {
-    return { result: await rpc<T>(fn, { ...body, p_stats: stats }), statsShared: true };
+    return {
+      result: await rpc<T>(fn, { ...body, p_stats: stats, p_theme: theme ?? {} }),
+      statsShared: true,
+      themeShared: true,
+    };
   } catch (err) {
-    if (err instanceof ShareError && err.code === SCHEMA_BEHIND) {
-      return { result: await rpc<T>(fn, body), statsShared: false };
-    }
-    throw err;
+    if (!(err instanceof ShareError) || err.code !== SCHEMA_BEHIND) throw err;
   }
+  try {
+    return { result: await rpc<T>(fn, { ...body, p_stats: stats }), statsShared: true, themeShared: false };
+  } catch (err) {
+    if (!(err instanceof ShareError) || err.code !== SCHEMA_BEHIND) throw err;
+  }
+  return { result: await rpc<T>(fn, body), statsShared: false, themeShared: false };
 };
 
 type FetchedRow = {
@@ -234,6 +246,8 @@ type FetchedRow = {
   players: Player[];
   /** Absent until the database carries the stats column. */
   stats?: StatsStore;
+  /** Absent until the database carries the theme column. */
+  theme?: Theme | Record<string, never>;
   updated_at: string;
 };
 
@@ -243,6 +257,8 @@ export type FetchedRoster = {
   players: Player[];
   /** Empty when the publisher had none, or the database predates the column. */
   stats: StatsStore;
+  /** Null when the publisher set no badge, or the database predates the column. */
+  theme: Theme | null;
   updatedAt: string;
 };
 
@@ -270,6 +286,10 @@ export const fetchShared = async (
       id: crypto.randomUUID(),
     })),
     stats: row.stats && typeof row.stats === 'object' ? row.stats : {},
+    theme:
+      row.theme && typeof row.theme === 'object' && 'logo' in row.theme
+        ? (row.theme as Theme)
+        : null,
     updatedAt: row.updated_at,
   };
 };
@@ -277,8 +297,11 @@ export const fetchShared = async (
 export const createShare = async (
   roster: Roster,
   stats: StatsStore,
-): Promise<ShareKey & { statsShared: boolean }> => {
-  const { result, statsShared } = await rpcWithStats<Array<{ code: string; edit_token: string }>>(
+  theme: Theme | null,
+): Promise<ShareKey & { statsShared: boolean; themeShared: boolean }> => {
+  const { result, statsShared, themeShared } = await rpcWithExtras<
+    Array<{ code: string; edit_token: string }>
+  >(
     'roster_create',
     {
       p_team_name: roster.teamName,
@@ -286,6 +309,7 @@ export const createShare = async (
       p_players: roster.players,
     },
     stats,
+    theme,
   );
 
   const row = result?.[0];
@@ -294,15 +318,16 @@ export const createShare = async (
   const key = { code: row.code, editToken: row.edit_token };
   saveShareKey(key);
   rememberSource(key.code);
-  return { ...key, statsShared };
+  return { ...key, statsShared, themeShared };
 };
 
 export const updateShare = async (
   key: ShareKey,
   roster: Roster,
   stats: StatsStore,
-): Promise<{ statsShared: boolean }> => {
-  const { statsShared } = await rpcWithStats(
+  theme: Theme | null,
+): Promise<{ statsShared: boolean; themeShared: boolean }> => {
+  const { statsShared, themeShared } = await rpcWithExtras(
     'roster_update',
     {
       p_code: key.code,
@@ -312,8 +337,9 @@ export const updateShare = async (
       p_players: roster.players,
     },
     stats,
+    theme,
   );
-  return { statsShared };
+  return { statsShared, themeShared };
 };
 
 export const deleteShare = async (key: ShareKey): Promise<void> => {

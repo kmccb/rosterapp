@@ -71,16 +71,34 @@ body::after {
   pointer-events: none;
 }
 
+/*
+ * The default is the team this was built for; a second school's badge overrides
+ * --wallpaper at runtime. Kept as a variable rather than an inline style so the
+ * scrim below it, and the fallback, stay in the stylesheet where they belong.
+ */
 body::before {
   z-index: -2;
-  background: url('/bulldog.jpg') center / cover no-repeat;
+  background: var(--wallpaper, url('/bulldog.jpg')) center / cover no-repeat;
 }
 
+/*
+ * The scrim has to be the team's own dark, not a fixed navy. Left hardcoded it
+ * laid a blue wash over a crimson badge and turned it muddy — the ground colour
+ * changed underneath while the veil over it didn't.
+ */
 body::after {
   z-index: -1;
   background:
-    radial-gradient(120% 85% at 50% 40%, rgba(4, 8, 62, 0.78), rgba(2, 3, 40, 0.93) 72%),
-    linear-gradient(180deg, rgba(3, 3, 55, 0.72), rgba(2, 4, 34, 0.88));
+    radial-gradient(
+      120% 85% at 50% 40%,
+      var(--scrim-near, rgba(4, 8, 62, 0.78)),
+      var(--scrim-far, rgba(2, 3, 40, 0.93)) 72%
+    ),
+    linear-gradient(
+      180deg,
+      var(--scrim-top, rgba(3, 3, 55, 0.72)),
+      var(--scrim-bottom, rgba(2, 4, 34, 0.88))
+    );
 }
 
 #root {
@@ -783,4 +801,35 @@ textarea {
     border-left: 1px solid var(--line);
     border-right: 1px solid var(--line);
   }
+}
+
+/* ------------------------------------------------------------------ theme */
+
+.theme-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0 14px;
+}
+
+.theme-preview img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  flex: none;
+}
+
+/* The colours the badge produced, so it's obvious what was read off it. */
+.theme-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-swatches span {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
 }

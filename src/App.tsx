@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   fetchShared,
   forgetSource,
@@ -12,6 +12,7 @@ import {
   takeCodeFromUrl,
 } from './share/share';
 import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
+import { applyTheme, loadTheme, saveTheme, type Theme } from './theme/theme';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
@@ -53,6 +54,10 @@ export default function App() {
   /** A code from a share link that needs reviewing before it replaces anything. */
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsStore>(() => loadStats());
+  const [theme, setTheme] = useState<Theme | null>(() => loadTheme());
+
+  // Paint the team's colours on before anything renders in the default ones.
+  useLayoutEffect(() => applyTheme(theme), [theme]);
 
   const persist = useCallback((next: Roster) => {
     saveRoster(next);
@@ -136,6 +141,11 @@ export default function App() {
         if (Object.keys(found.stats).length > 0) {
           saveStats(found.stats);
           setStats(found.stats);
+        }
+        // The badge travels too, so a second school's link brings its own look.
+        if (found.theme) {
+          saveTheme(found.theme);
+          setTheme(found.theme);
         }
         // A followed link ties this device to that roster from now on, so it
         // restores itself later exactly like a code typed in by hand.
@@ -277,6 +287,8 @@ export default function App() {
             onBack={() => setTab('roster')}
             onGoToStats={() => setTab('stats')}
             stats={stats}
+            theme={theme}
+            onThemeChange={setTheme}
             onClear={() => {
               clearRoster();
               // Drop the share code too, or the next launch would helpfully
