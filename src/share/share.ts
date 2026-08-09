@@ -92,6 +92,27 @@ export const formatCode = (code: string): string => {
 export const normalizeCode = (code: string): string =>
   (code || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
 
+/*
+ * A link that carries the code, so nobody has to read eight characters down a
+ * phone. The code goes in the fragment rather than the query string: fragments
+ * are never sent to the server, so it stays out of GitHub's access logs and out
+ * of the Referer header of anything the page later loads.
+ */
+export const shareUrl = (code: string): string =>
+  `${window.location.origin}${window.location.pathname}#${formatCode(code)}`;
+
+/** Reads a share code out of the current URL, and strips it from the bar. */
+export const takeCodeFromUrl = (): string | null => {
+  const raw = window.location.hash.replace(/^#/, '');
+  const code = normalizeCode(raw);
+  if (code.length !== 8) return null;
+
+  // Drop it once consumed, so a later refresh doesn't re-import over whatever
+  // the roster has become, and so the code isn't sitting in a shared screenshot.
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  return code;
+};
+
 // --------------------------------------------------------------------- rpc
 
 class ShareError extends Error {}

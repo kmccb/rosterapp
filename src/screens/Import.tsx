@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { parseHeight, parseRoster, parseWeight, sideFromPosition, splitName } from '../parse/rosterParse';
-import { fetchShared, normalizeCode, sharingAvailable } from '../share/share';
+import { fetchShared, formatCode, normalizeCode, sharingAvailable } from '../share/share';
 import { formatHeight, fullName, type Player, type Roster, type Side } from '../types';
 
 type EditRow = {
@@ -26,6 +26,8 @@ type Props = {
   onSave: (players: Player[], meta?: ImportMeta) => void;
   onGoToSettings: () => void;
   onFinish: () => void;
+  /** Arrived on a share link while a different roster was already saved. */
+  initialCode?: string;
 };
 
 const SIDES: Array<{ value: Side; label: string }> = [
@@ -87,7 +89,7 @@ const SAMPLE = `#\tName\tPos\tHt\tWt\tGrade
 12\tAnthony Rodriguez\tWR\t5-10\t165\tSo
 72\tMarcus Webb\tOT\t6-4\t285\tSr`;
 
-export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
+export function Import({ roster, onSave, onGoToSettings, onFinish, initialCode }: Props) {
   const [text, setText] = useState('');
   const [rows, setRows] = useState<EditRow[] | null>(null);
   const [meta, setMeta] = useState<ImportMeta>({});
@@ -96,6 +98,19 @@ export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  /*
+   * Arrived here from a share link with a different roster already saved. Pull
+   * it straight into the review table: replacing someone's roster is not
+   * something a tapped link should do without showing them what's coming.
+   */
+  useEffect(() => {
+    if (!initialCode) return;
+    setCode(formatCode(initialCode));
+    void handlePull(initialCode);
+    // Once, for the code this screen was opened with.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode]);
 
   const duplicateNumbers = useMemo(() => {
     const seen = new Map<string, number>();
@@ -124,11 +139,11 @@ export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
 
   // A pulled roster lands in the same review table as a pasted one. It came off
   // someone else's phone, so it gets the same look-before-you-save treatment.
-  const handlePull = async () => {
+  const handlePull = async (which: string = code) => {
     setPulling(true);
     setError('');
     try {
-      const found = await fetchShared(code);
+      const found = await fetchShared(which);
       if (!found) {
         setError('No roster for that code. Check it with whoever shared it — codes can be taken down.');
         return;
@@ -136,7 +151,7 @@ export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
       setMeta({
         teamName: found.teamName,
         season: found.season,
-        sourceCode: normalizeCode(code),
+        sourceCode: normalizeCode(which),
       });
       setRows(found.players.map(fromPlayer));
       setSaved(false);

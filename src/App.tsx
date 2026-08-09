@@ -3,8 +3,10 @@ import {
   fetchShared,
   forgetSource,
   loadSource,
+  normalizeCode,
   rememberSource,
   sharingAvailable,
+  takeCodeFromUrl,
 } from './share/share';
 import { Import, type ImportMeta } from './screens/Import';
 import { Lookup } from './screens/Lookup';
@@ -31,10 +33,20 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'team', label: 'Team' },
 ];
 
+/*
+ * Read once, at module load, rather than inside the effect — reading it strips
+ * the code from the address bar, and StrictMode runs effects twice in
+ * development. The first pass consumed the code and the second found an empty
+ * hash, so a followed link quietly did nothing at all.
+ */
+const LINK_CODE = takeCodeFromUrl();
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('lookup');
   const [roster, setRoster] = useState<Roster>(() => loadRoster());
   const [restoring, setRestoring] = useState(false);
+  /** A code from a share link that needs reviewing before it replaces anything. */
+  const [pendingCode, setPendingCode] = useState<string | null>(null);
 
   const persist = useCallback((next: Roster) => {
     saveRoster(next);
@@ -52,10 +64,25 @@ export default function App() {
    */
   useEffect(() => {
     if (!sharingAvailable) return;
-    if (loadRoster().players.length > 0) return;
 
-    const code = loadSource();
+    const existing = loadRoster();
+    const linked = LINK_CODE;
+
+    /*
+     * Someone followed a share link. With nothing to lose, load it and put them
+     * straight on the keypad — that is the whole promise of the link. If they
+     * already have a *different* roster, don't silently replace it: open the
+     * import screen with the code filled in so they see what's arriving first.
+     */
+    if (linked && existing.players.length > 0 && linked !== loadSource()) {
+      setPendingCode(linked);
+      setTab('roster');
+      return;
+    }
+
+    const code = linked ?? loadSource();
     if (!code) return;
+    if (!linked && existing.players.length > 0) return;
 
     let cancelled = false;
     setRestoring(true);
@@ -76,6 +103,9 @@ export default function App() {
           players: found.players,
           updatedAt: new Date().toISOString(),
         });
+        // A followed link ties this device to that roster from now on, so it
+        // restores itself later exactly like a code typed in by hand.
+        rememberSource(code);
       })
       // No signal is the normal case at a ground; leave the empty state be and
       // try again next launch rather than showing an error nobody can act on.
@@ -88,6 +118,22 @@ export default function App() {
       cancelled = true;
     };
   }, [persist]);
+
+  /*
+   * Tapping a share link while the app is already open is a fragment change,
+   * not a page load, so none of the above would run and the link would appear
+   * to do nothing. Reload and let the normal path handle it — the code is still
+   * in the URL at that point, and gets consumed on the way through.
+   */
+  useEffect(() => {
+    const onHashChange = () => {
+      if (normalizeCode(window.location.hash.replace(/^#/, '')).length === 8) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   /** 700ms is past a tap and a scroll-start, short of feeling stuck. */
   const holdTimer = useRef<number | null>(null);
@@ -165,6 +211,7 @@ export default function App() {
             onSave={handleImport}
             onGoToSettings={() => setTab('settings')}
             onFinish={() => setTab('lookup')}
+            initialCode={pendingCode ?? undefined}
           />
         )}
         {tab === 'settings' && (

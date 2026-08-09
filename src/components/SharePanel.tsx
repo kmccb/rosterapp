@@ -4,6 +4,7 @@ import {
   deleteShare,
   formatCode,
   loadShareKey,
+  shareUrl,
   updateShare,
   type ShareKey,
 } from '../share/share';
@@ -56,14 +57,17 @@ export function SharePanel({ roster }: Props) {
       return 'The code no longer works. Rosters already pulled stay on those phones.';
     });
 
-  const copyCode = async () => {
+  const copy = async (what: 'link' | 'code') => {
     if (!key) return;
     setError('');
+    const text = what === 'link' ? shareUrl(key.code) : formatCode(key.code);
     try {
-      await navigator.clipboard.writeText(formatCode(key.code));
-      setNote('Code copied to the clipboard.');
+      await navigator.clipboard.writeText(text);
+      setNote(what === 'link' ? 'Link copied. Paste it to the team.' : 'Code copied.');
     } catch {
-      setNote('Couldn’t reach the clipboard — read the code off the screen instead.');
+      // Safari refuses the clipboard outside a user gesture it trusts, and the
+      // link is too long to read off a screen — so show it instead of failing.
+      setNote(`Couldn’t reach the clipboard. ${what === 'link' ? text : formatCode(key.code)}`);
     }
   };
 
@@ -74,18 +78,27 @@ export function SharePanel({ roster }: Props) {
       {key ? (
         <>
           <p className="hint">
-            Anyone who opens the app and taps “Add the roster” can enter this code to get a copy.
-            Read it out, or send it in the team group chat.
+            Send the link to the team. Opening it loads the roster — no typing, no accounts. The
+            code below is the same thing for anyone you'd rather read it out to.
           </p>
           <p className="code">{formatCode(key.code)}</p>
 
           <div className="review-actions">
-            <button type="button" className="btn" onClick={() => void copyCode()}>
+            <button type="button" className="btn btn-primary" onClick={() => void copy('link')}>
+              Copy the link
+            </button>
+            <button type="button" className="btn" onClick={() => void copy('code')}>
               Copy the code
             </button>
+          </div>
+
+          <p className="hint">
+            Changed the roster since? Send it again — the same link picks up the new one.
+          </p>
+          <div className="review-actions">
             <button
               type="button"
-              className="btn btn-primary"
+              className="btn"
               onClick={() => void update()}
               disabled={busy !== null}
             >
