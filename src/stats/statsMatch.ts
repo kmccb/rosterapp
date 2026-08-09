@@ -100,11 +100,20 @@ export type MatchReport = {
   ambiguous: Array<{ printed: string; candidates: string[] }>;
 };
 
+/** "D. Xipolitas" and "Dominic Xipolitas" are one person; "P. Xipolitas" is not. */
+const printedIdentity = (raw: string): string => {
+  const { initial, last } = parsePrintedName(raw);
+  return `${last}|${initial}`;
+};
+
 export function matchStats(rows: ParsedStatRow[], players: Player[]): MatchReport {
   const byPlayer: Record<string, PlayerStats> = {};
   const matchedNames = new Map<string, Player>();
   const unmatched = new Set<string>();
   const ambiguous = new Map<string, string[]>();
+
+  // Which distinct people in the stats ended up pointing at each roster player.
+  const claimants = new Map<string, Map<string, string>>();
 
   for (const row of rows) {
     const outcome = matchName(row.name, players);
@@ -121,11 +130,38 @@ export function matchStats(rows: ParsedStatRow[], players: Player[]): MatchRepor
     const { player } = outcome;
     matchedNames.set(row.name, player);
     const key = playerKey(player);
+
+    const claims = claimants.get(key) ?? new Map<string, string>();
+    claims.set(printedIdentity(row.name), row.name);
+    claimants.set(key, claims);
+
     const existing = byPlayer[key] ?? {};
     // A player can appear once per category; merge rather than overwrite so a
     // paste covering several tables accumulates.
     existing[row.category] = { ...(existing[row.category] ?? {}), ...row.values };
     byPlayer[key] = existing;
+  }
+
+  /*
+   * Two different people in the stats landing on one roster entry means the
+   * roster can't tell them apart — a surname-only "Xipolitas" swallows both
+   * brothers, and merging would quietly credit the graduated one's season to
+   * the one still playing. Drop the lot and say so; a card showing nothing is
+   * recoverable, a card showing someone else's nine touchdowns is not.
+   */
+  for (const [key, claims] of claimants) {
+    if (claims.size < 2) continue;
+    delete byPlayer[key];
+    const printedNames = [...claims.values()];
+    const player = players.find((p) => playerKey(p) === key);
+    for (const printed of printedNames) {
+      matchedNames.delete(printed);
+      ambiguous.set(printed, [
+        `${fullName(player ?? ({} as Player)) || 'a roster entry'} — also matched by ${printedNames
+          .filter((n) => n !== printed)
+          .join(', ')}`,
+      ]);
+    }
   }
 
   return {
