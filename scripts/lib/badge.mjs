@@ -36,6 +36,37 @@ const encode = (pipeline) => pipeline.png({ palette: true, colours: 256, effort:
  */
 const isArt = (r, g, b) => Math.min(r, g, b) > 200 || (r < 45 && g < 45 && b < 150);
 
+/**
+ * Squares a badge by padding it, never by cropping.
+ *
+ * Crests are often wider than they are tall, and the parts that reach the edges
+ * — swords, wings, banner tails — are exactly what a centre-crop removes. The
+ * padding replicates the edge pixels, so a flat backdrop extends invisibly and
+ * a gradient one simply stops changing.
+ */
+export async function squareSource(source) {
+  const meta = await sharp(source).metadata();
+  const side = Math.max(meta.width, meta.height);
+  const dx = side - meta.width;
+  const dy = side - meta.height;
+
+  const buffer =
+    dx === 0 && dy === 0
+      ? await sharp(source).png().toBuffer()
+      : await sharp(source)
+          .extend({
+            left: Math.floor(dx / 2),
+            right: Math.ceil(dx / 2),
+            top: Math.floor(dy / 2),
+            bottom: Math.ceil(dy / 2),
+            extendWith: 'copy',
+          })
+          .png()
+          .toBuffer();
+
+  return { buffer, side, padded: dx !== 0 || dy !== 0, source: meta };
+}
+
 /** Locates the artwork inside its badge and returns a square crop around it. */
 export async function findArtwork(source) {
   const { data, info } = await sharp(source).raw().toBuffer({ resolveWithObject: true });
@@ -126,8 +157,9 @@ export async function paletteFor(source, override) {
 
 /** Writes the full icon set for one team. Returns what it wrote, for logging. */
 export async function writeIcons(source, outDir) {
-  const { crop, centred, artFraction } = await findArtwork(source);
-  const badge = await sharp(source).extract(crop).png().toBuffer();
+  const squared = await squareSource(source);
+  const { crop, artFraction, info } = await findArtwork(squared.buffer);
+  const badge = await sharp(squared.buffer).extract(crop).png().toBuffer();
 
   await mkdir(outDir, { recursive: true });
   const written = [];
@@ -144,21 +176,41 @@ export async function writeIcons(source, outDir) {
     written.push([file, png.length]);
   }
 
-  // Maskable is the uncropped badge grown until the artwork centres, so the
-  // wash runs edge to edge. Compositing onto a generated background instead
-  // leaves a visible seam where the two fail to meet.
+  /*
+   * Maskable: the whole badge, grown until the artwork occupies only the part
+   * Android guarantees. Growing rather than shrinking-onto-a-background keeps
+   * the backdrop continuous — compositing leaves a seam where the badge's own
+   * wash meets a generated one. Only enough is added to hit the target, so a
+   * badge with margin already is left alone.
+   */
+  const artSide = artFraction * info.width;
+  const target = Math.max(info.width, Math.ceil(artSide / MASKABLE_SCALE));
+  const cx = crop.left + crop.width / 2;
+  const cy = crop.top + crop.height / 2;
+  const left = Math.max(0, Math.round(target / 2 - cx));
+  const top = Math.max(0, Math.round(target / 2 - cy));
+
   const maskable = await encode(
-    sharp(source).extend({ ...centred, extendWith: 'copy' }).resize(512, 512, { fit: 'cover' }),
+    sharp(squared.buffer)
+      .extend({
+        left,
+        top,
+        right: Math.max(0, target - info.width - left),
+        bottom: Math.max(0, target - info.height - top),
+        extendWith: 'copy',
+      })
+      .resize(512, 512, { fit: 'cover' }),
   );
   await writeFile(join(outDir, 'icon-512-maskable.png'), maskable);
   written.push(['icon-512-maskable.png', maskable.length]);
 
-  return { written, artFraction };
+  return { written, artFraction: artSide / target, padded: squared.padded, source: squared.source };
 }
 
 /** The page wallpaper: the whole badge, small enough to precache. */
 export async function writeWallpaper(source, outPath) {
-  const buf = await sharp(source)
+  const squared = await squareSource(source);
+  const buf = await sharp(squared.buffer)
     .resize(1200, 1200, { fit: 'cover' })
     .jpeg({ quality: 62, mozjpeg: true, progressive: true })
     .toBuffer();

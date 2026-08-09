@@ -118,15 +118,22 @@ if (phase === 'pre') {
     await mkdir(out, { recursive: true });
 
     const palette = await paletteFor(team.logo, team.palette);
-    const { artFraction } = await writeIcons(team.logo, join(out, 'icons'));
+    const { artFraction, padded, source: src } = await writeIcons(team.logo, join(out, 'icons'));
     const bytes = await writeWallpaper(team.logo, join(out, 'badge.jpg'));
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
         `accent ${palette.accent}  badge ${(bytes / 1024).toFixed(0)}kB` +
-        `${team.palette ? '  (palette pinned)' : ''}`,
+        `${team.palette ? '  (palette pinned)' : ''}${padded ? '  (padded to square)' : ''}`,
     );
+
+    if (Math.max(src.width, src.height) < 512) {
+      console.warn(
+        `  ! ${team.slug}: the badge is only ${src.width}x${src.height}. Icons are made at 512px, ` +
+          `so it will be upscaled and look soft on a home screen. A larger original would fix it.`,
+      );
+    }
 
     if (artFraction > 0.72) {
       console.warn(
