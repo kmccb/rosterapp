@@ -13,8 +13,8 @@ and getting an answer before the next snap.
 
 ## Getting the roster in
 
-Open **Roster**, paste the rows straight out of the spreadsheet (or pick a `.csv`/`.tsv` file), and
-hit Review. It works out which column is the number, the name, the position, the height, the weight
+Open **Import roster** from the menu, paste the rows straight out of the spreadsheet (or pick a
+`.csv`/`.tsv` file), and hit Review. It works out which column is the number, the name, the position, the height, the weight
 and the grade — with or without a header row, tab- comma- or space-separated, names as either
 `Jake Miller` or `Miller, Jake`, heights as `6-1`, `6'1"` or `73`.
 
@@ -27,9 +27,9 @@ switch phones, the roster goes with it.
 ## Sharing by code
 
 One person types the roster in and hits **Settings → Publish to a code**. That returns eight
-characters like `BXQ4-T9KM`. Everyone else puts the code into their **Roster** tab, checks the
-same review table, and saves. From then on it's a local roster like any other and works with no
-signal.
+characters like `BXQ4-T9KM`. Everyone else opens **Import roster** from the menu, enters the code,
+checks the same review table, and saves. From then on it's a local roster like any other and works
+with no signal.
 
 Worth being clear about what this is: a roster is a list of minors with their heights, weights and
 year in school, and anyone holding the code can read it. It's the paper roster handed round at a
@@ -44,11 +44,14 @@ and return at most one roster. There is no function that lists, counts or search
 
 ## Screens
 
-| Tab | What it does |
+The keypad is the landing page. Everything else is behind the menu button in the top corner —
+between plays you want a number pad, not a nav bar.
+
+| Screen | What it does |
 | --- | --- |
-| Lookup | The keypad. Number in, player out. |
-| Team | The full roster by number, searchable by name or position — the reverse lookup. |
-| Roster | Paste, or pull a share code, then review the import. |
+| Number lookup | The keypad, and the page you land on. Number in, player out. |
+| Full roster | Every player by number, searchable by name or position — the reverse lookup. |
+| Import roster | Paste, or enter a share code, then review before saving. |
 | Settings | Team name, season, sharing, CSV/JSON backup, delete. |
 
 ## Development

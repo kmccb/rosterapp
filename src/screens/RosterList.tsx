@@ -42,7 +42,7 @@ export function RosterList({ roster }: { roster: Roster }) {
         aria-label="Search the roster"
       />
       {roster.players.length === 0 ? (
-        <p className="empty-text">No roster yet — add one from the Roster tab.</p>
+        <p className="empty-text">No roster yet — add one from Import roster in the menu.</p>
       ) : players.length === 0 ? (
         <p className="empty-text">No players match “{search}”.</p>
       ) : (

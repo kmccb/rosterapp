@@ -74,7 +74,7 @@ export function SharePanel({ roster }: Props) {
       {key ? (
         <>
           <p className="hint">
-            Anyone who types this code into their Roster tab gets a copy. Read it out, or send it
+            Anyone who enters this code under Import roster gets a copy. Read it out, or send it
             in the team group chat.
           </p>
           <p className="code">{formatCode(key.code)}</p>

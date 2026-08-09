@@ -68,7 +68,7 @@ export function Settings({ roster, onChange, onClear }: Props) {
       <h2 className="section">Backup</h2>
       <p className="hint">
         The roster lives only on this phone. Copy it somewhere safe, or send it to another parent —
-        both formats paste straight back into the Roster tab.
+        both formats paste straight back in under Import roster.
       </p>
       <div className="review-actions">
         <button
