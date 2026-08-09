@@ -34,6 +34,31 @@ is also why the site must serve over HTTPS only — `http://` and `https://` are
 with separate storage, so a roster typed in over one is invisible to the other. `Enforce HTTPS`
 under Settings → Pages is what prevents that, and it is not optional.
 
+## Stats
+
+A player's card shows last season next to this season. Both come from Hudl: open the season stats
+page, select the tables — **headings included** — copy, and paste the lot into **Stats**, reached
+from the Roster screen. Passing, rushing, defence and the rest can go in together.
+
+Players are matched by **surname plus first initial**, never by jersey number, because numbers get
+reassigned between seasons — last year's #1 is often this year's #7. For the same reason stats are
+filed under that name key rather than a player id, so re-importing the roster doesn't strand them.
+
+Nothing is guessed. A name that fits nobody is reported and dropped (usually a player who left);
+a name that fits more than one player is reported and left out until the roster has enough of a
+first name to tell them apart. The initial is checked even when only one player carries the
+surname — a lone Xipolitas on this year's roster is not last year's "P. Xipolitas".
+
+Two caveats worth knowing:
+
+- The kick-return and punt-return tables have **identical columns**. The heading above them is the
+  only thing that separates the two, which is why the paste has to include headings.
+- Hudl's kicking table often lists everything under "Rest of team" with no named player, in which
+  case there is nothing to attach to anyone.
+
+`src/stats/statsParse.ts` does the reading and `src/stats/statsMatch.ts` the matching; both are
+pure and covered by tests, including a table copied verbatim off the live Hudl page.
+
 ## Sharing by code
 
 One person types the roster in and hits **Settings → Publish to a code**. That returns eight

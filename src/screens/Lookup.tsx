@@ -3,11 +3,17 @@ import { Keypad } from '../components/Keypad';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey, numberMatches } from '../parse/rosterParse';
+import type { StatsStore } from '../stats/statsStore';
 import type { Player, Roster } from '../types';
 
-type Props = { roster: Roster; onGoToImport: () => void; restoring?: boolean };
+type Props = {
+  roster: Roster;
+  onGoToImport: () => void;
+  restoring?: boolean;
+  stats?: StatsStore;
+};
 
-export function Lookup({ roster, onGoToImport, restoring = false }: Props) {
+export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
 
@@ -67,6 +73,7 @@ export function Lookup({ roster, onGoToImport, restoring = false }: Props) {
           <PlayerCard
             player={featured}
             onBack={pinned && matches.length > 1 ? () => setPinned(null) : undefined}
+            stats={stats}
           />
         ) : query ? (
           matches.length > 0 ? (

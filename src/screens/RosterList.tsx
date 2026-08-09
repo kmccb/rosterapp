@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey } from '../parse/rosterParse';
+import type { StatsStore } from '../stats/statsStore';
 import { fullName, type Player, type Roster, type Side } from '../types';
 
 /**
@@ -42,7 +43,7 @@ function Chip({
 }
 
 /** The reverse lookup: "what number is Jake?", now narrowable by area and position. */
-export function RosterList({ roster }: { roster: Roster }) {
+export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsStore }) {
   const [search, setSearch] = useState('');
   const [area, setArea] = useState<Side | null>(null);
   const [position, setPosition] = useState<string | null>(null);
@@ -100,7 +101,7 @@ export function RosterList({ roster }: { roster: Roster }) {
   if (selected) {
     return (
       <div className="screen">
-        <PlayerCard player={selected} onBack={() => setSelected(null)} />
+        <PlayerCard player={selected} onBack={() => setSelected(null)} stats={stats} />
       </div>
     );
   }

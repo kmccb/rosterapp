@@ -273,6 +273,55 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
+/* ------------------------------------------------------------------ stats */
+
+/*
+ * Last season against this season, a row per category so the two columns
+ * compare like with like. Left-aligned despite the card above being centred —
+ * numbers are read by scanning down a column, and centring breaks that.
+ */
+.stats {
+  margin: 18px auto 0;
+  max-width: 460px;
+  text-align: left;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) 1fr 1fr;
+  gap: 6px 10px;
+  padding: 7px 0;
+  align-items: baseline;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-row + .stats-row {
+  border-top: 1px solid var(--line);
+}
+
+.stats-head {
+  padding-top: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stats-cat {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stats-none {
+  color: var(--line);
+  font-style: normal;
+}
+
 /* ------------------------------------------------------------------- rows */
 
 .rows {

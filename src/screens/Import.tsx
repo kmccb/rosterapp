@@ -25,6 +25,7 @@ type Props = {
   roster: Roster;
   onSave: (players: Player[], meta?: ImportMeta) => void;
   onGoToSettings: () => void;
+  onGoToStats: () => void;
   onFinish: () => void;
   /** Arrived on a share link while a different roster was already saved. */
   initialCode?: string;
@@ -89,7 +90,14 @@ const SAMPLE = `#\tName\tPos\tHt\tWt\tGrade
 12\tAnthony Rodriguez\tWR\t5-10\t165\tSo
 72\tMarcus Webb\tOT\t6-4\t285\tSr`;
 
-export function Import({ roster, onSave, onGoToSettings, onFinish, initialCode }: Props) {
+export function Import({
+  roster,
+  onSave,
+  onGoToSettings,
+  onGoToStats,
+  onFinish,
+  initialCode,
+}: Props) {
   const [text, setText] = useState('');
   const [rows, setRows] = useState<EditRow[] | null>(null);
   const [meta, setMeta] = useState<ImportMeta>({});
@@ -421,6 +429,10 @@ export function Import({ roster, onSave, onGoToSettings, onFinish, initialCode }
         Team name, season, sharing and backup are in{' '}
         <button type="button" className="link-btn" onClick={onGoToSettings}>
           Settings
+        </button>
+        . Last season's numbers go in under{' '}
+        <button type="button" className="link-btn" onClick={onGoToStats}>
+          Stats
         </button>
         .
       </p>

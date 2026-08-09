@@ -8,14 +8,16 @@ import {
   sharingAvailable,
   takeCodeFromUrl,
 } from './share/share';
+import { loadStats, type StatsStore } from './stats/statsStore';
 import { Import, type ImportMeta } from './screens/Import';
+import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
 import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'roster' | 'settings';
+type Tab = 'lookup' | 'team' | 'roster' | 'settings' | 'stats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -47,6 +49,7 @@ export default function App() {
   const [restoring, setRestoring] = useState(false);
   /** A code from a share link that needs reviewing before it replaces anything. */
   const [pendingCode, setPendingCode] = useState<string | null>(null);
+  const [stats, setStats] = useState<StatsStore>(() => loadStats());
 
   const persist = useCallback((next: Roster) => {
     saveRoster(next);
@@ -202,16 +205,30 @@ export default function App() {
 
       <main className="main">
         {tab === 'lookup' && (
-          <Lookup roster={roster} onGoToImport={() => setTab('roster')} restoring={restoring} />
+          <Lookup
+            roster={roster}
+            onGoToImport={() => setTab('roster')}
+            restoring={restoring}
+            stats={stats}
+          />
         )}
-        {tab === 'team' && <RosterList roster={roster} />}
+        {tab === 'team' && <RosterList roster={roster} stats={stats} />}
         {tab === 'roster' && (
           <Import
             roster={roster}
             onSave={handleImport}
             onGoToSettings={() => setTab('settings')}
+            onGoToStats={() => setTab('stats')}
             onFinish={() => setTab('lookup')}
             initialCode={pendingCode ?? undefined}
+          />
+        )}
+        {tab === 'stats' && (
+          <StatsImport
+            roster={roster}
+            stats={stats}
+            onSaved={setStats}
+            onBack={() => setTab('roster')}
           />
         )}
         {tab === 'settings' && (

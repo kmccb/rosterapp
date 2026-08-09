@@ -1,7 +1,12 @@
+import { categoriesAcross, summarise } from '../stats/statsFormat';
+import { playerKey, type PlayerStats } from '../stats/statsMatch';
+import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, formatWeight, fullName, SIDE_LABEL, type Player } from '../types';
 
+type Props = { player: Player; onBack?: () => void; stats?: StatsStore };
+
 /** The answer to "who is #7" — sized to be read at arm's length in the stands. */
-export function PlayerCard({ player, onBack }: { player: Player; onBack?: () => void }) {
+export function PlayerCard({ player, onBack, stats }: Props) {
   const meta = [
     player.position,
     player.side ? SIDE_LABEL[player.side] : '',
@@ -9,6 +14,10 @@ export function PlayerCard({ player, onBack }: { player: Player; onBack?: () => 
   ].filter(Boolean);
 
   const body = [formatHeight(player.heightIn), formatWeight(player.weightLb)].filter(Boolean);
+
+  const key = playerKey(player);
+  const previous = stats?.previous?.byPlayer[key];
+  const current = stats?.current?.byPlayer[key];
 
   return (
     <div className="card">
@@ -23,6 +32,55 @@ export function PlayerCard({ player, onBack }: { player: Player; onBack?: () => 
       <div className="card-name">{fullName(player) || 'Unnamed player'}</div>
       {meta.length > 0 && <div className="card-meta">{meta.join(' · ')}</div>}
       {body.length > 0 && <div className="card-body">{body.join('   ·   ')}</div>}
+
+      <StatsTable
+        previous={previous}
+        current={current}
+        previousLabel={stats?.previous?.label ?? 'Last season'}
+        currentLabel={stats?.current?.label ?? 'This season'}
+      />
+    </div>
+  );
+}
+
+function StatsTable({
+  previous,
+  current,
+  previousLabel,
+  currentLabel,
+}: {
+  previous?: PlayerStats;
+  current?: PlayerStats;
+  previousLabel: string;
+  currentLabel: string;
+}) {
+  // Rows come from both seasons at once, so a category the player only played
+  // in one of them still lines up against a blank in the other.
+  const categories = categoriesAcross(previous, current);
+  if (categories.length === 0) return null;
+
+  const prevByCategory = new Map(summarise(previous).map((s) => [s.category, s]));
+  const currByCategory = new Map(summarise(current).map((s) => [s.category, s]));
+
+  return (
+    <div className="stats">
+      <div className="stats-row stats-head">
+        <span />
+        <span>{previousLabel}</span>
+        <span>{currentLabel}</span>
+      </div>
+
+      {categories.map((category) => {
+        const a = prevByCategory.get(category);
+        const b = currByCategory.get(category);
+        return (
+          <div className="stats-row" key={category}>
+            <span className="stats-cat">{(a ?? b)?.label}</span>
+            <span>{a ? a.parts.join(' · ') : <i className="stats-none">—</i>}</span>
+            <span>{b ? b.parts.join(' · ') : <i className="stats-none">—</i>}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
