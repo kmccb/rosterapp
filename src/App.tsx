@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Import } from './screens/Import';
+import { Import, type ImportMeta } from './screens/Import';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
 import { Settings } from './screens/Settings';
@@ -25,8 +25,14 @@ export default function App() {
   }, []);
 
   const handleImport = useCallback(
-    (players: Player[]) => {
-      persist({ ...roster, players });
+    (players: Player[], meta?: ImportMeta) => {
+      // A shared roster names its own team; a pasted one leaves whatever's set.
+      persist({
+        ...roster,
+        players,
+        teamName: meta?.teamName || roster.teamName,
+        season: meta?.season || roster.season,
+      });
       setTab('lookup');
     },
     [persist, roster],

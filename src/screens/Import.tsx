@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { parseHeight, parseRoster, parseWeight, sideFromPosition, splitName } from '../parse/rosterParse';
+import { fetchShared, sharingAvailable } from '../share/share';
 import { formatHeight, fullName, type Player, type Roster, type Side } from '../types';
 
 type EditRow = {
@@ -13,9 +14,12 @@ type EditRow = {
   side: Side;
 };
 
+/** A shared roster brings its own team name and season; a pasted one doesn't. */
+export type ImportMeta = { teamName?: string; season?: string };
+
 type Props = {
   roster: Roster;
-  onSave: (players: Player[]) => void;
+  onSave: (players: Player[], meta?: ImportMeta) => void;
 };
 
 const SIDES: Array<{ value: Side; label: string }> = [
@@ -80,6 +84,9 @@ const SAMPLE = `#\tName\tPos\tHt\tWt\tGrade
 export function Import({ roster, onSave }: Props) {
   const [text, setText] = useState('');
   const [rows, setRows] = useState<EditRow[] | null>(null);
+  const [meta, setMeta] = useState<ImportMeta>({});
+  const [code, setCode] = useState('');
+  const [pulling, setPulling] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -105,7 +112,29 @@ export function Import({ roster, onSave }: Props) {
       return;
     }
     setError('');
+    setMeta({});
     setRows(result.rows.map((r) => fromPlayer(r.player)));
+  };
+
+  // A pulled roster lands in the same review table as a pasted one. It came off
+  // someone else's phone, so it gets the same look-before-you-save treatment.
+  const handlePull = async () => {
+    setPulling(true);
+    setError('');
+    try {
+      const found = await fetchShared(code);
+      if (!found) {
+        setError('No roster for that code. Check it with whoever shared it — codes can be taken down.');
+        return;
+      }
+      setMeta({ teamName: found.teamName, season: found.season });
+      setRows(found.players.map(fromPlayer));
+      setSaved(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not fetch that roster.');
+    } finally {
+      setPulling(false);
+    }
   };
 
   const update = (id: string, patch: Partial<EditRow>) =>
@@ -116,10 +145,12 @@ export function Import({ roster, onSave }: Props) {
   const handleSave = () => {
     const keep = (rows ?? []).filter((r) => r.number.trim() || r.name.trim());
     try {
-      onSave(keep.map(toPlayer));
+      onSave(keep.map(toPlayer), meta);
       setSaved(true);
       setRows(null);
       setText('');
+      setCode('');
+      setMeta({});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save the roster.');
     }
@@ -139,6 +170,7 @@ export function Import({ roster, onSave }: Props) {
         <div className="review-summary">
           <div>
             <strong>{rows.length}</strong> players found
+            {meta.teamName ? ` for ${meta.teamName}` : ''}
             {needsAttention > 0 && <span className="warn"> · {needsAttention} need a look</span>}
           </div>
           <p className="hint">
@@ -259,6 +291,38 @@ export function Import({ roster, onSave }: Props) {
           {roster.players.length} players saved
           {roster.teamName ? ` for ${roster.teamName}` : ''}. Importing replaces them.
         </p>
+      )}
+
+      {sharingAvailable && (
+        <>
+          <label className="label" htmlFor="code">
+            Have a share code?
+          </label>
+          <p className="hint">
+            Eight characters from whoever keeps the roster, like BXQ4-T9KM.
+          </p>
+          <div className="review-actions">
+            <input
+              id="code"
+              className="input cell"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="BXQ4-T9KM"
+              aria-label="Share code"
+            />
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void handlePull()}
+              disabled={pulling || !code.trim()}
+            >
+              {pulling ? 'Fetching…' : 'Get the roster'}
+            </button>
+          </div>
+        </>
       )}
 
       <label className="label" htmlFor="paste">

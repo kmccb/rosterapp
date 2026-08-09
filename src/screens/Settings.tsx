@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { SharePanel } from '../components/SharePanel';
+import { sharingAvailable } from '../share/share';
 import { formatHeight, fullName, type Roster } from '../types';
 
 type Props = {
@@ -103,6 +105,8 @@ export function Settings({ roster, onChange, onClear }: Props) {
           />
         </>
       )}
+
+      {sharingAvailable && <SharePanel roster={roster} />}
 
       <h2 className="section">Danger zone</h2>
       {confirmClear ? (

@@ -7,7 +7,9 @@ and getting an answer before the next snap.
 - **Prefix matching.** Tap `7` and #7 is on top with the 70s underneath. Tap `2` and you're on #72.
 - **Works offline.** It's an installable web app; once it's on your home screen it doesn't need a
   signal, which is the whole point at a packed stadium.
-- **Your data stays on your phone.** No account, no server. Roster lives in browser storage.
+- **Nothing leaves the phone unless you publish it.** No accounts, ever. The roster lives in
+  browser storage, and the only thing that reaches a server is a roster someone deliberately
+  shared — see below.
 
 ## Getting the roster in
 
@@ -22,16 +24,38 @@ cell is editable, so a column that landed wrong takes a second to fix.
 **Back it up.** Settings → Copy as CSV. Browser storage is not forever — if you clear site data or
 switch phones, the roster goes with it.
 
+## Sharing by code
+
+One person types the roster in and hits **Settings → Publish to a code**. That returns eight
+characters like `BXQ4-T9KM`. Everyone else puts the code into their **Roster** tab, checks the
+same review table, and saves. From then on it's a local roster like any other and works with no
+signal.
+
+Worth being clear about what this is: a roster is a list of minors with their heights, weights and
+year in school, and anyone holding the code can read it. It's the paper roster handed round at a
+game, not a secret. Publishing is opt-in per roster, the publisher can take it down from Settings,
+and a code that nobody refreshes expires after 400 days.
+
+What stops the code being the *only* thing protecting it is that there's nothing else to find. The
+anon key ships inside the JavaScript bundle where anyone can read it, so `shared_roster` is not
+exposed to the Data API at all — RLS on with no policies, grants revoked, and access only through
+the security-definer functions in `supabase/migrations/0001_shared_roster.sql`. Those take a code
+and return at most one roster. There is no function that lists, counts or searches, by design.
+
 ## Screens
 
 | Tab | What it does |
 | --- | --- |
 | Lookup | The keypad. Number in, player out. |
 | Team | The full roster by number, searchable by name or position — the reverse lookup. |
-| Roster | Paste and review the import. |
-| Settings | Team name, season, CSV/JSON backup, delete. |
+| Roster | Paste, or pull a share code, then review the import. |
+| Settings | Team name, season, sharing, CSV/JSON backup, delete. |
 
 ## Development
+
+Sharing needs two environment variables — copy `.env.example` to `.env.local` and fill them from
+the Supabase project (Settings → API). Without them everything else still runs; the share UI just
+hides itself.
 
 ```sh
 npm install
@@ -74,6 +98,10 @@ One-time setup, in order:
 5. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
    button only appears for workflows already on the default branch — so nothing deploys while this
    lives on a feature branch.
+6. **Settings → Secrets and variables → Actions → Variables**: add `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY`. Variables rather than secrets, deliberately — both are readable in
+   the shipped bundle anyway, and hiding them would only make the build harder to audit. Skip
+   this and the site deploys fine without sharing.
 
 `public/CNAME` carries the domain into every build, which is what keeps the custom domain from
 being dropped on each deploy. Because a custom domain serves from the root, `vite.config.ts` sets

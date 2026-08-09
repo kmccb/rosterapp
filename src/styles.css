@@ -430,6 +430,18 @@ textarea {
   font-size: 13px;
 }
 
+/* Meant to be read out loud across a car park, so it's sized to be shouted. */
+.code {
+  margin: 4px 0 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(30px, 10vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-align: center;
+  user-select: all;
+}
+
 .error {
   color: var(--danger);
   font-size: 15px;
