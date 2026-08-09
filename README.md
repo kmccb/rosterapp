@@ -76,7 +76,7 @@ npm run dev      # --host, so you can open it on your phone over the same wifi
 npm test         # parser tests
 npm run build    # typecheck + production build
 npm run preview  # serve the build, for checking offline behaviour
-npm run icons    # regenerate PNG icons after editing public/icons/favicon.svg
+npm run icons    # regenerate the app icons after replacing img/logo.jpg
 ```
 
 The parsing logic lives in `src/parse/rosterParse.ts` and is pure and covered by tests — that's

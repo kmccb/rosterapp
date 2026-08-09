@@ -11,7 +11,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.svg'],
+      includeAssets: [
+        'icons/apple-touch-icon.png',
+        'icons/favicon-32.png',
+        'icons/favicon-16.png',
+      ],
       manifest: {
         name: 'Roster Lookup',
         short_name: 'Roster',
