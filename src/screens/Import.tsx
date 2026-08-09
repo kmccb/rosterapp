@@ -325,6 +325,21 @@ export function Import({
 
   return (
     <div className="screen">
+      {/*
+        The other two setup screens, as buttons at the top rather than a link in
+        a footnote. They were a 27x18px word in grey prose at the bottom of a
+        scrolling screen, which is the same as not being there at all.
+      */}
+      <nav className="setup-nav" aria-label="Setup">
+        <span className="setup-nav-here">Roster</span>
+        <button type="button" className="btn" onClick={onGoToStats}>
+          Stats
+        </button>
+        <button type="button" className="btn" onClick={onGoToSettings}>
+          Settings
+        </button>
+      </nav>
+
       {saved && (
         <p className="success">
           Roster saved. Publish it or set the team name before you finish — this screen is the way
@@ -432,17 +447,8 @@ export function Import({
         </button>
       </div>
 
-      {/* Settings has no tab any more, so this is the only door to it. */}
       <p className="footnote">
-        Team name, season, sharing and backup are in{' '}
-        <button type="button" className="link-btn" onClick={onGoToSettings}>
-          Settings
-        </button>
-        . Last season's numbers go in under{' '}
-        <button type="button" className="link-btn" onClick={onGoToStats}>
-          Stats
-        </button>
-        .
+        Nothing here is shared until you publish it from Settings.
       </p>
     </div>
   );

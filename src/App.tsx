@@ -240,6 +240,7 @@ export default function App() {
             stats={stats}
             onSaved={setStats}
             onBack={() => setTab('roster')}
+            onGoToSettings={() => setTab('settings')}
           />
         )}
         {tab === 'settings' && (
@@ -247,6 +248,7 @@ export default function App() {
             roster={roster}
             onChange={(patch) => persist({ ...roster, ...patch })}
             onBack={() => setTab('roster')}
+            onGoToStats={() => setTab('stats')}
             stats={stats}
             onClear={() => {
               clearRoster();

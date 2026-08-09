@@ -8,6 +8,7 @@ type Props = {
   roster: Roster;
   onChange: (patch: Partial<Roster>) => void;
   onBack: () => void;
+  onGoToStats: () => void;
   stats: StatsStore;
   onClear: () => void;
 };
@@ -31,7 +32,7 @@ const toCsv = (roster: Roster): string => {
   return [head, ...lines].join('\n');
 };
 
-export function Settings({ roster, onChange, onBack, onClear, stats }: Props) {
+export function Settings({ roster, onChange, onBack, onGoToStats, onClear, stats }: Props) {
   const [copied, setCopied] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -46,10 +47,16 @@ export function Settings({ roster, onChange, onBack, onClear, stats }: Props) {
 
   return (
     <div className="screen">
-      {/* No tab bar entry for this screen, so it carries its own way out. */}
-      <button type="button" className="card-back" onClick={onBack}>
-        ‹ Back to the roster
-      </button>
+      {/* No tab bar entry for these, so each carries the way to the others. */}
+      <nav className="setup-nav" aria-label="Setup">
+        <button type="button" className="btn" onClick={onBack}>
+          Roster
+        </button>
+        <button type="button" className="btn" onClick={onGoToStats}>
+          Stats
+        </button>
+        <span className="setup-nav-here">Settings</span>
+      </nav>
 
       <label className="label" htmlFor="team">
         Team

@@ -515,6 +515,43 @@ textarea {
   color: var(--warn);
 }
 
+/*
+ * The three setup screens, reachable from each other. These used to be links
+ * buried in a closing sentence — a couple of dozen pixels of grey text at the
+ * bottom of a screen you had to scroll to reach, which is indistinguishable
+ * from absent. The screen you're on is named rather than linked, so the row
+ * doubles as a "you are here".
+ */
+.setup-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.setup-nav .btn {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 15px;
+}
+
+.setup-nav-here {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
 /* A button that has to sit inside a sentence without looking like a button. */
 .link-btn {
   padding: 0;

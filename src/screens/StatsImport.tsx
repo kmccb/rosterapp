@@ -9,6 +9,7 @@ type Props = {
   stats: StatsStore;
   onSaved: (next: StatsStore) => void;
   onBack: () => void;
+  onGoToSettings: () => void;
 };
 
 const BUCKETS: Array<{ id: SeasonBucket; label: string }> = [
@@ -16,7 +17,7 @@ const BUCKETS: Array<{ id: SeasonBucket; label: string }> = [
   { id: 'current', label: 'This season' },
 ];
 
-export function StatsImport({ roster, stats, onSaved, onBack }: Props) {
+export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: Props) {
   const [bucket, setBucket] = useState<SeasonBucket>('previous');
   const [label, setLabel] = useState('');
   const [text, setText] = useState('');
@@ -73,9 +74,15 @@ export function StatsImport({ roster, stats, onSaved, onBack }: Props) {
 
   return (
     <div className="screen">
-      <button type="button" className="card-back" onClick={onBack}>
-        ‹ Back to the roster
-      </button>
+      <nav className="setup-nav" aria-label="Setup">
+        <button type="button" className="btn" onClick={onBack}>
+          Roster
+        </button>
+        <span className="setup-nav-here">Stats</span>
+        <button type="button" className="btn" onClick={onGoToSettings}>
+          Settings
+        </button>
+      </nav>
 
       <h2 className="section">Stats</h2>
       <p className="hint">
