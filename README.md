@@ -45,6 +45,15 @@ npm run icons    # regenerate PNG icons after editing public/icons/favicon.svg
 The parsing logic lives in `src/parse/rosterParse.ts` and is pure and covered by tests — that's
 where to go when a real roster paste doesn't come out right.
 
+## Colours and the background
+
+The palette in `src/styles.css` is sampled from `img/logo.jpg`: `#030367` from the line work,
+`#1687cd` and `#1a489e` from the wash behind it, and white. The logo doubles as the page
+background — `public/bulldog.jpg` is a 1200px re-encode of it, drawn `cover` behind two fixed
+layers so it bleeds off every screen edge, with a scrim over it heavy enough to keep white text
+above 13:1. To swap teams, drop a new square logo at `img/logo.jpg`, re-run the resize, and move
+the four hex values at the top of the stylesheet.
+
 ## Deploying
 
 Live at **https://roster.scottforge.ai**. Pushing to `main` builds and publishes via

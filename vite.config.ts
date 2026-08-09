@@ -20,8 +20,8 @@ export default defineConfig({
         scope: '.',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#0b0f14',
-        theme_color: '#0b0f14',
+        background_color: '#04043a',
+        theme_color: '#04043a',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -34,7 +34,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // jpg is in here for public/bulldog.jpg — it's the page background, and
+        // without precaching it the app comes up bare when there's no signal.
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff2}'],
       },
     }),
   ],

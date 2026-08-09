@@ -1,19 +1,30 @@
 /*
  * Dark, high-contrast, and big. This gets used one-handed, at night, in a
  * crowd — legibility beats decoration everywhere it's a choice.
+ *
+ * Colours are sampled straight out of the team logo: the navy of the line
+ * work, the azure and royal blue of its background wash, and white.
  */
 
 :root {
-  --bg: #0b0f14;
-  --surface: #161d27;
-  --surface-2: #1f2937;
-  --line: #2b3543;
-  --text: #f3f7fc;
-  --muted: #9aabc0;
-  --accent: #ffd60a;
-  --accent-ink: #14181d;
-  --danger: #ff6b6b;
-  --ok: #4ade80;
+  /* Sampled from img/logo.jpg. */
+  --navy-ink: #030367;
+  --azure: #1687cd;
+  --royal: #1a489e;
+
+  --bg: #04043a;
+  --chrome: rgba(4, 5, 48, 0.82);
+  --surface: rgba(9, 18, 74, 0.72);
+  --surface-2: rgba(22, 50, 118, 0.78);
+  --line: rgba(125, 180, 240, 0.24);
+  --text: #ffffff;
+  --muted: #a8c6e8;
+  --accent: #4fbaf7;
+  --accent-ink: #04043a;
+  --ghost: rgba(126, 186, 247, 0.22);
+  --warn: #ffc24a;
+  --danger: #ff7b7b;
+  --ok: #5be39b;
 
   --radius: 14px;
   --tap: 56px;
@@ -41,6 +52,37 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * The logo as wallpaper, in two fixed layers behind everything. Nothing in the
+ * app scrolls the body itself — the screens scroll inside their own panes — so
+ * these can be position:fixed and skip background-attachment, which iOS mangles.
+ *
+ * `cover` on a square image means it bleeds past the viewport on every phone,
+ * so there is no visible edge and the logo's own wash becomes the page gradient.
+ * The scrim on top is what keeps text readable: it holds the brightest part of
+ * the artwork near 5% luminance, so white body copy still clears 13:1 and the
+ * dog reads as a watermark rather than a picture competing with the roster.
+ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  z-index: -2;
+  background: url('/bulldog.jpg') center / cover no-repeat;
+}
+
+body::after {
+  z-index: -1;
+  background:
+    radial-gradient(120% 85% at 50% 40%, rgba(4, 8, 62, 0.78), rgba(2, 3, 40, 0.93) 72%),
+    linear-gradient(180deg, rgba(3, 3, 55, 0.72), rgba(2, 4, 34, 0.88));
+}
+
 #root {
   height: 100%;
 }
@@ -63,11 +105,18 @@ textarea {
   padding-top: env(safe-area-inset-top);
 }
 
+/*
+ * Chrome sits on a darker, blurred plate at the top and bottom of the screen.
+ * That pins the watermark to the middle of the view, where there is nothing
+ * small to read, and keeps the tabs and keys off the busiest part of the art.
+ */
 .header {
   flex: none;
   padding: 10px 12px 0;
   border-bottom: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--chrome);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .title {
@@ -169,7 +218,7 @@ textarea {
   font-size: 76px;
   font-weight: 800;
   line-height: 1;
-  color: var(--line);
+  color: var(--ghost);
 }
 
 /* ------------------------------------------------------------------- card */
@@ -281,7 +330,9 @@ textarea {
   gap: 8px;
   padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--chrome);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .key {
@@ -300,9 +351,11 @@ textarea {
   user-select: none;
 }
 
+/* Pressed keys flip to the logo's own pairing: white on navy, inverted. */
 .key:active {
-  background: var(--accent);
+  background: var(--text);
   color: var(--accent-ink);
+  border-color: var(--text);
 }
 
 .key-secondary {
@@ -387,8 +440,14 @@ textarea {
   font-size: 15px;
 }
 
+/*
+ * Amber, not the brand blue. The accent used to be yellow and did double duty
+ * as both "this is the brand" and "this needs a look", which read as the same
+ * thing on the review screen. Now the blue is the brand and amber only ever
+ * means a row wants checking.
+ */
 .warn {
-  color: var(--accent);
+  color: var(--warn);
 }
 
 .btn {
@@ -409,8 +468,8 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--text);
+  border-color: var(--text);
   color: var(--accent-ink);
 }
 
@@ -440,7 +499,7 @@ textarea {
 }
 
 .review-row.has-issue {
-  border-color: var(--accent);
+  border-color: var(--warn);
 }
 
 .review-line {
@@ -503,7 +562,7 @@ textarea {
 
 .review-issues {
   margin: 6px 2px 0;
-  color: var(--accent);
+  color: var(--warn);
   font-size: 13px;
 }
 
