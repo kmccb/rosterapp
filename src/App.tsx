@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Import, type ImportMeta } from './screens/Import';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
@@ -6,17 +6,17 @@ import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'roster' | 'settings';
+type View = 'lookup' | 'team' | 'roster' | 'settings';
 
-const TABS: Array<{ id: Tab; label: string }> = [
-  { id: 'lookup', label: 'Lookup' },
-  { id: 'team', label: 'Team' },
-  { id: 'roster', label: 'Roster' },
-  { id: 'settings', label: 'Settings' },
-];
+const TITLES: Record<Exclude<View, 'lookup'>, string> = {
+  team: 'Full roster',
+  roster: 'Import roster',
+  settings: 'Settings',
+};
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('lookup');
+  const [view, setView] = useState<View>('lookup');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [roster, setRoster] = useState<Roster>(() => loadRoster());
 
   const persist = useCallback((next: Roster) => {
@@ -33,35 +33,80 @@ export default function App() {
         teamName: meta?.teamName || roster.teamName,
         season: meta?.season || roster.season,
       });
-      setTab('lookup');
+      setView('lookup');
     },
     [persist, roster],
   );
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
+
+  const go = (next: View) => {
+    setView(next);
+    setMenuOpen(false);
+  };
+
+  // The keypad is the landing page. Everything else you navigated to on purpose.
+  const onLanding = view === 'lookup';
+
   return (
     <div className="app">
       <header className="header">
-        <h1 className="title">{roster.teamName || 'Roster Lookup'}</h1>
-        <nav className="tabs" aria-label="Sections">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`tab${tab === t.id ? ' active' : ''}`}
-              onClick={() => setTab(t.id)}
-              aria-current={tab === t.id ? 'page' : undefined}
-            >
-              {t.label}
+        <div className="header-top">
+          {onLanding ? (
+            <h1 className="title">{roster.teamName || 'Roster Lookup'}</h1>
+          ) : (
+            <button type="button" className="back-btn" onClick={() => setView('lookup')}>
+              ← {TITLES[view as Exclude<View, 'lookup'>]}
             </button>
-          ))}
-        </nav>
+          )}
+
+          <button
+            type="button"
+            className="menu-btn"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+          >
+            <span className="menu-icon" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
+      {menuOpen && (
+        <>
+          <button
+            type="button"
+            className="scrim"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          />
+          <nav className="menu" aria-label="Sections">
+            <button type="button" className="menu-item" onClick={() => go('lookup')}>
+              Number lookup
+            </button>
+            <button type="button" className="menu-item" onClick={() => go('team')}>
+              Full roster
+            </button>
+            <button type="button" className="menu-item" onClick={() => go('roster')}>
+              Import roster
+            </button>
+            <button type="button" className="menu-item" onClick={() => go('settings')}>
+              Settings
+            </button>
+          </nav>
+        </>
+      )}
+
       <main className="main">
-        {tab === 'lookup' && <Lookup roster={roster} onGoToImport={() => setTab('roster')} />}
-        {tab === 'team' && <RosterList roster={roster} />}
-        {tab === 'roster' && <Import roster={roster} onSave={handleImport} />}
-        {tab === 'settings' && (
+        {view === 'lookup' && <Lookup roster={roster} onGoToImport={() => setView('roster')} />}
+        {view === 'team' && <RosterList roster={roster} />}
+        {view === 'roster' && <Import roster={roster} onSave={handleImport} />}
+        {view === 'settings' && (
           <Settings
             roster={roster}
             onChange={(patch) => persist({ ...roster, ...patch })}
