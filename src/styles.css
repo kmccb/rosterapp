@@ -65,17 +65,16 @@ textarea {
 
 .header {
   flex: none;
-  padding: 10px 12px 0;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
-  background: var(--bg);
 }
 
 .header-top {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  min-height: 40px;
 }
 
 .title {
@@ -88,17 +87,6 @@ textarea {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.sync {
-  flex: none;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.sync-offline,
-.sync-error {
-  color: var(--accent);
 }
 
 .signin {
@@ -127,26 +115,114 @@ textarea {
   opacity: 0.6;
 }
 
-.tabs {
-  display: flex;
-  gap: 4px;
+/* The landing page is the keypad and nothing else. Everything else lives
+   behind the menu, one tap away. */
+
+.back-btn {
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.tab {
-  flex: 1;
-  padding: 10px 4px;
+.menu-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -8px -10px -8px 0;
   border: 0;
-  border-bottom: 3px solid transparent;
   background: none;
-  color: var(--muted);
-  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Three bars, drawn rather than shipped as an icon font. */
+.menu-icon,
+.menu-icon::before,
+.menu-icon::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.menu-icon {
+  position: relative;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.menu-icon::before {
+  top: -6px;
+}
+
+.menu-icon::after {
+  top: 6px;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: default;
+}
+
+.menu {
+  position: fixed;
+  z-index: 11;
+  top: calc(56px + env(safe-area-inset-top));
+  right: 10px;
+  min-width: 210px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font-size: 17px;
   font-weight: 600;
+  text-align: left;
   cursor: pointer;
 }
 
-.tab.active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
+.menu-item:active {
+  background: var(--surface);
+}
+
+.menu-status {
+  margin: 4px 0 2px;
+  padding: 0 14px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .main {

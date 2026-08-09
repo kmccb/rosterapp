@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Import } from './screens/Import';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
@@ -6,7 +6,13 @@ import { Settings } from './screens/Settings';
 import { SignIn } from './screens/SignIn';
 import { useTeam } from './useTeam';
 
-type Tab = 'lookup' | 'team' | 'roster' | 'settings';
+type View = 'lookup' | 'team' | 'roster' | 'settings';
+
+const TITLES: Record<Exclude<View, 'lookup'>, string> = {
+  team: 'Full roster',
+  roster: 'Import roster',
+  settings: 'Settings',
+};
 
 const SYNC_LABEL: Record<string, string> = {
   syncing: 'Syncing…',
@@ -17,75 +23,104 @@ const SYNC_LABEL: Record<string, string> = {
 };
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('lookup');
+  const [view, setView] = useState<View>('lookup');
+  const [menuOpen, setMenuOpen] = useState(false);
   const team = useTeam();
 
-  const tabs = useMemo(() => {
-    const all: Array<{ id: Tab; label: string }> = [
-      { id: 'lookup', label: 'Lookup' },
-      { id: 'team', label: 'Team' },
-      { id: 'roster', label: 'Roster' },
-      { id: 'settings', label: 'Settings' },
-    ];
-    // Viewers can't import, so the tab would only lead to a dead end.
-    return team.canEdit ? all : all.filter((t) => t.id !== 'roster');
-  }, [team.canEdit]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
-  const activeTab = tabs.some((t) => t.id === tab) ? tab : 'lookup';
+  const go = (next: View) => {
+    setView(next);
+    setMenuOpen(false);
+  };
+
+  // Anything but the keypad is somewhere you deliberately navigated to.
+  const onLanding = view === 'lookup';
 
   return (
     <div className="app">
       <header className="header">
         <div className="header-top">
-          <h1 className="title">{team.roster.teamName || 'Roster Lookup'}</h1>
-          {team.shared && (
-            <span className={`sync sync-${team.syncState}`} title={team.error || undefined}>
-              {SYNC_LABEL[team.syncState]}
-            </span>
+          {onLanding ? (
+            <h1 className="title">{team.roster.teamName || 'Roster Lookup'}</h1>
+          ) : (
+            <button type="button" className="back-btn" onClick={() => setView('lookup')}>
+              ← {TITLES[view as Exclude<View, 'lookup'>]}
+            </button>
+          )}
+
+          {!team.needsSignIn && (
+            <button
+              type="button"
+              className="menu-btn"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+            >
+              <span className="menu-icon" aria-hidden="true" />
+            </button>
           )}
         </div>
-        {!team.needsSignIn && (
-          <nav className="tabs" aria-label="Sections">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`tab${activeTab === t.id ? ' active' : ''}`}
-                onClick={() => setTab(t.id)}
-                aria-current={activeTab === t.id ? 'page' : undefined}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
-        )}
       </header>
+
+      {menuOpen && (
+        <>
+          <button
+            type="button"
+            className="scrim"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          />
+          <nav className="menu" aria-label="Sections">
+            <button type="button" className="menu-item" onClick={() => go('lookup')}>
+              Number lookup
+            </button>
+            <button type="button" className="menu-item" onClick={() => go('team')}>
+              Full roster
+            </button>
+            {team.canEdit && (
+              <button type="button" className="menu-item" onClick={() => go('roster')}>
+                Import roster
+              </button>
+            )}
+            <button type="button" className="menu-item" onClick={() => go('settings')}>
+              Settings
+            </button>
+            {team.shared && <p className="menu-status">{SYNC_LABEL[team.syncState]}</p>}
+          </nav>
+        </>
+      )}
 
       <main className="main">
         {team.needsSignIn ? (
           <SignIn onSignIn={team.signIn} hasCachedRoster={team.roster.players.length > 0} />
         ) : (
           <>
-            {activeTab === 'lookup' && (
+            {view === 'lookup' && (
               <Lookup
                 roster={team.roster}
                 canEdit={team.canEdit}
-                onGoToImport={() => setTab('roster')}
+                onGoToImport={() => setView('roster')}
               />
             )}
-            {activeTab === 'team' && <RosterList roster={team.roster} />}
-            {activeTab === 'roster' && team.canEdit && (
+            {view === 'team' && <RosterList roster={team.roster} />}
+            {view === 'roster' && team.canEdit && (
               <Import
                 roster={team.roster}
                 shared={team.shared}
                 onSave={async (players) => {
                   await team.savePlayers(players);
                   // Straight back to the keypad — that's what the import was for.
-                  setTab('lookup');
+                  setView('lookup');
                 }}
               />
             )}
-            {activeTab === 'settings' && (
+            {view === 'settings' && (
               <Settings
                 roster={team.roster}
                 shared={team.shared}
