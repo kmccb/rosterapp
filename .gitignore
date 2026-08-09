@@ -4,3 +4,6 @@ dev-dist/
 *.local
 .DS_Store
 .vite/
+public/icons/
+public/badge.jpg
+public/manifest.webmanifest

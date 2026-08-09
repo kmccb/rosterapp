@@ -115,20 +115,41 @@ npm run dev      # --host, so you can open it on your phone over the same wifi
 npm test         # parser tests
 npm run build    # typecheck + production build
 npm run preview  # serve the build, for checking offline behaviour
-npm run icons    # regenerate the app icons after replacing img/logo.jpg
+npm run icons    # regenerate every team's icons after changing a logo
 ```
 
 The parsing logic lives in `src/parse/rosterParse.ts` and is pure and covered by tests — that's
 where to go when a real roster paste doesn't come out right.
 
-## Colours and the background
+## More than one team
 
-The palette in `src/styles.css` is sampled from `img/logo.jpg`: `#030367` from the line work,
-`#1687cd` and `#1a489e` from the wash behind it, and white. The logo doubles as the page
-background — `public/bulldog.jpg` is a 1200px re-encode of it, drawn `cover` behind two fixed
-layers so it bleeds off every screen edge, with a scrim over it heavy enough to keep white text
-above 13:1. To swap teams, drop a new square logo at `img/logo.jpg`, re-run the resize, and move
-the four hex values at the top of the stylesheet.
+Each folder in `teams/` is a team, and each gets its own page on the same site:
+
+```
+teams/
+  poland/   team.json  logo.jpg     -> /            ("root": true)
+  eagles/   team.json  logo.jpg     -> /eagles/
+```
+
+`npm run build` turns each one into its own icon set, manifest, badge and `index.html`. A phone
+adding `/eagles/` to its home screen gets that team's crest and name, because the OS reads those
+from files on disk at install time — which is the one piece of branding a runtime upload can never
+reach. Everything else is shared: same JavaScript, same database, same deploy.
+
+To add a team: make the folder, drop in a square `logo.jpg` and a `team.json` with `name` and
+`short`, then build and push. Exactly one team carries `"root": true` and lives at `/` — that's
+the original, whose installed apps and existing links already point there.
+
+Colours come off the badge. The most saturated colour in it sets the hue, and a dark ground and
+bright accent are generated from that — generated rather than sampled, because sampling a pale
+badge gives a pale ground and unreadable text. `src/theme/palette.ts` does it, the build imports
+the same module so a baked theme and an uploaded one can't drift, and the contrast guarantees are
+asserted across eight team colour families in its tests. A team can pin its own palette in
+`team.json` instead; the root team does, so its look predates and survives all of this.
+
+Anyone can also add a badge from **Settings → Add the team badge** without a rebuild. That gets
+them the colours and the watermark, and travels with the share link — just not the home screen
+icon.
 
 ## Deploying
 

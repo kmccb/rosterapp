@@ -1,0 +1,14 @@
+{
+  "name": "Roster Lookup",
+  "short": "Roster",
+  "root": true,
+  "palette": {
+    "ground": "#04043a",
+    "surface": "#163a76",
+    "line": "#2f5f9e",
+    "text": "#ffffff",
+    "muted": "#a8c6e8",
+    "accent": "#4fbaf7",
+    "accentInk": "#04043a"
+  }
+}

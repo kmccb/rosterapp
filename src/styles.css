@@ -78,7 +78,7 @@ body::after {
  */
 body::before {
   z-index: -2;
-  background: var(--wallpaper, url('/bulldog.jpg')) center / cover no-repeat;
+  background: var(--wallpaper, url('/badge.jpg')) center / cover no-repeat;
 }
 
 /*

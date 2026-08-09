@@ -12,7 +12,7 @@ import {
   takeCodeFromUrl,
 } from './share/share';
 import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
-import { applyTheme, loadTheme, saveTheme, type Theme } from './theme/theme';
+import { applyTheme, bakedTeam, initialTheme, saveTheme, type Theme } from './theme/theme';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
@@ -54,7 +54,7 @@ export default function App() {
   /** A code from a share link that needs reviewing before it replaces anything. */
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsStore>(() => loadStats());
-  const [theme, setTheme] = useState<Theme | null>(() => loadTheme());
+  const [theme, setTheme] = useState<Theme | null>(() => initialTheme());
 
   // Paint the team's colours on before anything renders in the default ones.
   useLayoutEffect(() => applyTheme(theme), [theme]);
@@ -234,7 +234,7 @@ export default function App() {
           onContextMenu={(e) => e.preventDefault()}
           title="Press and hold to set up"
         >
-          {roster.teamName || 'Roster Lookup'}
+          {roster.teamName || bakedTeam()?.name || 'Roster Lookup'}
         </h1>
         <nav className="tabs" aria-label="Sections">
           {TABS.map((t) => (

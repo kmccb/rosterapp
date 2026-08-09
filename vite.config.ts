@@ -11,35 +11,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: [
-        'icons/apple-touch-icon.png',
-        'icons/favicon-32.png',
-        'icons/favicon-16.png',
-      ],
-      manifest: {
-        name: 'Roster Lookup',
-        short_name: 'Roster',
-        description: 'Type a jersey number, see the player.',
-        start_url: '.',
-        scope: '.',
-        display: 'standalone',
-        orientation: 'portrait',
-        background_color: '#04043a',
-        theme_color: '#04043a',
-        icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          {
-            src: 'icons/icon-512-maskable.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-      },
+      // Each team writes its own manifest in scripts/build-teams.mjs, so the
+      // plugin must not generate a competing one at the root.
+      manifest: false,
       workbox: {
-        // jpg is in here for public/bulldog.jpg — it's the page background, and
-        // without precaching it the app comes up bare when there's no signal.
+        // jpg covers each team's badge.jpg, which is the page background. Left
+        // out of the precache the app comes up bare with no signal, which is
+        // the one condition it exists to survive. png covers the icon sets.
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff2}'],
       },
     }),

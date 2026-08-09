@@ -28,9 +28,10 @@ const looksLikeTheme = (v: unknown): v is Theme => {
   if (typeof v !== 'object' || v === null) return false;
   const t = v as Record<string, unknown>;
   const p = t.palette as Record<string, unknown> | undefined;
+  // Either an uploaded badge (a data URI) or one baked into the build (a path).
+  const logo = typeof t.logo === 'string' ? t.logo : '';
   return (
-    typeof t.logo === 'string' &&
-    t.logo.startsWith('data:image/') &&
+    (logo.startsWith('data:image/') || logo.startsWith('/')) &&
     !!p &&
     typeof p.ground === 'string' &&
     typeof p.accent === 'string'
@@ -58,6 +59,40 @@ export const saveTheme = (theme: Theme): void => {
 };
 
 export const clearTheme = (): void => localStorage.removeItem(KEY);
+
+/*
+ * A team baked into the page at build time, for sites serving more than one.
+ * The per-team build writes it into that team's index.html.
+ *
+ * It gets copied into storage on first visit rather than read fresh each time,
+ * because offline the service worker answers a navigation with the root shell —
+ * which carries the *root* team's script. Left unstored, a second team's app
+ * would come up in the first team's colours the moment it lost signal.
+ */
+type BakedTeam = { slug: string; name: string; palette: Palette; wallpaper: string };
+
+export const bakedTeam = (): BakedTeam | null => {
+  const t = (window as unknown as { __TEAM__?: BakedTeam }).__TEAM__;
+  return t && t.palette && t.wallpaper ? t : null;
+};
+
+/** The theme to start with: what's stored, else what the page was built with. */
+export function initialTheme(): Theme | null {
+  const stored = loadTheme();
+  if (stored) return stored;
+
+  const baked = bakedTeam();
+  if (!baked) return null;
+
+  const theme: Theme = { logo: baked.wallpaper, palette: baked.palette, seedHue: -1 };
+  try {
+    // Stored so an offline launch, or the root shell, can't undo it.
+    localStorage.setItem(KEY, JSON.stringify({ schema: 1, theme } satisfies Stored));
+  } catch {
+    // Not fatal: the page carries it anyway while there's a connection.
+  }
+  return theme;
+}
 
 // ------------------------------------------------------------------- apply
 
