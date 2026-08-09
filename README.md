@@ -7,7 +7,11 @@ and getting an answer before the next snap.
 - **Prefix matching.** Tap `7` and #7 is on top with the 70s underneath. Tap `2` and you're on #72.
 - **Works offline.** It's an installable web app; once it's on your home screen it doesn't need a
   signal, which is the whole point at a packed stadium.
-- **Your data stays on your phone.** No account, no server. Roster lives in browser storage.
+- **Shared with the other parents.** One person imports the roster; everyone with the team code
+  sees it. Each phone keeps its own copy, so lookups never wait on the network.
+
+Sharing is optional. With no backend configured the app runs entirely on-device, which is how it
+behaves until you follow [docs/sharing-setup.md](docs/sharing-setup.md).
 
 ## Getting the roster in
 
@@ -28,8 +32,14 @@ switch phones, the roster goes with it.
 | --- | --- |
 | Lookup | The keypad. Number in, player out. |
 | Team | The full roster by number, searchable by name or position — the reverse lookup. |
-| Roster | Paste and review the import. |
-| Settings | Team name, season, CSV/JSON backup, delete. |
+| Roster | Paste and review the import. Editors only. |
+| Settings | Team name, season, sync status, access codes, CSV/JSON backup. |
+
+## Two codes
+
+When sharing is on there are two access codes. The **team code** is read-only and goes to every
+parent. The **editor code** also allows importing, and goes to you and anyone helping enter data.
+Both are set up in [docs/sharing-setup.md](docs/sharing-setup.md) and can be rotated from Settings.
 
 ## Development
 

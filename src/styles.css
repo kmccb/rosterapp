@@ -70,13 +70,61 @@ textarea {
   background: var(--bg);
 }
 
+.header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 .title {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync {
+  flex: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sync-offline,
+.sync-error {
+  color: var(--accent);
+}
+
+.signin {
+  max-width: 420px;
+}
+
+.signin-title {
+  margin: 8px 0 6px;
+  font-size: 24px;
+}
+
+.signin-btn {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.signin-cached {
+  margin-top: 24px;
+}
+
+.settings-gap {
+  margin-top: 8px;
+}
+
+.input:disabled {
+  opacity: 0.6;
 }
 
 .tabs {

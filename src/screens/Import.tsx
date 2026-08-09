@@ -15,7 +15,9 @@ type EditRow = {
 
 type Props = {
   roster: Roster;
-  onSave: (players: Player[]) => void;
+  /** True when saving publishes to the shared database rather than just this device. */
+  shared: boolean;
+  onSave: (players: Player[]) => Promise<void>;
 };
 
 const SIDES: Array<{ value: Side; label: string }> = [
@@ -77,11 +79,12 @@ const SAMPLE = `#\tName\tPos\tHt\tWt\tGrade
 12\tAnthony Rodriguez\tWR\t5-10\t165\tSo
 72\tMarcus Webb\tOT\t6-4\t285\tSr`;
 
-export function Import({ roster, onSave }: Props) {
+export function Import({ roster, shared, onSave }: Props) {
   const [text, setText] = useState('');
   const [rows, setRows] = useState<EditRow[] | null>(null);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const duplicateNumbers = useMemo(() => {
@@ -113,15 +116,19 @@ export function Import({ roster, onSave }: Props) {
 
   const remove = (id: string) => setRows((rs) => (rs ?? []).filter((r) => r.id !== id));
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const keep = (rows ?? []).filter((r) => r.number.trim() || r.name.trim());
+    setSaving(true);
+    setError('');
     try {
-      onSave(keep.map(toPlayer));
+      await onSave(keep.map(toPlayer));
       setSaved(true);
       setRows(null);
       setText('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save the roster.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -143,6 +150,7 @@ export function Import({ roster, onSave }: Props) {
           </div>
           <p className="hint">
             Check the columns landed in the right place, then save. Nothing is stored until you do.
+            {shared && ' Saving publishes this to everyone with the team code.'}
           </p>
         </div>
 
@@ -240,8 +248,13 @@ export function Import({ roster, onSave }: Props) {
           <button type="button" className="btn" onClick={() => setRows(null)}>
             Start over
           </button>
-          <button type="button" className="btn btn-primary" onClick={handleSave}>
-            Save {rows.length} players
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => void handleSave()}
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : `Save ${rows.length} players`}
           </button>
         </div>
       </div>

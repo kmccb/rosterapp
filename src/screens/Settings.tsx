@@ -1,10 +1,16 @@
 import { useState } from 'react';
+import { pushCodes } from '../api/client';
 import { formatHeight, fullName, type Roster } from '../types';
 
 type Props = {
   roster: Roster;
-  onChange: (patch: Partial<Roster>) => void;
+  shared: boolean;
+  canEdit: boolean;
+  syncLabel: string;
+  onChange: (patch: Partial<Roster>) => Promise<void>;
   onClear: () => void;
+  onSignOut: () => void;
+  onRefresh: () => Promise<void>;
 };
 
 const toCsv = (roster: Roster): string => {
@@ -26,9 +32,21 @@ const toCsv = (roster: Roster): string => {
   return [head, ...lines].join('\n');
 };
 
-export function Settings({ roster, onChange, onClear }: Props) {
+export function Settings({
+  roster,
+  shared,
+  canEdit,
+  syncLabel,
+  onChange,
+  onClear,
+  onSignOut,
+  onRefresh,
+}: Props) {
   const [copied, setCopied] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
+  const [viewCode, setViewCode] = useState('');
+  const [editCode, setEditCode] = useState('');
+  const [codeMessage, setCodeMessage] = useState('');
 
   const copy = async (label: string, content: string) => {
     try {
@@ -39,8 +57,41 @@ export function Settings({ roster, onChange, onClear }: Props) {
     }
   };
 
+  const changeCodes = async () => {
+    setCodeMessage('');
+    try {
+      await pushCodes({
+        viewCode: viewCode.trim() || undefined,
+        editCode: editCode.trim() || undefined,
+      });
+      setViewCode('');
+      setEditCode('');
+      setCodeMessage('Codes changed. Anyone using the old one will need the new one.');
+    } catch (err) {
+      setCodeMessage(err instanceof Error ? err.message : 'Could not change the codes.');
+    }
+  };
+
   return (
     <div className="screen">
+      {shared && (
+        <>
+          <h2 className="section">Sharing</h2>
+          <p className="hint">
+            {syncLabel}
+            {canEdit ? ' · you can edit' : ' · read-only'}
+          </p>
+          <div className="review-actions">
+            <button type="button" className="btn" onClick={() => void onRefresh()}>
+              Check for updates
+            </button>
+            <button type="button" className="btn" onClick={onSignOut}>
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
+
       <label className="label" htmlFor="team">
         Team
       </label>
@@ -48,8 +99,9 @@ export function Settings({ roster, onChange, onClear }: Props) {
         id="team"
         className="input"
         value={roster.teamName}
-        onChange={(e) => onChange({ teamName: e.target.value })}
+        onChange={(e) => void onChange({ teamName: e.target.value })}
         placeholder="Central High Bulldogs"
+        disabled={!canEdit}
       />
 
       <label className="label" htmlFor="season">
@@ -59,14 +111,16 @@ export function Settings({ roster, onChange, onClear }: Props) {
         id="season"
         className="input"
         value={roster.season}
-        onChange={(e) => onChange({ season: e.target.value })}
+        onChange={(e) => void onChange({ season: e.target.value })}
         placeholder="2026"
+        disabled={!canEdit}
       />
 
       <h2 className="section">Backup</h2>
       <p className="hint">
-        The roster lives only on this phone. Copy it somewhere safe, or send it to another parent —
-        both formats paste straight back into the Roster tab.
+        {shared
+          ? 'The roster lives in the team database, but a copy never hurts.'
+          : 'The roster lives only on this phone. Copy it somewhere safe.'}
       </p>
       <div className="review-actions">
         <button
@@ -104,7 +158,51 @@ export function Settings({ roster, onChange, onClear }: Props) {
         </>
       )}
 
+      {shared && canEdit && (
+        <>
+          <h2 className="section">Access codes</h2>
+          <p className="hint">
+            Change a code if one gets passed around too far. Leave a box empty to keep that code as
+            it is. The team code is read-only access; the editor code also allows importing.
+          </p>
+          <input
+            className="input"
+            value={viewCode}
+            onChange={(e) => setViewCode(e.target.value)}
+            placeholder="New team code (6+ characters)"
+            aria-label="New team code"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+          <input
+            className="input settings-gap"
+            value={editCode}
+            onChange={(e) => setEditCode(e.target.value)}
+            placeholder="New editor code (8+ characters)"
+            aria-label="New editor code"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+          <div className="review-actions">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void changeCodes()}
+              disabled={!viewCode.trim() && !editCode.trim()}
+            >
+              Change codes
+            </button>
+          </div>
+          {codeMessage && <p className="success">{codeMessage}</p>}
+        </>
+      )}
+
       <h2 className="section">Danger zone</h2>
+      <p className="hint">
+        {shared
+          ? 'Clears the copy saved on this phone. The team database is untouched.'
+          : 'Deletes the roster from this phone.'}
+      </p>
       {confirmClear ? (
         <div className="review-actions">
           <button type="button" className="btn" onClick={() => setConfirmClear(false)}>
@@ -118,7 +216,7 @@ export function Settings({ roster, onChange, onClear }: Props) {
               setConfirmClear(false);
             }}
           >
-            Yes, delete the roster
+            Yes, clear it
           </button>
         </div>
       ) : (
@@ -128,7 +226,7 @@ export function Settings({ roster, onChange, onClear }: Props) {
           onClick={() => setConfirmClear(true)}
           disabled={roster.players.length === 0}
         >
-          Delete the roster
+          {shared ? 'Clear this device' : 'Delete the roster'}
         </button>
       )}
 

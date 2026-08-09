@@ -27,6 +27,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Repository variable (Settings → Secrets and variables → Actions →
+          # Variables). Not a secret — it's a public endpoint, and the team code
+          # is what actually guards the data. Unset just means the deployed app
+          # runs on-device with no sharing.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

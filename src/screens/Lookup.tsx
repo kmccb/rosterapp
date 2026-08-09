@@ -5,9 +5,9 @@ import { PlayerRow } from '../components/PlayerRow';
 import { numberKey, numberMatches } from '../parse/rosterParse';
 import type { Player, Roster } from '../types';
 
-type Props = { roster: Roster; onGoToImport: () => void };
+type Props = { roster: Roster; canEdit: boolean; onGoToImport: () => void };
 
-export function Lookup({ roster, onGoToImport }: Props) {
+export function Lookup({ roster, canEdit, onGoToImport }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
 
@@ -49,10 +49,20 @@ export function Lookup({ roster, onGoToImport }: Props) {
         {roster.players.length === 0 ? (
           <div className="empty">
             <p className="empty-title">No roster yet</p>
-            <p className="empty-text">Paste the team roster once and it stays on this phone.</p>
-            <button type="button" className="btn btn-primary" onClick={onGoToImport}>
-              Add the roster
-            </button>
+            {canEdit ? (
+              <>
+                <p className="empty-text">
+                  Paste the team roster once — everyone with the team code gets it.
+                </p>
+                <button type="button" className="btn btn-primary" onClick={onGoToImport}>
+                  Add the roster
+                </button>
+              </>
+            ) : (
+              <p className="empty-text">
+                Nobody has published the roster yet. It'll show up here once they do.
+              </p>
+            )}
           </div>
         ) : featured ? (
           <PlayerCard

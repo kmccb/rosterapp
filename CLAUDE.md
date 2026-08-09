@@ -18,14 +18,19 @@ Work lives on `claude/football-roster-lookup-8uqr00`. **Not yet merged to `main`
 Built and verified:
 - Keypad lookup with prefix matching, player card, reverse name/position search
 - Roster paste import with column inference and a review/edit table
-- Settings: team name, season, CSV/JSON backup, delete
+- Shared team database (Supabase) with two access codes, viewer/editor roles, offline cache
+- Settings: team name, season, sync status, code rotation, CSV/JSON backup
 - Installable PWA, works fully offline
-- 30 parser unit tests; full flow driven in Chromium at 390×844 including a network-off reload
+- 30 parser unit tests; two browser drives at 390×844 — local-only mode, and a two-session
+  editor/viewer sharing flow against a mock API, both including a network-off reload
 
 Pending, in order:
-1. **DNS** — `CNAME` record `roster` → `kmccb.github.io.` for `roster.scottforge.ai`
-2. **GitHub** — Settings → Pages → Custom domain, then Enforce HTTPS
-3. **Merge to `main`** — the deploy workflow only triggers on pushes to `main`, and the manual
+1. **Supabase setup** — see `docs/sharing-setup.md`. Until `VITE_API_URL` is set the app runs
+   on-device with no sign-in, which is a valid mode and the default.
+2. **DNS** — `CNAME` record `roster` → `kmccb.github.io.` for `roster.scottforge.ai`
+3. **GitHub** — Settings → Pages → Custom domain, then Enforce HTTPS; and add `VITE_API_URL` as
+   an Actions *variable* so deployed builds get the backend
+4. **Merge to `main`** — the deploy workflow only triggers on pushes to `main`, and the manual
    "Run workflow" button only appears for workflows already on the default branch. Nothing
    deploys until this happens.
 
@@ -46,13 +51,40 @@ the user copies a table he's entitled to read and pastes it, reusing the existin
 src/
   types.ts            Player, Roster, formatHeight/formatWeight, SIDE_LABEL
   storage.ts          localStorage behind loadRoster/saveRoster, schema-versioned
+  useTeam.ts          Roster state + sync + role. The one place the two worlds meet.
+  api/client.ts       Calls to the edge function. Never on a lookup's critical path.
   parse/rosterParse.ts   All paste-parsing. Pure, no DOM, no React.
   components/         Keypad, PlayerCard, PlayerRow — presentational
-  screens/            Lookup, RosterList, Import, Settings
+  screens/            Lookup, RosterList, Import, Settings, SignIn
+supabase/
+  schema.sql          Tables + the RLS lockdown
+  functions/api/      The only thing with database credentials
 ```
 
-`App.tsx` owns roster state and persists through `storage.ts`. Screens receive data and callbacks;
-they don't touch localStorage directly.
+`App.tsx` renders; `useTeam.ts` owns state. Screens receive data and callbacks and touch neither
+localStorage nor the network directly.
+
+### The cache is the read path
+
+**Lookups always read the local cache, never the network.** Sync happens around that. This is not
+an optimisation — congested stadium wifi is the environment this app exists for, and any change
+that puts a fetch in front of a jersey-number lookup breaks the product.
+
+Consequences worth keeping:
+- A signed-out or expired session still shows the last downloaded roster.
+- Going offline degrades to "showing your last download", not an error screen.
+- `useTeam` collapses to pure on-device behaviour when `VITE_API_URL` is unset, so the app is
+  never broken mid-setup.
+
+### Security posture
+
+The browser holds no database credentials. RLS is on for every table with **no policies**, so anon
+and authenticated can read nothing; the edge function's service role is the only way in, and it
+checks the team code itself. Codes are stored PBKDF2-hashed, compared in constant time, and the
+sign-in endpoint is rate-limited per hashed IP.
+
+If you add an endpoint: it goes through the same token check, and anything that writes must
+require `role === 'editor'`.
 
 ### The parser is the load-bearing part
 
