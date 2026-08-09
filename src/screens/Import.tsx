@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { parseHeight, parseRoster, parseWeight, sideFromPosition, splitName } from '../parse/rosterParse';
-import { fetchShared, sharingAvailable } from '../share/share';
+import { fetchShared, normalizeCode, sharingAvailable } from '../share/share';
 import { formatHeight, fullName, type Player, type Roster, type Side } from '../types';
 
 type EditRow = {
@@ -14,8 +14,12 @@ type EditRow = {
   side: Side;
 };
 
-/** A shared roster brings its own team name and season; a pasted one doesn't. */
-export type ImportMeta = { teamName?: string; season?: string };
+/**
+ * A shared roster brings its own team name and season; a pasted one doesn't.
+ * `sourceCode` is the share code it came from, which the app keeps so it can
+ * restore itself if browser storage is ever emptied.
+ */
+export type ImportMeta = { teamName?: string; season?: string; sourceCode?: string };
 
 type Props = {
   roster: Roster;
@@ -129,7 +133,11 @@ export function Import({ roster, onSave, onGoToSettings, onFinish }: Props) {
         setError('No roster for that code. Check it with whoever shared it — codes can be taken down.');
         return;
       }
-      setMeta({ teamName: found.teamName, season: found.season });
+      setMeta({
+        teamName: found.teamName,
+        season: found.season,
+        sourceCode: normalizeCode(code),
+      });
       setRows(found.players.map(fromPlayer));
       setSaved(false);
     } catch (err) {

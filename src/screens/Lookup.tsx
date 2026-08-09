@@ -5,9 +5,9 @@ import { PlayerRow } from '../components/PlayerRow';
 import { numberKey, numberMatches } from '../parse/rosterParse';
 import type { Player, Roster } from '../types';
 
-type Props = { roster: Roster; onGoToImport: () => void };
+type Props = { roster: Roster; onGoToImport: () => void; restoring?: boolean };
 
-export function Lookup({ roster, onGoToImport }: Props) {
+export function Lookup({ roster, onGoToImport, restoring = false }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
 
@@ -47,13 +47,22 @@ export function Lookup({ roster, onGoToImport }: Props) {
     <div className="lookup">
       <div className="results">
         {roster.players.length === 0 ? (
-          <div className="empty">
-            <p className="empty-title">No roster yet</p>
-            <p className="empty-text">Paste the team roster once and it stays on this phone.</p>
-            <button type="button" className="btn btn-primary" onClick={onGoToImport}>
-              Add the roster
-            </button>
-          </div>
+          // Someone who has used this for weeks shouldn't be told there's no
+          // roster while we're in the middle of fetching theirs back.
+          restoring ? (
+            <div className="empty">
+              <p className="empty-title">Getting the roster</p>
+              <p className="empty-text">This phone had one saved. Fetching it again…</p>
+            </div>
+          ) : (
+            <div className="empty">
+              <p className="empty-title">No roster yet</p>
+              <p className="empty-text">Paste the team roster once and it stays on this phone.</p>
+              <button type="button" className="btn btn-primary" onClick={onGoToImport}>
+                Add the roster
+              </button>
+            </div>
+          )
         ) : featured ? (
           <PlayerCard
             player={featured}

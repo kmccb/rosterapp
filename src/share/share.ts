@@ -42,6 +42,44 @@ export const saveShareKey = (key: ShareKey): void => {
 
 export const clearShareKey = (): void => localStorage.removeItem(SHARE_KEY);
 
+/*
+ * Where this device's roster came from, whether it was published here or pulled
+ * from someone else's code. Browser storage is not durable — iOS in particular
+ * evicts it, and until the site enforced HTTPS the http and https origins each
+ * had their own jar — so a roster can vanish without anyone deleting it. When
+ * that happens and we know the code, the app can quietly fetch it back instead
+ * of showing a first-run screen to someone who has used it for weeks.
+ *
+ * Kept separate from the publisher's key above: a parent has a code and no
+ * right to change what it points at.
+ */
+const SOURCE_KEY = 'rosterapp.source.v1';
+
+export const loadSource = (): string | null => {
+  try {
+    const code = localStorage.getItem(SOURCE_KEY);
+    return code && code.length === 8 ? code : null;
+  } catch {
+    return null;
+  }
+};
+
+export const rememberSource = (code: string): void => {
+  try {
+    localStorage.setItem(SOURCE_KEY, normalizeCode(code));
+  } catch {
+    // Out of quota or blocked; restore is a convenience, not worth failing over.
+  }
+};
+
+export const forgetSource = (): void => {
+  try {
+    localStorage.removeItem(SOURCE_KEY);
+  } catch {
+    /* as above */
+  }
+};
+
 // ------------------------------------------------------------------- codes
 
 /** `BXQ4T9KM` -> `BXQ4-T9KM`. The dash is only ever for reading aloud. */
@@ -58,8 +96,18 @@ export const normalizeCode = (code: string): string =>
 
 class ShareError extends Error {}
 
-const rpc = async <T>(fn: string, body: Record<string, unknown>): Promise<T> => {
+const rpc = async <T>(
+  fn: string,
+  body: Record<string, unknown>,
+  timeoutMs?: number,
+): Promise<T> => {
   if (!BASE || !KEY) throw new ShareError('Sharing is not set up in this build.');
+
+  // Ground wifi fails by hanging rather than refusing, and a request with no
+  // ceiling means a spinner with no end. Callers that run without a user
+  // watching pass a bound so they can fall back to something usable.
+  const abort = timeoutMs ? new AbortController() : null;
+  const timer = abort ? setTimeout(() => abort.abort(), timeoutMs) : null;
 
   let res: Response;
   try {
@@ -71,10 +119,13 @@ const rpc = async <T>(fn: string, body: Record<string, unknown>): Promise<T> => 
         Authorization: `Bearer ${KEY}`,
       },
       body: JSON.stringify(body),
+      signal: abort?.signal,
     });
   } catch {
     // Almost always no signal, which is the normal state at a game.
     throw new ShareError('No connection. This needs a signal — the saved roster still works offline.');
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 
   if (!res.ok) {
@@ -107,13 +158,16 @@ export type FetchedRoster = {
 };
 
 /** Null when the code doesn't match anything, which includes expired codes. */
-export const fetchShared = async (code: string): Promise<FetchedRoster | null> => {
+export const fetchShared = async (
+  code: string,
+  timeoutMs?: number,
+): Promise<FetchedRoster | null> => {
   const normalized = normalizeCode(code);
   if (normalized.length !== 8) {
     throw new ShareError('A share code is 8 characters, like BXQ4-T9KM.');
   }
 
-  const rows = await rpc<FetchedRow[]>('roster_fetch', { p_code: normalized });
+  const rows = await rpc<FetchedRow[]>('roster_fetch', { p_code: normalized }, timeoutMs);
   const row = rows?.[0];
   if (!row) return null;
 
@@ -142,6 +196,7 @@ export const createShare = async (roster: Roster): Promise<ShareKey> => {
 
   const key = { code: row.code, editToken: row.edit_token };
   saveShareKey(key);
+  rememberSource(key.code);
   return key;
 };
 
@@ -158,4 +213,6 @@ export const updateShare = async (key: ShareKey, roster: Roster): Promise<void> 
 export const deleteShare = async (key: ShareKey): Promise<void> => {
   await rpc('roster_delete', { p_code: key.code, p_edit_token: key.editToken });
   clearShareKey();
+  // The code is dead, so there is nothing left to restore from.
+  forgetSource();
 };

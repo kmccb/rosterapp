@@ -24,6 +24,16 @@ cell is editable, so a column that landed wrong takes a second to fix.
 **Back it up.** Settings → Copy as CSV. Browser storage is not forever — if you clear site data or
 switch phones, the roster goes with it.
 
+Unless it was shared. Publishing a roster, or pulling one with a code, records that code on the
+device. If the app then opens to empty storage it fetches the roster back on its own, instead of
+showing a first-run screen to someone who has used it all season. Deleting the roster deliberately
+drops the code too, so a delete stays deleted.
+
+That matters more than it sounds: browser storage gets evicted without asking, iOS especially. It
+is also why the site must serve over HTTPS only — `http://` and `https://` are separate origins
+with separate storage, so a roster typed in over one is invisible to the other. `Enforce HTTPS`
+under Settings → Pages is what prevents that, and it is not optional.
+
 ## Sharing by code
 
 One person types the roster in and hits **Settings → Publish to a code**. That returns eight
@@ -54,6 +64,10 @@ everyone holding a phone in the stands.
 | Team | Every player by number, filtered by area and position, searchable by name — the reverse lookup. | Tab |
 | Roster | Paste, or enter a share code, then review before saving. | "Add the roster", on the empty Lookup screen |
 | Settings | Team name, season, sharing, CSV/JSON backup, delete. | Link at the foot of Roster |
+
+**Press and hold the team name** to reach setup at any time. It's the escape hatch: auto-restore
+(below) refills the empty Lookup screen before you can use it, which would otherwise leave a coach
+unable to reach Settings at all — including to stop sharing.
 
 **Setup is one sitting, and leaving ends it.** The empty state is the only entrance, so saving a
 roster deliberately keeps you on the Roster screen rather than bouncing you to Lookup — publishing
@@ -107,7 +121,11 @@ One-time setup, in order:
    not the repo, and the trailing dot matters on some providers).
 4. **Settings → Pages → Custom domain**: `roster.scottforge.ai`, then tick **Enforce HTTPS** once
    the certificate finishes provisioning — that can take a few minutes to an hour after DNS
-   resolves.
+   resolves. Go back and check the box actually got ticked: until it is, GitHub serves and links
+   to `http://`, which is a *different storage origin* from `https://` — so rosters vanish
+   depending on which one you arrive at — and service workers refuse to register outside a secure
+   context, which quietly costs you the offline support the app exists for.
+   Verify with `gh api repos/<owner>/<repo>/pages --jq .https_enforced`.
 5. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
    button only appears for workflows already on the default branch — so nothing deploys while this
    lives on a feature branch.

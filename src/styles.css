@@ -119,7 +119,11 @@ textarea {
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Held down to reach setup, so don't let the hold start a text selection. */
 .title {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   margin: 0 0 8px;
   font-size: 15px;
   font-weight: 600;
