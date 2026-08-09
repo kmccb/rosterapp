@@ -2,9 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchShared,
   forgetSource,
+  loadShareKey,
   loadSource,
+  loadSynced,
   normalizeCode,
   rememberSource,
+  rememberSynced,
   sharingAvailable,
   takeCodeFromUrl,
 } from './share/share';
@@ -85,10 +88,26 @@ export default function App() {
 
     const code = linked ?? loadSource();
     if (!code) return;
-    if (!linked && existing.players.length > 0) return;
+
+    /*
+     * Two jobs share this fetch. With no roster it's a restore, and the screen
+     * says so. With a roster already here it's a quiet top-up: the coach
+     * uploads a new version and every phone that followed the link picks it up
+     * next launch. Without that second case an upload reached nobody — the
+     * roster was fetched once and then never looked at again.
+     *
+     * The publishing phone is exempt. Its copy is what gets uploaded, so
+     * pulling the server's version back over it would be a round trip at best
+     * and would undo an unpublished edit at worst.
+     */
+    const hasRoster = existing.players.length > 0;
+    const isPublisher = Boolean(loadShareKey());
+    if (hasRoster && !linked && isPublisher) return;
+
+    const topUp = hasRoster && !linked;
 
     let cancelled = false;
-    setRestoring(true);
+    if (!topUp) setRestoring(true);
 
     // Bounded, so a connection that hangs rather than fails can't leave the app
     // sitting on "Getting the roster" with no way forward.
@@ -96,10 +115,15 @@ export default function App() {
       .then((found) => {
         if (cancelled) return;
         if (!found) {
-          // Definitively gone — the publisher took it down. Stop asking.
-          forgetSource();
+          // Taken down. A phone that already has the roster keeps it — that was
+          // the promise when sharing stopped — so only give up when there's
+          // nothing local to lose.
+          if (!topUp) forgetSource();
           return;
         }
+        // Already have this exact version; leave everything alone.
+        if (topUp && found.updatedAt === loadSynced()) return;
+
         persist({
           teamName: found.teamName,
           season: found.season,
@@ -116,12 +140,15 @@ export default function App() {
         // A followed link ties this device to that roster from now on, so it
         // restores itself later exactly like a code typed in by hand.
         rememberSource(code);
+        // The publisher's own stamp, so the next launch can tell a fresh
+        // upload from the copy already sitting here.
+        rememberSynced(found.updatedAt);
       })
       // No signal is the normal case at a ground; leave the empty state be and
       // try again next launch rather than showing an error nobody can act on.
       .catch(() => {})
       .finally(() => {
-        if (!cancelled) setRestoring(false);
+        if (!cancelled && !topUp) setRestoring(false);
       });
 
     return () => {

@@ -19,19 +19,33 @@ export function PlayerCard({ player, onBack, stats }: Props) {
   const previous = stats?.previous?.byPlayer[key];
   const current = stats?.current?.byPlayer[key];
 
+  /*
+   * With stats to show, the number stops being the headline and becomes a
+   * label: you just typed it, so you know it. It moves beside the name instead
+   * of above it, which buys back the height the table needs — otherwise the
+   * card is a huge digit and you scroll to reach the thing you came for.
+   * With no stats there's nothing to make room for, so it stays big.
+   */
+  const hasStats = Boolean(previous || current);
+
   return (
-    <div className="card">
+    <div className={`card${hasStats ? ' card-with-stats' : ''}`}>
       {onBack && (
         <button type="button" className="card-back" onClick={onBack}>
           ← back to matches
         </button>
       )}
-      <div className="card-number" aria-label={`Number ${player.number}`}>
-        {player.number || '—'}
+
+      <div className="card-head">
+        <div className="card-number" aria-label={`Number ${player.number}`}>
+          {player.number || '—'}
+        </div>
+        <div className="card-who">
+          <div className="card-name">{fullName(player) || 'Unnamed player'}</div>
+          {meta.length > 0 && <div className="card-meta">{meta.join(' · ')}</div>}
+          {body.length > 0 && <div className="card-body">{body.join('   ·   ')}</div>}
+        </div>
       </div>
-      <div className="card-name">{fullName(player) || 'Unnamed player'}</div>
-      {meta.length > 0 && <div className="card-meta">{meta.join(' · ')}</div>}
-      {body.length > 0 && <div className="card-body">{body.join('   ·   ')}</div>}
 
       <StatsTable
         previous={previous}

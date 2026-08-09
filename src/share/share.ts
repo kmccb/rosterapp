@@ -76,8 +76,35 @@ export const rememberSource = (code: string): void => {
 export const forgetSource = (): void => {
   try {
     localStorage.removeItem(SOURCE_KEY);
+    localStorage.removeItem(SYNCED_KEY);
   } catch {
     /* as above */
+  }
+};
+
+/*
+ * The publisher's updated_at as of the last copy this device took.
+ *
+ * The local roster's own updatedAt can't do this job: it records when *this*
+ * phone saved, which is always later than the server's stamp, so comparing the
+ * two would say "up to date" forever. Keeping the server's own stamp is the
+ * only way to tell a fresh publish from one already seen.
+ */
+const SYNCED_KEY = 'rosterapp.synced.v1';
+
+export const loadSynced = (): string | null => {
+  try {
+    return localStorage.getItem(SYNCED_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const rememberSynced = (stamp: string): void => {
+  try {
+    localStorage.setItem(SYNCED_KEY, stamp);
+  } catch {
+    /* a missed sync stamp costs one redundant fetch, nothing more */
   }
 };
 
