@@ -159,9 +159,13 @@ begin
 
   -- 8 symbols is about 1.1e12 codes. Retry on the vanishingly unlikely clash
   -- rather than trusting the first draw.
+  --
+  -- `s.code` has to stay qualified: this function's RETURNS TABLE declares an
+  -- output parameter also called `code`, and an unqualified reference is
+  -- ambiguous between the two at runtime.
   for i in 1..8 loop
     v_code := public.roster_token(8);
-    exit when not exists (select 1 from public.shared_roster where code = v_code);
+    exit when not exists (select 1 from public.shared_roster s where s.code = v_code);
     v_code := null;
   end loop;
 
