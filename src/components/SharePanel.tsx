@@ -20,6 +20,8 @@ export function SharePanel({ roster }: Props) {
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
   const [confirmStop, setConfirmStop] = useState(false);
+  const [copied, setCopied] = useState<'link' | 'code' | null>(null);
+  const [uploaded, setUploaded] = useState(false);
 
   const run = async (which: Exclude<Busy, null>, work: () => Promise<string>) => {
     setBusy(which);
@@ -45,7 +47,9 @@ export function SharePanel({ roster }: Props) {
     run('update', async () => {
       if (!key) throw new Error('Nothing is published from this phone yet.');
       await updateShare(key, roster);
-      return 'Everyone who pulls the code again gets the new roster.';
+      setUploaded(true);
+      window.setTimeout(() => setUploaded(false), 2500);
+      return 'Uploaded. The link now gives out this version.';
     });
 
   const stop = () =>
@@ -57,17 +61,25 @@ export function SharePanel({ roster }: Props) {
       return 'The code no longer works. Rosters already pulled stay on those phones.';
     });
 
+  /*
+   * Confirmation goes on the button itself, not in a message further down the
+   * page. This panel sits at the bottom of a long screen, so on a phone the
+   * note was rendering below the fold — the copy worked every time and looked
+   * like it had done nothing at all.
+   */
   const copy = async (what: 'link' | 'code') => {
     if (!key) return;
     setError('');
+    setNote('');
     const text = what === 'link' ? shareUrl(key.code) : formatCode(key.code);
     try {
       await navigator.clipboard.writeText(text);
-      setNote(what === 'link' ? 'Link copied. Paste it to the team.' : 'Code copied.');
+      setCopied(what);
+      window.setTimeout(() => setCopied((c) => (c === what ? null : c)), 2500);
     } catch {
-      // Safari refuses the clipboard outside a user gesture it trusts, and the
-      // link is too long to read off a screen — so show it instead of failing.
-      setNote(`Couldn’t reach the clipboard. ${what === 'link' ? text : formatCode(key.code)}`);
+      // Safari refuses the clipboard outside a gesture it trusts, and the link
+      // is too long to read off a screen — so show it rather than just failing.
+      setError(`Couldn’t copy automatically. Press and hold to select: ${text}`);
     }
   };
 
@@ -85,15 +97,19 @@ export function SharePanel({ roster }: Props) {
 
           <div className="review-actions">
             <button type="button" className="btn btn-primary" onClick={() => void copy('link')}>
-              Copy the link
+              {copied === 'link' ? '✓ Link copied' : 'Copy the link'}
             </button>
             <button type="button" className="btn" onClick={() => void copy('code')}>
-              Copy the code
+              {copied === 'code' ? '✓ Code copied' : 'Copy the code'}
             </button>
           </div>
 
+          {note && <p className="success">{note}</p>}
+          {error && <p className="error">{error}</p>}
+
           <p className="hint">
-            Changed the roster since? Send it again — the same link picks up the new one.
+            Edited the roster since you published? The link keeps giving out the version you last
+            uploaded, so upload it again.
           </p>
           <div className="review-actions">
             <button
@@ -102,7 +118,11 @@ export function SharePanel({ roster }: Props) {
               onClick={() => void update()}
               disabled={busy !== null}
             >
-              {busy === 'update' ? 'Sending…' : 'Send the current roster'}
+              {busy === 'update'
+                ? 'Uploading…'
+                : uploaded
+                  ? '✓ Uploaded'
+                  : 'Upload the current roster'}
             </button>
           </div>
 
@@ -149,11 +169,11 @@ export function SharePanel({ roster }: Props) {
           >
             {busy === 'publish' ? 'Publishing…' : 'Publish to a code'}
           </button>
+
+          {note && <p className="success">{note}</p>}
+          {error && <p className="error">{error}</p>}
         </>
       )}
-
-      {note && <p className="success">{note}</p>}
-      {error && <p className="error">{error}</p>}
     </>
   );
 }
