@@ -16,6 +16,26 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <title>Roster Lookup</title>
+    <script>
+      /*
+       * iOS 16.4+ reads this manifest when you Add to Home Screen, and pins the
+       * shortcut to its start_url — a fixed path, baked at build time, which
+       * cannot carry anyone's share code. A phone installing from a share link
+       * therefore launched at the bare path, in the separate storage jar iOS
+       * gives a home-screen web app, with no roster and no way to find one.
+       *
+       * Dropping the manifest on iOS restores the older behaviour: the shortcut
+       * records the page you were actually on, code and all. Nothing is lost —
+       * on iOS the name, icon, colour and standalone display all come from the
+       * apple-* meta tags above, not from here. Android keeps the manifest,
+       * where it is needed and where storage isn't partitioned anyway.
+       */
+      (function () {
+        var ua = navigator.userAgent;
+        var iOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+        if (iOS) document.querySelector('link[rel="manifest"]')?.remove();
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

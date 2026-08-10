@@ -63,7 +63,16 @@ export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props
           ) : (
             <div className="empty">
               <p className="empty-title">No roster yet</p>
-              <p className="empty-text">Paste the team roster once and it stays on this phone.</p>
+              {/*
+                The share code is named here on purpose. This screen is what a
+                phone shows when its storage is empty — a fresh install, or iOS
+                having cleared it — and in that state the code is the fastest way
+                back. Leaving it unmentioned made the way out look like retyping
+                the whole roster.
+              */}
+              <p className="empty-text">
+                Paste the team roster, or enter the 8-character share code you were sent.
+              </p>
               <button type="button" className="btn btn-primary" onClick={onGoToImport}>
                 Add the roster
               </button>
