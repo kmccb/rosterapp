@@ -24,7 +24,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
-import { parseIcal } from '../src/schedule/icalParse.ts';
+import { parseIcal, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
@@ -87,12 +87,13 @@ const manifestFor = (team, palette) => ({
  * name, the theme colour, and the palette inlined so the first paint is already
  * in the team's colours instead of flashing the site's and correcting itself.
  */
-const pageFor = (html, team, palette) => {
+const pageFor = (html, team, palette, schedule) => {
   const baked = {
     slug: team.slug,
     name: team.name,
     palette,
     wallpaper: `${team.base}badge.jpg`,
+    schedule,
   };
 
   return html
@@ -120,15 +121,33 @@ const pageFor = (html, team, palette) => {
  * lookup, and losing the whole deploy over a calendar would be the wrong trade.
  */
 async function writeSchedule(team, out) {
-  const history = existsSync(join(teamsDir, team.slug, 'history.json'))
+  /*
+   * history.json is deliberately terse — [date, opponent, home, us, them] —
+   * because it's 170 rows of the same shape and a diff should be readable. It's
+   * expanded here into the same Game the calendar produces, so head-to-head
+   * doesn't care which source a meeting came from.
+   */
+  const raw = existsSync(join(teamsDir, team.slug, 'history.json'))
     ? JSON.parse(await readFile(join(teamsDir, team.slug, 'history.json'), 'utf8'))
     : [];
+
+  const history = raw.map(([date, opponent, home, us, them]) => ({
+    date,
+    opponent: tidyOpponent(opponent),
+    opponentKey: opponentKey(opponent),
+    home: Boolean(home),
+    scrimmage: false,
+    result: { us, them, won: us > them },
+  }));
 
   if (!team.schedule) {
     if (history.length) {
       await writeFile(join(out, 'schedule.json'), JSON.stringify({ games: [], history }));
+      return true;
     }
-    return;
+    // Nothing to show, so the team gets no Schedule tab at all rather than one
+    // that opens on an apology.
+    return false;
   }
 
   try {
@@ -146,15 +165,20 @@ async function writeSchedule(team, out) {
       `           schedule ${games.length} events, ${games.filter((g) => !g.scrimmage).length} games, ` +
         `${played} played, ${history.length} in history`,
     );
+    return true;
   } catch (err) {
     console.warn(
       `  ! ${team.slug}: could not read the schedule feed (${err.message}). ` +
         `Keeping whatever was built last time.`,
     );
+    return existsSync(join(out, 'schedule.json'));
   }
 }
 
 const teams = await readTeams();
+
+/** Which teams ended up with a schedule, so only they get the tab. */
+const hasSchedule = new Map();
 
 if (phase === 'pre') {
   for (const team of teams) {
@@ -168,7 +192,7 @@ if (phase === 'pre') {
     const { artFraction, padded, source: src } = await writeIcons(team.logo, join(out, 'icons'));
     const bytes = await writeWallpaper(team.logo, join(out, 'badge.jpg'));
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
-    await writeSchedule(team, out);
+    hasSchedule.set(team.slug, await writeSchedule(team, out));
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
@@ -198,7 +222,8 @@ if (phase === 'pre') {
     const palette = await paletteFor(team.logo, team.palette);
     const out = team.root ? dist : join(dist, team.slug);
     await mkdir(out, { recursive: true });
-    await writeFile(join(out, 'index.html'), pageFor(builtIndex, team, palette));
+    const schedule = existsSync(join(out, 'schedule.json'));
+    await writeFile(join(out, 'index.html'), pageFor(builtIndex, team, palette, schedule));
   }
   console.log(`${teams.length} team pages written.`);
 }

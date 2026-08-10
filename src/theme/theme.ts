@@ -69,7 +69,14 @@ export const clearTheme = (): void => localStorage.removeItem(KEY);
  * which carries the *root* team's script. Left unstored, a second team's app
  * would come up in the first team's colours the moment it lost signal.
  */
-type BakedTeam = { slug: string; name: string; palette: Palette; wallpaper: string };
+type BakedTeam = {
+  slug: string;
+  name: string;
+  palette: Palette;
+  wallpaper: string;
+  /** Whether this team's build produced a schedule worth a tab. */
+  schedule?: boolean;
+};
 
 /**
  * The path this team is served from — "/" or "/victorychristian/". Files that

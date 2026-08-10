@@ -35,10 +35,14 @@ type Tab = 'lookup' | 'team' | 'schedule' | 'roster' | 'settings' | 'stats';
  * because leaving is what closes the door. Publishing needs a saved roster, and
  * this is the only point where you have one and can still reach Settings.
  */
+/*
+ * Schedule only appears for a team whose build actually produced one. A tab
+ * that opens on "no schedule for this team" is worse than no tab.
+ */
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
   { id: 'team', label: 'Team' },
-  { id: 'schedule', label: 'Schedule' },
+  ...(bakedTeam()?.schedule === false ? [] : [{ id: 'schedule' as Tab, label: 'Schedule' }]),
 ];
 
 /*
