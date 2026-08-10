@@ -253,6 +253,69 @@ textarea {
 
 /* ------------------------------------------------------------------- card */
 
+.card-photo {
+  width: 92px;
+  height: 92px;
+  flex: none;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: top center;
+  background: var(--ghost);
+}
+
+.card-jersey {
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-home {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.card-bio {
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Wraps rather than scrolls: a punter has three of these and a linebacker
+   five, and a row that slides sideways hides the ones on the end. */
+.card-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.card-line {
+  flex: 1 1 84px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.card-line-value {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-line-label {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .card {
   margin: auto 0;
   padding: 8px 4px;

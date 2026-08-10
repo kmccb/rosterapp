@@ -33,11 +33,13 @@ const requestLink = (school: string): string => {
 type Props = {
   roster: Roster;
   onGoToCode: () => void;
+  /** A published squad: nothing to ask for, nothing to type in. */
+  baked?: boolean;
   restoring?: boolean;
   stats?: StatsStore;
 };
 
-export function Lookup({ roster, onGoToCode, restoring = false, stats }: Props) {
+export function Lookup({ roster, onGoToCode, restoring = false, baked = false, stats }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
   const school = bakedTeam()?.school || roster.teamName || 'team';
@@ -83,7 +85,17 @@ export function Lookup({ roster, onGoToCode, restoring = false, stats }: Props) 
           restoring ? (
             <div className="empty">
               <p className="empty-title">Getting the roster</p>
-              <p className="empty-text">This phone had one saved. Fetching it again…</p>
+              <p className="empty-text">
+                {baked ? 'Reading the squad list…' : 'This phone had one saved. Fetching it again…'}
+              </p>
+            </div>
+          ) : baked ? (
+            <div className="empty">
+              <p className="empty-title">Roster unavailable</p>
+              <p className="empty-text">
+                The squad list couldn’t be read. It travels with the app, so this usually clears
+                itself on the next launch.
+              </p>
             </div>
           ) : (
             <div className="empty">

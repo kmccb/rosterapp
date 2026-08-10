@@ -90,6 +90,8 @@ type BakedTeam = {
   wallpaper: string;
   /** Whether this team's build produced a schedule worth a tab. */
   schedule?: boolean;
+  /** Whether the squad is published and baked in, rather than typed and shared. */
+  roster?: boolean;
 };
 
 /**

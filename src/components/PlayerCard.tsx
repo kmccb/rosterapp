@@ -26,7 +26,7 @@ export function PlayerCard({ player, onBack, stats }: Props) {
    * card is a huge digit and you scroll to reach the thing you came for.
    * With no stats there's nothing to make room for, so it stays big.
    */
-  const hasStats = Boolean(previous || current);
+  const hasStats = Boolean(previous || current) || Boolean(player.lines?.length);
 
   return (
     <div className={`card${hasStats ? ' card-with-stats' : ''}`}>
@@ -37,15 +37,50 @@ export function PlayerCard({ player, onBack, stats }: Props) {
       )}
 
       <div className="card-head">
-        <div className="card-number" aria-label={`Number ${player.number}`}>
-          {player.number || '—'}
-        </div>
+        {player.photo ? (
+          // Loaded from where it lives rather than copied into this site. It
+          // is decoration, not information — the number and the name are the
+          // information — so a picture that never arrives leaves no gap.
+          <img
+            className="card-photo"
+            src={player.photo}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="card-number" aria-label={`Number ${player.number}`}>
+            {player.number || '—'}
+          </div>
+        )}
         <div className="card-who">
           <div className="card-name">{fullName(player) || 'Unnamed player'}</div>
+          {player.photo && (
+            <div className="card-jersey" aria-label={`Number ${player.number}`}>
+              #{player.number || '—'}
+            </div>
+          )}
           {meta.length > 0 && <div className="card-meta">{meta.join(' · ')}</div>}
           {body.length > 0 && <div className="card-body">{body.join('   ·   ')}</div>}
+          {player.hometown && <div className="card-home">{player.hometown}</div>}
         </div>
       </div>
+
+      {player.bio && <p className="card-bio">{player.bio}</p>}
+
+      {player.lines && player.lines.length > 0 && (
+        <div className="card-lines">
+          {player.lines.map((l) => (
+            <div key={l.label} className="card-line">
+              <span className="card-line-value">{l.value}</span>
+              <span className="card-line-label">{l.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <StatsTable
         previous={previous}

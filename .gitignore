@@ -1,4 +1,6 @@
 node_modules/
+# Team artwork fetched at build time, which is not ours to redistribute.
+.cache/
 dist/
 dev-dist/
 *.local

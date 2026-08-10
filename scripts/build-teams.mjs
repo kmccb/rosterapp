@@ -21,17 +21,39 @@
  */
 import { readdir, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetchEspnRoster } from './lib/espn.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
 import { parseIcal, nextGame, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
 const publicDir = join(root, 'public');
+const cacheDir = join(root, '.cache');
 const dist = join(root, 'dist');
 
 const phase = process.argv.includes('--post') ? 'post' : 'pre';
+
+/**
+ * A crest that lives somewhere else.
+ *
+ * The icons have to exist as files — the OS reads them off disk when a home
+ * screen shortcut is made — but a university's mark is not ours to commit to a
+ * public repository. So it is fetched at build time into an ignored directory,
+ * and kept there so a build without a connection still has one.
+ */
+const cachedLogo = async (slug, url) => {
+  const file = join(cacheDir, `${slug}${extname(new URL(url).pathname) || '.png'}`);
+  if (existsSync(file)) return file;
+
+  await mkdir(cacheDir, { recursive: true });
+  const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error(`${slug}: could not fetch the logo (HTTP ${res.status})`);
+  await writeFile(file, Buffer.from(await res.arrayBuffer()));
+  console.log(`           fetched ${slug} logo from ${new URL(url).host}`);
+  return file;
+};
 
 const readTeams = async () => {
   const slugs = (await readdir(teamsDir, { withFileTypes: true }))
@@ -41,10 +63,11 @@ const readTeams = async () => {
   const teams = [];
   for (const slug of slugs) {
     const config = JSON.parse(await readFile(join(teamsDir, slug, 'team.json'), 'utf8'));
-    const logo = ['logo.jpg', 'logo.png', 'logo.jpeg']
-      .map((f) => join(teamsDir, slug, f))
-      .find((p) => existsSync(p));
-    if (!logo) throw new Error(`teams/${slug} has no logo.jpg or logo.png`);
+    const logo =
+      ['logo.jpg', 'logo.png', 'logo.jpeg']
+        .map((f) => join(teamsDir, slug, f))
+        .find((p) => existsSync(p)) ?? (config.logoUrl ? await cachedLogo(slug, config.logoUrl) : null);
+    if (!logo) throw new Error(`teams/${slug} has no logo.jpg, logo.png or logoUrl`);
     teams.push({ slug, logo, base: config.root ? '/' : `/${slug}/`, ...config });
   }
 
@@ -108,6 +131,31 @@ const pageFor = (html, teams, team, palette) =>
       '</head>',
       `  <script>window.__TEAMS__=${JSON.stringify(teams)}</script>\n  </head>`,
     );
+
+/**
+ * The squad, for a team whose roster is already public.
+ *
+ * A high school roster belongs to the coach who typed it in and travels by
+ * share code. A college roster is published, so it is baked in and the whole
+ * apparatus of codes and setup screens simply doesn't apply to that team.
+ *
+ * A fetch that fails leaves the previous one in place, for the same reason the
+ * schedule does: a stale roster is worth more than none.
+ */
+async function writeRoster(team, out) {
+  if (!team.espn) return;
+  try {
+    const roster = await fetchEspnRoster(team.espn);
+    await writeFile(join(out, 'roster.json'), JSON.stringify(roster));
+    console.log(
+      `           roster   ${roster.players.length} players, ` +
+        `${roster.players.filter((p) => p.photo).length} with a photograph, ` +
+        `${roster.players.filter((p) => p.lines.length).length} with numbers`,
+    );
+  } catch (err) {
+    console.warn(`  ! ${team.slug}: could not read the roster (${err.message}).`);
+  }
+}
 
 /**
  * The forecast for the next kickoff.
@@ -265,6 +313,7 @@ if (phase === 'pre') {
     const bytes = await writeWallpaper(team.logo, join(out, 'badge.jpg'));
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
     await writeSchedule(team, out);
+    await writeRoster(team, out);
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
@@ -302,6 +351,7 @@ if (phase === 'pre') {
       palette: await paletteFor(team.logo, team.palette),
       wallpaper: `${team.base}badge.jpg`,
       schedule: existsSync(join(out, 'schedule.json')),
+      roster: existsSync(join(out, 'roster.json')),
     };
   }
 

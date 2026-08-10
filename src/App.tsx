@@ -58,10 +58,19 @@ const TABS: Array<{ id: Tab; label: string }> = [
  */
 const LINK_CODE = takeCodeFromUrl();
 
+/**
+ * Some teams publish their squad, so the build bakes it in.
+ *
+ * For those the whole apparatus of codes, setup screens and share links is
+ * beside the point — there is nothing to type in and nothing to send. The app
+ * simply reads the roster the site was built with, and every visitor has it.
+ */
+const BAKED_ROSTER = bakedTeam()?.roster === true;
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('lookup');
-  const [roster, setRoster] = useState<Roster>(() => loadRoster());
-  const [restoring, setRestoring] = useState(false);
+  const [roster, setRoster] = useState<Roster>(() => (BAKED_ROSTER ? emptyRoster() : loadRoster()));
+  const [restoring, setRestoring] = useState(BAKED_ROSTER);
   /** A code from a share link that needs reviewing before it replaces anything. */
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsStore>(() => loadStats());
@@ -125,8 +134,42 @@ export default function App() {
    * Deliberate deletion drops the code (see onClear), so this can never undo
    * someone choosing to remove the roster.
    */
+  /*
+   * A published squad, read straight off the site.
+   *
+   * Network first, then the precached copy — same reasoning as the schedule:
+   * this file changes whenever the team does, and the worker's copy is a
+   * launch or more behind, but it is what makes the app work with no signal.
+   */
   useEffect(() => {
-    if (!sharingAvailable) return;
+    if (!BAKED_ROSTER) return;
+    let cancelled = false;
+
+    const load = async (): Promise<Roster> => {
+      const base = teamBase();
+      try {
+        const fresh = await fetch(`${base}roster.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (fresh.ok) return (await fresh.json()) as Roster;
+      } catch {
+        // No signal; the built-in copy is the point of all this.
+      }
+      const cached = await fetch(`${base}roster.json`);
+      if (!cached.ok) throw new Error(String(cached.status));
+      return (await cached.json()) as Roster;
+    };
+
+    load()
+      .then((found) => !cancelled && setRoster(found))
+      .catch(() => {})
+      .finally(() => !cancelled && setRestoring(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (BAKED_ROSTER || !sharingAvailable) return;
 
     const existing = loadRoster();
     const hasRoster = existing.players.length > 0;
@@ -219,6 +262,7 @@ export default function App() {
   const holdTimer = useRef<number | null>(null);
   const holdToSetUp = {
     start: () => {
+      if (BAKED_ROSTER) return;
       holdTimer.current = window.setTimeout(() => setTab('roster'), 700);
     },
     cancel: () => {
@@ -292,6 +336,7 @@ export default function App() {
           <Lookup
             roster={roster}
             onGoToCode={() => setTab('code')}
+            baked={BAKED_ROSTER}
             restoring={restoring}
             stats={stats}
           />

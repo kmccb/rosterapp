@@ -15,6 +15,19 @@ export type Player = {
   weightLb?: number;
   /** Whatever the roster used: "Jr", "11", "Soph". Kept verbatim. */
   grade?: string;
+
+  /*
+   * Only a baked roster carries these. A roster typed in by a coach has a
+   * number and a name and that is the job; a published one can afford a face
+   * and a paragraph, so the card shows them when they are there and looks
+   * exactly as it always did when they are not.
+   */
+  /** Linked, not copied — the picture belongs to whoever took it. */
+  photo?: string;
+  hometown?: string;
+  bio?: string;
+  /** Season numbers, already formatted: the label is the short one. */
+  lines?: Array<{ label: string; value: string }>;
 };
 
 export type Roster = {
