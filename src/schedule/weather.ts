@@ -44,7 +44,9 @@ export const skyOf = (code: number): Sky => {
   if (code >= 51 && code <= 57) return 'drizzle';
   if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
   if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
-  if (code >= 95) return 'thunder';
+  // Bounded at the top of the table: an open-ended check turned any nonsense
+  // value into a thunderstorm, which is the loudest possible way to be wrong.
+  if (code >= 95 && code <= 99) return 'thunder';
   // Nothing else is defined, and a wrong picture is worse than a plain cloud.
   return 'cloudy';
 };
