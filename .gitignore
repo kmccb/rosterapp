@@ -9,4 +9,5 @@ public/*/
 public/icons/
 public/badge.jpg
 public/manifest.webmanifest
+public/schedule.json
 !public/CNAME
