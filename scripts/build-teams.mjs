@@ -23,7 +23,7 @@ import { readdir, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fetchEspnRoster } from './lib/espn.mjs';
+import { fetchEspnRoster, fetchEspnSeasons } from './lib/espn.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
 import { parseIcal, nextGame, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
 
@@ -154,6 +154,29 @@ async function writeRoster(team, out) {
     );
   } catch (err) {
     console.warn(`  ! ${team.slug}: could not read the roster (${err.message}).`);
+  }
+}
+
+/**
+ * Every season the record goes back to.
+ *
+ * Fetched rather than committed: these are somebody else's compilation, and
+ * they are cheap enough to ask for. Two dozen seasons, four requests at a
+ * time, on a build that already runs every six hours.
+ */
+async function writeSeasons(team, out) {
+  if (!team.espn) return;
+  try {
+    const from = team.seasonsFrom ?? 2004;
+    const seasons = await fetchEspnSeasons(team.espn, from, new Date().getFullYear());
+    if (!seasons.length) return;
+    await writeFile(join(out, 'seasons.json'), JSON.stringify({ seasons }));
+    console.log(
+      `           seasons  ${seasons.length} (${seasons[seasons.length - 1].year}–${seasons[0].year}), ` +
+        `${seasons.reduce((n, s) => n + s.categories.reduce((m, c) => m + c.stats.length, 0), 0)} figures`,
+    );
+  } catch (err) {
+    console.warn(`  ! ${team.slug}: could not read the season history (${err.message}).`);
   }
 }
 
@@ -314,6 +337,7 @@ if (phase === 'pre') {
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
     await writeSchedule(team, out);
     await writeRoster(team, out);
+    await writeSeasons(team, out);
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
@@ -352,6 +376,7 @@ if (phase === 'pre') {
       wallpaper: `${team.base}badge.jpg`,
       schedule: existsSync(join(out, 'schedule.json')),
       roster: existsSync(join(out, 'roster.json')),
+      seasons: existsSync(join(out, 'seasons.json')),
     };
   }
 

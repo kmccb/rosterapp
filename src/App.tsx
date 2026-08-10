@@ -23,11 +23,12 @@ import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
 import { Schedule } from './screens/Schedule';
+import { SeasonStats } from './screens/SeasonStats';
 import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'schedule' | 'code' | 'roster' | 'settings' | 'stats';
+type Tab = 'lookup' | 'team' | 'schedule' | 'seasons' | 'code' | 'roster' | 'settings' | 'stats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -48,6 +49,8 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
   { id: 'team', label: 'Team' },
   ...(bakedTeam()?.schedule === false ? [] : [{ id: 'schedule' as Tab, label: 'Schedule' }]),
+  // Only a team with a published record has one to browse.
+  ...(bakedTeam()?.seasons ? [{ id: 'seasons' as Tab, label: 'Stats' }] : []),
 ];
 
 /*
@@ -358,6 +361,7 @@ export default function App() {
           />
         )}
         {tab === 'schedule' && <Schedule base={teamBase()} />}
+        {tab === 'seasons' && <SeasonStats base={teamBase()} />}
         {tab === 'roster' && (
           <Import
             roster={roster}

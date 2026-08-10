@@ -159,3 +159,78 @@ export async function fetchEspnRoster(id) {
     updatedAt: new Date().toISOString(),
   };
 }
+
+// ------------------------------------------------------------- season stats
+
+const CORE = 'https://sports.core.api.espn.com/v2/sports/football/leagues/college-football';
+
+/** ESPN's own words for each bucket; its category names are code, not English. */
+const CATEGORY_LABELS = {
+  general: 'General',
+  passing: 'Passing',
+  rushing: 'Rushing',
+  receiving: 'Receiving',
+  defensive: 'Defence',
+  defensiveInterceptions: 'Interceptions',
+  kicking: 'Kicking',
+  returning: 'Returning',
+  punting: 'Punting',
+  scoring: 'Scoring',
+  miscellaneous: 'Drives and downs',
+};
+
+const getJson = async (url) => {
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'rosterapp (github.com/kmccb/rosterapp)' },
+    signal: AbortSignal.timeout(20000),
+  });
+  return res.ok ? res.json() : null;
+};
+
+/** Four at a time: this walks twenty-odd seasons and should not arrive as a flood. */
+const inBatches = async (items, size, fn) => {
+  const out = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(...(await Promise.all(items.slice(i, i + size).map(fn))));
+  }
+  return out;
+};
+
+/**
+ * Every season the API will admit to, newest first.
+ *
+ * A year with no statistics is dropped rather than shown empty — 2020 is a
+ * hole in the record for everyone, and a dropdown entry leading to nothing is
+ * worse than one that isn't there.
+ */
+export async function fetchEspnSeasons(id, from, to) {
+  const years = [];
+  for (let y = to; y >= from; y--) years.push(y);
+
+  const seasons = await inBatches(years, 4, async (year) => {
+    const [stats, record] = await Promise.all([
+      getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/statistics`),
+      getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/record`),
+    ]);
+
+    const categories = (stats?.splits?.categories ?? [])
+      .map((c) => ({
+        name: c.name,
+        label: CATEGORY_LABELS[c.name] ?? c.displayName ?? c.name,
+        stats: (c.stats ?? [])
+          .filter((s) => s && s.displayValue != null && s.displayValue !== '')
+          .map((s) => ({ label: s.displayName ?? s.name, value: String(s.displayValue) })),
+      }))
+      .filter((c) => c.stats.length > 0);
+
+    const overall = record?.items?.find((i) => i.type === 'total') ?? record?.items?.[0];
+    const summary = overall?.displayValue ?? '';
+
+    // A season with a record and no statistics is one that hasn't been played
+    // yet. Listing it would put an empty year at the top of the dropdown.
+    if (!categories.length) return null;
+    return { year, record: summary, categories };
+  });
+
+  return seasons.filter(Boolean);
+}
