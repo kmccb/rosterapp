@@ -77,39 +77,41 @@ export default function App() {
     if (!sharingAvailable) return;
 
     const existing = loadRoster();
+    const hasRoster = existing.players.length > 0;
     const linked = LINK_CODE;
+    const source = loadSource();
+    const code = linked ?? source;
+    if (!code) return;
 
     /*
-     * Someone followed a share link. With nothing to lose, load it and put them
-     * straight on the keypad — that is the whole promise of the link. If they
-     * already have a *different* roster, don't silently replace it: open the
-     * import screen with the code filled in so they see what's arriving first.
+     * A link for a *different* roster than the one already here. Don't replace
+     * it silently: open the import screen with the code filled in so they see
+     * what's arriving first.
      */
-    if (linked && existing.players.length > 0 && linked !== loadSource()) {
+    if (linked && hasRoster && linked !== source) {
       setPendingCode(linked);
       setTab('roster');
       return;
     }
 
-    const code = linked ?? loadSource();
-    if (!code) return;
+    /*
+     * This device published that code, so its copy is the source of truth.
+     * Pulling the server's version back over it would be a round trip at best,
+     * and would undo an edit that hasn't been uploaded yet. Matched on the code
+     * rather than merely "has a key", because the link now stays in the address
+     * and a publisher can arrive with someone else's code in hand.
+     */
+    if (hasRoster && loadShareKey()?.code === code) return;
 
     /*
-     * Two jobs share this fetch. With no roster it's a restore, and the screen
-     * says so. With a roster already here it's a quiet top-up: the coach
-     * uploads a new version and every phone that followed the link picks it up
-     * next launch. Without that second case an upload reached nobody — the
-     * roster was fetched once and then never looked at again.
-     *
-     * The publishing phone is exempt. Its copy is what gets uploaded, so
-     * pulling the server's version back over it would be a round trip at best
-     * and would undo an unpublished edit at worst.
+     * With no roster this is a restore, and the screen says so. With one already
+     * here it's a quiet check for a newer version — the coach uploads and every
+     * phone picks it up next launch. Keyed on whether there's a roster rather
+     * than on how the code arrived: the code is in the address on every launch
+     * now, so treating its presence as "first visit" would show the restoring
+     * screen every single time.
      */
-    const hasRoster = existing.players.length > 0;
-    const isPublisher = Boolean(loadShareKey());
-    if (hasRoster && !linked && isPublisher) return;
-
-    const topUp = hasRoster && !linked;
+    const topUp = hasRoster;
 
     let cancelled = false;
     if (!topUp) setRestoring(true);

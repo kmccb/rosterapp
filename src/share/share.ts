@@ -130,16 +130,22 @@ export const normalizeCode = (code: string): string =>
 export const shareUrl = (code: string): string =>
   `${window.location.origin}${window.location.pathname}#${formatCode(code)}`;
 
-/** Reads a share code out of the current URL, and strips it from the bar. */
+/**
+ * Reads a share code out of the current URL. Deliberately leaves it there.
+ *
+ * iOS gives a home-screen web app its own storage, separate from Safari's, and
+ * the web clip records whatever URL was showing when it was added. Stripping the
+ * code meant the installed app launched at a bare address with an empty jar and
+ * no way to find the roster — it opened blank every time.
+ *
+ * Keeping it costs nothing now. A repeat visit with a code already in hand is
+ * treated as a check for updates rather than a re-import, and the code is the
+ * thing that gets shared anyway, so there's nothing here a link doesn't already
+ * carry.
+ */
 export const takeCodeFromUrl = (): string | null => {
-  const raw = window.location.hash.replace(/^#/, '');
-  const code = normalizeCode(raw);
-  if (code.length !== 8) return null;
-
-  // Drop it once consumed, so a later refresh doesn't re-import over whatever
-  // the roster has become, and so the code isn't sitting in a shared screenshot.
-  history.replaceState(null, '', window.location.pathname + window.location.search);
-  return code;
+  const code = normalizeCode(window.location.hash.replace(/^#/, ''));
+  return code.length === 8 ? code : null;
 };
 
 // --------------------------------------------------------------------- rpc
