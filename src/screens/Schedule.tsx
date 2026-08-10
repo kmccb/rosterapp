@@ -31,11 +31,35 @@ export function Schedule({ base }: { base: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    // Precached, so this resolves from disk with no signal.
-    fetch(`${base}schedule.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data: Season) => !cancelled && setSeason(data))
+
+    /*
+     * Network first, then the precache.
+     *
+     * This is the one file that changes between deploys — scores after a game,
+     * the forecast every few hours — and the precached copy only rolls over
+     * when a new service worker installs and activates, which is a launch or
+     * more behind. The query is what gets past it: the precache route matches
+     * on the exact URL, so a request carrying one goes to the network.
+     *
+     * The plain address is the fallback, and that one the worker does answer,
+     * so a ground with no signal still gets the schedule.
+     */
+    const load = async (): Promise<Season> => {
+      try {
+        const fresh = await fetch(`${base}schedule.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (fresh.ok) return (await fresh.json()) as Season;
+      } catch {
+        // No signal, which is the normal case at a ground.
+      }
+      const cached = await fetch(`${base}schedule.json`);
+      if (!cached.ok) throw new Error(String(cached.status));
+      return (await cached.json()) as Season;
+    };
+
+    load()
+      .then((data) => !cancelled && setSeason(data))
       .catch(() => !cancelled && setFailed(true));
+
     return () => {
       cancelled = true;
     };

@@ -124,6 +124,37 @@ export const rememberSynced = (stamp: string): void => {
   }
 };
 
+/*
+ * Link codes this device has already been asked about.
+ *
+ * The code stays in the address for good — a home screen icon remembers the
+ * address it was added at, and stripping it left the installed app launching
+ * at a bare URL with an empty jar. The cost is that "there is a code in the
+ * address" stopped meaning "someone just followed a link": it is now true on
+ * every single launch, so the offer to swap rosters came up every time and had
+ * to be dismissed before the app could be used.
+ *
+ * Asked once, then remembered. Someone who declines and changes their mind can
+ * still type the code in.
+ */
+const HANDLED_KEY = () => scopedKey('rosterapp.handled.v1');
+
+export const linkHandled = (code: string): boolean => {
+  try {
+    return localStorage.getItem(HANDLED_KEY()) === normalizeCode(code);
+  } catch {
+    return false;
+  }
+};
+
+export const rememberHandled = (code: string): void => {
+  try {
+    localStorage.setItem(HANDLED_KEY(), normalizeCode(code));
+  } catch {
+    // Worst case it asks again next launch, which is where this started.
+  }
+};
+
 // ------------------------------------------------------------------- codes
 
 /** `BXQ4T9KM` -> `BXQ4-T9KM`. The dash is only ever for reading aloud. */

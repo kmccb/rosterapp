@@ -5,8 +5,10 @@ import {
   loadShareKey,
   loadSource,
   loadSynced,
+  linkHandled,
   normalizeCode,
   releaseShareKeyUnless,
+  rememberHandled,
   rememberSource,
   rememberSynced,
   sharingAvailable,
@@ -135,10 +137,12 @@ export default function App() {
 
     /*
      * A link for a *different* roster than the one already here. Don't replace
-     * it silently: open the import screen with the code filled in so they see
-     * what's arriving first.
+     * it silently: open the code screen with it filled in so they see what is
+     * arriving first — but only the first time, because the code stays in the
+     * address and would otherwise greet every launch of the installed app.
      */
-    if (linked && hasRoster && linked !== source) {
+    if (linked && hasRoster && linked !== source && !linkHandled(linked)) {
+      rememberHandled(linked);
       setPendingCode(linked);
       setTab('code');
       return;
