@@ -24,7 +24,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
-import { parseIcal, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
+import { parseIcal, nextGame, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
@@ -110,6 +110,67 @@ const pageFor = (html, teams, team, palette) =>
     );
 
 /**
+ * The forecast for the next kickoff.
+ *
+ * Open-Meteo needs no key and no account. It happens here rather than on each
+ * phone for the same reasons the schedule does: it lands in the precache and so
+ * survives a ground with no signal, it costs one request every few hours rather
+ * than one per spectator, and nobody has to announce themselves to a weather
+ * service to find out whether to bring a coat.
+ *
+ * Only the next game gets one. Anything further out is a guess dressed up as a
+ * fact, and the rebuild will reach it in time.
+ */
+async function forecastFor(team, games) {
+  const at = team.location && nextGame(games);
+  if (!at?.kickoff) return undefined;
+
+  const kickoff = Math.floor(new Date(at.kickoff).getTime() / 1000);
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${team.location.lat}` +
+    `&longitude=${team.location.lon}` +
+    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,weather_code,is_day` +
+    `&temperature_unit=fahrenheit&wind_speed_unit=mph&timeformat=unixtime&forecast_days=16`;
+
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { hourly } = await res.json();
+
+    // The forecast is hourly and kickoff is not on the hour, so take the
+    // closest one — and give up rather than guess if the game is beyond range.
+    let best = -1;
+    let gap = Infinity;
+    hourly.time.forEach((t, i) => {
+      const d = Math.abs(t - kickoff);
+      if (d < gap) {
+        gap = d;
+        best = i;
+      }
+    });
+    if (best < 0 || gap > 3600 * 2) return undefined;
+
+    const weather = {
+      code: hourly.weather_code[best],
+      tempF: Math.round(hourly.temperature_2m[best]),
+      precipChance: Math.round(hourly.precipitation_probability[best] ?? 0),
+      windMph: Math.round(hourly.wind_speed_10m[best]),
+      day: hourly.is_day[best] === 1,
+      at: new Date(hourly.time[best] * 1000).toISOString(),
+    };
+    console.log(
+      `           weather  ${weather.tempF}°F, ${weather.precipChance}% rain, ` +
+        `${weather.windMph}mph wind at ${at.opponent}`,
+    );
+    return weather;
+  } catch (err) {
+    // A schedule without a forecast is the thing this screen is actually for.
+    console.warn(`  ! ${team.slug}: no forecast (${err.message}).`);
+    return undefined;
+  }
+}
+
+/**
  * The season, fetched from the school's own calendar feed.
  *
  * It happens here rather than on the phone because the feed sends no CORS
@@ -154,10 +215,11 @@ async function writeSchedule(team, out) {
     const res = await fetch(team.schedule, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const { games, teamName } = parseIcal(await res.text());
+    const weather = await forecastFor(team, games);
 
     await writeFile(
       join(out, 'schedule.json'),
-      JSON.stringify({ games, history, teamName, fetched: new Date().toISOString() }),
+      JSON.stringify({ games, history, teamName, weather, fetched: new Date().toISOString() }),
     );
 
     const played = games.filter((g) => g.result).length;

@@ -927,6 +927,39 @@ a.btn {
   font-size: 16px;
 }
 
+.forecast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.sky-icon {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  color: var(--accent);
+}
+
+.forecast-temp {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.forecast-sky {
+  color: var(--text);
+}
+
+.forecast-note::before {
+  content: '·';
+  margin-right: 8px;
+}
+
 .h2h {
   margin-top: 16px;
 }

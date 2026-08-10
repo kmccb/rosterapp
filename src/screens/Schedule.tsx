@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
+import { SkyIcon } from '../components/SkyIcon';
 import { headToHead, nextGame, type Game } from '../schedule/icalParse';
+import { describeSky, worthMentioning, type Weather } from '../schedule/weather';
 
-type Season = { games: Game[]; history: Game[]; teamName?: string; fetched?: string };
+type Season = {
+  games: Game[];
+  history: Game[];
+  teamName?: string;
+  /** Kickoff forecast for the next game, when the build could get one. */
+  weather?: Weather;
+  fetched?: string;
+};
 
 /**
  * The season, and who's next.
@@ -59,7 +68,7 @@ export function Schedule({ base }: { base: string }) {
 
   return (
     <div className="screen">
-      {next && <NextGame game={next} history={history} />}
+      {next && <NextGame game={next} history={history} weather={season.weather} />}
 
       <div className="season-head">
         <h2 className="section">Season</h2>
@@ -145,7 +154,39 @@ function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: st
   );
 }
 
-function NextGame({ game, history }: { game: Game; history: Game[] }) {
+/**
+ * What it will be like to stand there.
+ *
+ * Only the temperature is always shown. Rain gets a line when there is enough
+ * chance of it to change what you bring, and wind only when it is enough to
+ * feel — a forecast that lists every number for a still, dry evening is just
+ * noise above the thing people opened this screen for.
+ */
+function Forecast({ weather }: { weather: Weather }) {
+  const notes = [
+    worthMentioning(weather.precipChance) ? `${weather.precipChance}% rain` : null,
+    weather.windMph >= 12 ? `${weather.windMph} mph wind` : null,
+  ].filter(Boolean);
+
+  return (
+    <p className="forecast">
+      <SkyIcon code={weather.code} day={weather.day} />
+      <span className="forecast-temp">{weather.tempF}°</span>
+      <span className="forecast-sky">{describeSky(weather.code)}</span>
+      {notes.length > 0 && <span className="forecast-note">{notes.join(' · ')}</span>}
+    </p>
+  );
+}
+
+function NextGame({
+  game,
+  history,
+  weather,
+}: {
+  game: Game;
+  history: Game[];
+  weather?: Weather;
+}) {
   return (
     <section className="next-game">
       <p className="next-label">{game.scrimmage ? 'Next up · scrimmage' : 'Next up'}</p>
@@ -157,6 +198,8 @@ function NextGame({ game, history }: { game: Game; history: Game[] }) {
         {TIME(game) && ` · ${TIME(game)}`}
         {game.occasion && ` · ${game.occasion}`}
       </p>
+
+      {weather && <Forecast weather={weather} />}
 
       <HeadToHead history={history} opponentKey={game.opponentKey} />
     </section>
