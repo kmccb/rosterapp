@@ -13,6 +13,12 @@ type Season = { games: Game[]; history: Game[]; teamName?: string; fetched?: str
 export function Schedule({ base }: { base: string }) {
   const [season, setSeason] = useState<Season | null>(null);
   const [failed, setFailed] = useState(false);
+  /*
+   * Which fixture is showing its record. One at a time: on a phone the list is
+   * most of the screen, and two open panels push the rest of the season out of
+   * sight for no gain — nobody compares two of these side by side.
+   */
+  const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +50,7 @@ export function Schedule({ base }: { base: string }) {
     );
   }
 
+  const history = season.history ?? [];
   const played = season.games.filter((g) => g.result && !g.scrimmage);
   const record = {
     won: played.filter((g) => g.result!.won).length,
@@ -52,7 +59,7 @@ export function Schedule({ base }: { base: string }) {
 
   return (
     <div className="screen">
-      {next && <NextGame game={next} history={season.history ?? []} />}
+      {next && <NextGame game={next} history={history} />}
 
       <div className="season-head">
         <h2 className="section">Season</h2>
@@ -62,11 +69,22 @@ export function Schedule({ base }: { base: string }) {
           </span>
         )}
       </div>
+      <p className="hint">Tap any game for the record against them.</p>
 
       <div className="fixtures">
-        {season.games.map((g) => (
-          <Fixture key={`${g.date}-${g.opponentKey}`} game={g} isNext={g === next} />
-        ))}
+        {season.games.map((g) => {
+          const id = `${g.date}-${g.opponentKey}`;
+          return (
+            <Fixture
+              key={id}
+              game={g}
+              isNext={g === next}
+              history={history}
+              open={open === id}
+              onToggle={() => setOpen((cur) => (cur === id ? null : id))}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -88,9 +106,46 @@ const TIME = (game: Game): string =>
     ? new Date(game.kickoff).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
     : '';
 
-function NextGame({ game, history }: { game: Game; history: Game[] }) {
-  const h2h = headToHead(history, game.opponentKey);
+/**
+ * The record against one opponent, and how the last few went.
+ *
+ * Shared by the next fixture and by any game opened in the list, so the thing
+ * you get for tapping a game in October is the thing you already trust from the
+ * top of the screen.
+ */
+function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: string }) {
+  const h2h = headToHead(history, opponentKey);
 
+  if (h2h.played === 0) {
+    return <p className="h2h-none">No previous meetings on record.</p>;
+  }
+
+  return (
+    <div className="h2h">
+      <p className="h2h-record">
+        <strong>
+          {h2h.won}–{h2h.lost}
+        </strong>{' '}
+        in the last {h2h.played} {h2h.played === 1 ? 'meeting' : 'meetings'}
+      </p>
+      <ul className="h2h-list">
+        {h2h.meetings.slice(0, 5).map((m) => (
+          <li key={m.date}>
+            <span className={m.result!.won ? 'h2h-w' : 'h2h-l'}>{m.result!.won ? 'W' : 'L'}</span>
+            <span className="h2h-score">
+              {m.result!.us}–{m.result!.them}
+            </span>
+            <span className="h2h-when">
+              {m.home ? 'home' : 'away'} · {m.date.slice(0, 4)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function NextGame({ game, history }: { game: Game; history: Game[] }) {
   return (
     <section className="next-game">
       <p className="next-label">{game.scrimmage ? 'Next up · scrimmage' : 'Next up'}</p>
@@ -103,62 +158,57 @@ function NextGame({ game, history }: { game: Game; history: Game[] }) {
         {game.occasion && ` · ${game.occasion}`}
       </p>
 
-      {h2h.played > 0 ? (
-        <div className="h2h">
-          <p className="h2h-record">
-            <strong>
-              {h2h.won}–{h2h.lost}
-            </strong>{' '}
-            in the last {h2h.played} {h2h.played === 1 ? 'meeting' : 'meetings'}
-          </p>
-          <ul className="h2h-list">
-            {h2h.meetings.slice(0, 5).map((m) => (
-              <li key={m.date}>
-                <span className={m.result!.won ? 'h2h-w' : 'h2h-l'}>
-                  {m.result!.won ? 'W' : 'L'}
-                </span>
-                <span className="h2h-score">
-                  {m.result!.us}–{m.result!.them}
-                </span>
-                <span className="h2h-when">
-                  {m.home ? 'home' : 'away'} · {m.date.slice(0, 4)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className="h2h-none">No previous meetings on record.</p>
-      )}
+      <HeadToHead history={history} opponentKey={game.opponentKey} />
     </section>
   );
 }
 
-function Fixture({ game, isNext }: { game: Game; isNext: boolean }) {
+function Fixture({
+  game,
+  isNext,
+  history,
+  open,
+  onToggle,
+}: {
+  game: Game;
+  isNext: boolean;
+  history: Game[];
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className={`fixture${isNext ? ' is-next' : ''}${game.result ? ' is-played' : ''}`}>
-      <span className="fixture-date">
-        {new Date(game.kickoff ?? `${game.date}T12:00:00`).toLocaleDateString(undefined, {
-          day: 'numeric',
-          month: 'short',
-        })}
-      </span>
-      <span className="fixture-team">
-        <span className="fixture-ha">{game.home ? 'vs' : 'at'}</span> {game.opponent}
-        {game.scrimmage && <span className="fixture-tag">scrimmage</span>}
-      </span>
-      <span className="fixture-result">
-        {game.result ? (
-          <>
-            <span className={game.result.won ? 'h2h-w' : 'h2h-l'}>
-              {game.result.won ? 'W' : 'L'}
-            </span>{' '}
-            {game.result.us}–{game.result.them}
-          </>
-        ) : (
-          TIME(game)
-        )}
-      </span>
+      <button type="button" className="fixture-row" onClick={onToggle} aria-expanded={open}>
+        <span className="fixture-date">
+          {new Date(game.kickoff ?? `${game.date}T12:00:00`).toLocaleDateString(undefined, {
+            day: 'numeric',
+            month: 'short',
+          })}
+        </span>
+        <span className="fixture-team">
+          <span className="fixture-ha">{game.home ? 'vs' : 'at'}</span> {game.opponent}
+          {game.scrimmage && <span className="fixture-tag">scrimmage</span>}
+        </span>
+        <span className="fixture-result">
+          {game.result ? (
+            <>
+              <span className={game.result.won ? 'h2h-w' : 'h2h-l'}>
+                {game.result.won ? 'W' : 'L'}
+              </span>{' '}
+              {game.result.us}–{game.result.them}
+            </>
+          ) : (
+            TIME(game)
+          )}
+        </span>
+        <span className="fixture-caret" aria-hidden="true" />
+      </button>
+
+      {open && (
+        <div className="fixture-h2h">
+          <HeadToHead history={history} opponentKey={game.opponentKey} />
+        </div>
+      )}
     </div>
   );
 }

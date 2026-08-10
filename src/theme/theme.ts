@@ -75,6 +75,8 @@ export const clearTheme = (): void => localStorage.removeItem(KEY());
 type BakedTeam = {
   slug: string;
   name: string;
+  /** The school, for the request email. The display name can be generic. */
+  school: string;
   palette: Palette;
   wallpaper: string;
   /** Whether this team's build produced a schedule worth a tab. */

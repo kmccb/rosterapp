@@ -177,9 +177,6 @@ async function writeSchedule(team, out) {
 
 const teams = await readTeams();
 
-/** Which teams ended up with a schedule, so only they get the tab. */
-const hasSchedule = new Map();
-
 if (phase === 'pre') {
   /*
    * A team that was renamed or dropped leaves its whole directory behind in
@@ -205,7 +202,7 @@ if (phase === 'pre') {
     const { artFraction, padded, source: src } = await writeIcons(team.logo, join(out, 'icons'));
     const bytes = await writeWallpaper(team.logo, join(out, 'badge.jpg'));
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
-    hasSchedule.set(team.slug, await writeSchedule(team, out));
+    await writeSchedule(team, out);
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
@@ -239,6 +236,7 @@ if (phase === 'pre') {
     table[team.root ? '' : team.slug] = {
       slug: team.slug,
       name: team.name,
+      school: team.school ?? team.name,
       palette: await paletteFor(team.logo, team.palette),
       wallpaper: `${team.base}badge.jpg`,
       schedule: existsSync(join(out, 'schedule.json')),

@@ -4,7 +4,31 @@ import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey, numberMatches } from '../parse/rosterParse';
 import type { StatsStore } from '../stats/statsStore';
+import { bakedTeam } from '../theme/theme';
 import type { Player, Roster } from '../types';
+
+const REQUEST_TO = 'tom@scottforge.ai';
+
+/**
+ * Opens the reader's own mail app with the request already written.
+ *
+ * A form on the page would mean somebody approving strangers by hand, and a
+ * list of names and addresses kept in the database. This asks for exactly the
+ * same thing and stores nothing anywhere. The address of the page goes in the
+ * body because it names the team exactly, whatever the team is called.
+ */
+const requestLink = (school: string): string => {
+  const here = `${window.location.origin}${window.location.pathname}`;
+  const subject = `Roster link — ${school}`;
+  const body = [
+    `Please could you send me the link to the ${school} roster?`,
+    '',
+    'My name:',
+    '',
+    here,
+  ].join('\n');
+  return `mailto:${REQUEST_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
 
 type Props = {
   roster: Roster;
@@ -16,6 +40,7 @@ type Props = {
 export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
+  const school = bakedTeam()?.school || roster.teamName || 'team';
 
   const matches = useMemo(() => {
     if (!query) return [];
@@ -64,18 +89,30 @@ export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props
             <div className="empty">
               <p className="empty-title">No roster yet</p>
               {/*
-                The share code is named here on purpose. This screen is what a
-                phone shows when its storage is empty — a fresh install, or iOS
-                having cleared it — and in that state the code is the fastest way
-                back. Leaving it unmentioned made the way out look like retyping
-                the whole roster.
+                Two very different people land here, and for a while it only
+                spoke to one of them. The coach setting up for the season comes
+                once; everyone else arrived from a link, or typed the address
+                having heard about it, and to them a screen offering to let them
+                paste a roster reads as broken. So the request leads, and the
+                setup door is the quiet one — it is still the only way in to
+                Settings, so it can't be dropped.
+
+                The share code is named on purpose too: this is also what a
+                phone shows when iOS has cleared its storage, and in that state
+                the code is the fastest way back.
               */}
               <p className="empty-text">
-                Paste the team roster, or enter the 8-character share code you were sent.
+                This is the {school} roster. It opens from a link — ask for one, or enter the
+                8-character code you were sent.
               </p>
-              <button type="button" className="btn btn-primary" onClick={onGoToImport}>
-                Add the roster
-              </button>
+              <div className="empty-actions">
+                <a className="btn btn-primary" href={requestLink(school)}>
+                  Ask for the link
+                </a>
+                <button type="button" className="btn" onClick={onGoToImport}>
+                  I have a code, or the roster
+                </button>
+              </div>
             </div>
           )
         ) : featured ? (

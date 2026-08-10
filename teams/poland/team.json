@@ -1,6 +1,7 @@
 {
   "name": "Roster Lookup",
   "short": "Roster",
+  "school": "Poland Seminary",
   "root": true,
   "palette": {
     "ground": "#04043a",
