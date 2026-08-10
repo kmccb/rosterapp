@@ -63,6 +63,8 @@ describe('which team the page is', () => {
   });
 });
 
+const UPLOADED = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+
 describe('a badge left behind by another team', () => {
   it('is discarded, and the page returns to its own', () => {
     // What Victory Christian's page wrote into the shared jar.
@@ -75,23 +77,44 @@ describe('a badge left behind by another team', () => {
     expect(loadTheme()?.logo).toBe('/badge.jpg');
   });
 
+  it('is discarded even when it arrived as an uploaded image', () => {
+    /*
+     * The case that survived the first fix and kept repainting the page. A
+     * badge that travelled in a share is a data URI, so there is nothing on it
+     * naming a team — the only thing that separates it from a badge chosen
+     * here is that nobody chose it here.
+     */
+    saveTheme({ logo: UPLOADED, palette: palette('#ff4d6d'), seedHue: 348 });
+
+    expect(initialTheme()?.logo).toBe('/badge.jpg');
+    expect(initialTheme()?.palette.accent).toBe('#c8102e');
+  });
+
   it('leaves this team’s own baked badge alone', () => {
     saveTheme({ logo: '/badge.jpg', palette: palette('#c8102e'), seedHue: -1 });
     expect(initialTheme()?.logo).toBe('/badge.jpg');
   });
 
-  it('never throws away a badge the coach uploaded', () => {
-    // An uploaded crest is a data URI, so it can't be traced to a team — and a
-    // shared roster carries one. Discarding it would undo somebody's own work.
-    const uploaded: Theme = {
-      logo: 'data:image/jpeg;base64,/9j/4AAQSkZJRg==',
+  it('keeps a badge this device chose on the settings screen', () => {
+    const mine: Theme = {
+      logo: UPLOADED,
       palette: palette('#0f7b3f'),
       seedHue: 142,
+      origin: 'local',
     };
-    saveTheme(uploaded);
+    saveTheme(mine);
 
-    expect(initialTheme()?.logo).toBe(uploaded.logo);
+    expect(initialTheme()?.logo).toBe(UPLOADED);
     expect(initialTheme()?.palette.accent).toBe('#0f7b3f');
+  });
+
+  it('keeps a shared badge on a page built for no team at all', () => {
+    // The reason shares carry a badge: a team running its own roster on a page
+    // that has no identity of its own.
+    (globalThis as Record<string, unknown>).window = { location: { pathname: '/' } };
+    saveTheme({ logo: UPLOADED, palette: palette('#ff4d6d'), seedHue: 348 });
+
+    expect(initialTheme()?.logo).toBe(UPLOADED);
   });
 
   it('adopts the page’s own badge when there is nothing stored', () => {

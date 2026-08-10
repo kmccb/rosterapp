@@ -93,8 +93,13 @@ export default function App() {
         saveStats(found.stats);
         setStats(found.stats);
       }
-      // The badge travels too, so a second school's link brings its own look.
-      if (found.theme) {
+      /*
+       * The badge travels with a share so a team with no page of its own still
+       * gets its own look. A page built for a team already has one, and taking
+       * the share's badge there repaints the wrong team — which is exactly how
+       * Victory's crest ended up on Poland's page.
+       */
+      if (found.theme && !bakedTeam()) {
         saveTheme(found.theme);
         setTheme(found.theme);
       }

@@ -19,6 +19,15 @@ export type Theme = {
   palette: Palette;
   /** What it was derived from, for the settings screen to show. */
   seedHue: number;
+  /**
+   * Set only when this device chose the badge on the settings screen.
+   *
+   * A theme with no origin arrived in a share, and a share carries the badge
+   * of the roster's team, not of the page it is opened on. That is how a
+   * Victory badge ended up repainting the Poland page and stayed there: it was
+   * an uploaded image, so there was no path on it to trace back to a team.
+   */
+  origin?: 'local';
 };
 
 const KEY = () => scopedKey('rosterapp.theme.v1');
@@ -102,23 +111,23 @@ export const bakedTeam = (): BakedTeam | null => {
 };
 
 /**
- * A theme left behind by a different team's page.
+ * The theme to start with.
  *
- * A baked theme names that team's badge by path, so one whose badge isn't this
- * page's came from somewhere else. Only reachable on the root team, whose keys
- * stayed unsuffixed when the rest were scoped — and only from before that
- * change. An uploaded badge is a data URI and can never match this test, so a
- * coach's own crest is never the thing thrown away.
+ * A page built for a team wears that team's badge, and a stored theme only
+ * overrides it when this device deliberately chose one. Everything else got
+ * here by following a share, which carries the badge belonging to the roster
+ * rather than to the page — the two are the same thing only when the site
+ * serves one team, which is no longer the case.
+ *
+ * That rule also cleans up after the period when both teams shared one set of
+ * storage keys, which is not otherwise recoverable: an uploaded badge is a data
+ * URI, so nothing about it says which team it came from.
  */
-const isForeign = (theme: Theme, baked: BakedTeam | null): boolean =>
-  theme.logo.startsWith('/') && theme.logo !== baked?.wallpaper;
-
-/** The theme to start with: what's stored, else what the page was built with. */
 export function initialTheme(): Theme | null {
   const baked = bakedTeam();
 
   const stored = loadTheme();
-  if (stored && !isForeign(stored, baked)) return stored;
+  if (stored && (stored.origin === 'local' || !baked)) return stored;
   if (stored) clearTheme();
 
   if (!baked) return null;
@@ -240,7 +249,8 @@ export async function themeFromFile(file: File): Promise<Theme> {
   const { data } = ctx.getImageData(0, 0, SAMPLE_PX, SAMPLE_PX);
 
   const seed = dominantHue(data, 4);
-  return { logo, palette: paletteFrom(seed), seedHue: Math.round(seed?.h ?? -1) };
+  // Chosen here, on this device, so it outranks the page's own badge.
+  return { logo, palette: paletteFrom(seed), seedHue: Math.round(seed?.h ?? -1), origin: 'local' };
 }
 
 /** Roughly what the badge will cost in storage and in a share. */
