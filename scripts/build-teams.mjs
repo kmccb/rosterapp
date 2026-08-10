@@ -86,17 +86,15 @@ const manifestFor = (team, palette) => ({
  * when a link is added. Only the things a browser can't infer are changed: the
  * name, the theme colour, and the palette inlined so the first paint is already
  * in the team's colours instead of flashing the site's and correcting itself.
+ *
+ * Every page carries the whole table, not just its own team, because the
+ * service worker serves navigations from its precache and what it holds is the
+ * root team's shell. A page that knew only itself came up as the wrong team the
+ * moment the worker answered; with the table, the app reads the address and is
+ * right whichever shell arrives.
  */
-const pageFor = (html, team, palette, schedule) => {
-  const baked = {
-    slug: team.slug,
-    name: team.name,
-    palette,
-    wallpaper: `${team.base}badge.jpg`,
-    schedule,
-  };
-
-  return html
+const pageFor = (html, teams, team, palette) =>
+  html
     .replace(/<title>[^<]*<\/title>/, `<title>${team.name}</title>`)
     .replace(
       /<meta name="theme-color" content="[^"]*"\s*\/?>/,
@@ -106,8 +104,10 @@ const pageFor = (html, team, palette, schedule) => {
       /<meta name="apple-mobile-web-app-title" content="[^"]*"\s*\/?>/,
       `<meta name="apple-mobile-web-app-title" content="${team.short ?? team.name}" />`,
     )
-    .replace('</head>', `  <script>window.__TEAM__=${JSON.stringify(baked)}</script>\n  </head>`);
-};
+    .replace(
+      '</head>',
+      `  <script>window.__TEAMS__=${JSON.stringify(teams)}</script>\n  </head>`,
+    );
 
 /**
  * The season, fetched from the school's own calendar feed.
@@ -218,12 +218,27 @@ if (phase === 'pre') {
 } else {
   const builtIndex = await readFile(join(dist, 'index.html'), 'utf8');
 
+  // Keyed by the path segment each team is served from, which is what the app
+  // reads out of the address. The root team's key is empty.
+  const table = {};
   for (const team of teams) {
-    const palette = await paletteFor(team.logo, team.palette);
+    const out = team.root ? dist : join(dist, team.slug);
+    table[team.root ? '' : team.slug] = {
+      slug: team.slug,
+      name: team.name,
+      palette: await paletteFor(team.logo, team.palette),
+      wallpaper: `${team.base}badge.jpg`,
+      schedule: existsSync(join(out, 'schedule.json')),
+    };
+  }
+
+  for (const team of teams) {
     const out = team.root ? dist : join(dist, team.slug);
     await mkdir(out, { recursive: true });
-    const schedule = existsSync(join(out, 'schedule.json'));
-    await writeFile(join(out, 'index.html'), pageFor(builtIndex, team, palette, schedule));
+    await writeFile(
+      join(out, 'index.html'),
+      pageFor(builtIndex, table, team, table[team.root ? '' : team.slug].palette),
+    );
   }
   console.log(`${teams.length} team pages written.`);
 }

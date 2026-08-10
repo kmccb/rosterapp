@@ -10,7 +10,7 @@
  * manifest, which is fixed at build time.
  */
 
-import { scopedKey } from '../scope';
+import { scopedKey, teamScope } from '../scope';
 import { dominantHue, paletteFrom, type Palette } from './palette';
 
 export type Theme = {
@@ -62,13 +62,15 @@ export const saveTheme = (theme: Theme): void => {
 export const clearTheme = (): void => localStorage.removeItem(KEY());
 
 /*
- * A team baked into the page at build time, for sites serving more than one.
- * The per-team build writes it into that team's index.html.
+ * The teams baked into the page at build time, for sites serving more than one.
  *
- * It gets copied into storage on first visit rather than read fresh each time,
- * because offline the service worker answers a navigation with the root shell —
- * which carries the *root* team's script. Left unstored, a second team's app
- * would come up in the first team's colours the moment it lost signal.
+ * Every team's page carries the whole table, keyed by the path each is served
+ * from, and the team is picked from the address at runtime. That is deliberate:
+ * the service worker answers a navigation from its precache, and what it has is
+ * the root team's shell, so a page cannot rely on being the one that was built
+ * for it. Carrying only its own team meant /victorychristian/ came up as the
+ * root team — its badge, its name, its schedule tab — over whatever roster the
+ * share code fetched. With the table, whichever shell arrives is right.
  */
 type BakedTeam = {
   slug: string;
@@ -90,7 +92,10 @@ export const teamBase = (): string => {
 };
 
 export const bakedTeam = (): BakedTeam | null => {
-  const t = (window as unknown as { __TEAM__?: BakedTeam }).__TEAM__;
+  const table = (window as unknown as { __TEAMS__?: Record<string, BakedTeam> }).__TEAMS__;
+  // Falls back to the root team so an address that names no known team still
+  // gets a working page rather than the unthemed default.
+  const t = table?.[teamScope()] ?? table?.[''];
   return t && t.palette && t.wallpaper ? t : null;
 };
 

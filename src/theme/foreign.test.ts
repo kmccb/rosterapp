@@ -21,6 +21,13 @@ const palette = (accent: string): Palette =>
   }) as Palette;
 
 const POLAND = { slug: 'poland', name: 'Poland', palette: palette('#c8102e'), wallpaper: '/badge.jpg' };
+const VICTORY = {
+  slug: 'victorychristian',
+  name: 'Victory Christian',
+  palette: palette('#7a1420'),
+  wallpaper: '/victorychristian/badge.jpg',
+};
+const TABLE = { '': POLAND, victorychristian: VICTORY };
 
 const memoryStorage = () => {
   const map = new Map<string, string>();
@@ -31,12 +38,29 @@ const memoryStorage = () => {
   };
 };
 
+/** Every shell carries every team; only the address says which one you're on. */
+const visit = (pathname: string) => {
+  (globalThis as Record<string, unknown>).window = { location: { pathname }, __TEAMS__: TABLE };
+};
+
 beforeEach(() => {
   (globalThis as Record<string, unknown>).localStorage = memoryStorage();
-  (globalThis as Record<string, unknown>).window = {
-    location: { pathname: '/' },
-    __TEAM__: POLAND,
-  };
+  visit('/');
+});
+
+describe('which team the page is', () => {
+  it('is read from the address, not from the shell that was served', () => {
+    // The service worker answers with the root team's shell whatever the path,
+    // so this is the case that came up as the wrong team entirely.
+    visit('/victorychristian/');
+    expect(initialTheme()?.logo).toBe('/victorychristian/badge.jpg');
+    expect(initialTheme()?.palette.accent).toBe('#7a1420');
+  });
+
+  it('falls back to the root team for an address naming no team', () => {
+    visit('/somewhere-else/');
+    expect(initialTheme()?.logo).toBe('/badge.jpg');
+  });
 });
 
 describe('a badge left behind by another team', () => {
