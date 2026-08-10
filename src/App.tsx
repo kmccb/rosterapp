@@ -11,9 +11,11 @@ import {
   rememberSynced,
   sharingAvailable,
   takeCodeFromUrl,
+  type FetchedRoster,
 } from './share/share';
 import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
 import { applyTheme, bakedTeam, initialTheme, saveTheme, teamBase, type Theme } from './theme/theme';
+import { CodeEntry } from './screens/CodeEntry';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
@@ -23,7 +25,7 @@ import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'schedule' | 'roster' | 'settings' | 'stats';
+type Tab = 'lookup' | 'team' | 'schedule' | 'code' | 'roster' | 'settings' | 'stats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -71,6 +73,42 @@ export default function App() {
     setRoster(loadRoster());
   }, []);
 
+  /**
+   * Take on a roster fetched from a code — from a link at launch, or typed in
+   * by hand. Both routes land here so neither can quietly grow a rule the
+   * other one lacks.
+   */
+  const adopt = useCallback(
+    (found: FetchedRoster, code: string) => {
+      persist({
+        teamName: found.teamName,
+        season: found.season,
+        players: found.players,
+        updatedAt: new Date().toISOString(),
+      });
+      // Only overwrite local stats when the share actually carried some. An
+      // older publish, or one from a phone that never pasted any, must not
+      // wipe what's already here.
+      if (Object.keys(found.stats).length > 0) {
+        saveStats(found.stats);
+        setStats(found.stats);
+      }
+      // The badge travels too, so a second school's link brings its own look.
+      if (found.theme) {
+        saveTheme(found.theme);
+        setTheme(found.theme);
+      }
+      // This device is tied to that roster from now on, so it restores itself
+      // later exactly like a code typed in by hand.
+      rememberSource(code);
+      releaseShareKeyUnless(code);
+      // The publisher's own stamp, so the next launch can tell a fresh upload
+      // from the copy already sitting here.
+      rememberSynced(found.updatedAt);
+    },
+    [persist],
+  );
+
   /*
    * Browser storage can be emptied without anyone asking — iOS evicts it, and
    * "clear site data" takes it too. If the roster came from a share code we
@@ -97,7 +135,7 @@ export default function App() {
      */
     if (linked && hasRoster && linked !== source) {
       setPendingCode(linked);
-      setTab('roster');
+      setTab('code');
       return;
     }
 
@@ -138,31 +176,7 @@ export default function App() {
         // Already have this exact version; leave everything alone.
         if (topUp && found.updatedAt === loadSynced()) return;
 
-        persist({
-          teamName: found.teamName,
-          season: found.season,
-          players: found.players,
-          updatedAt: new Date().toISOString(),
-        });
-        // Only overwrite local stats when the share actually carried some. An
-        // older publish, or one from a phone that never pasted any, must not
-        // wipe what's already here.
-        if (Object.keys(found.stats).length > 0) {
-          saveStats(found.stats);
-          setStats(found.stats);
-        }
-        // The badge travels too, so a second school's link brings its own look.
-        if (found.theme) {
-          saveTheme(found.theme);
-          setTheme(found.theme);
-        }
-        // A followed link ties this device to that roster from now on, so it
-        // restores itself later exactly like a code typed in by hand.
-        rememberSource(code);
-        releaseShareKeyUnless(code);
-        // The publisher's own stamp, so the next launch can tell a fresh
-        // upload from the copy already sitting here.
-        rememberSynced(found.updatedAt);
+        adopt(found, code);
       })
       // No signal is the normal case at a ground; leave the empty state be and
       // try again next launch rather than showing an error nobody can act on.
@@ -174,7 +188,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [persist]);
+  }, [adopt]);
 
   /*
    * Tapping a share link while the app is already open is a fragment change,
@@ -268,12 +282,27 @@ export default function App() {
         {tab === 'lookup' && (
           <Lookup
             roster={roster}
-            onGoToImport={() => setTab('roster')}
+            onGoToCode={() => setTab('code')}
             restoring={restoring}
             stats={stats}
           />
         )}
         {tab === 'team' && <RosterList roster={roster} stats={stats} />}
+        {tab === 'code' && (
+          <CodeEntry
+            initialCode={pendingCode ?? undefined}
+            replacing={roster.players.length > 0}
+            onFound={(found, code) => {
+              adopt(found, code);
+              setPendingCode(null);
+              setTab('lookup');
+            }}
+            onBack={() => {
+              setPendingCode(null);
+              setTab('lookup');
+            }}
+          />
+        )}
         {tab === 'schedule' && <Schedule base={teamBase()} />}
         {tab === 'roster' && (
           <Import
@@ -282,7 +311,6 @@ export default function App() {
             onGoToSettings={() => setTab('settings')}
             onGoToStats={() => setTab('stats')}
             onFinish={() => setTab('lookup')}
-            initialCode={pendingCode ?? undefined}
           />
         )}
         {tab === 'stats' && (

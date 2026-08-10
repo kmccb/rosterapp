@@ -32,12 +32,12 @@ const requestLink = (school: string): string => {
 
 type Props = {
   roster: Roster;
-  onGoToImport: () => void;
+  onGoToCode: () => void;
   restoring?: boolean;
   stats?: StatsStore;
 };
 
-export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props) {
+export function Lookup({ roster, onGoToCode, restoring = false, stats }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
   const school = bakedTeam()?.school || roster.teamName || 'team';
@@ -94,8 +94,10 @@ export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props
                 once; everyone else arrived from a link, or typed the address
                 having heard about it, and to them a screen offering to let them
                 paste a roster reads as broken. So the request leads, and the
-                setup door is the quiet one — it is still the only way in to
-                Settings, so it can't be dropped.
+                setup door is not here at all: it is the press-and-hold on the
+                title, because pasting a roster and picking files is a job for
+                one person once a season, and putting it on the way in made the
+                app look like something you had to fill in before using.
 
                 The share code is named on purpose too: this is also what a
                 phone shows when iOS has cleared its storage, and in that state
@@ -109,8 +111,8 @@ export function Lookup({ roster, onGoToImport, restoring = false, stats }: Props
                 <a className="btn btn-primary" href={requestLink(school)}>
                   Ask for the link
                 </a>
-                <button type="button" className="btn" onClick={onGoToImport}>
-                  I have a code, or the roster
+                <button type="button" className="btn" onClick={onGoToCode}>
+                  I have a code
                 </button>
               </div>
             </div>
