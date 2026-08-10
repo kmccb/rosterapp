@@ -24,6 +24,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
+import { parseIcal } from '../src/schedule/icalParse.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
@@ -107,6 +108,52 @@ const pageFor = (html, team, palette) => {
     .replace('</head>', `  <script>window.__TEAM__=${JSON.stringify(baked)}</script>\n  </head>`);
 };
 
+/**
+ * The season, fetched from the school's own calendar feed.
+ *
+ * It happens here rather than on the phone because the feed sends no CORS
+ * header, so a browser can't read it — and because a schedule is the same for
+ * everyone on the team, so baking it costs one fetch instead of one per phone.
+ * A scheduled rebuild is what keeps it current; see .github/workflows.
+ *
+ * A feed that's down must not break the build. The site is mostly a roster
+ * lookup, and losing the whole deploy over a calendar would be the wrong trade.
+ */
+async function writeSchedule(team, out) {
+  const history = existsSync(join(teamsDir, team.slug, 'history.json'))
+    ? JSON.parse(await readFile(join(teamsDir, team.slug, 'history.json'), 'utf8'))
+    : [];
+
+  if (!team.schedule) {
+    if (history.length) {
+      await writeFile(join(out, 'schedule.json'), JSON.stringify({ games: [], history }));
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(team.schedule, { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { games, teamName } = parseIcal(await res.text());
+
+    await writeFile(
+      join(out, 'schedule.json'),
+      JSON.stringify({ games, history, teamName, fetched: new Date().toISOString() }),
+    );
+
+    const played = games.filter((g) => g.result).length;
+    console.log(
+      `           schedule ${games.length} events, ${games.filter((g) => !g.scrimmage).length} games, ` +
+        `${played} played, ${history.length} in history`,
+    );
+  } catch (err) {
+    console.warn(
+      `  ! ${team.slug}: could not read the schedule feed (${err.message}). ` +
+        `Keeping whatever was built last time.`,
+    );
+  }
+}
+
 const teams = await readTeams();
 
 if (phase === 'pre') {
@@ -121,6 +168,7 @@ if (phase === 'pre') {
     const { artFraction, padded, source: src } = await writeIcons(team.logo, join(out, 'icons'));
     const bytes = await writeWallpaper(team.logo, join(out, 'badge.jpg'));
     await writeFile(join(out, 'manifest.webmanifest'), JSON.stringify(manifestFor(team, palette)));
+    await writeSchedule(team, out);
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +

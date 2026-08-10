@@ -71,6 +71,16 @@ export const clearTheme = (): void => localStorage.removeItem(KEY);
  */
 type BakedTeam = { slug: string; name: string; palette: Palette; wallpaper: string };
 
+/**
+ * The path this team is served from — "/" or "/victorychristian/". Files that
+ * belong to a team sit beside its page, so this is what finds them.
+ */
+export const teamBase = (): string => {
+  const baked = bakedTeam();
+  if (baked?.wallpaper) return baked.wallpaper.replace(/badge\.jpg$/, '');
+  return window.location.pathname.replace(/[^/]*$/, '');
+};
+
 export const bakedTeam = (): BakedTeam | null => {
   const t = (window as unknown as { __TEAM__?: BakedTeam }).__TEAM__;
   return t && t.palette && t.wallpaper ? t : null;

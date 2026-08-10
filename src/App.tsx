@@ -12,16 +12,17 @@ import {
   takeCodeFromUrl,
 } from './share/share';
 import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
-import { applyTheme, bakedTeam, initialTheme, saveTheme, type Theme } from './theme/theme';
+import { applyTheme, bakedTeam, initialTheme, saveTheme, teamBase, type Theme } from './theme/theme';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
+import { Schedule } from './screens/Schedule';
 import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'roster' | 'settings' | 'stats';
+type Tab = 'lookup' | 'team' | 'schedule' | 'roster' | 'settings' | 'stats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -37,6 +38,7 @@ type Tab = 'lookup' | 'team' | 'roster' | 'settings' | 'stats';
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
   { id: 'team', label: 'Team' },
+  { id: 'schedule', label: 'Schedule' },
 ];
 
 /*
@@ -263,6 +265,7 @@ export default function App() {
           />
         )}
         {tab === 'team' && <RosterList roster={roster} stats={stats} />}
+        {tab === 'schedule' && <Schedule base={teamBase()} />}
         {tab === 'roster' && (
           <Import
             roster={roster}

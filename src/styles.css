@@ -833,3 +833,154 @@ textarea {
   border-radius: 8px;
   border: 1px solid var(--line);
 }
+
+/* --------------------------------------------------------------- schedule */
+
+/*
+ * The next fixture leads, because that is the question anyone opening this
+ * screen came with. Everything else is a list to look ahead in.
+ */
+.next-game {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.next-label {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.next-opponent {
+  margin: 0;
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.next-vs {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.next-when {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.h2h {
+  margin-top: 16px;
+}
+
+.h2h-record {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.h2h-record strong {
+  font-size: 20px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.h2h-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.h2h-list li {
+  display: grid;
+  grid-template-columns: 20px 64px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.h2h-when {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.h2h-none {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.h2h-w { color: var(--ok); font-weight: 700; }
+.h2h-l { color: var(--danger); font-weight: 700; }
+
+.season-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.season-record {
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.fixtures {
+  display: flex;
+  flex-direction: column;
+}
+
+.fixture {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  font-size: 16px;
+}
+
+/* The next one is picked out, so the list has somewhere to land the eye. */
+.fixture.is-next {
+  font-weight: 700;
+}
+
+.fixture.is-next .fixture-date,
+.fixture.is-next .fixture-result {
+  color: var(--accent);
+}
+
+.fixture-date,
+.fixture-result {
+  color: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fixture-ha {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.fixture-tag {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

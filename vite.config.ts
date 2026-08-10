@@ -15,10 +15,12 @@ export default defineConfig({
       // plugin must not generate a competing one at the root.
       manifest: false,
       workbox: {
-        // jpg covers each team's badge.jpg, which is the page background. Left
-        // out of the precache the app comes up bare with no signal, which is
-        // the one condition it exists to survive. png covers the icon sets.
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff2}'],
+        // Every extension here earns its place. jpg is each team's badge.jpg,
+        // the page background. png is the icon sets. json is schedule.json, and
+        // webmanifest each team's manifest. Anything left out of this list is
+        // missing with no signal, which is the one condition the app exists to
+        // survive — the wallpaper and then the schedule were each lost that way.
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff2,json,webmanifest}'],
       },
     }),
   ],
