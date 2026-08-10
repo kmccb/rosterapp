@@ -78,15 +78,29 @@ export const isPositionValue = (s: string): boolean => {
   return parts.length > 0 && parts.length <= 3 && parts.every((p) => ALL_POS.has(p));
 };
 
-/** Side of the ball implied by a position string. '' when unknown or both ways. */
+/** The side one position belongs to. '' for ATH, UTIL and anything unrecognised. */
+export const sideOfPosition = (position: string): Side => {
+  const p = position.trim().toUpperCase();
+  if (OFFENSE.has(p)) return 'O';
+  if (DEFENSE.has(p)) return 'D';
+  if (SPECIAL.has(p)) return 'ST';
+  return '';
+};
+
+/**
+ * The single side to record for a player, for the roster's own column.
+ *
+ * Deliberately gives up on a two-way player: one value cannot hold WR and CB,
+ * and guessing which matters more would be wrong half the time. Filtering
+ * doesn't use this — see sidesOf in roster/filters, which keeps both.
+ */
 export const sideFromPosition = (position: string): Side => {
   const parts = splitPositions(position);
   if (parts.length === 0) return '';
   const sides = new Set<Side>();
   for (const p of parts) {
-    if (OFFENSE.has(p)) sides.add('O');
-    else if (DEFENSE.has(p)) sides.add('D');
-    else if (SPECIAL.has(p)) sides.add('ST');
+    const side = sideOfPosition(p);
+    if (side) sides.add(side);
   }
   // A pure-special-teams player is 'ST'; K/PR alongside a real position isn't.
   if (sides.size === 1) return [...sides][0];

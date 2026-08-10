@@ -2,18 +2,9 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey } from '../parse/rosterParse';
+import { inArea, positionsForArea, positionsOf, sidesOf } from '../roster/filters';
 import type { StatsStore } from '../stats/statsStore';
 import { fullName, type Player, type Roster, type Side } from '../types';
-
-/**
- * "WR/CB" is one player who plays two positions, so it has to count as both —
- * filtering to CB and not finding your two-way corner would just look broken.
- */
-const positionsOf = (p: Player): string[] =>
-  p.position
-    .split('/')
-    .map((s) => s.trim().toUpperCase())
-    .filter(Boolean);
 
 const AREAS: Array<{ value: Side; label: string }> = [
   { value: 'O', label: 'Offense' },
@@ -58,28 +49,22 @@ export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsSto
   );
 
   // Only offer areas the roster actually uses. A roster imported without a side
-  // column would otherwise get three chips that all filter to nothing.
+  // column, and without recognisable positions, would otherwise get three chips
+  // that all filter to nothing.
   const areas = useMemo(
-    () => AREAS.filter((a) => byNumber.some((p) => p.side === a.value)),
+    () => AREAS.filter((a) => byNumber.some((p) => sidesOf(p).includes(a.value))),
     [byNumber],
   );
 
-  const inArea = useMemo(
-    () => (area ? byNumber.filter((p) => p.side === area) : byNumber),
-    [byNumber, area],
-  );
+  const pool = useMemo(() => byNumber.filter((p) => inArea(p, area)), [byNumber, area]);
 
   // Positions come from the roster itself, narrowed to the chosen area, so a
   // chip never leads to an empty list.
-  const positions = useMemo(() => {
-    const seen = new Set<string>();
-    inArea.forEach((p) => positionsOf(p).forEach((pos) => seen.add(pos)));
-    return [...seen].sort();
-  }, [inArea]);
+  const positions = useMemo(() => positionsForArea(byNumber, area), [byNumber, area]);
 
   const players = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return inArea.filter((p) => {
+    return pool.filter((p) => {
       if (position && !positionsOf(p).includes(position)) return false;
       if (!q) return true;
       return (
@@ -88,14 +73,12 @@ export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsSto
         p.number.includes(q)
       );
     });
-  }, [inArea, position, search]);
+  }, [pool, position, search]);
 
-  // Switching area can strand a position that doesn't exist on that side.
+  // Switching area can strand a position that isn't played on that side.
   const pickArea = (next: Side | null) => {
     setArea(next);
-    if (!position) return;
-    const pool = next ? byNumber.filter((p) => p.side === next) : byNumber;
-    if (!pool.some((p) => positionsOf(p).includes(position))) setPosition(null);
+    if (position && !positionsForArea(byNumber, next).includes(position)) setPosition(null);
   };
 
   if (selected) {
