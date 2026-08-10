@@ -10,6 +10,7 @@
  * manifest, which is fixed at build time.
  */
 
+import { scopedKey } from '../scope';
 import { dominantHue, paletteFrom, type Palette } from './palette';
 
 export type Theme = {
@@ -20,7 +21,7 @@ export type Theme = {
   seedHue: number;
 };
 
-const KEY = 'rosterapp.theme.v1';
+const KEY = () => scopedKey('rosterapp.theme.v1');
 
 type Stored = { schema: 1; theme: Theme };
 
@@ -40,7 +41,7 @@ const looksLikeTheme = (v: unknown): v is Theme => {
 
 export const loadTheme = (): Theme | null => {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<Stored>;
     return looksLikeTheme(parsed?.theme) ? parsed.theme : null;
@@ -51,14 +52,14 @@ export const loadTheme = (): Theme | null => {
 
 export const saveTheme = (theme: Theme): void => {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ schema: 1, theme } satisfies Stored));
+    localStorage.setItem(KEY(), JSON.stringify({ schema: 1, theme } satisfies Stored));
   } catch (err) {
     console.error('Could not save the theme', err);
     throw new Error('Could not save the logo — it may be too large for this device.');
   }
 };
 
-export const clearTheme = (): void => localStorage.removeItem(KEY);
+export const clearTheme = (): void => localStorage.removeItem(KEY());
 
 /*
  * A team baked into the page at build time, for sites serving more than one.
@@ -93,18 +94,32 @@ export const bakedTeam = (): BakedTeam | null => {
   return t && t.palette && t.wallpaper ? t : null;
 };
 
+/**
+ * A theme left behind by a different team's page.
+ *
+ * A baked theme names that team's badge by path, so one whose badge isn't this
+ * page's came from somewhere else. Only reachable on the root team, whose keys
+ * stayed unsuffixed when the rest were scoped — and only from before that
+ * change. An uploaded badge is a data URI and can never match this test, so a
+ * coach's own crest is never the thing thrown away.
+ */
+const isForeign = (theme: Theme, baked: BakedTeam | null): boolean =>
+  theme.logo.startsWith('/') && theme.logo !== baked?.wallpaper;
+
 /** The theme to start with: what's stored, else what the page was built with. */
 export function initialTheme(): Theme | null {
-  const stored = loadTheme();
-  if (stored) return stored;
-
   const baked = bakedTeam();
+
+  const stored = loadTheme();
+  if (stored && !isForeign(stored, baked)) return stored;
+  if (stored) clearTheme();
+
   if (!baked) return null;
 
   const theme: Theme = { logo: baked.wallpaper, palette: baked.palette, seedHue: -1 };
   try {
     // Stored so an offline launch, or the root shell, can't undo it.
-    localStorage.setItem(KEY, JSON.stringify({ schema: 1, theme } satisfies Stored));
+    localStorage.setItem(KEY(), JSON.stringify({ schema: 1, theme } satisfies Stored));
   } catch {
     // Not fatal: the page carries it anyway while there's a connection.
   }

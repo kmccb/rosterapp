@@ -7,6 +7,7 @@
  * none of the query-builder surface would get used.
  */
 
+import { scopedKey, teamScope } from '../scope';
 import type { StatsStore } from '../stats/statsStore';
 import type { Theme } from '../theme/theme';
 import type { Player, Roster } from '../types';
@@ -23,11 +24,11 @@ export const sharingAvailable = Boolean(BASE && KEY);
 /** What the coach keeps after publishing. The token is the right to re-publish. */
 export type ShareKey = { code: string; editToken: string };
 
-const SHARE_KEY = 'rosterapp.share.v1';
+const SHARE_KEY = () => scopedKey('rosterapp.share.v1');
 
 export const loadShareKey = (): ShareKey | null => {
   try {
-    const raw = localStorage.getItem(SHARE_KEY);
+    const raw = localStorage.getItem(SHARE_KEY());
     if (!raw) return null;
     const v = JSON.parse(raw) as Partial<ShareKey>;
     return typeof v?.code === 'string' && typeof v?.editToken === 'string'
@@ -39,10 +40,24 @@ export const loadShareKey = (): ShareKey | null => {
 };
 
 export const saveShareKey = (key: ShareKey): void => {
-  localStorage.setItem(SHARE_KEY, JSON.stringify(key));
+  localStorage.setItem(SHARE_KEY(), JSON.stringify(key));
 };
 
-export const clearShareKey = (): void => localStorage.removeItem(SHARE_KEY);
+export const clearShareKey = (): void => localStorage.removeItem(SHARE_KEY());
+
+/**
+ * The right to edit belongs to a roster, not to a device.
+ *
+ * Once this phone holds a roster that came from a different code, the token it
+ * kept no longer describes what's here — and publishing with it would write
+ * this roster over the one that token belongs to. That is reachable today: a
+ * phone that managed two teams while they shared one jar can be holding one
+ * team's roster and the other's token.
+ */
+export const releaseShareKeyUnless = (code: string): void => {
+  const key = loadShareKey();
+  if (key && key.code !== normalizeCode(code)) clearShareKey();
+};
 
 /*
  * Where this device's roster came from, whether it was published here or pulled
@@ -55,11 +70,11 @@ export const clearShareKey = (): void => localStorage.removeItem(SHARE_KEY);
  * Kept separate from the publisher's key above: a parent has a code and no
  * right to change what it points at.
  */
-const SOURCE_KEY = 'rosterapp.source.v1';
+const SOURCE_KEY = () => scopedKey('rosterapp.source.v1');
 
 export const loadSource = (): string | null => {
   try {
-    const code = localStorage.getItem(SOURCE_KEY);
+    const code = localStorage.getItem(SOURCE_KEY());
     return code && code.length === 8 ? code : null;
   } catch {
     return null;
@@ -68,7 +83,7 @@ export const loadSource = (): string | null => {
 
 export const rememberSource = (code: string): void => {
   try {
-    localStorage.setItem(SOURCE_KEY, normalizeCode(code));
+    localStorage.setItem(SOURCE_KEY(), normalizeCode(code));
   } catch {
     // Out of quota or blocked; restore is a convenience, not worth failing over.
   }
@@ -76,8 +91,8 @@ export const rememberSource = (code: string): void => {
 
 export const forgetSource = (): void => {
   try {
-    localStorage.removeItem(SOURCE_KEY);
-    localStorage.removeItem(SYNCED_KEY);
+    localStorage.removeItem(SOURCE_KEY());
+    localStorage.removeItem(SYNCED_KEY());
   } catch {
     /* as above */
   }
@@ -91,11 +106,11 @@ export const forgetSource = (): void => {
  * two would say "up to date" forever. Keeping the server's own stamp is the
  * only way to tell a fresh publish from one already seen.
  */
-const SYNCED_KEY = 'rosterapp.synced.v1';
+const SYNCED_KEY = () => scopedKey('rosterapp.synced.v1');
 
 export const loadSynced = (): string | null => {
   try {
-    return localStorage.getItem(SYNCED_KEY);
+    return localStorage.getItem(SYNCED_KEY());
   } catch {
     return null;
   }
@@ -103,7 +118,7 @@ export const loadSynced = (): string | null => {
 
 export const rememberSynced = (stamp: string): void => {
   try {
-    localStorage.setItem(SYNCED_KEY, stamp);
+    localStorage.setItem(SYNCED_KEY(), stamp);
   } catch {
     /* a missed sync stamp costs one redundant fetch, nothing more */
   }
@@ -127,8 +142,13 @@ export const normalizeCode = (code: string): string =>
  * are never sent to the server, so it stays out of GitHub's access logs and out
  * of the Referer header of anything the page later loads.
  */
-export const shareUrl = (code: string): string =>
-  `${window.location.origin}${window.location.pathname}#${formatCode(code)}`;
+export const shareUrl = (code: string): string => {
+  // Built from the team rather than from location.pathname, which can be
+  // `/index.html` — a link that then opens a page the service worker treats as
+  // a different address than the one the app was installed at.
+  const scope = teamScope();
+  return `${window.location.origin}/${scope ? `${scope}/` : ''}#${formatCode(code)}`;
+};
 
 /**
  * Reads a share code out of the current URL. Deliberately leaves it there.

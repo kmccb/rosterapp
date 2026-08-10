@@ -6,6 +6,7 @@ import {
   loadSource,
   loadSynced,
   normalizeCode,
+  releaseShareKeyUnless,
   rememberSource,
   rememberSynced,
   sharingAvailable,
@@ -158,6 +159,7 @@ export default function App() {
         // A followed link ties this device to that roster from now on, so it
         // restores itself later exactly like a code typed in by hand.
         rememberSource(code);
+        releaseShareKeyUnless(code);
         // The publisher's own stamp, so the next launch can tell a fresh
         // upload from the copy already sitting here.
         rememberSynced(found.updatedAt);
@@ -215,7 +217,10 @@ export default function App() {
       });
       // Only once it's saved: pulling a code and then abandoning the review
       // shouldn't tie this device to someone else's roster.
-      if (meta?.sourceCode) rememberSource(meta.sourceCode);
+      if (meta?.sourceCode) {
+        rememberSource(meta.sourceCode);
+        releaseShareKeyUnless(meta.sourceCode);
+      }
       if (meta?.stats && Object.keys(meta.stats).length > 0) {
         saveStats(meta.stats);
         setStats(meta.stats);

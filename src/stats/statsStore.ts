@@ -8,6 +8,7 @@
  */
 
 import type { PlayerStats } from './statsMatch';
+import { scopedKey } from '../scope';
 
 export type SeasonBucket = 'previous' | 'current';
 
@@ -20,7 +21,7 @@ export type SeasonStats = {
 
 export type StatsStore = Partial<Record<SeasonBucket, SeasonStats>>;
 
-const KEY = 'rosterapp.stats.v1';
+const KEY = () => scopedKey('rosterapp.stats.v1');
 
 type Stored = { schema: 1; stats: StatsStore };
 
@@ -33,7 +34,7 @@ const isSeason = (v: unknown): v is SeasonStats => {
 /** Anything unreadable reads as "no stats", exactly like the roster does. */
 export const loadStats = (): StatsStore => {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Partial<Stored>;
     const stats = parsed?.stats;
@@ -50,7 +51,7 @@ export const loadStats = (): StatsStore => {
 export const saveStats = (stats: StatsStore): void => {
   const stored: Stored = { schema: 1, stats };
   try {
-    localStorage.setItem(KEY, JSON.stringify(stored));
+    localStorage.setItem(KEY(), JSON.stringify(stored));
   } catch (err) {
     console.error('Could not save the stats', err);
     throw new Error('Could not save the stats — device storage may be full or blocked.');
@@ -75,4 +76,4 @@ export const clearSeason = (bucket: SeasonBucket): StatsStore => {
   return next;
 };
 
-export const clearStats = (): void => localStorage.removeItem(KEY);
+export const clearStats = (): void => localStorage.removeItem(KEY());

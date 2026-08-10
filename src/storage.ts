@@ -1,6 +1,7 @@
+import { scopedKey } from './scope';
 import { emptyRoster, type Player, type Roster } from './types';
 
-const KEY = 'rosterapp.v1';
+const KEY = () => scopedKey('rosterapp.v1');
 
 type Stored = { schema: 1; roster: Roster };
 
@@ -13,7 +14,7 @@ const isPlayer = (v: unknown): v is Player => {
 /** Anything unreadable is treated as "no roster yet" rather than crashing the app. */
 export const loadRoster = (): Roster => {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (!raw) return emptyRoster();
     const parsed = JSON.parse(raw) as Partial<Stored>;
     const roster = parsed?.roster;
@@ -32,7 +33,7 @@ export const loadRoster = (): Roster => {
 export const saveRoster = (roster: Roster): void => {
   const stored: Stored = { schema: 1, roster: { ...roster, updatedAt: new Date().toISOString() } };
   try {
-    localStorage.setItem(KEY, JSON.stringify(stored));
+    localStorage.setItem(KEY(), JSON.stringify(stored));
   } catch (err) {
     // Private-mode Safari and a full quota both land here.
     console.error('Could not save the roster', err);
@@ -40,4 +41,4 @@ export const saveRoster = (roster: Roster): void => {
   }
 };
 
-export const clearRoster = (): void => localStorage.removeItem(KEY);
+export const clearRoster = (): void => localStorage.removeItem(KEY());
