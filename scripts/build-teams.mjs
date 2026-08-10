@@ -181,10 +181,23 @@ const teams = await readTeams();
 const hasSchedule = new Map();
 
 if (phase === 'pre') {
+  /*
+   * A team that was renamed or dropped leaves its whole directory behind in
+   * public/, and the glob that builds the precache doesn't know it is stale —
+   * so the dead team's icons and badge ship, and get cached on every phone.
+   * Clearing only the directories of teams that still exist can't catch that,
+   * because the orphan is by definition not one of them.
+   */
+  const live = new Set(teams.filter((t) => !t.root).map((t) => t.slug));
+  for (const dir of await readdir(publicDir, { withFileTypes: true })) {
+    if (dir.isDirectory() && dir.name !== 'icons' && !live.has(dir.name)) {
+      console.log(`           removing public/${dir.name}/ — no such team`);
+      await rm(join(publicDir, dir.name), { recursive: true, force: true });
+    }
+  }
+
   for (const team of teams) {
     const out = team.root ? publicDir : join(publicDir, team.slug);
-    // Cleared first so a renamed or removed team doesn't leave orphans behind
-    // in the build.
     if (!team.root) await rm(out, { recursive: true, force: true });
     await mkdir(out, { recursive: true });
 
