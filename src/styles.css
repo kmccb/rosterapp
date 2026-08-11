@@ -1152,6 +1152,49 @@ a.btn {
   white-space: nowrap;
 }
 
+.player-stat {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.player-stat-who {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.player-stat-number {
+  min-width: 28px;
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-stat-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.player-stat-pos {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.player-stat-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 3px 0 0 36px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.player-stat-line b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 .season-head {
   display: flex;
   align-items: baseline;

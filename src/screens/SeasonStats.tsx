@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 
 type Stat = { label: string; value: string };
 type Category = { name: string; label: string; stats: Stat[] };
-type Season = { year: number; record: string; categories: Category[] };
+type SeasonPlayer = { name: string; number: string; position: string; lines: Stat[] };
+type Season = { year: number; record: string; categories: Category[]; players?: SeasonPlayer[] };
 
 /**
  * The record, season by season.
@@ -17,6 +18,7 @@ export function SeasonStats({ base }: { base: string }) {
   const [failed, setFailed] = useState(false);
   const [year, setYear] = useState<number | null>(null);
   const [open, setOpen] = useState<string | null>(null);
+  const [who, setWho] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +55,19 @@ export function SeasonStats({ base }: { base: string }) {
     [seasons, year],
   );
 
+  // Name, number or position — whichever someone happens to know.
+  const players = useMemo(() => {
+    const all = season?.players ?? [];
+    const q = who.trim().toLowerCase();
+    if (!q) return all;
+    return all.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.position.toLowerCase().includes(q) ||
+        p.number.includes(q),
+    );
+  }, [season, who]);
+
   if (failed) {
     return (
       <div className="screen">
@@ -82,6 +97,9 @@ export function SeasonStats({ base }: { base: string }) {
               // A category left open under one year may not exist under
               // another, and an empty panel looks like a fault.
               setOpen(null);
+              // The filter is almost always a name, and a name rarely spans
+              // two decades — carrying it across would look like nobody played.
+              setWho('');
             }}
           >
             {seasons.map((s) => (
@@ -94,6 +112,7 @@ export function SeasonStats({ base }: { base: string }) {
         {season.record && <span className="season-record">{season.record.replace('-', '–')}</span>}
       </div>
 
+      <h2 className="section">Team</h2>
       <p className="hint">
         {seasons[seasons.length - 1].year}–{seasons[0].year}. Tap a heading for the detail.
       </p>
@@ -125,6 +144,52 @@ export function SeasonStats({ base }: { base: string }) {
           </div>
         ))}
       </div>
+
+      {(season.players?.length ?? 0) > 0 && (
+        <>
+          <div className="season-head">
+            <h2 className="section">Players</h2>
+            <span className="cat-count">
+              {players.length === season.players!.length
+                ? `${players.length}`
+                : `${players.length} of ${season.players!.length}`}
+            </span>
+          </div>
+          <input
+            className="input search"
+            type="search"
+            value={who}
+            onChange={(e) => setWho(e.target.value)}
+            placeholder="Search name, position or number"
+            aria-label={`Search ${season.year} players`}
+          />
+
+          {players.length === 0 ? (
+            <p className="empty-text">Nobody by that name played in {season.year}.</p>
+          ) : (
+            <div className="fixtures">
+              {players.map((p) => (
+                <div className="player-stat" key={`${p.number}-${p.name}`}>
+                  <div className="player-stat-who">
+                    <span className="player-stat-number">{p.number || '—'}</span>
+                    <span className="player-stat-name">{p.name}</span>
+                    {p.position && <span className="player-stat-pos">{p.position}</span>}
+                  </div>
+                  {/* Two to four numbers each, so they are shown rather than
+                      hidden behind a tap the way the team's two hundred are. */}
+                  <div className="player-stat-lines">
+                    {p.lines.map((l) => (
+                      <span className="player-stat-line" key={l.label}>
+                        <b>{l.value}</b> {l.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

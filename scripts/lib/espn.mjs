@@ -203,14 +203,46 @@ const inBatches = async (items, size, fn) => {
  * hole in the record for everyone, and a dropdown entry leading to nothing is
  * worse than one that isn't there.
  */
+/**
+ * Who played that year, and what they did.
+ *
+ * The same roster endpoint answers for any past season, statistics included,
+ * so a whole year costs one request rather than one per player. Only players
+ * who actually recorded something are kept: a squad list is 170 names and the
+ * question here is what happened, not who was on the sideline.
+ */
+async function playersFor(id, year) {
+  const data = await getJson(`${ROSTER(id)}&season=${year}`);
+  const athletes = (data?.positionGroups ?? []).flatMap((g) => g.athletes ?? []);
+
+  const seen = new Set();
+  const players = [];
+  for (const a of athletes) {
+    if (seen.has(a.id)) continue;
+    seen.add(a.id);
+    const lines = linesFor(a.statistics?.splits?.categories ?? []);
+    if (!lines.length) continue;
+    players.push({
+      name: a.displayName ?? [a.firstName, a.lastName].filter(Boolean).join(' '),
+      number: String(a.jersey ?? '').trim(),
+      position: a.position?.abbreviation ?? '',
+      lines,
+    });
+  }
+
+  players.sort((x, y) => (Number(x.number) || 999) - (Number(y.number) || 999));
+  return players;
+}
+
 export async function fetchEspnSeasons(id, from, to) {
   const years = [];
   for (let y = to; y >= from; y--) years.push(y);
 
   const seasons = await inBatches(years, 4, async (year) => {
-    const [stats, record] = await Promise.all([
+    const [stats, record, players] = await Promise.all([
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/statistics`),
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/record`),
+      playersFor(id, year),
     ]);
 
     const categories = (stats?.splits?.categories ?? [])
@@ -229,7 +261,7 @@ export async function fetchEspnSeasons(id, from, to) {
     // A season with a record and no statistics is one that hasn't been played
     // yet. Listing it would put an empty year at the top of the dropdown.
     if (!categories.length) return null;
-    return { year, record: summary, categories };
+    return { year, record: summary, categories, players };
   });
 
   return seasons.filter(Boolean);
