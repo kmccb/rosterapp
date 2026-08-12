@@ -164,20 +164,90 @@ export async function fetchEspnRoster(id) {
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports/football/leagues/college-football';
 
-/** ESPN's own words for each bucket; its category names are code, not English. */
-const CATEGORY_LABELS = {
-  general: 'General',
-  passing: 'Passing',
-  rushing: 'Rushing',
-  receiving: 'Receiving',
-  defensive: 'Defence',
-  defensiveInterceptions: 'Interceptions',
-  kicking: 'Kicking',
-  returning: 'Returning',
-  punting: 'Punting',
-  scoring: 'Scoring',
-  miscellaneous: 'Drives and downs',
+/*
+ * The team stats worth a screen, and nothing else.
+ *
+ * The API hands over about two hundred figures a season — forced fumbles by
+ * primary defender, average stuff yards, kickoff return yards allowed. Dumped
+ * whole under their own headings it reads as a database rather than a season.
+ * This is the set somebody actually asks about, in the order they'd ask.
+ *
+ * Named by the API's own keys rather than its display text, which changes.
+ *
+ * One thing genuinely isn't here: total yards, for or against. ESPN stopped
+ * compiling team offensive totals for this division around 2012, and building
+ * them out of the player rows would be wrong in the years where player
+ * coverage is thin. Better absent than wrong.
+ */
+const TEAM_SECTIONS = [
+  ['Scoring', [
+    ['scoring', 'totalPoints', 'Points'],
+    ['scoring', 'totalPointsPerGame', 'Points per game'],
+    ['scoring', 'passingTouchdowns', 'Passing TD'],
+    ['scoring', 'rushingTouchdowns', 'Rushing TD'],
+    ['scoring', 'receivingTouchdowns', 'Receiving TD'],
+    ['scoring', 'returnTouchdowns', 'Return TD'],
+    ['scoring', 'fieldGoals', 'Field goals'],
+    ['scoring', 'kickExtraPointsMade', 'Extra points'],
+  ]],
+  ['Moving the ball', [
+    ['miscellaneous', 'firstDowns', 'First downs'],
+    ['miscellaneous', 'firstDownsPerGame', 'First downs per game'],
+    ['miscellaneous', 'firstDownsPassing', 'Passing first downs'],
+    ['miscellaneous', 'firstDownsRushing', 'Rushing first downs'],
+    ['miscellaneous', 'thirdDownConvPct', 'Third down'],
+    ['miscellaneous', 'fourthDownConvPct', 'Fourth down'],
+    ['miscellaneous', 'redzoneScoringPct', 'Red zone'],
+    ['miscellaneous', 'redzoneTouchdownPct', 'Red zone TD'],
+    ['miscellaneous', 'totalDrives', 'Drives'],
+    ['miscellaneous', 'possessionTimeSeconds', 'Time of possession'],
+  ]],
+  ['Defence', [
+    ['defensive', 'totalTackles', 'Tackles'],
+    ['defensive', 'soloTackles', 'Solo tackles'],
+    ['defensive', 'sacks', 'Sacks'],
+    ['defensive', 'sackYards', 'Sack yards'],
+    ['defensive', 'tacklesForLoss', 'Tackles for loss'],
+    ['defensive', 'passesDefended', 'Passes defended'],
+    ['defensiveInterceptions', 'interceptions', 'Interceptions'],
+    ['defensiveInterceptions', 'interceptionTouchdowns', 'Pick sixes'],
+  ]],
+  ['Turnovers and discipline', [
+    ['miscellaneous', 'totalTakeaways', 'Takeaways'],
+    ['miscellaneous', 'totalGiveaways', 'Giveaways'],
+    ['miscellaneous', 'turnOverDifferential', 'Turnover margin'],
+    ['general', 'fumblesForced', 'Fumbles forced'],
+    ['general', 'fumblesRecovered', 'Fumbles recovered'],
+    ['miscellaneous', 'totalPenalties', 'Penalties'],
+    ['miscellaneous', 'totalPenaltyYards', 'Penalty yards'],
+  ]],
+];
+
+/**
+ * Possession, per game.
+ *
+ * The API reports it as seconds for the whole season, which comes out as
+ * "405:49" and means nothing to anyone. Divided by games played it is the
+ * half-hour or so people picture.
+ */
+const asTimePerGame = (seconds, games) => {
+  const n = Number(seconds) / (Number(games) || 0);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.floor(n / 60) + ':' + String(Math.round(n % 60)).padStart(2, '0');
 };
+
+/**
+ * A zero here almost never means zero.
+ *
+ * ESPN carries the full schema for every division but only fills in what it
+ * compiles, so this team's older seasons report 0 tackles and 0 red zone
+ * attempts beside 21 sacks. Printing those as facts is worse than leaving the
+ * row out — a season where nobody made a tackle is obviously wrong, and it
+ * makes the figures beside it look wrong too.
+ *
+ * The cost is dropping the occasional true zero, which nobody misses.
+ */
+const isUnfilled = (value) => /^0(\.0+)?%?$/.test(String(value).trim());
 
 const getJson = async (url) => {
   const res = await fetch(url, {
@@ -242,18 +312,42 @@ export async function fetchEspnSeasons(id, from, to) {
     const [stats, record, players] = await Promise.all([
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/statistics`),
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/record`),
-      playersFor(id, year),
+      Promise.resolve([]),
     ]);
 
-    const categories = (stats?.splits?.categories ?? [])
-      .map((c) => ({
-        name: c.name,
-        label: CATEGORY_LABELS[c.name] ?? c.displayName ?? c.name,
-        stats: (c.stats ?? [])
-          .filter((s) => s && s.displayValue != null && s.displayValue !== '')
-          .map((s) => ({ label: s.displayName ?? s.name, value: String(s.displayValue) })),
-      }))
-      .filter((c) => c.stats.length > 0);
+    const raw = new Map();
+    for (const c of stats?.splits?.categories ?? []) {
+      for (const s of c.stats ?? []) {
+        if (s && s.displayValue != null && s.displayValue !== '') {
+          raw.set(c.name + '.' + s.name, String(s.displayValue));
+        }
+      }
+    }
+
+    const games = raw.get('general.gamesPlayed');
+
+    const categories = TEAM_SECTIONS.map(([label, wanted]) => ({
+      name: label.toLowerCase().replace(/\W+/g, '-'),
+      label,
+      stats: wanted
+        .map(([cat, key, as]) => {
+          const value = raw.get(cat + '.' + key);
+          if (value == null || isUnfilled(value)) return null;
+          if (key === 'possessionTimeSeconds') {
+            const t = asTimePerGame(value, games);
+            return t ? { label: as + ' per game', value: t } : null;
+          }
+          // Two decimal places on a conversion rate is false precision, and
+          // '47.47%' is harder to read than '47%' without telling you more.
+          const n = Number(value);
+          if (key.endsWith('Pct')) return { label: as, value: Math.round(n) + '%' };
+          if (Number.isFinite(n) && !Number.isInteger(n)) {
+            return { label: as, value: String(Math.round(n * 10) / 10) };
+          }
+          return { label: as, value };
+        })
+        .filter(Boolean),
+    })).filter((c) => c.stats.length > 0);
 
     const overall = record?.items?.find((i) => i.type === 'total') ?? record?.items?.[0];
     const summary = overall?.displayValue ?? '';

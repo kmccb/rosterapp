@@ -1,24 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Stat = { label: string; value: string };
-type Category = { name: string; label: string; stats: Stat[] };
+type Section = { name: string; label: string; stats: Stat[] };
 type SeasonPlayer = { name: string; number: string; position: string; lines: Stat[] };
-type Season = { year: number; record: string; categories: Category[]; players?: SeasonPlayer[] };
+type Season = { year: number; record: string; categories: Section[]; players?: SeasonPlayer[] };
 
 /**
  * The record, season by season.
  *
- * Two decades of it, and around two hundred figures a year, which is far more
- * than anyone reads top to bottom. So the year leads, the record sits next to
- * it as the one number everybody wants, and the rest stays folded away by
- * category until somebody goes looking for it.
+ * Two things people come here for and they are different questions: how the
+ * team did, and what one player did. So they are two sections under one year,
+ * rather than two hundred figures under headings nobody chose.
  */
 export function SeasonStats({ base }: { base: string }) {
   const [seasons, setSeasons] = useState<Season[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [year, setYear] = useState<number | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
   const [who, setWho] = useState('');
+  const strip = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,23 +50,31 @@ export function SeasonStats({ base }: { base: string }) {
     };
   }, [base]);
 
-  const season = useMemo(
-    () => seasons?.find((s) => s.year === year) ?? null,
-    [seasons, year],
+  const season = useMemo(() => seasons?.find((s) => s.year === year) ?? null, [seasons, year]);
+  const squad = useMemo(() => season?.players ?? [], [season]);
+
+  /** Only positions somebody actually played that year. */
+  const positions = useMemo(
+    () => [...new Set(squad.map((p) => p.position).filter(Boolean))].sort(),
+    [squad],
   );
 
-  // Name, number or position — whichever someone happens to know.
   const players = useMemo(() => {
-    const all = season?.players ?? [];
     const q = who.trim().toLowerCase();
-    if (!q) return all;
-    return all.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.position.toLowerCase().includes(q) ||
-        p.number.includes(q),
-    );
-  }, [season, who]);
+    return squad.filter((p) => {
+      if (position && p.position !== position) return false;
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.number.includes(q);
+    });
+  }, [squad, position, who]);
+
+  const pickYear = (next: number) => {
+    setYear(next);
+    // A position or a name rarely spans two decades, and carrying either
+    // across would make a season look empty when it isn't.
+    setPosition(null);
+    setWho('');
+  };
 
   if (failed) {
     return (
@@ -86,86 +94,96 @@ export function SeasonStats({ base }: { base: string }) {
 
   return (
     <div className="screen">
-      <div className="season-pick">
-        <label className="season-year">
-          <span className="visually-hidden">Season</span>
-          <select
-            className="season-select"
-            value={season.year}
-            onChange={(e) => {
-              setYear(Number(e.target.value));
-              // A category left open under one year may not exist under
-              // another, and an empty panel looks like a fault.
-              setOpen(null);
-              // The filter is almost always a name, and a name rarely spans
-              // two decades — carrying it across would look like nobody played.
-              setWho('');
+      {/*
+        A strip rather than a dropdown: twenty-one years is few enough to slide
+        through with a thumb, and it looks like the rest of the app instead of
+        like the operating system.
+      */}
+      <div className="years" ref={strip} role="group" aria-label="Season">
+        {seasons.map((s) => (
+          <button
+            key={s.year}
+            type="button"
+            className={`chip year-chip${s.year === season.year ? ' active' : ''}`}
+            onClick={(e) => {
+              pickYear(s.year);
+              e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'center' });
             }}
+            aria-pressed={s.year === season.year}
           >
-            {seasons.map((s) => (
-              <option key={s.year} value={s.year}>
-                {s.year}
-              </option>
-            ))}
-          </select>
-        </label>
-        {season.record && <span className="season-record">{season.record.replace('-', '–')}</span>}
-      </div>
-
-      <h2 className="section">Team</h2>
-      <p className="hint">
-        {seasons[seasons.length - 1].year}–{seasons[0].year}. Tap a heading for the detail.
-      </p>
-
-      <div className="fixtures">
-        {season.categories.map((c) => (
-          <div className="fixture" key={c.name}>
-            <button
-              type="button"
-              className="fixture-row cat-row"
-              onClick={() => setOpen((cur) => (cur === c.name ? null : c.name))}
-              aria-expanded={open === c.name}
-            >
-              <span className="cat-label">{c.label}</span>
-              <span className="cat-count">{c.stats.length}</span>
-              <span className="fixture-caret" aria-hidden="true" />
-            </button>
-
-            {open === c.name && (
-              <dl className="cat-stats">
-                {c.stats.map((s) => (
-                  <div className="cat-stat" key={s.label}>
-                    <dt>{s.label}</dt>
-                    <dd>{s.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </div>
+            {s.year}
+          </button>
         ))}
       </div>
 
-      {(season.players?.length ?? 0) > 0 && (
-        <>
-          <div className="season-head">
-            <h2 className="section">Players</h2>
-            <span className="cat-count">
-              {players.length === season.players!.length
-                ? `${players.length}`
-                : `${players.length} of ${season.players!.length}`}
-            </span>
+      <div className="season-banner">
+        <span className="season-banner-year">{season.year}</span>
+        {season.record && (
+          <span className="season-banner-record">{season.record.replace('-', '–')}</span>
+        )}
+      </div>
+
+      <h2 className="section">Team</h2>
+      {season.categories.map((c) => (
+        <section key={c.name} className="stat-block">
+          <h3 className="stat-block-title">{c.label}</h3>
+          <div className="card-lines">
+            {c.stats.map((s) => (
+              <div key={s.label} className="card-line">
+                <span className="card-line-value">{s.value}</span>
+                <span className="card-line-label">{s.label}</span>
+              </div>
+            ))}
           </div>
+        </section>
+      ))}
+
+      <div className="season-head">
+        <h2 className="section">Players</h2>
+        <span className="cat-count">
+          {players.length === squad.length ? squad.length : `${players.length} of ${squad.length}`}
+        </span>
+      </div>
+
+      {squad.length === 0 ? (
+        <p className="hint">No player figures on record for {season.year}.</p>
+      ) : (
+        <>
+          {positions.length > 1 && (
+            <div className="chips" role="group" aria-label="Filter by position">
+              <button
+                type="button"
+                className={`chip${position === null ? ' active' : ''}`}
+                onClick={() => setPosition(null)}
+                aria-pressed={position === null}
+              >
+                All
+              </button>
+              {positions.map((pos) => (
+                <button
+                  key={pos}
+                  type="button"
+                  className={`chip${position === pos ? ' active' : ''}`}
+                  onClick={() => setPosition(pos)}
+                  aria-pressed={position === pos}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
+          )}
+
           <input
             className="input search"
             type="search"
             value={who}
             onChange={(e) => setWho(e.target.value)}
-            placeholder="Search name, position or number"
+            placeholder="Search by name or number"
             aria-label={`Search ${season.year} players`}
           />
 
           {players.length === 0 ? (
-            <p className="empty-text">Nobody by that name played in {season.year}.</p>
+            <p className="empty-text">Nobody matches that in {season.year}.</p>
           ) : (
             <div className="fixtures">
               {players.map((p) => (
@@ -175,11 +193,11 @@ export function SeasonStats({ base }: { base: string }) {
                     <span className="player-stat-name">{p.name}</span>
                     {p.position && <span className="player-stat-pos">{p.position}</span>}
                   </div>
-                  {/* Two to four numbers each, so they are shown rather than
-                      hidden behind a tap the way the team's two hundred are. */}
+                  {/* A handful of numbers each, so they are shown rather than
+                      hidden behind a tap. */}
                   <div className="player-stat-lines">
-                    {p.lines.map((l) => (
-                      <span className="player-stat-line" key={l.label}>
+                    {p.lines.map((l, i) => (
+                      <span className="player-stat-line" key={`${l.label}-${i}`}>
                         <b>{l.value}</b> {l.label}
                       </span>
                     ))}

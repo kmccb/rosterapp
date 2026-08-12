@@ -1076,30 +1076,69 @@ a.btn {
 .h2h-w { color: var(--ok); font-weight: 700; }
 .h2h-l { color: var(--danger); font-weight: 700; }
 
-.season-pick {
+/* A thumb-slid strip of years, in the app's own chips rather than the
+   operating system's picker. Edge-to-edge so it reads as scrollable, with the
+   screen's padding put back inside it. */
+.years {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 8px;
+  margin: 0 -14px;
+  padding: 2px 14px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* The native control on purpose: on a phone it opens the system picker, which
-   is a better year wheel than anything worth building here. */
-.season-select {
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-2);
-  color: var(--text);
+.years::-webkit-scrollbar {
+  display: none;
+}
+
+.year-chip {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.season-banner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.season-banner-year {
+  font-size: clamp(30px, 9vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.season-banner-record {
+  color: var(--accent);
   font-size: 26px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
-.season-select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.stat-block {
+  margin-top: 16px;
+}
+
+.stat-block-title {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The tiles are shared with the player card, where they sit under a heading
+   already; here they are the first thing in the block. */
+.stat-block .card-lines {
+  margin-top: 0;
 }
 
 /* Both selectors are one class, and .fixture-row is declared later in this

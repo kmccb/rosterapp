@@ -170,10 +170,30 @@ async function writeSeasons(team, out) {
     const from = team.seasonsFrom ?? 2004;
     const seasons = await fetchEspnSeasons(team.espn, from, new Date().getFullYear());
     if (!seasons.length) return;
+
+    /*
+     * Player rows come from a committed file rather than from this build.
+     * Splitting a player's career by season costs one request each and there
+     * are 780 of them across two decades — see scripts/fetch-players.mjs, and
+     * the bug that made it necessary.
+     */
+    const file = join(teamsDir, team.slug, 'players.json');
+    const byYear = existsSync(file)
+      ? (JSON.parse(await readFile(file, 'utf8')).seasons ?? {})
+      : {};
+    for (const season of seasons) {
+      season.players = (byYear[String(season.year)] ?? []).map((p) => ({
+        name: p.name,
+        number: p.n,
+        position: p.pos,
+        lines: (p.s ?? []).map(([label, value]) => ({ label, value })),
+      }));
+    }
     await writeFile(join(out, 'seasons.json'), JSON.stringify({ seasons }));
     console.log(
       `           seasons  ${seasons.length} (${seasons[seasons.length - 1].year}–${seasons[0].year}), ` +
-        `${seasons.reduce((n, s) => n + s.categories.reduce((m, c) => m + c.stats.length, 0), 0)} figures`,
+        `${seasons.reduce((n, s) => n + s.categories.reduce((m, c) => m + c.stats.length, 0), 0)} team figures, ` +
+        `${seasons.reduce((n, s) => n + s.players.length, 0)} player seasons`,
     );
   } catch (err) {
     console.warn(`  ! ${team.slug}: could not read the season history (${err.message}).`);
