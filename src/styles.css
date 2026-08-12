@@ -1067,12 +1067,6 @@ a.btn {
   font-size: 15px;
 }
 
-.h2h-more {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
 .h2h-w { color: var(--ok); font-weight: 700; }
 .h2h-l { color: var(--danger); font-weight: 700; }
 
