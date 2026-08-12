@@ -25,7 +25,7 @@ import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchEspnRoster, fetchEspnSeasons } from './lib/espn.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
-import { parseIcal, nextGame, opponentKey, tidyOpponent } from '../src/schedule/icalParse.ts';
+import { parseIcal, nextGame, canonicalOpponent } from '../src/schedule/icalParse.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
@@ -263,10 +263,13 @@ async function writeSchedule(team, out) {
     ? JSON.parse(await readFile(join(teamsDir, team.slug, 'history.json'), 'utf8'))
     : [];
 
+  // Both sides go through the same alias table, so a school the record book and
+  // the calendar feed name differently still lands on one key.
+  const aliases = team.opponentAliases ?? {};
+
   const history = raw.map(([date, opponent, home, us, them]) => ({
     date,
-    opponent: tidyOpponent(opponent),
-    opponentKey: opponentKey(opponent),
+    ...canonicalOpponent(opponent, aliases),
     home: Boolean(home),
     scrimmage: false,
     result: { us, them, won: us > them },
@@ -285,7 +288,7 @@ async function writeSchedule(team, out) {
   try {
     const res = await fetch(team.schedule, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { games, teamName } = parseIcal(await res.text());
+    const { games, teamName } = parseIcal(await res.text(), aliases);
     const weather = await forecastFor(team, games);
 
     await writeFile(
@@ -298,6 +301,25 @@ async function writeSchedule(team, out) {
       `           schedule ${games.length} events, ${games.filter((g) => !g.scrimmage).length} games, ` +
         `${played} played, ${history.length} in history`,
     );
+
+    /*
+     * A fixture whose opponent has no history at all is either genuinely new or
+     * a name the two sources spell differently — which is exactly how fifteen
+     * meetings with Niles went missing. Say so at build time rather than
+     * letting the app quietly report no previous meetings.
+     */
+    if (history.length) {
+      const known = new Set(history.map((g) => g.opponentKey));
+      const unseen = games
+        .filter((g) => !g.scrimmage && !known.has(g.opponentKey))
+        .map((g) => g.opponent);
+      if (unseen.length) {
+        console.warn(
+          `  ? ${team.slug}: no history against ${[...new Set(unseen)].join(', ')}. ` +
+            `New opponent, or a name mismatch needing an entry in opponentAliases.`,
+        );
+      }
+    }
     return true;
   } catch (err) {
     console.warn(

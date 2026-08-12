@@ -1,4 +1,4 @@
-import { headToHead, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
+import { canonicalOpponent, headToHead, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
 
 /*
  * Copied from the school's live ScheduleStar feed, folding and all. The folded
@@ -191,5 +191,54 @@ describe('headToHead', () => {
   it('reports nothing rather than guessing for a new opponent', () => {
     const h = headToHead(history, opponentKey('Kirtland'));
     expect(h).toEqual({ played: 0, won: 0, lost: 0, meetings: [] });
+  });
+});
+
+describe('canonicalOpponent', () => {
+  // Poland's record book files fifteen meetings under "McKinley"; the school's
+  // calendar feed calls the same school Niles McKinley. Nothing matched, so a
+  // team they have played every year since 2011 showed no previous meetings.
+  const aliases = {
+    mckinley: 'Niles McKinley',
+    niles: 'Niles McKinley',
+    nilesmckinley: 'Niles McKinley',
+  };
+
+  it('lands every spelling of one school on the same key', () => {
+    const keys = ['McKinley', 'Niles', 'Niles McKinley', 'Niles McKinley High School'].map(
+      (name) => canonicalOpponent(name, aliases).opponentKey,
+    );
+    expect(new Set(keys).size).toBe(1);
+    expect(keys[0]).toBe(opponentKey('Niles McKinley'));
+  });
+
+  it('prints the name the team actually uses', () => {
+    expect(canonicalOpponent('McKinley', aliases).opponent).toBe('Niles McKinley');
+  });
+
+  it('leaves a school with no alias exactly as it was', () => {
+    expect(canonicalOpponent('Struthers High School', aliases)).toEqual({
+      opponent: 'Struthers',
+      opponentKey: 'struthers',
+    });
+  });
+
+  it('changes nothing at all when a team declares no aliases', () => {
+    expect(canonicalOpponent('McKinley')).toEqual({ opponent: 'McKinley', opponentKey: 'mckinley' });
+  });
+
+  it('matches a feed fixture to the record book through the alias', () => {
+    const feed = parseIcal(
+      'BEGIN:VEVENT\nSUMMARY:Poland Seminary vs Niles McKinley High School | F | Home\nDTSTART:20260925T230000Z\nEND:VEVENT',
+      aliases,
+    ).games;
+
+    // How the build expands a terse history row, aliases and all.
+    const book = [
+      { date: '2025-09-26', ...canonicalOpponent('McKinley', aliases), home: true, scrimmage: false, result: { us: 21, them: 14, won: true } },
+      { date: '2024-09-27', ...canonicalOpponent('McKinley', aliases), home: false, scrimmage: false, result: { us: 7, them: 28, won: false } },
+    ];
+
+    expect(headToHead(book, feed[0].opponentKey).played).toBe(2);
   });
 });

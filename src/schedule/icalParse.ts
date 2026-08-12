@@ -70,6 +70,35 @@ export const opponentKey = (name: string): string =>
   tidyOpponent(name).toLowerCase().replace(/[^a-z0-9]/g, '');
 
 /**
+ * Maps the names one school goes by onto a single one.
+ *
+ * Schools rarely answer to one name. A calendar feed prints the legal one and a
+ * record book prints what everyone says — Poland's own history has fifteen
+ * meetings filed under "McKinley" while the feed calls the same school Niles
+ * McKinley, so the head-to-head found nothing against a team they play every
+ * year.
+ *
+ * Deliberately per-team and hand-written rather than fuzzy: "McKinley" means
+ * Niles to Poland and Canton to half of Stark County, and no amount of string
+ * distance knows which. Each team declares its own in teams/<slug>/team.json.
+ */
+export type OpponentAliases = Record<string, string>;
+
+/**
+ * Resolve a name to the one this team files that school under.
+ * Unknown names pass straight through, so an empty table changes nothing.
+ */
+export const canonicalOpponent = (
+  raw: string,
+  aliases: OpponentAliases = {},
+): { opponent: string; opponentKey: string } => {
+  const key = opponentKey(raw);
+  const alias = aliases[key];
+  if (!alias) return { opponent: tidyOpponent(raw), opponentKey: key };
+  return { opponent: tidyOpponent(alias), opponentKey: opponentKey(alias) };
+};
+
+/**
  * A played game's score, if the feed has started carrying one.
  *
  * The feed showed no results while the season was still ahead of it, so the
@@ -101,7 +130,7 @@ const parseScore = (text: string, weAreHome: boolean): Game['result'] | undefine
 
 export type ParsedSchedule = { games: Game[]; teamName: string };
 
-export function parseIcal(text: string): ParsedSchedule {
+export function parseIcal(text: string, aliases: OpponentAliases = {}): ParsedSchedule {
   const unfolded = unfold(text);
   const chunks = unfolded.split('BEGIN:VEVENT').slice(1);
 
@@ -133,8 +162,7 @@ export function parseIcal(text: string): ParsedSchedule {
 
     games.push({
       ...when,
-      opponent: tidyOpponent(them),
-      opponentKey: opponentKey(them),
+      ...canonicalOpponent(them, aliases),
       home,
       occasion,
       scrimmage,

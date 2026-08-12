@@ -146,12 +146,34 @@ const TIME = (game: Game): string =>
  * you get for tapping a game in October is the thing you already trust from the
  * top of the screen.
  */
-function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: string }) {
+/** How many meetings the summary at the top of the screen lists before the rest. */
+const SUMMARY_MEETINGS = 5;
+
+function HeadToHead({
+  history,
+  opponentKey,
+  full = false,
+}: {
+  history: Game[];
+  opponentKey: string;
+  /** Opened from the list, where the whole record is the point. */
+  full?: boolean;
+}) {
   const h2h = headToHead(history, opponentKey);
 
   if (h2h.played === 0) {
     return <p className="h2h-none">No previous meetings on record.</p>;
   }
+
+  const since = h2h.meetings[h2h.meetings.length - 1]?.date.slice(0, 4);
+  /*
+   * Tapping a fixture gets every meeting on record. The panel at the top of the
+   * screen stays short so it doesn't push the season out of view — but it now
+   * says what it is holding back, rather than trailing off after five and
+   * looking like the whole story.
+   */
+  const shown = full ? h2h.meetings : h2h.meetings.slice(0, SUMMARY_MEETINGS);
+  const hidden = h2h.played - shown.length;
 
   return (
     <div className="h2h">
@@ -159,10 +181,11 @@ function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: st
         <strong>
           {h2h.won}–{h2h.lost}
         </strong>{' '}
-        in the last {h2h.played} {h2h.played === 1 ? 'meeting' : 'meetings'}
+        in {h2h.played} {h2h.played === 1 ? 'meeting' : 'meetings'}
+        {since && h2h.played > 1 ? ` since ${since}` : ''}
       </p>
       <ul className="h2h-list">
-        {h2h.meetings.slice(0, 5).map((m) => (
+        {shown.map((m) => (
           <li key={m.date}>
             <span className={m.result!.won ? 'h2h-w' : 'h2h-l'}>{m.result!.won ? 'W' : 'L'}</span>
             <span className="h2h-score">
@@ -174,6 +197,11 @@ function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: st
           </li>
         ))}
       </ul>
+      {hidden > 0 && (
+        <p className="h2h-more">
+          {hidden} earlier {hidden === 1 ? 'meeting' : 'meetings'} — tap the fixture below
+        </p>
+      )}
     </div>
   );
 }
@@ -273,7 +301,7 @@ function Fixture({
 
       {open && (
         <div className="fixture-h2h">
-          <HeadToHead history={history} opponentKey={game.opponentKey} />
+          <HeadToHead history={history} opponentKey={game.opponentKey} full />
         </div>
       )}
     </div>
