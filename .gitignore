@@ -13,3 +13,6 @@ public/badge.jpg
 public/manifest.webmanifest
 public/schedule.json
 !public/CNAME
+
+# Subagent-driven development scratch: ledgers, briefs and review packages.
+.superpowers/
