@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseTeamPage } from './leagueParse';
+import { parseTeamPage, parseRegionTable } from './leagueParse';
 
 const fixture = (name: string) =>
   readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
@@ -57,5 +57,35 @@ describe('parseTeamPage', () => {
       Girard: 644, Hubbard: 738, Lakeview: 828,
       'Niles McKinley': 994, 'South Range': 1460, Struthers: 1500,
     });
+  });
+});
+
+describe('parseRegionTable', () => {
+  const table = parseRegionTable(fixture('region-2026-13.html'));
+
+  it('keeps the caption, which states the cut', () => {
+    expect(table.caption).toBe('Top 12 teams following week 10 qualify for playoffs');
+  });
+
+  it('reads every team in the region', () => {
+    expect(table.rows).toHaveLength(24);
+  });
+
+  it('marks exactly the rows the site marks as qualifying', () => {
+    expect(table.rows.filter((r) => r.qualifying)).toHaveLength(12);
+  });
+
+  it('finds Poland, which is what the screen picks out', () => {
+    const poland = table.rows.find((r) => r.school === 'Poland Seminary');
+    expect(poland).toBeDefined();
+    expect(poland!.teamId).toBe(1264);
+  });
+
+  it('reads a row whole', () => {
+    const first = table.rows[0];
+    expect(first.rank).toBe('1t');
+    expect(first.record).toBe('0-0');
+    expect(typeof first.average).toBe('number');
+    expect(Number.isNaN(first.average)).toBe(false);
   });
 });
