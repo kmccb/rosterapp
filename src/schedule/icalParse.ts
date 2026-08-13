@@ -185,6 +185,23 @@ export const nextGame = (games: Game[], today = new Date()): Game | undefined =>
   return games.find((g) => !g.result && g.date >= iso);
 };
 
+/**
+ * How many sleeps until kickoff. 0 is game day; null once it has been played.
+ *
+ * Counted off the calendar rather than in hours, because that is how anyone
+ * waiting for a game counts. A Friday night kickoff is one sleep away from
+ * Thursday lunchtime and from Thursday midnight alike, which is not what
+ * dividing the gap by twenty-four gives you — that would call the first of
+ * those "today" and put the card a day out for most of the day before a game.
+ */
+export const daysToKickoff = (game: Game, today = new Date()): number | null => {
+  const kickoff = game.kickoff ? new Date(game.kickoff) : new Date(`${game.date}T12:00:00`);
+  const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((midnight(kickoff) - midnight(today)) / 86400000);
+
+  return Number.isFinite(days) && days >= 0 ? days : null;
+};
+
 export type HeadToHead = {
   played: number;
   won: number;

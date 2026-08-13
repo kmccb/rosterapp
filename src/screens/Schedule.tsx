@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SkyIcon } from '../components/SkyIcon';
-import { headToHead, nextGame, type Game } from '../schedule/icalParse';
+import { daysToKickoff, headToHead, nextGame, type Game } from '../schedule/icalParse';
 import { describeSky, worthMentioning, type Weather } from '../schedule/weather';
+import { useBarHeight } from '../useBarHeight';
 
 type Season = {
   games: Game[];
@@ -28,6 +29,13 @@ export function Schedule({ base }: { base: string }) {
    * sight for no gain — nobody compares two of these side by side.
    */
   const [open, setOpen] = useState<string | null>(null);
+  /** All of it, what has been played, or what is left. */
+  const [show, setShow] = useState<'all' | 'played' | 'todo'>('all');
+  const bar = useRef<HTMLDivElement>(null);
+
+  // The month headers stick below the bar, which only exists once the season
+  // has loaded — and whose height depends on whether there is a record yet.
+  useBarHeight(bar, [season]);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,38 +98,100 @@ export function Schedule({ base }: { base: string }) {
     lost: played.filter((g) => !g.result!.won).length,
   };
 
+  const showing = season.games.filter((g) =>
+    show === 'played' ? g.result : show === 'todo' ? !g.result : true,
+  );
+
   return (
     <div className="screen">
-      {next && <NextGame game={next} history={history} weather={season.weather} />}
-
-      <div className="season-head">
-        <h2 className="section">Season</h2>
-        {played.length > 0 && (
-          <span className="season-record">
-            {record.won}–{record.lost}
+      {/* The year and the record pinned, so the form is still there when you
+          have scrolled into November. */}
+      <div className="control-bar" ref={bar}>
+        <div className="season-banner">
+          <span className="season-banner-year">
+            {new Date(season.games[0]?.date ?? Date.now()).getFullYear()}
           </span>
-        )}
+          {played.length > 0 && (
+            <span className="season-banner-record">
+              {record.won}–{record.lost}
+            </span>
+          )}
+        </div>
+        <div className="seg" role="group" aria-label="Which games">
+          <button type="button" aria-pressed={show === 'all'} onClick={() => setShow('all')}>
+            All
+          </button>
+          <button type="button" aria-pressed={show === 'played'} onClick={() => setShow('played')}>
+            Played
+          </button>
+          <button type="button" aria-pressed={show === 'todo'} onClick={() => setShow('todo')}>
+            To come
+          </button>
+        </div>
       </div>
-      <p className="hint">Tap any game for the record against them.</p>
+
+      {next && show !== 'played' && (
+        <NextGame game={next} history={history} weather={season.weather} base={base} />
+      )}
+
+      <p className="filter-line">
+        <span>{summaryFor(show, season.games, record)}</span>
+      </p>
 
       <div className="fixtures">
-        {season.games.map((g) => {
-          const id = `${g.date}-${g.opponentKey}`;
-          return (
-            <Fixture
-              key={id}
-              game={g}
-              isNext={g === next}
-              history={history}
-              open={open === id}
-              onToggle={() => setOpen((cur) => (cur === id ? null : id))}
-            />
-          );
-        })}
+        {byMonth(showing).map((m) => (
+          <div key={m.label}>
+            <div className="group-head">{m.label}</div>
+            {m.games.map((g) => {
+              const id = `${g.date}-${g.opponentKey}`;
+              return (
+                <Fixture
+                  key={id}
+                  game={g}
+                  isNext={g === next}
+                  history={history}
+                  open={open === id}
+                  onToggle={() => setOpen((cur) => (cur === id ? null : id))}
+                />
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
+const byMonth = (games: Game[]) => {
+  const groups: Array<{ label: string; games: Game[] }> = [];
+  for (const g of games) {
+    const label = new Date(g.kickoff ?? `${g.date}T12:00:00`).toLocaleDateString(undefined, {
+      month: 'long',
+    });
+    const last = groups[groups.length - 1];
+    if (last?.label === label) last.games.push(g);
+    else groups.push({ label, games: [g] });
+  }
+  return groups;
+};
+
+/** What the segment above it left, said in one line. */
+const summaryFor = (
+  show: 'all' | 'played' | 'todo',
+  games: Game[],
+  record: { won: number; lost: number },
+) => {
+  const played = games.filter((g) => g.result && !g.scrimmage).length;
+  const todo = games.filter((g) => !g.result).length;
+
+  if (show === 'played') {
+    return played ? `${played} played — ${record.won}–${record.lost}` : 'Nothing played yet.';
+  }
+  if (show === 'todo') {
+    return todo ? `${todo} still to come` : 'That is the season.';
+  }
+  return `${games.length} games — tap one for the record against them`;
+};
 
 const WHEN = (game: Game): string => {
   // Prefer the exact kickoff and render it in the reader's own timezone; the
@@ -139,12 +209,18 @@ const TIME = (game: Game): string =>
     ? new Date(game.kickoff).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
     : '';
 
+/** Just the record, for the card. The meetings themselves stay on tap. */
+const recordAgainst = (history: Game[], opponentKey: string): string | null => {
+  const h = headToHead(history, opponentKey);
+  return h.played === 0 ? null : `${h.won}–${h.lost}`;
+};
+
 /**
- * The record against one opponent, and how the last few went.
+ * The record against one opponent, and every meeting behind it.
  *
- * Shared by the next fixture and by any game opened in the list, so the thing
- * you get for tapping a game in October is the thing you already trust from the
- * top of the screen.
+ * Opened from a fixture in the list, which is now the only place it appears:
+ * the card at the top of the screen carries the record as a single figure, so
+ * this is what you get when that figure is the thing you want to look into.
  */
 function HeadToHead({ history, opponentKey }: { history: Game[]; opponentKey: string }) {
   const h2h = headToHead(history, opponentKey);
@@ -210,19 +286,113 @@ function Forecast({ weather }: { weather: Weather }) {
   );
 }
 
+/**
+ * The next fixture, as a card.
+ *
+ * It used to print the whole head-to-head underneath, which pushed the season
+ * itself off the screen for a record most people only glance at. The record is
+ * one figure in the foot now; every meeting behind it is still a tap away on
+ * the fixture in the list.
+ */
+const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+
+/**
+ * Today, and again tomorrow.
+ *
+ * A countdown worked out once at render is a day behind by morning, and this
+ * is an app people leave open — installed to a home screen, put in a pocket at
+ * a ground, opened again the next evening. So the day is state, and it turns
+ * over on its own.
+ *
+ * Timed to the next midnight and checked again whenever the page comes back to
+ * the front, because a sleeping phone does not run timers on schedule and the
+ * wake-up is the moment that actually matters. Both routes hand back the same
+ * Date object when the day has not changed, so React drops the re-render and
+ * the ordinary case costs nothing.
+ */
+function useToday(): Date {
+  const [today, setToday] = useState(() => new Date());
+
+  useEffect(() => {
+    const check = () => setToday((prev) => (sameDay(prev, new Date()) ? prev : new Date()));
+
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    // A second past, so the clock has definitely turned when this fires.
+    const id = setTimeout(check, midnight.getTime() - now.getTime() + 1000);
+    document.addEventListener('visibilitychange', check);
+
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [today]);
+
+  return today;
+}
+
+/**
+ * The wait, counted down.
+ *
+ * Days rather than a running clock: nobody plans around the hours, and a
+ * ticking number would be wrong the moment the phone went in a pocket. On the
+ * day itself the count stops being the point, so the badge comes out and the
+ * card says so.
+ */
+function Countdown({ game, base, today }: { game: Game; base: string; today: Date }) {
+  const days = daysToKickoff(game, today);
+  if (days === null) return null;
+
+  if (days === 0) {
+    return (
+      <span className="countdown is-gameday">
+        {/* Decoration beside a sentence that already says it — a badge that
+            never arrives leaves the words doing the job on their own. */}
+        <img
+          className="countdown-badge"
+          src={`${base}badge.jpg`}
+          alt=""
+          aria-hidden="true"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+        It&rsquo;s game day!
+      </span>
+    );
+  }
+
+  return (
+    <span className="countdown">
+      <b>{days}</b> {days === 1 ? 'day' : 'days'} until game day
+    </span>
+  );
+}
+
 function NextGame({
   game,
   history,
   weather,
+  base,
 }: {
   game: Game;
   history: Game[];
   weather?: Weather;
+  base: string;
 }) {
+  const allTime = recordAgainst(history, game.opponentKey);
+  // One reading of the date for the card and the count in it, so they cannot
+  // disagree across the midnight it is written to survive.
+  const today = useToday();
+  const isGameDay = daysToKickoff(game, today) === 0;
+
   return (
-    <section className="next-game">
-      <p className="next-label">{game.scrimmage ? 'Next up · scrimmage' : 'Next up'}</p>
-      <h2 className="next-opponent">
+    <section className={`next-card${isGameDay ? ' is-gameday' : ''}`}>
+      <div className="next-card-head">
+        <p className="next-card-label">{game.scrimmage ? 'Next up · scrimmage' : 'Next up'}</p>
+        <Countdown game={game} base={base} today={today} />
+      </div>
+      <h2 className="next-card-opponent">
         <span className="next-vs">{game.home ? 'vs' : 'at'}</span> {game.opponent}
       </h2>
       <p className="next-when">
@@ -231,9 +401,16 @@ function NextGame({
         {game.occasion && ` · ${game.occasion}`}
       </p>
 
-      {weather && <Forecast weather={weather} />}
-
-      <HeadToHead history={history} opponentKey={game.opponentKey} />
+      {(weather || allTime) && (
+        <div className="next-card-foot">
+          {weather && <Forecast weather={weather} />}
+          {allTime && (
+            <span>
+              <b>{allTime}</b> all-time
+            </span>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -251,23 +428,28 @@ function Fixture({
   open: boolean;
   onToggle: () => void;
 }) {
+  // The month is the group header the row sits under, so the row itself only
+  // needs the day.
+  const day = new Date(game.kickoff ?? `${game.date}T12:00:00`).toLocaleDateString(undefined, {
+    day: 'numeric',
+  });
+
+  // Whatever the school called the night, and failing that where it is played.
+  const sub = game.occasion ?? (game.home ? 'Home' : 'Away');
+
   return (
     <div className={`fixture${isNext ? ' is-next' : ''}${game.result ? ' is-played' : ''}`}>
       <button type="button" className="fixture-row" onClick={onToggle} aria-expanded={open}>
-        <span className="fixture-date">
-          {new Date(game.kickoff ?? `${game.date}T12:00:00`).toLocaleDateString(undefined, {
-            day: 'numeric',
-            month: 'short',
-          })}
-        </span>
+        <span className="fixture-date">{day}</span>
         <span className="fixture-team">
           <span className="fixture-ha">{game.home ? 'vs' : 'at'}</span> {game.opponent}
           {game.scrimmage && <span className="fixture-tag">scrimmage</span>}
+          <span className="fixture-sub">{sub}</span>
         </span>
         <span className="fixture-result">
           {game.result ? (
             <>
-              <span className={game.result.won ? 'h2h-w' : 'h2h-l'}>
+              <span className={`form-chip ${game.result.won ? 'won' : 'lost'}`}>
                 {game.result.won ? 'W' : 'L'}
               </span>{' '}
               {game.result.us}–{game.result.them}

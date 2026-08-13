@@ -27,6 +27,16 @@ const POSITIONS = {
 };
 
 /**
+ * "1 touchdown", "26 touchdowns" — the count arrives as a display string.
+ *
+ * Sacks come through as "10.5", which is never "1", so the plural there is
+ * right by accident; it goes through here anyway so it stays right the season
+ * somebody finishes on one.
+ */
+const many = (count, noun, plural = `${noun}s`) =>
+  `${count} ${String(count) === '1' ? noun : plural}`;
+
+/**
  * How each kind of season reads as a sentence, in the order a player's own
  * story would be told: what they did with the ball first, then what they did
  * without it. Only one or two ever apply to the same player.
@@ -36,20 +46,20 @@ const SENTENCES = [
     s.passingYards &&
     `Threw for ${s.passingYards} yards` +
       (s.passingTouchdowns && s.passingTouchdowns !== '0'
-        ? ` and ${s.passingTouchdowns} touchdowns`
+        ? ` and ${many(s.passingTouchdowns, 'touchdown')}`
         : '')],
   ['rushing', (s) =>
-    s.rushingYards && `Ran for ${s.rushingYards} yards on ${s.rushingAttempts} carries`],
+    s.rushingYards && `Ran for ${s.rushingYards} yards on ${many(s.rushingAttempts, 'carry', 'carries')}`],
   ['receiving', (s) =>
-    s.receptions && `Caught ${s.receptions} passes for ${s.receivingYards} yards`],
+    s.receptions && `Caught ${many(s.receptions, 'pass', 'passes')} for ${s.receivingYards} yards`],
   ['defensive', (s) =>
-    s.soloTackles && `Made ${s.soloTackles} solo tackles${s.sacks && s.sacks !== '0' ? ` and ${s.sacks} sacks` : ''}`],
+    s.soloTackles && `Made ${many(s.soloTackles, 'solo tackle')}${s.sacks && s.sacks !== '0' ? ` and ${many(s.sacks, 'sack')}` : ''}`],
   ['defensiveInterceptions', (s) =>
-    s.interceptions && s.interceptions !== '0' && `Picked off ${s.interceptions} passes`],
+    s.interceptions && s.interceptions !== '0' && `Picked off ${many(s.interceptions, 'pass', 'passes')}`],
   ['kicking', (s) =>
-    s.totalKickingPoints && `Scored ${s.totalKickingPoints} points off the tee`],
+    s.totalKickingPoints && `Scored ${many(s.totalKickingPoints, 'point')} off the tee`],
   ['punting', (s) =>
-    s.punts && `Punted ${s.punts} times, averaging ${s.grossAvgPuntYards} yards`],
+    s.punts && `Punted ${many(s.punts, 'time')}, averaging ${s.grossAvgPuntYards} yards`],
 ];
 
 /** ESPN pads the array with nulls, and a missing stat is not a zero. */
@@ -94,17 +104,39 @@ const bioFor = (athlete, categories, when) => {
     if (line) said.push(line);
     if (said.length === 2) break;
   }
-  if (said.length) parts.push(`${said.join(', and ')} ${when}.`);
+  // Each clause is written as an opener; only the first one still is.
+  if (said.length) {
+    const [first, ...rest] = said;
+    parts.push(`${[first, ...rest.map(lower)].join(', and ')} ${when}.`);
+  }
 
   return parts.join(' ');
 };
+
+const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+
+/**
+ * A zero here almost never means zero.
+ *
+ * ESPN carries the full schema for every division but only fills in what it
+ * compiles, so this team's older seasons report 0 tackles and 0 red zone
+ * attempts beside 21 sacks. Printing those as facts is worse than leaving the
+ * row out — a season where nobody made a tackle is obviously wrong, and it
+ * makes the figures beside it look wrong too.
+ *
+ * The same zero wears several coats depending on the stat — '0', '0.0', '0-0',
+ * '0/0', '0.0%' — so the shape is matched rather than the string.
+ *
+ * The cost is dropping the occasional true zero, which nobody misses.
+ */
+const isUnfilled = (value) => /^(0(\.0+)?%?|0-0|0\/0)$/.test(String(value).trim());
 
 /** The numbers worth putting on the card, already formatted for reading. */
 const linesFor = (categories) =>
   categories.flatMap((c) =>
     (c.stats ?? [])
       .filter(Boolean)
-      .filter((s) => s.displayValue && s.displayValue !== '0')
+      .filter((s) => s.displayValue && s.displayValue !== '--' && !isUnfilled(s.displayValue))
       .map((s) => ({ label: s.shortDisplayName || s.displayName, value: s.displayValue })),
   );
 
@@ -236,19 +268,6 @@ const asTimePerGame = (seconds, games) => {
   return Math.floor(n / 60) + ':' + String(Math.round(n % 60)).padStart(2, '0');
 };
 
-/**
- * A zero here almost never means zero.
- *
- * ESPN carries the full schema for every division but only fills in what it
- * compiles, so this team's older seasons report 0 tackles and 0 red zone
- * attempts beside 21 sacks. Printing those as facts is worse than leaving the
- * row out — a season where nobody made a tackle is obviously wrong, and it
- * makes the figures beside it look wrong too.
- *
- * The cost is dropping the occasional true zero, which nobody misses.
- */
-const isUnfilled = (value) => /^0(\.0+)?%?$/.test(String(value).trim());
-
 const getJson = async (url) => {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'rosterapp (github.com/kmccb/rosterapp)' },
@@ -266,13 +285,6 @@ const inBatches = async (items, size, fn) => {
   return out;
 };
 
-/**
- * Every season the API will admit to, newest first.
- *
- * A year with no statistics is dropped rather than shown empty — 2020 is a
- * hole in the record for everyone, and a dropdown entry leading to nothing is
- * worse than one that isn't there.
- */
 /**
  * Who played that year, and what they did.
  *
@@ -304,15 +316,25 @@ async function playersFor(id, year) {
   return players;
 }
 
+/**
+ * Every season the API will admit to, newest first.
+ *
+ * A year with no statistics is dropped rather than shown empty — 2020 is a
+ * hole in the record for everyone, and a dropdown entry leading to nothing is
+ * worse than one that isn't there.
+ */
 export async function fetchEspnSeasons(id, from, to) {
   const years = [];
   for (let y = to; y >= from; y--) years.push(y);
 
+  // Three requests a year rather than two, so the walk takes about three times
+  // as long — inBatches already paces it at four years at a time, which is six
+  // rounds of twelve instead of sixty-six requests at once.
   const seasons = await inBatches(years, 4, async (year) => {
     const [stats, record, players] = await Promise.all([
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/statistics`),
       getJson(`${CORE}/seasons/${year}/types/2/teams/${id}/record`),
-      Promise.resolve([]),
+      playersFor(id, year),
     ]);
 
     const raw = new Map();

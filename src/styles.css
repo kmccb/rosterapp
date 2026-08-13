@@ -28,6 +28,9 @@
 
   --radius: 14px;
   --tap: 56px;
+  /* .screen's own side padding, named because the pinned bars reach out to the
+     edges of it and put it back inside themselves. */
+  --screen-pad: 14px;
 
   color-scheme: dark;
 }
@@ -184,7 +187,7 @@ textarea {
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px 14px calc(24px + env(safe-area-inset-bottom));
+  padding: var(--screen-pad) var(--screen-pad) calc(24px + env(safe-area-inset-bottom));
 }
 
 /* ----------------------------------------------------------------- lookup */
@@ -204,6 +207,9 @@ textarea {
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
+  /* The card runs under the keypad rather than stopping dead against it, so
+     it's obvious there is more of it than the pad leaves room for. */
+  mask-image: linear-gradient(180deg, #000 calc(100% - 28px), transparent);
 }
 
 .results-count {
@@ -263,8 +269,16 @@ textarea {
   background: var(--ghost);
 }
 
+/* Name and number on one line, wrapping only when the name is long enough to
+   need it. */
+.card-name-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .card-jersey {
-  margin-top: 2px;
   color: var(--accent);
   font-size: 20px;
   font-weight: 800;
@@ -277,10 +291,16 @@ textarea {
   font-size: 14px;
 }
 
+/* Two lines. The bio is context, not the answer — the numbers under it are,
+   and on a Lookup card the keypad only leaves so much room for both. */
 .card-bio {
   margin: 14px 0 0;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Wraps rather than scrolls: a punter has three of these and a linebacker
@@ -950,33 +970,364 @@ a.btn {
   border: 1px solid var(--line);
 }
 
-/* --------------------------------------------------------------- schedule */
+/* ----------------------------------------------- pinned controls, shared by
+   RosterList, SeasonStats and Schedule. One bar per screen, always the first
+   child of .screen, so `top: 0` lands under the tab strip. */
 
-/*
- * The next fixture leads, because that is the question anyone opening this
- * screen came with. Everything else is a list to look ahead in.
- */
-.next-game {
-  margin-bottom: 22px;
-  padding-bottom: 18px;
+.control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* Out to the edges of .screen's padding and back again, so the blur covers
+     the full width of the list scrolling under it. */
+  margin: calc(var(--screen-pad, 14px) * -1);
+  margin-bottom: 8px;
+  padding: 10px var(--screen-pad, 14px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--chrome);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
 
-.next-label {
-  margin: 0 0 4px;
+.control-row {
+  display: flex;
+  gap: 8px;
+}
+
+.control-row .search {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+/* The position chips, folded into one button until asked for. */
+.pos-pill {
+  flex: none;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
   color: var(--muted);
-  font-size: 12px;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pos-pill[aria-pressed='true'] {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--accent-ink);
+}
+
+.pos-pill:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pos-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Segmented control: areas in RosterList, the two questions in SeasonStats,
+   All/Played/To come in Schedule. Same object every time. */
+.seg {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.seg button {
+  flex: 1;
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seg button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--accent-ink);
+}
+
+/* What's applied, and the way out of it. */
+.filter-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Inside a bar the bar's own gap spaces it; standing in the flow it needs its
+   own room, or it reads as part of whatever is above it. */
+.screen > .filter-line {
+  margin: 16px 0 6px;
+}
+
+.filter-clear {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* The same controls sitting in the flow rather than in the pinned bar, which
+   on the Stats screen is already holding the year. */
+.player-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 12px;
+}
+
+/* Group headers: number decades in RosterList, months in Schedule. The offset
+   is the bar's own height — measure it, don't guess, it changes with the row. */
+.group-head {
+  position: sticky;
+  top: var(--bar-h, 112px);
+  z-index: 1;
+  padding: 4px 0 6px;
+  background: linear-gradient(180deg, var(--bg) 70%, transparent);
+  color: var(--muted);
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.next-opponent {
-  margin: 0;
-  font-size: clamp(28px, 8vw, 40px);
+/* Hairline rows instead of gapped cards: ~11 players a screen, not 6. */
+.rows.rows-dense {
+  display: block;
+}
+
+.rows-dense .row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+}
+
+.rows-dense .row-number {
+  flex: none;
+  min-width: 38px;
+  font-size: 26px;
   font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rows-dense .row-who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rows-dense .row-name {
+  font-size: 17px;
+}
+
+.rows-dense .row-details {
+  font-size: 13px;
+}
+
+.rows-dense .row-pos {
+  flex: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* The expander that keeps a long list off the first screen. */
+.more-link {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Everything a block was holding back, once it is asked for: label left,
+   figure right, a hairline between. */
+.stat-rest {
+  margin: 10px 0 0;
+}
+
+.stat-rest > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 15px;
+}
+
+.stat-rest > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.stat-rest dt {
+  color: var(--muted);
+}
+
+.stat-rest dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Schedule: the next fixture as a card, and form at a glance. */
+.next-card {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--ghost);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.next-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* The wait, in the corner opposite the label. The number carries it, so it is
+   the one thing at full strength. */
+.countdown {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.countdown b {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Game day. The count has run out, so the corner stops reporting a number and
+ * says the thing — in the team's own colour, beside the team's own badge.
+ */
+.countdown.is-gameday {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.countdown-badge {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 7px;
+  object-fit: cover;
+  background: var(--ghost);
+}
+
+/* And the card itself picks itself out, once. */
+.next-card.is-gameday {
+  border-color: var(--accent);
+}
+
+.next-card-label {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.next-card-opponent {
+  margin: 6px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.next-card-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--accent);
+}
+
+/* The forecast is the card's own line here, not a paragraph under a heading. */
+.next-card-foot .forecast {
+  margin: 0;
+}
+
+.form-chip {
+  display: inline-block;
+  min-width: 20px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.form-chip.won {
+  background: var(--ok);
+}
+
+.form-chip.lost {
+  background: var(--danger);
+}
+
+/* --------------------------------------------------------------- schedule */
+
+/*
+ * The next fixture leads, because that is the question anyone opening this
+ * screen came with. Everything else is a list to look ahead in. Its own box
+ * lives with the shared controls above, as `.next-card`.
+ */
+.next-card-label {
+  margin: 0;
 }
 
 .next-vs {
@@ -1070,28 +1421,6 @@ a.btn {
 .h2h-w { color: var(--ok); font-weight: 700; }
 .h2h-l { color: var(--danger); font-weight: 700; }
 
-/* A thumb-slid strip of years, in the app's own chips rather than the
-   operating system's picker. Edge-to-edge so it reads as scrollable, with the
-   screen's padding put back inside it. */
-.years {
-  display: flex;
-  gap: 8px;
-  margin: 0 -14px;
-  padding: 2px 14px 10px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.years::-webkit-scrollbar {
-  display: none;
-}
-
-.year-chip {
-  flex: none;
-  font-variant-numeric: tabular-nums;
-}
-
 .season-banner {
   display: flex;
   align-items: baseline;
@@ -1099,6 +1428,23 @@ a.btn {
   gap: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
+}
+
+/* Inside the pinned bar it is a row of the bar, not a heading over the screen,
+   so it drops the rule underneath it and shrinks to fit between the arrows. */
+.control-bar .season-banner {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.control-bar .season-banner-year {
+  font-size: 30px;
+}
+
+.control-bar .season-banner-record {
+  font-size: 20px;
 }
 
 .season-banner-year {
@@ -1234,20 +1580,6 @@ a.btn {
   font-variant-numeric: tabular-nums;
 }
 
-.season-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.season-record {
-  color: var(--accent);
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
 .fixtures {
   display: flex;
   flex-direction: column;
@@ -1320,7 +1652,16 @@ a.btn {
   color: var(--accent);
 }
 
-.fixture-date,
+/* The month is the group header now, so the row only carries the day — which
+   makes it a number worth reading at a glance rather than a scrap of text. */
+.fixture-date {
+  color: var(--muted);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .fixture-result {
   color: var(--muted);
   font-size: 14px;
@@ -1330,6 +1671,15 @@ a.btn {
 
 .fixture-ha {
   color: var(--muted);
+  font-weight: 400;
+}
+
+/* Whatever the night was called, or just where it is being played. */
+.fixture-sub {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 13px;
   font-weight: 400;
 }
 

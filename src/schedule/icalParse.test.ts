@@ -1,4 +1,4 @@
-import { canonicalOpponent, headToHead, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
+import { canonicalOpponent, daysToKickoff, headToHead, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
 
 /*
  * Copied from the school's live ScheduleStar feed, folding and all. The folded
@@ -159,6 +159,43 @@ describe('nextGame', () => {
 
   it('returns nothing when the season is over', () => {
     expect(nextGame(games, new Date('2027-01-01T12:00:00Z'))).toBeUndefined();
+  });
+});
+
+describe('daysToKickoff', () => {
+  /*
+   * The card counts down from this, so it changes on its own between one
+   * render and the next. Every case fixes "now" rather than trusting the clock.
+   */
+  const game = { date: '2026-09-11', scrimmage: false, home: true, opponent: 'Salem', opponentKey: 'salem' };
+  const at = (local: string) => new Date(local);
+
+  it('counts calendar days, not twenty-four hour blocks', () => {
+    // Both of these are one sleep away. Dividing the gap by 24 hours would
+    // call the first of them game day, a day early.
+    expect(daysToKickoff(game, at('2026-09-10T23:30:00'))).toBe(1);
+    expect(daysToKickoff(game, at('2026-09-10T00:30:00'))).toBe(1);
+  });
+
+  it('is zero all through game day', () => {
+    expect(daysToKickoff(game, at('2026-09-11T08:00:00'))).toBe(0);
+    // Still game day after kickoff has been and gone.
+    expect(daysToKickoff(game, at('2026-09-11T23:00:00'))).toBe(0);
+  });
+
+  it('counts whole days however far out the fixture is', () => {
+    expect(daysToKickoff(game, at('2026-09-08T12:00:00'))).toBe(3);
+    expect(daysToKickoff(game, at('2026-09-04T12:00:00'))).toBe(7);
+    expect(daysToKickoff(game, at('2026-08-28T12:00:00'))).toBe(14);
+  });
+
+  it('gives nothing for a fixture already played', () => {
+    expect(daysToKickoff(game, at('2026-09-12T00:30:00'))).toBeNull();
+  });
+
+  it('reads a kickoff instant in the local zone, like the screen does', () => {
+    const timed = { ...game, kickoff: '2026-09-12T00:00:00Z' };
+    expect(daysToKickoff(timed, new Date(Date.parse('2026-09-12T00:00:00Z')))).toBe(0);
   });
 });
 
