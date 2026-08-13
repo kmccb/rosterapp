@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SkyIcon } from '../components/SkyIcon';
 import { daysToKickoff, headToHead, nextGame, type Game } from '../schedule/icalParse';
 import { describeSky, worthMentioning, type Weather } from '../schedule/weather';
-import { useBarHeight } from '../useBarHeight';
 
 type Season = {
   games: Game[];
@@ -29,13 +28,6 @@ export function Schedule({ base }: { base: string }) {
    * sight for no gain — nobody compares two of these side by side.
    */
   const [open, setOpen] = useState<string | null>(null);
-  /** All of it, what has been played, or what is left. */
-  const [show, setShow] = useState<'all' | 'played' | 'todo'>('all');
-  const bar = useRef<HTMLDivElement>(null);
-
-  // The month headers stick below the bar, which only exists once the season
-  // has loaded — and whose height depends on whether there is a record yet.
-  useBarHeight(bar, [season]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,48 +90,20 @@ export function Schedule({ base }: { base: string }) {
     lost: played.filter((g) => !g.result!.won).length,
   };
 
-  const showing = season.games.filter((g) =>
-    show === 'played' ? g.result : show === 'todo' ? !g.result : true,
-  );
-
   return (
     <div className="screen">
-      {/* The year and the record pinned, so the form is still there when you
-          have scrolled into November. */}
-      <div className="control-bar" ref={bar}>
-        <div className="season-banner">
-          <span className="season-banner-year">
-            {new Date(season.games[0]?.date ?? Date.now()).getFullYear()}
-          </span>
-          {played.length > 0 && (
-            <span className="season-banner-record">
-              {record.won}–{record.lost}
-            </span>
-          )}
-        </div>
-        <div className="seg" role="group" aria-label="Which games">
-          <button type="button" aria-pressed={show === 'all'} onClick={() => setShow('all')}>
-            All
-          </button>
-          <button type="button" aria-pressed={show === 'played'} onClick={() => setShow('played')}>
-            Played
-          </button>
-          <button type="button" aria-pressed={show === 'todo'} onClick={() => setShow('todo')}>
-            To come
-          </button>
-        </div>
-      </div>
-
-      {next && show !== 'played' && (
-        <NextGame game={next} history={history} weather={season.weather} base={base} />
-      )}
+      {next && <NextGame game={next} history={history} weather={season.weather} base={base} />}
 
       <p className="filter-line">
-        <span>{summaryFor(show, season.games, record)}</span>
+        <span>
+          {season.games.length} games
+          {played.length > 0 && ` · ${record.won}–${record.lost}`} — tap one for the record against
+          them
+        </span>
       </p>
 
       <div className="fixtures">
-        {byMonth(showing).map((m) => (
+        {byMonth(season.games).map((m) => (
           <div key={m.label}>
             <div className="group-head">{m.label}</div>
             {m.games.map((g) => {
@@ -173,24 +137,6 @@ const byMonth = (games: Game[]) => {
     else groups.push({ label, games: [g] });
   }
   return groups;
-};
-
-/** What the segment above it left, said in one line. */
-const summaryFor = (
-  show: 'all' | 'played' | 'todo',
-  games: Game[],
-  record: { won: number; lost: number },
-) => {
-  const played = games.filter((g) => g.result && !g.scrimmage).length;
-  const todo = games.filter((g) => !g.result).length;
-
-  if (show === 'played') {
-    return played ? `${played} played — ${record.won}–${record.lost}` : 'Nothing played yet.';
-  }
-  if (show === 'todo') {
-    return todo ? `${todo} still to come` : 'That is the season.';
-  }
-  return `${games.length} games — tap one for the record against them`;
 };
 
 const WHEN = (game: Game): string => {

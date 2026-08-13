@@ -1098,11 +1098,14 @@ a.btn {
   margin: 4px 0 12px;
 }
 
-/* Group headers: number decades in RosterList, months in Schedule. The offset
-   is the bar's own height — measure it, don't guess, it changes with the row. */
+/* Group headers: number decades in RosterList, months in Schedule. Where a
+   pinned bar sits above them the offset is that bar's measured height; where
+   there isn't one — the Schedule — they pin to the top of the screen, which is
+   what the zero default gives. Never a guessed constant: it would be wrong on
+   one screen or the other. */
 .group-head {
   position: sticky;
-  top: var(--bar-h, 112px);
+  top: var(--bar-h, 0px);
   z-index: 1;
   padding: 4px 0 6px;
   background: linear-gradient(180deg, var(--bg) 70%, transparent);
@@ -1208,9 +1211,9 @@ a.btn {
   white-space: nowrap;
 }
 
-/* Schedule: the next fixture as a card, and form at a glance. */
+/* Schedule: the next fixture as a card, and form at a glance. It leads the
+   screen now, so the screen's own padding is the gap above it. */
 .next-card {
-  margin-top: 14px;
   padding: 14px;
   border: 1px solid var(--ghost);
   border-radius: 16px;

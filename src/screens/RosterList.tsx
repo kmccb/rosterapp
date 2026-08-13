@@ -1,11 +1,10 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey } from '../parse/rosterParse';
 import { inArea, positionsForArea, positionsOf, sidesOf } from '../roster/filters';
 import type { StatsStore } from '../stats/statsStore';
 import { fullName, type Player, type Roster, type Side } from '../types';
-import { useBarHeight } from '../useBarHeight';
 
 const AREAS: Array<{ value: Side; label: string }> = [
   { value: 'O', label: 'Offense' },
@@ -116,9 +115,24 @@ export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsSto
 
   const hasPlayers = roster.players.length > 0;
 
-  // The decade headers stick below the bar, and the bar grows when the
-  // position chips open, so it measures itself rather than being guessed at.
-  useBarHeight(bar, [hasPlayers, selected]);
+  /*
+   * The decade headers pin directly under the bar, so they need its height —
+   * and it does not have a fixed one. It grows when the position chips open,
+   * and again whenever a control wraps. A guess is wrong the moment either
+   * happens, so the bar measures itself and publishes the answer.
+   */
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+
+    const publish = () =>
+      el.closest<HTMLElement>('.screen')?.style.setProperty('--bar-h', `${el.offsetHeight}px`);
+
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasPlayers, selected]);
 
   if (selected) {
     return (
