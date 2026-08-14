@@ -1,3 +1,11 @@
+/**
+ * Turns the per-team pages the parser hands back into what the screen
+ * actually shows: one deduplicated game list, a standings table, and games
+ * grouped into football weeks. The site has no concept of "the league" or
+ * "week 6" — both are derived here from a roster of member schools and the
+ * dates that happen to appear.
+ */
+
 import type { TeamPage } from './leagueParse';
 
 export type LeagueGame = {
@@ -59,6 +67,19 @@ const tally = (games: TeamPage['games'], only?: string[]) => {
 
 const asPair = (record: string) => record.split('-').map(Number);
 
+/**
+ * Win/loss differential ties a 2-0 team with a 5-3 team (both +2), which
+ * mid-season is the normal state once bye weeks stagger how many games each
+ * school has played. Conference tables are read by winning percentage
+ * everywhere this app would be read, so that is what orders them. A team
+ * with no games yet has no percentage — 0-0 counts as 0 rather than NaN, so
+ * it sorts to the bottom instead of scrambling the table.
+ */
+const winPct = (record: string): number => {
+  const [w, l] = asPair(record);
+  return w + l === 0 ? 0 : w / (w + l);
+};
+
 export function standings(pages: TeamPage[], members: string[]): Standing[] {
   return pages
     .filter((p) => members.includes(p.name))
@@ -68,12 +89,9 @@ export function standings(pages: TeamPage[], members: string[]): Standing[] {
       leagueRecord: tally(p.games, members),
     }))
     .sort((a, b) => {
-      const [aw, al] = asPair(a.leagueRecord);
-      const [bw, bl] = asPair(b.leagueRecord);
-      if (bw - bl !== aw - al) return bw - bl - (aw - al);
-      const [aow, aol] = asPair(a.overall);
-      const [bow, bol] = asPair(b.overall);
-      return bow - bol - (aow - aol);
+      const league = winPct(b.leagueRecord) - winPct(a.leagueRecord);
+      if (league !== 0) return league;
+      return winPct(b.overall) - winPct(a.overall);
     });
 }
 

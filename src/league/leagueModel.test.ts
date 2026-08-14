@@ -57,6 +57,35 @@ describe('standings', () => {
     ];
     expect(standings(pages, MEMBERS).map((s) => s.name)).toEqual(['Poland Seminary', 'Hubbard']);
   });
+
+  it('ranks on winning percentage, not on games won minus games lost', () => {
+    // Girard is 2-0 and Poland Seminary is 5-3: both are +2 on win/loss
+    // differential, and since every game below is within the league, their
+    // overall differentials tie at +2 too — a differential sort has nothing
+    // left to break the tie and falls back to input order. Only winning
+    // percentage tells them apart: Girard's 100% belongs above Poland
+    // Seminary's 62.5%, regardless of which page came first.
+    const pages = [
+      page('Poland Seminary', [
+        game('2026-09-04', 'Girard', true, 20, 10),
+        game('2026-09-11', 'Hubbard', true, 20, 10),
+        game('2026-09-18', 'Girard', true, 20, 10),
+        game('2026-09-25', 'Hubbard', true, 10, 20),
+        game('2026-10-02', 'Girard', true, 10, 20),
+        game('2026-10-09', 'Hubbard', true, 10, 20),
+        game('2026-10-16', 'Girard', true, 20, 10),
+        game('2026-10-23', 'Hubbard', true, 20, 10),
+      ]),
+      page('Girard', [
+        game('2026-08-21', 'Hubbard', true, 20, 0),
+        game('2026-08-28', 'Hubbard', true, 20, 0),
+      ]),
+    ];
+    const table = standings(pages, MEMBERS);
+    expect(table.map((t) => `${t.name} ${t.leagueRecord}`)).toEqual([
+      'Girard 2-0', 'Poland Seminary 5-3',
+    ]);
+  });
 });
 
 describe('byWeek', () => {
