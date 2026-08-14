@@ -13,7 +13,13 @@ export type LeagueGame = {
   home: string;
   away: string;
   result?: { home: number; away: number };
+  /**
+   * Both schools in the conference AND a regular-season meeting. A November
+   * playoff rematch between two members is not a conference game, so this is
+   * false for it however familiar the two names look.
+   */
   isLeagueGame: boolean;
+  isPlayoff: boolean;
 };
 
 export type Standing = { name: string; overall: string; leagueRecord: string };
@@ -37,7 +43,8 @@ export function toLeagueGames(pages: TeamPage[], members: string[]): LeagueGame[
         date: g.date,
         home,
         away,
-        isLeagueGame: members.includes(page.name) && members.includes(g.opponent),
+        isLeagueGame: !g.playoff && members.includes(page.name) && members.includes(g.opponent),
+        isPlayoff: g.playoff,
         ...(g.result
           ? { result: g.home
               ? { home: g.result.us, away: g.result.them }
@@ -53,12 +60,20 @@ export function toLeagueGames(pages: TeamPage[], members: string[]): LeagueGame[
   return [...seen.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/**
+ * Records, twice over. With no `only` this is the overall record and every
+ * played game counts, playoffs included — 9-3 is Poland's 2025 season and the
+ * two November wins and the November loss are part of it. With `only` it is
+ * the conference record, and a playoff game is excluded even when the other
+ * school is a member: Poland lost to Girard twice in 2025, once in week 8 and
+ * once in the regional semi-final, and only the first is a Northeast 8 result.
+ */
 const tally = (games: TeamPage['games'], only?: string[]) => {
   let won = 0;
   let lost = 0;
   for (const g of games) {
     if (!g.result) continue;
-    if (only && !only.includes(g.opponent)) continue;
+    if (only && (g.playoff || !only.includes(g.opponent))) continue;
     if (g.result.us > g.result.them) won += 1;
     else lost += 1;
   }
@@ -91,7 +106,14 @@ export function standings(pages: TeamPage[], members: string[]): Standing[] {
     .sort((a, b) => {
       const league = winPct(b.leagueRecord) - winPct(a.leagueRecord);
       if (league !== 0) return league;
-      return winPct(b.overall) - winPct(a.overall);
+      const overall = winPct(b.overall) - winPct(a.overall);
+      if (overall !== 0) return overall;
+      // In August every team is 0-0 and both percentages tie, which leaves the
+      // order to whatever sequence the pages happened to be fetched in — that
+      // is, to Poland's schedule. Alphabetical is not a tie-breaker in any
+      // sporting sense and is not claimed as one; it is simply the order a
+      // reader can predict on the day the table has nothing to say.
+      return a.name.localeCompare(b.name);
     });
 }
 

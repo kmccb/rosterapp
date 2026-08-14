@@ -389,22 +389,88 @@ if (phase === 'pre') {
      *
      * fetchLeague is honest about what it got: null means the standings
      * themselves are incomplete or unreadable, and that's never publishable —
-     * the previous file, if any, stands. A regionTable of null inside an
-     * otherwise good result is a lesser problem, and it's this build's call,
-     * not fetchLeague's, whether that's good enough to ship: a working
-     * playoff table already on disk must not be blanked, but a team with no
-     * file at all gets one anyway, so the tab works instead of staying dead
-     * forever until the region page happens to cooperate.
+     * the previously published copy, if there is one, is republished instead.
+     * A regionTable of null inside an otherwise good result is a lesser
+     * problem, and it's this build's call, not fetchLeague's, whether that's
+     * good enough to ship: a working playoff table that is already live must
+     * not be blanked, but a team with no published file at all gets one
+     * anyway, so the tab works instead of staying dead forever until the
+     * region page happens to cooperate.
      */
     if (team.league) {
       const file = join(out, 'league.json');
-      try {
-        const league = await fetchLeague(team.league, new Date().getFullYear());
-        if (!league) {
-          console.warn(`  ! ${team.slug}: the league pages gave nothing; keeping the previous file.`);
-        } else if (!league.regionTable && existsSync(file)) {
+
+      /*
+       * "Keep the previous file" needs a previous file, and on the server there
+       * isn't one: deploy.yml and refresh.yml both start from a fresh
+       * actions/checkout and league.json is not tracked in git, so a
+       * disk-only check is false every single time in the one environment
+       * that matters — and the tab vanishes instead of going stale.
+       *
+       * The previous copy that genuinely exists is the one already being
+       * served, so that is what gets fetched. Locally the file on disk is the
+       * same thing and is cheaper, so it wins. Fetched lazily: a clean run
+       * never asks. A 404 is the first-ever deploy rather than a failure, and
+       * falls through to publishing whatever was scraped.
+       */
+      let cached;
+      const lastPublished = async () => {
+        if (cached !== undefined) return cached;
+        cached = null;
+        if (existsSync(file)) {
+          cached = await readFile(file, 'utf8');
+          return cached;
+        }
+        if (!team.site) return cached;
+        try {
+          const res = await fetch(`${team.site}${team.base}league.json`, {
+            headers: { 'User-Agent': 'rosterapp (github.com/kmccb/rosterapp)' },
+            signal: AbortSignal.timeout(20000),
+          });
+          if (!res.ok) return cached;
+          const text = await res.text();
+          JSON.parse(text); // an error page served as 200 is not a fallback
+          cached = text;
+        } catch (err) {
           console.warn(
-            `  ! ${team.slug}: fresh standings but an empty region page; keeping the previous ` +
+            `  ! ${team.slug}: could not read the deployed league.json to fall back on (${err.message}).`,
+          );
+        }
+        return cached;
+      };
+
+      let league = null;
+      try {
+        league = await fetchLeague(team.league, new Date().getFullYear());
+      } catch (err) {
+        // A thrown fetch is the same situation as a null one — nothing good to
+        // publish — so it falls into the same decision below rather than
+        // silently doing nothing on a machine that has no file to keep.
+        console.warn(`  ! ${team.slug}: could not read the league (${err.message}).`);
+      }
+
+      {
+        // fetchLeague is honest about what it got. null means the standings
+        // themselves are short or unreadable, which is never publishable; a
+        // null regionTable is a lesser loss but still worse than the copy
+        // already out there. Either way the answer is the same one the human
+        // ruled on: republish yesterday rather than publish something wrong.
+        const previous = !league || !league.regionTable ? await lastPublished() : null;
+
+        if (!league) {
+          if (previous) {
+            await writeFile(file, previous);
+            console.log(`           league   republished the previous copy — this run's pages gave nothing`);
+          } else {
+            console.warn(
+              `  ! ${team.slug}: the league pages gave nothing and there is no previous copy ` +
+                `anywhere, so no league.json is written and the tab stays off this build.`,
+            );
+          }
+        } else if (!league.regionTable && previous) {
+          await writeFile(file, previous);
+          console.warn(
+            `  ! ${team.slug}: fresh standings but an empty region page; republishing the previous ` +
               `league.json rather than blank a working playoff table with this one.`,
           );
         } else {
@@ -416,13 +482,11 @@ if (phase === 'pre') {
           );
           if (!league.regionTable) {
             console.warn(
-              `  ? ${team.slug}: no previous league.json to fall back on, so this one ships with no ` +
-                `region table; a later run fills it in once the region page is back.`,
+              `  ? ${team.slug}: no previous league.json anywhere to fall back on, so this one ships ` +
+                `with no region table; a later run fills it in once the region page is back.`,
             );
           }
         }
-      } catch (err) {
-        console.warn(`  ! ${team.slug}: could not read the league (${err.message}); keeping the previous file.`);
       }
     }
 

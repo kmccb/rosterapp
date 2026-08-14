@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { byWeek, standings, toLeagueGames } from './leagueModel';
-import type { TeamPage } from './leagueParse';
+import { parseTeamPage, type TeamPage } from './leagueParse';
 
 const MEMBERS = ['Poland Seminary', 'Girard', 'Hubbard'];
 
@@ -9,8 +10,12 @@ const page = (name: string, games: TeamPage['games']): TeamPage => ({
 });
 
 const game = (date: string, opponent: string, home: boolean, us?: number, them?: number) => ({
-  date, home, opponent, opponentId: 0, opponentRecord: '',
+  date, home, opponent, opponentId: 0, opponentRecord: '', playoff: false,
   ...(us === undefined ? {} : { result: { us, them: them! } }),
+});
+
+const playoffGame = (date: string, opponent: string, home: boolean, us: number, them: number) => ({
+  ...game(date, opponent, home, us, them), playoff: true,
 });
 
 describe('toLeagueGames', () => {
@@ -23,8 +28,15 @@ describe('toLeagueGames', () => {
     expect(games).toHaveLength(1);
     expect(games[0]).toEqual({
       date: '2026-09-18', home: 'Poland Seminary', away: 'Hubbard',
-      result: { home: 42, away: 14 }, isLeagueGame: true,
+      result: { home: 42, away: 14 }, isLeagueGame: true, isPlayoff: false,
     });
+  });
+
+  it('does not call a playoff rematch between two members a league game', () => {
+    const pages = [page('Poland Seminary', [playoffGame('2026-11-13', 'Hubbard', false, 21, 24)])];
+    const games = toLeagueGames(pages, MEMBERS);
+    expect(games[0].isPlayoff).toBe(true);
+    expect(games[0].isLeagueGame).toBe(false);
   });
 
   it('keeps a game against an outsider, and says it is not a league game', () => {
@@ -48,6 +60,32 @@ describe('standings', () => {
     ];
     const [poland] = standings(pages, MEMBERS);
     expect(poland).toEqual({ name: 'Poland Seminary', overall: '2-1', leagueRecord: '1-1' });
+  });
+
+  /*
+   * The one that would have shipped wrong. Poland played Girard twice in 2025:
+   * week 8 in the Northeast 8, and again on 14 November in the Division V
+   * regional semi-final, which the source marks '#'. Counting the second as a
+   * conference game gave 5-2 where the real Northeast 8 record is 5-1. The
+   * overall record has to keep both, because 9-3 is the season Poland had.
+   */
+  it('leaves the November playoff rematch out of the league record but in the overall', () => {
+    const html = readFileSync(new URL('./fixtures/team-2025-poland.html', import.meta.url), 'utf8');
+    const poland = parseTeamPage(html, 2025);
+    const members = [
+      'Poland Seminary', 'Girard', 'Hubbard', 'Lakeview',
+      'Niles McKinley', 'South Range', 'Struthers',
+    ];
+
+    // Both meetings are on the page, and only the later one is a playoff.
+    const girard = poland.games.filter((g) => g.opponent === 'Girard');
+    expect(girard.map((g) => `${g.date} ${g.playoff}`)).toEqual([
+      '2025-10-10 false', '2025-11-14 true',
+    ]);
+
+    const [row] = standings([poland], members);
+    expect(row.overall).toBe('9-3');
+    expect(row.leagueRecord).toBe('5-1');
   });
 
   it('sorts on league record, then overall', () => {
@@ -86,14 +124,29 @@ describe('standings', () => {
       'Girard 2-0', 'Poland Seminary 5-3',
     ]);
   });
+
+  it('reads alphabetically in the preseason, when nobody has played', () => {
+    // Every team 0-0, every percentage equal, so a stable sort would leave the
+    // table in the order the pages arrived — which is Poland's schedule order,
+    // meaningless to a reader. The season opens in August with exactly this
+    // table on screen.
+    const pages = [
+      page('Poland Seminary', []),
+      page('Hubbard', []),
+      page('Girard', []),
+    ];
+    expect(standings(pages, MEMBERS).map((s) => s.name)).toEqual([
+      'Girard', 'Hubbard', 'Poland Seminary',
+    ]);
+  });
 });
 
 describe('byWeek', () => {
   it('puts a Thursday and a Saturday in the same football week', () => {
     // 2026-09-17 is a Thursday, 2026-09-19 the Saturday after it.
     const weeks = byWeek([
-      { date: '2026-09-17', home: 'A', away: 'B', isLeagueGame: true },
-      { date: '2026-09-19', home: 'C', away: 'D', isLeagueGame: true },
+      { date: '2026-09-17', home: 'A', away: 'B', isLeagueGame: true, isPlayoff: false },
+      { date: '2026-09-19', home: 'C', away: 'D', isLeagueGame: true, isPlayoff: false },
     ]);
     expect(weeks).toHaveLength(1);
     expect(weeks[0].games).toHaveLength(2);
@@ -101,8 +154,8 @@ describe('byWeek', () => {
 
   it('numbers weeks that have games, and puts the newest first', () => {
     const weeks = byWeek([
-      { date: '2026-08-21', home: 'A', away: 'B', isLeagueGame: true },
-      { date: '2026-09-18', home: 'C', away: 'D', isLeagueGame: true },
+      { date: '2026-08-21', home: 'A', away: 'B', isLeagueGame: true, isPlayoff: false },
+      { date: '2026-09-18', home: 'C', away: 'D', isLeagueGame: true, isPlayoff: false },
     ]);
     // Two weeks apart on the calendar, but weeks are numbered by position
     // among weeks that actually have games — the source gives no season start

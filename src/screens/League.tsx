@@ -10,6 +10,8 @@ import { byWeek, type LeagueGame, type Standing } from '../league/leagueModel';
 type League = {
   conference: string;
   team: string;
+  /** Our joeeitel id, which is how our row is found in a table of names. */
+  teamId: number;
   division: string;
   region: number;
   teams: Standing[];
@@ -77,6 +79,22 @@ export function League({ base }: { base: string }) {
 
       {view === 'league' && (
         <>
+          {/* Friday night first. Somebody opening this on Friday night wants
+              the scores; the table is the thing you scroll to afterwards. */}
+          {weeks.map((w) => (
+            <div key={w.week}>
+              <div className="group-head">Week {w.week} · {w.label}</div>
+              {w.games.map((g) => (
+                <div className={`lg-game${g.isLeagueGame ? '' : ' is-outside'}`} key={`${g.date}-${g.home}-${g.away}`}>
+                  <span className="lg-side">{g.away}</span>
+                  <span className="lg-score">{g.result ? g.result.away : '—'}</span>
+                  <span className="lg-side">{g.home}</span>
+                  <span className="lg-score">{g.result ? g.result.home : '—'}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+
           <table className="table-lite table-standings">
             <thead>
               <tr><th>Standings</th><th>League</th><th>All</th></tr>
@@ -91,20 +109,6 @@ export function League({ base }: { base: string }) {
               ))}
             </tbody>
           </table>
-
-          {weeks.map((w) => (
-            <div key={w.week}>
-              <div className="group-head">Week {w.week} · {w.label}</div>
-              {w.games.map((g) => (
-                <div className={`lg-game${g.isLeagueGame ? '' : ' is-outside'}`} key={`${g.date}-${g.home}-${g.away}`}>
-                  <span className="lg-side">{g.away}</span>
-                  <span className="lg-score">{g.result ? g.result.away : '—'}</span>
-                  <span className="lg-side">{g.home}</span>
-                  <span className="lg-score">{g.result ? g.result.home : '—'}</span>
-                </div>
-              ))}
-            </div>
-          ))}
         </>
       )}
 
@@ -119,15 +123,27 @@ export function League({ base }: { base: string }) {
                 <tr><th>#</th><th>School</th><th>W–L</th><th>Avg</th></tr>
               </thead>
               <tbody>
-                {league.regionTable.rows.map((r) => (
-                  <tr key={r.teamId}
-                      className={[r.school === league.team ? 'is-us' : '', r.qualifying ? 'is-in' : ''].filter(Boolean).join(' ') || undefined}>
-                    <td>{r.rank}</td>
-                    <td>{r.school}</td>
-                    <td>{r.record.replace('-', '–')}</td>
-                    <td>{r.average.toFixed(1)}</td>
-                  </tr>
-                ))}
+                {league.regionTable.rows.map((r) => {
+                  // On the id, not the name: the region page prints "East"
+                  // where the team page says "Youngstown East", and our own
+                  // row is the one thing on this screen that must not be
+                  // missed because of a respelling.
+                  const us = r.teamId === league.teamId || r.school === league.team;
+                  return (
+                    <tr key={r.teamId}
+                        className={[us ? 'is-us' : '', r.qualifying ? 'is-in' : ''].filter(Boolean).join(' ') || undefined}>
+                      <td>
+                        {r.rank}
+                        {/* The coloured dot is CSS content, which a screen
+                            reader does not announce. This says it in words. */}
+                        {r.qualifying && <span className="visually-hidden">, in a playoff place</span>}
+                      </td>
+                      <td>{r.school}</td>
+                      <td>{r.record.replace('-', '–')}</td>
+                      <td>{r.average.toFixed(1)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </>

@@ -18,6 +18,14 @@ export type TeamGame = {
   opponentRecord: string;
   /** Absent until played. Us first, them second. */
   result?: { us: number; them: number };
+  /**
+   * An OHSAA playoff game, as the source marks it with a '#'. Two conference
+   * schools can meet again in November — Poland, Hubbard, Niles McKinley and
+   * Struthers are all in Region 13 in 2026 — and that rematch is emphatically
+   * not a conference game. Recorded here rather than thrown away, because the
+   * league record is wrong by a whole game if it isn't.
+   */
+  playoff: boolean;
 };
 
 export type TeamPage = {
@@ -32,11 +40,14 @@ export type TeamPage = {
 /** Tags out, entities decoded, whitespace collapsed — shared by every cell reader below. */
 const strip = (s: string) => s.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 
-/** Cell contents by class, with the tags and the whitespace taken out. */
-const cell = (row: string, className: string): string => {
+/** Cell contents by class, markup and all — some facts live in the tags. */
+const cellHtml = (row: string, className: string): string => {
   const m = row.match(new RegExp(`<td[^>]*class="[^"]*\\b${className}\\b[^"]*"[^>]*>([\\s\\S]*?)</td>`));
-  return m ? strip(m[1]) : '';
+  return m ? m[1] : '';
 };
+
+/** Cell contents by class, with the tags and the whitespace taken out. */
+const cell = (row: string, className: string): string => strip(cellHtml(row, className));
 
 export function parseTeamPage(html: string, year: number): TeamPage {
   const caption = html.match(/<caption>\s*<strong>\s*\d{4}\s+([\s\S]+?)\s+Football\s+\((\d+-\d+)\)/);
@@ -53,8 +64,11 @@ export function parseTeamPage(html: string, year: number): TeamPage {
     const [month, day] = date.split('/');
     // A playoff row marks the opponent with a '#' in its own span, still inside
     // the opponent cell, so it comes out glued to the front of the name once
-    // tags are stripped and must be peeled off separately from the record.
-    const opponentCell = cell(row, 'opponent');
+    // tags are stripped and must be peeled off separately from the record. The
+    // span is the only place the fact is recorded, so it is read off the markup
+    // before the tags go, not inferred from the stray '#'.
+    const opponentHtml = cellHtml(row, 'opponent');
+    const opponentCell = strip(opponentHtml);
     const opponent = opponentCell.replace(/^#\s*/, '').replace(/\s*\(\d+-\d+\)\s*$/, '').trim();
     const score = cell(row, 'score').match(/^(\d+)-(\d+)$/);
 
@@ -64,6 +78,7 @@ export function parseTeamPage(html: string, year: number): TeamPage {
       opponent,
       opponentId: Number(link[1]),
       opponentRecord: (opponentCell.match(/\((\d+-\d+)\)/) ?? [, ''])[1],
+      playoff: /<span[^>]*class="[^"]*\bplayoff\b/.test(opponentHtml),
       ...(score ? { result: { us: Number(score[1]), them: Number(score[2]) } } : {}),
     });
   }

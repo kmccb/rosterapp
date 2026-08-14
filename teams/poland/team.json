@@ -13,6 +13,9 @@
     "accentInk": "#04043a"
   },
   "schedule": "https://ical.schedulestar.com/fans/?uuid=6c1e7011-7fb1-11f1-b701-0268a4183e49",
+  "_site": "Where this build is already deployed. The refresh job checks out a clean tree, so the previously published league.json exists nowhere on the runner; it is fetched from here instead, and republished unchanged when a scrape comes back short. Stale beats wrong.",
+  "site": "https://roster.scottforge.ai",
+  "_league": "members are the names to look for in the opponent column of teamId's page, which is how the seven resolve themselves rather than rotting in a list. ids is the escape hatch for the one name that doesn't resolve — a season Poland doesn't play a member, or a school joeeitel respells there (it prints \"East\" on the region page for what the team page calls \"Youngstown East\"). Anything still unresolved abandons the run rather than shipping a table one team short.",
   "league": {
     "source": "joeeitel",
     "teamId": 1264,
@@ -20,7 +23,8 @@
     "members": [
       "Poland Seminary", "Girard", "Hubbard", "Lakeview",
       "Niles McKinley", "South Range", "Struthers"
-    ]
+    ],
+    "ids": {}
   },
   "_opponentAliases": "Names one school answers to, mapped to the one we file it under. Key is the tidied name lowercased with punctuation dropped.",
   "opponentAliases": {
