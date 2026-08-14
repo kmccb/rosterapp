@@ -24,6 +24,7 @@ import { existsSync } from 'node:fs';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchEspnRoster, fetchEspnSeasons } from './lib/espn.mjs';
+import { fetchLeague } from './lib/ohio.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
 import { parseIcal, nextGame, canonicalOpponent } from '../src/schedule/icalParse.ts';
 
@@ -381,6 +382,29 @@ if (phase === 'pre') {
     await writeRoster(team, out);
     await writeSeasons(team, out);
 
+    /*
+     * The rest of the conference, and the playoff region. Written only for a
+     * team that asked for it; kept from the last run when the fetch or the parse
+     * comes back empty, for the same reason the schedule is.
+     */
+    if (team.league) {
+      try {
+        const league = await fetchLeague(team.league, new Date().getFullYear());
+        if (league) {
+          await writeFile(join(out, 'league.json'), JSON.stringify(league));
+          console.log(
+            `           league   ${league.teams.length} teams, ${league.games.length} games, ` +
+              `D-${league.division} region ${league.region}` +
+              `${league.regionTable ? `, ${league.regionTable.rows.length} in the region` : ', no region table'}`,
+          );
+        } else {
+          console.warn(`  ! ${team.slug}: the league pages gave nothing; keeping the previous file.`);
+        }
+      } catch (err) {
+        console.warn(`  ! ${team.slug}: could not read the league (${err.message}); keeping the previous file.`);
+      }
+    }
+
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
         `accent ${palette.accent}  badge ${(bytes / 1024).toFixed(0)}kB` +
@@ -419,6 +443,7 @@ if (phase === 'pre') {
       schedule: existsSync(join(out, 'schedule.json')),
       roster: existsSync(join(out, 'roster.json')),
       seasons: existsSync(join(out, 'seasons.json')),
+      league: existsSync(join(out, 'league.json')),
     };
   }
 
