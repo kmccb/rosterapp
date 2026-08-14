@@ -128,6 +128,13 @@ const mondayOf = (iso: string): string => {
   return d.toISOString().slice(0, 10);
 };
 
+/*
+ * In week order, earliest first — the way a season is read and the way the
+ * Schedule tab already lists its fixtures. Newest-first was tried and is
+ * wrong: before a ball is thrown it puts week ten, the furthest away, at the
+ * top of the screen, and the next game — the only one anybody is looking for
+ * — at the bottom.
+ */
 export function byWeek(games: LeagueGame[]): Week[] {
   const buckets = new Map<string, LeagueGame[]>();
   for (const g of games) {
@@ -135,15 +142,12 @@ export function byWeek(games: LeagueGame[]): Week[] {
     buckets.set(k, [...(buckets.get(k) ?? []), g]);
   }
 
-  const mondays = [...buckets.keys()].sort();
-  return mondays
-    .map((monday, i) => ({
-      week: i + 1,
-      label: new Date(`${monday}T12:00:00`).toLocaleDateString(undefined, {
-        month: 'long',
-        day: 'numeric',
-      }),
-      games: buckets.get(monday)!,
-    }))
-    .reverse();
+  return [...buckets.keys()].sort().map((monday, i) => ({
+    week: i + 1,
+    label: new Date(`${monday}T12:00:00`).toLocaleDateString(undefined, {
+      month: 'long',
+      day: 'numeric',
+    }),
+    games: buckets.get(monday)!,
+  }));
 }

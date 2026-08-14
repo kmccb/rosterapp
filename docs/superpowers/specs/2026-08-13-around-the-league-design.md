@@ -86,10 +86,16 @@ Stats:
         Girard               3–0     4–0
         Poland               2–1     3–1
 
-**Northeast 8** — the league's games grouped by week, newest first, with the
+**Northeast 8** — the league's games grouped by week, soonest first, with the
 standings underneath. Poland's own row is picked out. An unplayed fixture shows
 a dash and nothing else: the source has a score column and no kickoff column,
 so a time on this screen would be invented.
+
+Week order is the calendar's, the same way the Schedule tab lists its fixtures.
+This originally said newest first, on the reasoning that a supporter checking in
+on a Friday night wants that night's results at the top. That is wrong before a
+ball is thrown: it puts week ten, the furthest away, at the top of the screen
+and the next game at the bottom.
 
 **Region** — the Harbin points table for whichever region Poland is in, ranked,
 with Poland picked out. This is the "division" half of the request.

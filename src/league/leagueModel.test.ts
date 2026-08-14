@@ -152,15 +152,18 @@ describe('byWeek', () => {
     expect(weeks[0].games).toHaveLength(2);
   });
 
-  it('numbers weeks that have games, and puts the newest first', () => {
+  it('numbers weeks that have games, and puts the soonest first', () => {
     const weeks = byWeek([
-      { date: '2026-08-21', home: 'A', away: 'B', isLeagueGame: true, isPlayoff: false },
       { date: '2026-09-18', home: 'C', away: 'D', isLeagueGame: true, isPlayoff: false },
+      { date: '2026-08-21', home: 'A', away: 'B', isLeagueGame: true, isPlayoff: false },
     ]);
-    // Two weeks apart on the calendar, but weeks are numbered by position
-    // among weeks that actually have games — the source gives no season start
-    // date, so numbering the empty ones would be invention. Newest first.
-    expect(weeks.map((w) => w.week)).toEqual([2, 1]);
-    expect(weeks[0].games[0].date).toBe('2026-09-18');
+    // Weeks are numbered by position among weeks that actually have games —
+    // the source gives no season start date, so numbering the empty ones would
+    // be invention.
+    expect(weeks.map((w) => w.week)).toEqual([1, 2]);
+    // Fed in newest-first on purpose: the order out is the calendar's, not the
+    // order the games happened to arrive in.
+    expect(weeks[0].games[0].date).toBe('2026-08-21');
+    expect(weeks[1].games[0].date).toBe('2026-09-18');
   });
 });
