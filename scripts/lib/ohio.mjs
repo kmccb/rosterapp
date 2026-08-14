@@ -10,6 +10,14 @@
  *
  * All parsing lives in src/league/leagueParse.ts and is tested against saved
  * pages. Nothing here does any.
+ *
+ * Own page, or any one of the six rivals, missing or empty: the whole fetch
+ * returns null, because a standings table with a team quietly dropped from
+ * it is wrong rather than merely old. The region table is different — it
+ * doesn't corrupt anything else on the page, so a bad region page comes back
+ * as `regionTable: null` inside an otherwise good result, and it's left to
+ * the caller (which knows what's already on disk) to decide whether that is
+ * worth publishing.
  */
 import { parseRegionTable, parseTeamPage } from '../../src/league/leagueParse.ts';
 import { standings, toLeagueGames } from '../../src/league/leagueModel.ts';
@@ -39,17 +47,38 @@ export async function fetchLeague(config, year) {
   const ids = new Map();
   for (const g of own.games) if (wanted.includes(g.opponent)) ids.set(g.opponent, g.opponentId);
 
+  // Every rival is required. A table missing one of the seven is wrong, not
+  // merely stale, so one bad rival page abandons the whole fetch — the
+  // caller keeps whatever it already had.
   const others = [];
   for (const [name, id] of ids) {
     const html = await getHtml(TEAM(id, year));
     const page = html && parseTeamPage(html, year);
-    if (page?.games.length) others.push(page);
-    else console.warn(`  ! league: no page for ${name} (${id}); leaving them out of the table.`);
+    if (!page?.games.length) {
+      console.warn(
+        `  ! league: ${name}'s page (${id}) came back empty; a standings table short one team ` +
+          `is wrong rather than stale, so this run is abandoned and the caller keeps the last good file.`,
+      );
+      return null;
+    }
+    others.push(page);
   }
 
   const pages = [own, ...others];
+
+  // The region table is a lesser piece of the page: unlike a missing rival,
+  // a missing region doesn't corrupt the standings or the game list, so it
+  // does not sink the whole fetch. It comes back as null and the caller
+  // decides — from whether a good one already exists on disk — whether that
+  // is good enough to publish.
   const regionHtml = await getHtml(REGION(year, own.region));
   const region = regionHtml ? parseRegionTable(regionHtml) : null;
+  if (!region?.rows.length) {
+    console.warn(
+      `  ! league: the region ${own.region} page came back empty; the conference table is still ` +
+        `good, so it goes out with regionTable: null and the caller decides whether to publish that.`,
+    );
+  }
 
   return {
     conference: config.conference,

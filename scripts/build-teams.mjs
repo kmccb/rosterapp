@@ -384,21 +384,42 @@ if (phase === 'pre') {
 
     /*
      * The rest of the conference, and the playoff region. Written only for a
-     * team that asked for it; kept from the last run when the fetch or the parse
-     * comes back empty, for the same reason the schedule is.
+     * team that asked for it; kept from the last run when the fetch or the
+     * parse comes back empty, for the same reason the schedule is.
+     *
+     * fetchLeague is honest about what it got: null means the standings
+     * themselves are incomplete or unreadable, and that's never publishable —
+     * the previous file, if any, stands. A regionTable of null inside an
+     * otherwise good result is a lesser problem, and it's this build's call,
+     * not fetchLeague's, whether that's good enough to ship: a working
+     * playoff table already on disk must not be blanked, but a team with no
+     * file at all gets one anyway, so the tab works instead of staying dead
+     * forever until the region page happens to cooperate.
      */
     if (team.league) {
+      const file = join(out, 'league.json');
       try {
         const league = await fetchLeague(team.league, new Date().getFullYear());
-        if (league) {
-          await writeFile(join(out, 'league.json'), JSON.stringify(league));
+        if (!league) {
+          console.warn(`  ! ${team.slug}: the league pages gave nothing; keeping the previous file.`);
+        } else if (!league.regionTable && existsSync(file)) {
+          console.warn(
+            `  ! ${team.slug}: fresh standings but an empty region page; keeping the previous ` +
+              `league.json rather than blank a working playoff table with this one.`,
+          );
+        } else {
+          await writeFile(file, JSON.stringify(league));
           console.log(
             `           league   ${league.teams.length} teams, ${league.games.length} games, ` +
               `D-${league.division} region ${league.region}` +
               `${league.regionTable ? `, ${league.regionTable.rows.length} in the region` : ', no region table'}`,
           );
-        } else {
-          console.warn(`  ! ${team.slug}: the league pages gave nothing; keeping the previous file.`);
+          if (!league.regionTable) {
+            console.warn(
+              `  ? ${team.slug}: no previous league.json to fall back on, so this one ships with no ` +
+                `region table; a later run fills it in once the region page is back.`,
+            );
+          }
         }
       } catch (err) {
         console.warn(`  ! ${team.slug}: could not read the league (${err.message}); keeping the previous file.`);
