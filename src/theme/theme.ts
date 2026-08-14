@@ -94,6 +94,8 @@ type BakedTeam = {
   roster?: boolean;
   /** Whether there is a season-by-season record to browse. */
   seasons?: boolean;
+  /** Whether this team's build produced a league table worth a tab. */
+  league?: boolean;
 };
 
 /**

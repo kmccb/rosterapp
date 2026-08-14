@@ -20,6 +20,7 @@ import { applyTheme, bakedTeam, initialTheme, saveTheme, teamBase, type Theme } 
 import { CodeEntry } from './screens/CodeEntry';
 import { Import, type ImportMeta } from './screens/Import';
 import { StatsImport } from './screens/StatsImport';
+import { League } from './screens/League';
 import { Lookup } from './screens/Lookup';
 import { RosterList } from './screens/RosterList';
 import { Schedule } from './screens/Schedule';
@@ -28,7 +29,16 @@ import { Settings } from './screens/Settings';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
-type Tab = 'lookup' | 'team' | 'schedule' | 'seasons' | 'code' | 'roster' | 'settings' | 'stats';
+type Tab =
+  | 'lookup'
+  | 'team'
+  | 'schedule'
+  | 'seasons'
+  | 'league'
+  | 'code'
+  | 'roster'
+  | 'settings'
+  | 'stats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -51,6 +61,8 @@ const TABS: Array<{ id: Tab; label: string }> = [
   ...(bakedTeam()?.schedule === false ? [] : [{ id: 'schedule' as Tab, label: 'Schedule' }]),
   // Only a team with a published record has one to browse.
   ...(bakedTeam()?.seasons ? [{ id: 'seasons' as Tab, label: 'Stats' }] : []),
+  // Only a team whose build produced a league table has a conference to show.
+  ...(bakedTeam()?.league ? [{ id: 'league' as Tab, label: 'League' }] : []),
 ];
 
 /*
@@ -362,6 +374,7 @@ export default function App() {
         )}
         {tab === 'schedule' && <Schedule base={teamBase()} />}
         {tab === 'seasons' && <SeasonStats base={teamBase()} />}
+        {tab === 'league' && <League base={teamBase()} />}
         {tab === 'roster' && (
           <Import
             roster={roster}

@@ -1697,3 +1697,75 @@ a.btn {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+
+/* ------------------------------------------------------------------ league */
+
+/* A plain table, because a standings table is a table. Hairlines rather than
+   boxes, to match the dense rows on the Team list. */
+.table-lite {
+  width: 100%;
+  margin: 4px 0 8px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table-lite th {
+  padding: 4px 0 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.table-lite th:first-child,
+.table-lite td:first-child { text-align: left; }
+
+.table-lite td {
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Which column is the name, and so which one goes left, differs by table: the
+ * standings table's 2nd column is the League record and stays with the
+ * numbers, but the Region table's 2nd column is the school and reads like
+ * every other name column on this screen. One shared class can't say both, so
+ * each table carries the class that answers it.
+ */
+.table-region th:nth-child(2),
+.table-region td:nth-child(2) { text-align: left; }
+
+/* Our own row, which is the one anybody opened this to find. */
+.table-lite .is-us td {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* In a qualifying place, as the source marks it. */
+.table-lite .is-in td:first-child::after {
+  content: '·';
+  margin-left: 6px;
+  color: var(--ok);
+}
+
+.lg-game {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.lg-score {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* A game against someone outside the conference still matters to the team
+   playing it, but it is not what this screen is about. */
+.lg-game.is-outside .lg-side { color: var(--muted); }
