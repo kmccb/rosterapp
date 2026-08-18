@@ -66,10 +66,12 @@ const TABS: Array<{ id: Tab; label: string }> = [
 ];
 
 /*
- * Read once, at module load, rather than inside the effect — reading it strips
- * the code from the address bar, and StrictMode runs effects twice in
- * development. The first pass consumed the code and the second found an empty
- * hash, so a followed link quietly did nothing at all.
+ * Read once, at module load, so every render sees the same answer rather than
+ * re-reading an address that other things are free to change.
+ *
+ * Reading does not remove it: the code has to stay in the address, because an
+ * installed app gets its own empty storage and the address it was added at is
+ * the only thing that can lead it back to the roster.
  */
 const LINK_CODE = takeCodeFromUrl();
 
@@ -258,10 +260,13 @@ export default function App() {
   }, [adopt]);
 
   /*
-   * Tapping a share link while the app is already open is a fragment change,
-   * not a page load, so none of the above would run and the link would appear
-   * to do nothing. Reload and let the normal path handle it — the code is still
-   * in the URL at that point, and gets consumed on the way through.
+   * Tapping an older share link while the app is already open is a fragment
+   * change, not a page load, so none of the above would run and the link would
+   * appear to do nothing. Reload and let the normal path handle it.
+   *
+   * Only fragments need this. A current link carries its code in the query, so
+   * following one is a real navigation and the page loads by itself — but the
+   * fragment links already sent out live in people's messages for good.
    */
   useEffect(() => {
     const onHashChange = () => {

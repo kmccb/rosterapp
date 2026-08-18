@@ -169,35 +169,47 @@ export const normalizeCode = (code: string): string =>
 
 /*
  * A link that carries the code, so nobody has to read eight characters down a
- * phone. The code goes in the fragment rather than the query string: fragments
- * are never sent to the server, so it stays out of GitHub's access logs and out
- * of the Referer header of anything the page later loads.
+ * phone.
+ *
+ * The code rides in the query string. It used to ride in the fragment, which
+ * was better for privacy — a fragment is never sent to the server, so the code
+ * stayed out of GitHub's access logs and out of the Referer header of anything
+ * the page later loads. That was given up because it did not survive being
+ * installed: iOS hands a home-screen web app its own empty storage jar, so the
+ * address the shortcut was created at is the only way the installed app can
+ * find the roster, and a fragment does not reliably make it that far.
+ *
+ * A code is a read capability on one roster, revocable by re-publishing, so
+ * the cost of it appearing in a log is small. An app that opens blank is not.
  */
-export const shareUrl = (code: string): string => {
+export const shareUrlFor = (origin: string, scope: string, code: string): string =>
+  `${origin}/${scope ? `${scope}/` : ''}?c=${formatCode(code)}`;
+
+export const shareUrl = (code: string): string =>
   // Built from the team rather than from location.pathname, which can be
   // `/index.html` — a link that then opens a page the service worker treats as
   // a different address than the one the app was installed at.
-  const scope = teamScope();
-  return `${window.location.origin}/${scope ? `${scope}/` : ''}#${formatCode(code)}`;
-};
+  shareUrlFor(window.location.origin, teamScope(), code);
 
 /**
- * Reads a share code out of the current URL. Deliberately leaves it there.
+ * A share code out of a URL, wherever it is carried. Deliberately leaves it
+ * there — see shareUrlFor above for why the address is the only channel an
+ * installed app has.
  *
- * iOS gives a home-screen web app its own storage, separate from Safari's, and
- * the web clip records whatever URL was showing when it was added. Stripping the
- * code meant the installed app launched at a bare address with an empty jar and
- * no way to find the roster — it opened blank every time.
+ * The query is where codes ride now; the fragment is still read because every
+ * link sent before this change carries one, and those links live in people's
+ * messages for good.
  *
- * Keeping it costs nothing now. A repeat visit with a code already in hand is
- * treated as a check for updates rather than a re-import, and the code is the
- * thing that gets shared anyway, so there's nothing here a link doesn't already
- * carry.
+ * Pure, and takes the URL rather than reading `location`, so the rule about
+ * where a code may hide is testable without a browser.
  */
-export const takeCodeFromUrl = (): string | null => {
-  const code = normalizeCode(window.location.hash.replace(/^#/, ''));
+export const codeFromUrl = (url: string): string | null => {
+  const { searchParams, hash } = new URL(url);
+  const code = normalizeCode(searchParams.get('c') ?? hash.replace(/^#/, ''));
   return code.length === 8 ? code : null;
 };
+
+export const takeCodeFromUrl = (): string | null => codeFromUrl(window.location.href);
 
 // --------------------------------------------------------------------- rpc
 

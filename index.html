@@ -13,27 +13,39 @@
     <meta name="apple-mobile-web-app-title" content="Roster" />
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png" />
-    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <title>Roster Lookup</title>
     <script>
       /*
-       * iOS 16.4+ reads this manifest when you Add to Home Screen, and pins the
-       * shortcut to its start_url — a fixed path, baked at build time, which
-       * cannot carry anyone's share code. A phone installing from a share link
-       * therefore launched at the bare path, in the separate storage jar iOS
-       * gives a home-screen web app, with no roster and no way to find one.
+       * The manifest is attached here rather than written in the markup above,
+       * because iOS must never see one at all.
        *
-       * Dropping the manifest on iOS restores the older behaviour: the shortcut
-       * records the page you were actually on, code and all. Nothing is lost —
-       * on iOS the name, icon, colour and standalone display all come from the
-       * apple-* meta tags above, not from here. Android keeps the manifest,
-       * where it is needed and where storage isn't partitioned anyway.
+       * iOS 16.4+ reads a web app manifest when you Add to Home Screen and pins
+       * the shortcut to its start_url — a fixed path, baked at build time,
+       * which cannot carry anyone's share code. The installed app then opened
+       * at a bare address, in the separate storage jar iOS gives a home-screen
+       * web app, with no roster and no way to find one.
+       *
+       * This was tried once as a <link> in the markup that a script deleted a
+       * few lines later, and it did not hold: by the time any script runs,
+       * Safari has already begun with a manifest it saw during parsing, and
+       * removing the tag afterwards does not take it back. Never writing the
+       * tag is the only version that cannot lose that race.
+       *
+       * Nothing is given up on iOS — the name, icon, colour and standalone
+       * display all come from the apple-* meta tags above. Android and desktop
+       * get the manifest, where it is needed and where storage isn't
+       * partitioned anyway.
        */
       (function () {
         var ua = navigator.userAgent;
         var iOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
-        if (iOS) document.querySelector('link[rel="manifest"]')?.remove();
+        if (iOS) return;
+        var link = document.createElement('link');
+        link.rel = 'manifest';
+        // Relative, so each team's page picks up its own manifest.
+        link.href = './manifest.webmanifest';
+        document.head.appendChild(link);
       })();
     </script>
   </head>
