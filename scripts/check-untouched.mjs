@@ -159,16 +159,30 @@ let schoolCount = 0;
 if (!existsSync(index)) {
   problems.push('dist/oh/index.json is missing — the directory shipped with no schools.');
 } else {
-  let schools;
+  let parsed;
+  let parsedOk = false;
   try {
-    ({ schools } = JSON.parse(await readFile(index, 'utf8')));
+    parsed = JSON.parse(await readFile(index, 'utf8'));
+    parsedOk = true;
   } catch (err) {
     problems.push(`dist/oh/index.json could not be read as JSON: ${err.message}`);
   }
 
-  if (!Array.isArray(schools) || !schools.length) {
-    if (schools !== undefined) problems.push('dist/oh/index.json lists no schools.');
-  } else {
+  /*
+   * A missing list is a failing build, not a quiet zero.
+   *
+   * This read `if (schools !== undefined)`, meant to avoid a second complaint
+   * when the parse had already failed. What it actually did was let a renamed
+   * or dropped `schools` key through in silence, and the guard signed off with
+   * "shipped all 0 schools" — a directory with nothing in it, called green. The
+   * parse failure reports itself above, so there is nothing left to suppress —
+   * and the flag rather than the value, because a file holding the four bytes
+   * `null` parses perfectly well and has no schools in it either.
+   */
+  const schools = parsed?.schools;
+  if (parsedOk && (!Array.isArray(schools) || !schools.length)) {
+    problems.push('dist/oh/index.json has no usable schools list.');
+  } else if (parsedOk) {
     const dataDir = join(root, 'dist/oh/data');
     const files = new Set(
       existsSync(dataDir) ? (await readdir(dataDir)).filter((f) => f.endsWith('.json')) : [],
