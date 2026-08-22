@@ -444,8 +444,17 @@ if (phase === 'pre') {
    * because the orphan is by definition not one of them.
    */
   const live = new Set(teams.filter((t) => !t.root).map((t) => t.slug));
+  /*
+   * Two directories in public/ are not a team and never were. icons/ is the
+   * root team's own, written a few lines below. oh/ is the Ohio directory's
+   * state file and its 700 schools — committed data, not build output, and the
+   * sweep above deleted all of it the first time this ran: `npm run build`
+   * quietly removed files that were in the repository, and the directory then
+   * shipped empty with nothing to say why.
+   */
+  const notATeam = new Set(['icons', 'oh']);
   for (const dir of await readdir(publicDir, { withFileTypes: true })) {
-    if (dir.isDirectory() && dir.name !== 'icons' && !live.has(dir.name)) {
+    if (dir.isDirectory() && !notATeam.has(dir.name) && !live.has(dir.name)) {
       console.log(`           removing public/${dir.name}/ — no such team`);
       await rm(join(publicDir, dir.name), { recursive: true, force: true });
     }
