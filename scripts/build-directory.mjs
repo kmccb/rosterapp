@@ -25,12 +25,22 @@ const indexFile = join(out, 'index.json');
 
 const year = Number(process.argv[2]) || new Date().getFullYear();
 
-const previousCount = async () => {
-  if (!existsSync(indexFile)) return 0;
+/*
+ * What was published last time: the school count that guards against a
+ * shrunk directory, and the game count that guards against one that held its
+ * size while losing games underneath it. `games` postdates some committed
+ * copies, so its absence skips that half of the check rather than tripping it.
+ */
+const previousIndex = async () => {
+  if (!existsSync(indexFile)) return { schools: 0, games: undefined };
   try {
-    return JSON.parse(await readFile(indexFile, 'utf8')).schools.length;
+    const parsed = JSON.parse(await readFile(indexFile, 'utf8'));
+    return {
+      schools: parsed.schools.length,
+      games: typeof parsed.games === 'number' ? parsed.games : undefined,
+    };
   } catch {
-    return 0;
+    return { schools: 0, games: undefined };
   }
 };
 
@@ -39,7 +49,7 @@ console.log(`  fetched ${weeks.length}/${weeks.length + failed.length} weeks, ${
 
 const schools = directory(games);
 const seasons = seasonsBySchool(games);
-const before = await previousCount();
+const { schools: before, games: beforeGames } = await previousIndex();
 
 /*
  * The guard. A directory that has shrunk means weeks went missing, and
@@ -54,6 +64,33 @@ if (before > 0 && schools.length < before * 0.9) {
   process.exit(1);
 }
 
+/*
+ * A week that failed outright is a hole in the season, not a source that
+ * corrected itself — the school-count floor above can pass while an entire
+ * week's games are missing from every school that played in it. Refuse to
+ * publish rather than let that hole reach the site quietly.
+ */
+if (failed.length > 0 && before > 0) {
+  console.error(
+    `  ! week(s) ${failed.join(',')} failed to fetch — publishing would drop their games from ` +
+      `every school that played in them. Keeping the committed copy.`,
+  );
+  process.exit(1);
+}
+
+/*
+ * The same guard as schools, but on games directly, because a school survives
+ * on the list with zero games just as easily as with a full slate. Skipped
+ * when the committed index predates this field.
+ */
+if (beforeGames !== undefined && games.length < beforeGames * 0.9) {
+  console.error(
+    `  ! ${games.length} games against ${beforeGames} already published — too few. ` +
+      `Keeping the committed copy.`,
+  );
+  process.exit(1);
+}
+
 await mkdir(dataDir, { recursive: true });
 
 // Clear the data directory so a school that genuinely left does not linger.
@@ -63,7 +100,7 @@ for (const f of await readdir(dataDir).catch(() => [])) {
 
 await writeFile(
   indexFile,
-  `${JSON.stringify({ year, fetched: new Date().toISOString(), schools }, null, 0)}\n`,
+  `${JSON.stringify({ year, fetched: new Date().toISOString(), schools, games: games.length }, null, 0)}\n`,
 );
 
 for (const season of seasons.values()) {
