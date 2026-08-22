@@ -2,10 +2,10 @@
  * Ohio's whole season, off sixteen pages.
  *
  * joeeitel publishes a scoreboard per week, and one page carries every game in
- * the state: the date, the kickoff, both schools with the town they play in,
- * and the score once it exists. That is the entire free tier in sixteen
- * requests, and it is also the only source that prints a kickoff time for a
- * school that has not handed over a calendar feed.
+ * the state: the date, schools with the town they play in, and the score once
+ * it exists. Kickoff time is optional (some games lack it); city is optional
+ * (especially for out-of-state schools with a [XX] suffix). Both "at" and "vs"
+ * used as separators (vs = neutral site). Lines with "cancel" are skipped.
  *
  * Pure, and pinned to saved copies of real pages, because this is one person's
  * site with no API and the shape can change without warning. A change fails a
@@ -35,19 +35,22 @@ export type StateGame = {
 
 /*
  * One side of a fixture: "Salem (Salem) " or "Everett (Everett) [PA] ",
- * followed by the score span. The class is not pinned to text-primary because
- * an unplayed game carries the same span with text-danger and "***" inside it;
- * matching on the class would drop every unplayed fixture in the season.
+ * or with empty city "Berea () [KY] ", followed by the score span.
+ * The class is not pinned to text-primary because an unplayed game carries
+ * the same span with text-danger and "***" inside it; matching on the class
+ * would drop every unplayed fixture in the season. State abbreviations are
+ * typically 2 letters but may be longer (e.g. [TBD], [UK]).
  */
-const SIDE = String.raw`(.+?)\s*\((.+?)\)\s*(?:\[([A-Z]{2})\]\s*)?<span class="text-(?:primary|danger)">(\d+|\*\*\*)<\/span>`;
+const SIDE = String.raw`(.+?)\s*\(([^)]*)\)\s*(?:\[([A-Z]{2,})\]\s*)?<span class="text-(?:primary|danger)">(\d+|\*\*\*)<\/span>`;
 
 /*
- * The kickoff is required, not optional. Every one of the 4,275 games in the
- * 2026 season printed one, and an optional group here would happily swallow
- * the first word of a school's name on any line that did not.
+ * Date, optional kickoff (time-shaped), away school, then separator (at or vs),
+ * then home school. Lines with "cancel" are filtered in parseScoreboard.
+ * For lines lacking a city, city becomes '', and state defaults to 'OH' unless
+ * a [XX] suffix is present.
  */
 const LINE = new RegExp(
-  String.raw`<br>\s*(\d{4}-\d{2}-\d{2})\s+(\S+)\s+${SIDE}\s*at\s*${SIDE}` +
+  String.raw`<br>\s*(\d{4}-\d{2}-\d{2})\s+(?:(\d{1,2}(?::\d{2})?(?:am|pm|noon))\s+)?${SIDE}\s*(?:at|vs)\s*${SIDE}` +
     String.raw`(?:\s*<span class="text-danger">(OT\d+)<\/span>)?`,
   'g',
 );
@@ -63,12 +66,20 @@ export function parseScoreboard(html: string, week: number): StateGame[] {
   const games: StateGame[] = [];
 
   for (const m of html.matchAll(LINE)) {
+    // Check if this line has "cancel" and skip it. Look only to the next <br>.
+    const lineEnd = html.indexOf('<br>', m.index!);
+    const lineBound = lineEnd > 0 ? lineEnd : html.length;
+    const lineContext = html.substring(m.index!, lineBound);
+    if (lineContext.includes('<b>cancel</b>')) {
+      continue;
+    }
+
     const [, date, kickoff, aName, aCity, aState, aScore, hName, hCity, hState, hScore, ot] = m;
 
     games.push({
       week,
       date,
-      kickoff,
+      kickoff: kickoff || '',
       away: side(aName, aCity, aState, aScore),
       home: side(hName, hCity, hState, hScore),
       ...(ot ? { overtime: ot } : {}),

@@ -8,7 +8,7 @@ describe('parseScoreboard', () => {
   const week1 = parseScoreboard(WEEK1, 1);
 
   it('reads every game on the page', () => {
-    expect(week1.length).toBe(385);
+    expect(week1.length).toBe(401);
   });
 
   it('reads a played game, visitor first', () => {
@@ -32,11 +32,12 @@ describe('parseScoreboard', () => {
    * Every game has two schools, so a week's schools must come to twice its
    * games. This is the invariant that catches a regex silently dropping rows,
    * which is the failure that would matter and the one hardest to spot.
+   * Every school must have a name and state; city may be empty for some entries.
    */
   it('accounts for two schools in every game', () => {
     const sides = week1.flatMap((g) => [g.away, g.home]);
     expect(sides.length).toBe(week1.length * 2);
-    expect(sides.every((s) => s.name && s.city)).toBe(true);
+    expect(sides.every((s) => s.name && s.state)).toBe(true);
   });
 
   it('leaves an unplayed game with no score rather than a zero', () => {
@@ -50,7 +51,7 @@ describe('parseScoreboard', () => {
     const week6 = parseScoreboard(WEEK6, 6);
     const foreign = week6.flatMap((g) => [g.away, g.home]).filter((s) => s.state !== 'OH');
     expect(foreign.length).toBeGreaterThan(0);
-    expect(foreign[0].state).toMatch(/^[A-Z]{2}$/);
+    expect(foreign[0].state).toMatch(/^[A-Z]{2,}$/);
     expect(week6.some((g) => g.home.state === 'OH')).toBe(true);
   });
 
