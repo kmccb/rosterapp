@@ -47,12 +47,21 @@ export const slugFor = (name: string, city: string): string =>
 /** Only Ohio schools get a page; everyone else is an opponent's name. */
 const isOhio = (s: StateSide) => s.state === 'OH';
 
+/*
+ * A school has a town. "Non-varsity opponent", printed with no city because
+ * the source has nothing to give it, is a stand-in for a scrimmage side that
+ * was never going to get a page — it still belongs on the real school's
+ * fixture as an opponent's name, but it is not itself a school to search for
+ * or file a season under.
+ */
+const isSchool = (s: StateSide) => isOhio(s) && s.city !== '';
+
 export function directory(games: StateGame[]): School[] {
   const schools = new Map<string, School>();
 
   for (const g of games) {
     for (const s of [g.away, g.home]) {
-      if (!isOhio(s)) continue;
+      if (!isSchool(s)) continue;
       const slug = slugFor(s.name, s.city);
       if (!schools.has(slug)) schools.set(slug, { slug, name: s.name, city: s.city });
     }
@@ -72,7 +81,7 @@ export function seasonsBySchool(games: StateGame[]): Map<string, SchoolSeason> {
   const seasons = new Map<string, SchoolSeason>();
 
   const file = (us: StateSide, them: StateSide, atHome: boolean, g: StateGame) => {
-    if (!isOhio(us)) return;
+    if (!isSchool(us)) return;
 
     const slug = slugFor(us.name, us.city);
     const season =
@@ -92,7 +101,7 @@ export function seasonsBySchool(games: StateGame[]): Map<string, SchoolSeason> {
       home: atHome,
       opponent: them.name,
       opponentCity: them.city,
-      opponentSlug: isOhio(them) ? slugFor(them.name, them.city) : null,
+      opponentSlug: isSchool(them) ? slugFor(them.name, them.city) : null,
       ...(played
         ? { result: { us: us.score!, them: them.score!, won: us.score! > them.score! } }
         : {}),

@@ -29,14 +29,32 @@ describe('parseScoreboard', () => {
   });
 
   /*
-   * Every game has two schools, so a week's schools must come to twice its
-   * games. This is the invariant that catches a regex silently dropping rows,
-   * which is the failure that would matter and the one hardest to spot.
-   * Every school must have a name and state; city may be empty for some entries.
+   * `sides.length === games.length * 2` was the old shape of this test, and
+   * it holds by construction — every game contributes exactly one away and
+   * one home side, so counting sides can never disagree with counting games.
+   * It would pass even if the regex silently merged two schools into one line.
+   *
+   * The invariant that would actually catch that: a school plays at most once
+   * a week. Byes mean some schools are absent, so this asserts at most one
+   * appearance, not exactly one.
    */
-  it('accounts for two schools in every game', () => {
+  it('never lists the same school twice in one week', () => {
+    // State, not just name and city: Ohio's Marietta and Marietta, GA share
+    // both, and are still two different schools playing two different games.
+    const key = (s: { name: string; city: string; state: string }) =>
+      `${s.name}|${s.city}|${s.state}`;
+    const counts = new Map<string, number>();
+    for (const g of week1) {
+      for (const s of [g.away, g.home]) {
+        counts.set(key(s), (counts.get(key(s)) ?? 0) + 1);
+      }
+    }
+    const repeats = [...counts.entries()].filter(([, n]) => n > 1);
+    expect(repeats).toEqual([]);
+  });
+
+  it('gives every side a name and a state', () => {
     const sides = week1.flatMap((g) => [g.away, g.home]);
-    expect(sides.length).toBe(week1.length * 2);
     expect(sides.every((s) => s.name && s.state)).toBe(true);
   });
 

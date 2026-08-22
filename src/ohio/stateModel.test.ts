@@ -51,6 +51,18 @@ describe('directory', () => {
     expect(d.map((s) => s.name)).toEqual(['Poland Seminary']);
   });
 
+  /*
+   * "Non-varsity opponent" ships with no city, standing in for a scrimmage
+   * side the source never gave a town. It is not a school with a page of its
+   * own, and it must not take up a slot in the 718 schools this once claimed.
+   */
+  it('leaves out a side with no city, which is a scrimmage stand-in and not a school', () => {
+    const d = directory([
+      game({ away: { name: 'Non-varsity opponent', city: '', state: 'OH', score: null } }),
+    ]);
+    expect(d.map((s) => s.name)).toEqual(['Poland Seminary']);
+  });
+
   it('is sorted by name so the file diffs cleanly week to week', () => {
     const names = directory(week1).map((s) => s.name);
     expect(names).toEqual([...names].sort());
@@ -106,5 +118,15 @@ describe('seasonsBySchool', () => {
     ]);
     expect(s.get('poland-seminary-poland')!.games[0].opponentSlug).toBeNull();
     expect(seasonsBySchool([game()]).get('poland-seminary-poland')!.games[0].opponentSlug).toBe('salem-salem');
+  });
+
+  it('keeps a cityless side as an opponent name, with no season file and no link', () => {
+    const s = seasonsBySchool([
+      game({ away: { name: 'Non-varsity opponent', city: '', state: 'OH', score: null } }),
+    ]);
+    expect(s.has('non-varsity-opponent')).toBe(false);
+    const poland = s.get('poland-seminary-poland')!;
+    expect(poland.games[0].opponent).toBe('Non-varsity opponent');
+    expect(poland.games[0].opponentSlug).toBeNull();
   });
 });
