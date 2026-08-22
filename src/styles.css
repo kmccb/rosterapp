@@ -976,9 +976,15 @@ a.btn {
 
 .control-bar {
   position: sticky;
-  top: 0;
+  /*
+   * Pulled up by the same amount the negative margin below pushes it down.
+   * A sticky element is held at its *margin* edge, so a -14px top margin parks
+   * the bar 14px below the top of the list and leaves a strip of scrolling
+   * content showing above it. This cancels that exactly.
+   */
+  top: calc(var(--screen-pad, 14px) * -1);
   z-index: 2;
-  /* Out to the edges of .screen's padding and back again, so the blur covers
+  /* Out to the edges of .screen's padding and back again, so the bar covers
      the full width of the list scrolling under it. */
   margin: calc(var(--screen-pad, 14px) * -1);
   margin-bottom: 8px;
@@ -986,8 +992,15 @@ a.btn {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: var(--chrome);
-  backdrop-filter: blur(14px);
+  /*
+   * Opaque, not the frosted --chrome the app bar uses. This one has a list
+   * scrolling underneath it rather than a fixed background, and a translucent
+   * bar with backdrop-filter is only as good as the browser's willingness to
+   * apply the filter — on iOS inside a scrolling container it frequently is
+   * not, which leaves week one's scores sliding visibly through the middle of
+   * the Northeast 8 / Region control. A readable control beats a frosted one.
+   */
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 

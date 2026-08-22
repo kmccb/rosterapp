@@ -72,8 +72,30 @@ export function Schedule({ base }: { base: string }) {
    * cannot end up disagreeing about whether Friday's game is over.
    */
   const now = useNow();
-  const next = useMemo(() => (season ? nextGame(season.games, now) : undefined), [season, now]);
-  const sections = useMemo(() => (season ? bySection(season.games, now) : []), [season, now]);
+
+  /*
+   * Scrimmages are dropped here rather than filtered out at the source, so the
+   * feed's own account of the season stays intact in schedule.json. Nothing on
+   * this screen wants them: they are not part of a record, nobody has a score
+   * for them, and two of them sat at the top of the list all season.
+   */
+  const games = useMemo(() => (season?.games ?? []).filter((g) => !g.scrimmage), [season]);
+
+  const next = useMemo(() => nextGame(games, now), [games, now]);
+  const sections = useMemo(() => bySection(games, now), [games, now]);
+
+  /*
+   * Every meeting with a school, this season's included.
+   *
+   * history.json stops at the end of last season — it is a committed record,
+   * not something the build appends to — so a game played this year was
+   * missing from its own head-to-head. Four days after losing to Salem the
+   * card under them still read 4-0.
+   */
+  const meetings = useMemo(
+    () => [...(season?.history ?? []), ...games.filter((g) => g.result)],
+    [season, games],
+  );
 
   if (failed) {
     return (
@@ -91,15 +113,14 @@ export function Schedule({ base }: { base: string }) {
     );
   }
 
-  const history = season.history ?? [];
-  const record = seasonRecord(season.games);
+  const record = seasonRecord(games);
 
   return (
     <div className="screen">
       {next && (
         <NextGame
           game={next}
-          history={history}
+          history={meetings}
           weather={season.weather}
           base={base}
           record={record}
@@ -109,7 +130,7 @@ export function Schedule({ base }: { base: string }) {
 
       <p className="filter-line">
         <span>
-          {season.games.length} games
+          {games.length} games
           {record.played > 0 && ` · ${record.won}–${record.lost}`} — tap one for the record against
           them
         </span>
@@ -127,7 +148,7 @@ export function Schedule({ base }: { base: string }) {
                   game={g}
                   isNext={g === next}
                   done={m.done}
-                  history={history}
+                  history={meetings}
                   open={open === id}
                   onToggle={() => setOpen((cur) => (cur === id ? null : id))}
                 />
@@ -377,7 +398,7 @@ function NextGame({
   return (
     <section className={`next-card${isGameDay ? ' is-gameday' : ''}`}>
       <div className="next-card-head">
-        <p className="next-card-label">{game.scrimmage ? 'Next up · scrimmage' : 'Next up'}</p>
+        <p className="next-card-label">Next up</p>
         <Countdown game={game} base={base} today={today} />
       </div>
       <h2 className="next-card-opponent">
@@ -452,14 +473,13 @@ function Fixture({
         </span>
         <span className="fixture-team">
           <span className="fixture-ha">{game.home ? 'vs' : 'at'}</span> {game.opponent}
-          {game.scrimmage && <span className="fixture-tag">scrimmage</span>}
           <span className="fixture-sub">{sub}</span>
         </span>
         {/*
           The score once there is one, and the kickoff time until then. A game
-          that has been played and has no score gets neither: a scrimmage
-          nobody scores, or a result the league has not posted yet, and last
-          Friday's kickoff time is not what anyone is looking for.
+          that has been played and has no score gets neither — the league has
+          not posted it yet, and last Friday's kickoff time is not what anyone
+          is looking for.
         */}
         <span className="fixture-result">
           {game.result ? (

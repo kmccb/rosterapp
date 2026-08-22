@@ -280,6 +280,23 @@ describe('headToHead', () => {
     const h = headToHead(history, opponentKey('Kirtland'));
     expect(h).toEqual({ played: 0, won: 0, lost: 0, meetings: [] });
   });
+
+  /*
+   * The screen passes the committed history and this season's played games as
+   * one list, because history.json stops at the end of last season. Without
+   * that, four days after losing to Salem the panel under Salem still read
+   * 2-1 from three meetings and made no mention of the game just played.
+   */
+  it('counts a game played this season alongside the record book', () => {
+    const thisSeason = parseIcal(
+      'BEGIN:VEVENT\nSUMMARY:Poland Seminary vs Salem HS | F | Home L 17-21\nDTSTART:20260821T230000Z\nEND:VEVENT',
+    ).games;
+
+    const h = headToHead([...history, ...thisSeason], opponentKey('Salem'));
+
+    expect({ played: h.played, won: h.won, lost: h.lost }).toEqual({ played: 4, won: 2, lost: 2 });
+    expect(h.meetings[0].date).toBe('2026-08-21');
+  });
 });
 
 describe('canonicalOpponent', () => {

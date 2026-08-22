@@ -215,7 +215,10 @@ async function writeSeasons(team, out) {
  * fact, and the rebuild will reach it in time.
  */
 async function forecastFor(team, games) {
-  const at = team.location && nextGame(games);
+  // Scrimmages are not shown any more, so the card the forecast sits on is
+  // never one — in early August this was fetching the weather for a game
+  // nobody would see.
+  const at = team.location && nextGame(games.filter((g) => !g.scrimmage));
   if (!at?.kickoff) return undefined;
 
   const kickoff = Math.floor(new Date(at.kickoff).getTime() / 1000);
@@ -308,8 +311,10 @@ async function applyResults(team, out) {
      * rare enough not to be worth a second call to the forecast on every
      * build.
      */
-    const was = nextGame(season.games)?.date;
-    const now = nextGame(games)?.date;
+    // Scrimmages excluded on both sides, to match what forecastFor aims at.
+    const real = (all) => nextGame(all.filter((g) => !g.scrimmage))?.date;
+    const was = real(season.games);
+    const now = real(games);
     const weather = was === now ? season.weather : await forecastFor(team, games);
 
     await writeFile(scheduleFile, JSON.stringify({ ...season, games, weather }));
