@@ -146,6 +146,19 @@ if (!existsSync(join(root, 'dist/oh/index.html'))) {
 }
 
 /*
+ * The denylist keeps the fallback from answering for /oh/; it says nothing
+ * about what the fallback answers for everything else. That is this literal,
+ * and a workbox upgrade or a config change could point it at some other file
+ * without ever touching the denylist this guard already checks.
+ */
+if (!sw.includes('createHandlerBoundToURL("index.html")')) {
+  problems.push(
+    'the worker\'s navigation fallback is not bound to "index.html" — Poland no longer ' +
+      'has a fallback page, or something else does.',
+  );
+}
+
+/*
  * The directory's data has to arrive with its page.
  *
  * scripts/build-teams.mjs --pre sweeps public/ for directories that are not a

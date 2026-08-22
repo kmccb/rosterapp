@@ -17,6 +17,13 @@
       break the first. This page caches what it needs in localStorage instead,
       which is enough: the school a reader picks is a few kilobytes.
     -->
+    <!-- Without this, body::before falls back to /badge.jpg — Poland's badge —
+         and this page would wear another team's wallpaper. -->
+    <style>
+      :root {
+        --wallpaper: none;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

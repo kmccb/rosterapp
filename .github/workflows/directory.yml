@@ -44,4 +44,6 @@ jobs:
             exit 0
           fi
           git commit -m "Ohio scores, $(date -u +%Y-%m-%d)"
+          # Someone may have pushed to main while this run was fetching.
+          git pull --rebase
           git push
