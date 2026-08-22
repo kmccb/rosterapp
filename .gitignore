@@ -15,5 +15,9 @@ public/schedule.json
 public/league.json
 !public/CNAME
 
+# The Ohio directory is committed data, not a build artefact — see
+# docs/superpowers/plans/2026-08-22-ohio-directory.md
+!public/oh/
+
 # Subagent-driven development scratch: ledgers, briefs and review packages.
 .superpowers/
