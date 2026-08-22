@@ -27,12 +27,15 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-        # Repository *variables*, not secrets. Both of these end up readable in
-        # the shipped bundle by design, and storing them as secrets would only
-        # make them harder to check without making them any less public.
+        # Repository *variables*, not secrets. Every one of these ends up
+        # readable in the shipped bundle by design, and storing them as secrets
+        # would only make them harder to check without making them any less
+        # public. Leave any of them unset and the feature it belongs to turns
+        # itself off rather than half-working.
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_CF_BEACON: ${{ vars.VITE_CF_BEACON }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

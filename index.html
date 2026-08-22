@@ -48,6 +48,38 @@
         document.head.appendChild(link);
       })();
     </script>
+    <script>
+      /*
+       * How many people opened this, and nothing else.
+       *
+       * Cloudflare Web Analytics: no cookie, no device fingerprint, no
+       * identifier that follows anyone between sites. It reports a page view
+       * and the referrer, and it never sees a roster — those live in browser
+       * storage and are not on the page as anything a script off another
+       * origin could read.
+       *
+       * Attached by script rather than written as a tag so an unset token is a
+       * no-op instead of a broken request. Vite substitutes the value at build
+       * time; with nothing to substitute the placeholder survives verbatim,
+       * which is what the '%' check catches — a local `npm run dev`, or anyone
+       * who forks this, gets no beacon at all rather than a 404 to a stranger's
+       * analytics.
+       *
+       * The token is not a secret. It ships in the page for anyone to read, the
+       * same way the Supabase anon key does, and for the same reason it is a
+       * repository *variable* and not a repository secret.
+       */
+      (function () {
+        var token = '%VITE_CF_BEACON%';
+        if (!token || token.charAt(0) === '%') return;
+
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+        s.setAttribute('data-cf-beacon', JSON.stringify({ token: token }));
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

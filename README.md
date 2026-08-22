@@ -103,11 +103,29 @@ until the roster is deleted, which drops you back on the empty state and reopens
 That is deliberate, and it is a real constraint: on a phone with a roster loaded there is no
 re-import, no re-publish and no backup without deleting first.
 
+## What gets counted
+
+One thing does leave the phone that nobody published: a page view.
+
+Cloudflare Web Analytics is attached to every page — no cookie, no device fingerprint, no
+identifier that follows anyone between sites, and nothing that survives the visit. It reports that
+a page was opened and where the link came from. It never sees a roster: those live in browser
+storage, and there is nothing on the page for a script from another origin to read even if it
+tried.
+
+It is off unless `VITE_CF_BEACON` is set at build time, so a fork, a local `npm run dev` and
+anyone else's copy attach nothing at all.
+
+Worth knowing what the numbers are not: this is an installable app that works with no signal, and a
+launch from a home screen with the phone in aeroplane mode reports nothing. The count is a floor,
+not an attendance figure.
+
 ## Development
 
 Sharing needs two environment variables — copy `.env.example` to `.env.local` and fill them from
 the Supabase project (Settings → API). Without them everything else still runs; the share UI just
-hides itself.
+hides itself. `VITE_CF_BEACON` is the third and is best left unset locally, so development doesn't
+count itself as traffic.
 
 ```sh
 npm install
