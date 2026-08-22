@@ -16,13 +16,19 @@ export function Directory() {
   const [q, setQ] = useState('');
   const [slug, setSlug] = useState<string | null>(() => chosenSlug());
 
+  // Only needed for the picker. A school already chosen goes straight to its
+  // own screen, which fetches its season directly — the index would be a
+  // wasted request. Loading resumes the moment "Follow a different school"
+  // clears the choice and slug goes back to null.
   useEffect(() => {
+    if (slug !== null) return;
     loadIndex()
       .then(setSchools)
       .catch(() => setFailed(true));
-  }, []);
+  }, [slug]);
 
-  const hits = useMemo(() => (schools ? searchSchools(schools, q).slice(0, 40) : []), [schools, q]);
+  const allHits = useMemo(() => (schools ? searchSchools(schools, q) : []), [schools, q]);
+  const hits = allHits.slice(0, 40);
 
   if (slug) {
     return (
@@ -62,12 +68,18 @@ export function Directory() {
         aria-label="Search for a school"
       />
 
+      {allHits.length > 40 && (
+        <p className="filter-line">
+          <span>{`Showing 40 of ${allHits.length} — keep typing`}</span>
+        </p>
+      )}
+
       <div className="fixtures">
         {hits.map((s) => (
           <button
             key={s.slug}
             type="button"
-            className="fixture-row"
+            className="fixture-row is-plain"
             onClick={() => {
               choose(s.slug);
               setSlug(s.slug);

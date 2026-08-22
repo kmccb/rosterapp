@@ -35,7 +35,13 @@ export function searchSchools(schools: School[], q: string): School[] {
 
 export const chosenSlug = (): string | null => localStorage.getItem(CHOSEN);
 export const choose = (slug: string): void => localStorage.setItem(CHOSEN, slug);
-export const forget = (): void => localStorage.removeItem(CHOSEN);
+
+/** Drop the season kept for whoever was chosen, not just the choice itself. */
+export const forget = (): void => {
+  const slug = chosenSlug();
+  if (slug) localStorage.removeItem(SEASON(slug));
+  localStorage.removeItem(CHOSEN);
+};
 
 /** Network first, then whatever was kept — the schedule screen's rule. */
 export async function loadIndex(): Promise<School[]> {
@@ -43,7 +49,11 @@ export async function loadIndex(): Promise<School[]> {
     const res = await fetch(`/oh/index.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const body = await res.json();
-      localStorage.setItem(INDEX, JSON.stringify(body.schools));
+      try {
+        localStorage.setItem(INDEX, JSON.stringify(body.schools));
+      } catch {
+        // A full jar must not fail a fetch that already succeeded.
+      }
       return body.schools as School[];
     }
   } catch {
@@ -61,7 +71,13 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
       const season = (await res.json()) as SchoolSeason;
       // Only the followed school is kept. Caching every school browsed would
       // fill the jar with counties nobody will open again.
-      if (slug === chosenSlug()) localStorage.setItem(SEASON(slug), JSON.stringify(season));
+      if (slug === chosenSlug()) {
+        try {
+          localStorage.setItem(SEASON(slug), JSON.stringify(season));
+        } catch {
+          // A full jar must not fail a fetch that already succeeded.
+        }
+      }
       return season;
     }
   } catch {

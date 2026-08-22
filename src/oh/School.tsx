@@ -72,18 +72,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       <section className="next-card">
         <p className="next-card-label">Roster not added yet</p>
         <p className="next-when">
-          {season.school.name} hasn't published their roster, so there's no way to look up a number
+          {season.school.name} hasn’t published their roster, so there’s no way to look up a number
           yet.
         </p>
         <a
-          className="fixture-row"
+          className="fixture-row is-plain"
           href={`mailto:?subject=${encodeURIComponent(
             `A roster app for ${season.school.name}`,
           )}&body=${encodeURIComponent(
             `I was at the game looking up jersey numbers and found this:\n\n` +
               `${location.origin}/oh/\n\n` +
-              `${season.school.name}'s schedule and scores are already on it, but the roster ` +
-              `isn't — that part has to come from the team. Any chance we could get ours added?\n`,
+              `${season.school.name}’s schedule and scores are already on it, but the roster ` +
+              `isn’t — that part has to come from the team. Any chance we could get ours added?\n`,
           )}`}
         >
           <span className="fixture-team">Ask the school to add it</span>
@@ -134,7 +134,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
         </>
       )}
 
-      <button type="button" className="fixture-row" onClick={onChange}>
+      <button type="button" className="fixture-row is-plain" onClick={onChange}>
         <span className="fixture-team">Follow a different school</span>
       </button>
     </div>
