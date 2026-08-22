@@ -177,13 +177,43 @@ export function parseIcal(text: string, aliases: OpponentAliases = {}): ParsedSc
   return { games, teamName };
 }
 
-/** The next game not yet played, from a given day. */
-export const nextGame = (games: Game[], today = new Date()): Game | undefined => {
-  const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
-  return games.find((g) => !g.result && g.date >= iso);
+/**
+ * Long enough that a game starting then is over.
+ *
+ * High school football runs about two and a half hours; three and a half
+ * leaves room for a weather delay without calling a game finished while it is
+ * still being played.
+ */
+const RUNTIME_MS = 3.5 * 60 * 60 * 1000;
+
+/**
+ * Whether a game has been played, whether or not anyone has published a score.
+ *
+ * A score is the certain answer, but it arrives late: the game ends around ten
+ * on a Friday night and the rebuild that fetches it does not run until two in
+ * the morning. Waiting for the score would leave "Next up" pointing at a
+ * finished game for the four hours of the week when the most people are
+ * looking at it.
+ *
+ * So the clock is the fallback. A game with a date but no kickoff time gets
+ * the end of that day rather than a guessed kickoff, because being late to
+ * move on is a smaller error than moving on while the teams are still out
+ * there.
+ */
+export const isDone = (game: Game, now = new Date()): boolean => {
+  if (game.result) return true;
+
+  if (!game.kickoff) {
+    const endOfDay = new Date(`${game.date}T23:59:59`);
+    return endOfDay.getTime() < now.getTime();
+  }
+
+  return new Date(game.kickoff).getTime() + RUNTIME_MS < now.getTime();
 };
+
+/** The next game not yet played, from a given moment. */
+export const nextGame = (games: Game[], today = new Date()): Game | undefined =>
+  games.find((g) => !isDone(g, today));
 
 /**
  * How many sleeps until kickoff. 0 is game day; null once it has been played.

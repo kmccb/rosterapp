@@ -10,6 +10,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noEmit": true,
+    // The build script runs a couple of these modules directly under Node,
+    // which strips the types but does not resolve an extensionless import the
+    // way a bundler does. Those imports carry a .ts, and this permits it.
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "resolveJsonModule": true,

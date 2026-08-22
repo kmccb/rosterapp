@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SkyIcon } from '../components/SkyIcon';
-import { daysToKickoff, headToHead, nextGame, type Game } from '../schedule/icalParse';
+import { daysToKickoff, headToHead, isDone, nextGame, type Game } from '../schedule/icalParse';
+import { seasonRecord } from '../schedule/mergeResults';
 import { describeSky, worthMentioning, type Weather } from '../schedule/weather';
 
 type Season = {
@@ -65,7 +66,14 @@ export function Schedule({ base }: { base: string }) {
     };
   }, [base]);
 
-  const next = useMemo(() => (season ? nextGame(season.games) : undefined), [season]);
+  /*
+   * One clock for the whole screen. The card, the countdown and the split
+   * between what is coming and what has been played all read from it, so they
+   * cannot end up disagreeing about whether Friday's game is over.
+   */
+  const now = useNow();
+  const next = useMemo(() => (season ? nextGame(season.games, now) : undefined), [season, now]);
+  const sections = useMemo(() => (season ? bySection(season.games, now) : []), [season, now]);
 
   if (failed) {
     return (
@@ -84,26 +92,31 @@ export function Schedule({ base }: { base: string }) {
   }
 
   const history = season.history ?? [];
-  const played = season.games.filter((g) => g.result && !g.scrimmage);
-  const record = {
-    won: played.filter((g) => g.result!.won).length,
-    lost: played.filter((g) => !g.result!.won).length,
-  };
+  const record = seasonRecord(season.games);
 
   return (
     <div className="screen">
-      {next && <NextGame game={next} history={history} weather={season.weather} base={base} />}
+      {next && (
+        <NextGame
+          game={next}
+          history={history}
+          weather={season.weather}
+          base={base}
+          record={record}
+          today={now}
+        />
+      )}
 
       <p className="filter-line">
         <span>
           {season.games.length} games
-          {played.length > 0 && ` · ${record.won}–${record.lost}`} — tap one for the record against
+          {record.played > 0 && ` · ${record.won}–${record.lost}`} — tap one for the record against
           them
         </span>
       </p>
 
       <div className="fixtures">
-        {byMonth(season.games).map((m) => (
+        {sections.map((m) => (
           <div key={m.label}>
             <div className="group-head">{m.label}</div>
             {m.games.map((g) => {
@@ -113,6 +126,7 @@ export function Schedule({ base }: { base: string }) {
                   key={id}
                   game={g}
                   isNext={g === next}
+                  done={m.done}
                   history={history}
                   open={open === id}
                   onToggle={() => setOpen((cur) => (cur === id ? null : id))}
@@ -126,17 +140,34 @@ export function Schedule({ base }: { base: string }) {
   );
 }
 
-const byMonth = (games: Game[]) => {
-  const groups: Array<{ label: string; games: Game[] }> = [];
-  for (const g of games) {
-    const label = new Date(g.kickoff ?? `${g.date}T12:00:00`).toLocaleDateString(undefined, {
-      month: 'long',
-    });
-    const last = groups[groups.length - 1];
-    if (last?.label === label) last.games.push(g);
-    else groups.push({ label, games: [g] });
-  }
-  return groups;
+/**
+ * The season in two halves: what is left, and what has happened.
+ *
+ * Months were the grouping before, which put August at the top of the screen
+ * all season and pushed the next game further down it every week. What anyone
+ * opening this wants is the next game and the last result, so those are the
+ * two things put nearest the top — coming up in the order they will be played,
+ * played in the order they finished, most recent first. The two games either
+ * side of tonight end up next to each other, which is the pair people are
+ * actually comparing.
+ *
+ * Months do not survive a reversed half, so the row carries its own date now.
+ */
+const bySection = (
+  games: Game[],
+  now: Date,
+): Array<{ label: string; done: boolean; games: Game[] }> => {
+  const coming: Game[] = [];
+  const played: Game[] = [];
+
+  // parseIcal sorts by date, so `coming` comes out ascending for free and
+  // `played` only has to be turned round.
+  for (const g of games) (isDone(g, now) ? played : coming).push(g);
+
+  return [
+    { label: 'Coming up', done: false, games: coming },
+    { label: 'Played', done: true, games: played.reverse() },
+  ].filter((s) => s.games.length > 0);
 };
 
 const WHEN = (game: Game): string => {
@@ -256,25 +287,35 @@ const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
  * Date object when the day has not changed, so React drops the re-render and
  * the ordinary case costs nothing.
  */
-function useToday(): Date {
-  const [today, setToday] = useState(() => new Date());
+function useNow(): Date {
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const check = () => setToday((prev) => (sameDay(prev, new Date()) ? prev : new Date()));
+    /*
+     * Coming back to the front always re-reads the clock, and no longer only
+     * when the date has changed. A game finishing at ten on a Friday night is
+     * the moment this screen most needs to move on, and that is two hours
+     * before the day turns over — a phone taken out of a pocket at the final
+     * whistle would otherwise still be counting down to a game that is over.
+     *
+     * It costs a render per foreground, which for a list this size is nothing.
+     */
+    const wake = () => setNow(new Date());
+    // And a day that turns over while the screen is being looked at.
+    const turn = () => setNow((prev) => (sameDay(prev, new Date()) ? prev : new Date()));
 
-    const now = new Date();
     const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     // A second past, so the clock has definitely turned when this fires.
-    const id = setTimeout(check, midnight.getTime() - now.getTime() + 1000);
-    document.addEventListener('visibilitychange', check);
+    const id = setTimeout(turn, midnight.getTime() - now.getTime() + 1000);
+    document.addEventListener('visibilitychange', wake);
 
     return () => {
       clearTimeout(id);
-      document.removeEventListener('visibilitychange', check);
+      document.removeEventListener('visibilitychange', wake);
     };
-  }, [today]);
+  }, [now]);
 
-  return today;
+  return now;
 }
 
 /**
@@ -320,16 +361,17 @@ function NextGame({
   history,
   weather,
   base,
+  record,
+  today,
 }: {
   game: Game;
   history: Game[];
   weather?: Weather;
   base: string;
+  record: { won: number; lost: number; played: number };
+  today: Date;
 }) {
   const allTime = recordAgainst(history, game.opponentKey);
-  // One reading of the date for the card and the count in it, so they cannot
-  // disagree across the midnight it is written to survive.
-  const today = useToday();
   const isGameDay = daysToKickoff(game, today) === 0;
 
   return (
@@ -341,6 +383,18 @@ function NextGame({
       <h2 className="next-card-opponent">
         <span className="next-vs">{game.home ? 'vs' : 'at'}</span> {game.opponent}
       </h2>
+
+      {/* The season so far, beside who is next. Before the first game there is
+          no record to print and a bare 0–0 would only take up the room. */}
+      {record.played > 0 && (
+        <p className="next-record">
+          <b>
+            {record.won}–{record.lost}
+          </b>{' '}
+          <span>this season</span>
+        </p>
+      )}
+
       <p className="next-when">
         {WHEN(game)}
         {TIME(game) && ` · ${TIME(game)}`}
@@ -364,21 +418,27 @@ function NextGame({
 function Fixture({
   game,
   isNext,
+  done,
   history,
   open,
   onToggle,
 }: {
   game: Game;
   isNext: boolean;
+  /** In the played half, so a kickoff time is no longer the useful thing. */
+  done: boolean;
   history: Game[];
   open: boolean;
   onToggle: () => void;
 }) {
-  // The month is the group header the row sits under, so the row itself only
-  // needs the day.
-  const day = new Date(game.kickoff ?? `${game.date}T12:00:00`).toLocaleDateString(undefined, {
-    day: 'numeric',
-  });
+  /*
+   * The row carries its own month now. The header above it says "Coming up" or
+   * "Played" rather than a month, and in the played half the dates run
+   * backwards, so a September row can sit directly under an October one.
+   */
+  const when = new Date(game.kickoff ?? `${game.date}T12:00:00`);
+  const day = when.toLocaleDateString(undefined, { day: 'numeric' });
+  const month = when.toLocaleDateString(undefined, { month: 'short' });
 
   // Whatever the school called the night, and failing that where it is played.
   const sub = game.occasion ?? (game.home ? 'Home' : 'Away');
@@ -386,12 +446,21 @@ function Fixture({
   return (
     <div className={`fixture${isNext ? ' is-next' : ''}${game.result ? ' is-played' : ''}`}>
       <button type="button" className="fixture-row" onClick={onToggle} aria-expanded={open}>
-        <span className="fixture-date">{day}</span>
+        <span className="fixture-date">
+          <span className="fixture-month">{month}</span>
+          {day}
+        </span>
         <span className="fixture-team">
           <span className="fixture-ha">{game.home ? 'vs' : 'at'}</span> {game.opponent}
           {game.scrimmage && <span className="fixture-tag">scrimmage</span>}
           <span className="fixture-sub">{sub}</span>
         </span>
+        {/*
+          The score once there is one, and the kickoff time until then. A game
+          that has been played and has no score gets neither: a scrimmage
+          nobody scores, or a result the league has not posted yet, and last
+          Friday's kickoff time is not what anyone is looking for.
+        */}
         <span className="fixture-result">
           {game.result ? (
             <>
@@ -401,7 +470,7 @@ function Fixture({
               {game.result.us}–{game.result.them}
             </>
           ) : (
-            TIME(game)
+            !done && TIME(game)
           )}
         </span>
         <span className="fixture-caret" aria-hidden="true" />

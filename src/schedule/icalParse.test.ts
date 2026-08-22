@@ -1,4 +1,4 @@
-import { canonicalOpponent, daysToKickoff, headToHead, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
+import { canonicalOpponent, daysToKickoff, headToHead, isDone, nextGame, opponentKey, parseIcal, tidyOpponent } from './icalParse';
 
 /*
  * Copied from the school's live ScheduleStar feed, folding and all. The folded
@@ -159,6 +159,57 @@ describe('nextGame', () => {
 
   it('returns nothing when the season is over', () => {
     expect(nextGame(games, new Date('2027-01-01T12:00:00Z'))).toBeUndefined();
+  });
+
+  /*
+   * The gap this closes: a Friday night game ends around ten and the rebuild
+   * that fetches the score does not run until two in the morning. Before this,
+   * "Next up" pointed at a finished game for those four hours — the ones when
+   * the most people are looking at it.
+   */
+  it('moves on once a game is over, before any score exists', () => {
+    const kickoff = new Date('2026-08-21T23:00:00Z');
+    const hours = (n: number) => new Date(kickoff.getTime() + n * 3600000);
+
+    expect(nextGame(games, hours(2))?.opponent).toBe('Salem');
+    expect(nextGame(games, hours(4))?.opponent).toBe('Field');
+  });
+});
+
+describe('isDone', () => {
+  const game = {
+    date: '2026-08-21',
+    kickoff: '2026-08-21T23:00:00.000Z',
+    opponent: 'Salem',
+    opponentKey: 'salem',
+    home: true,
+    scrimmage: false,
+  };
+  const after = (hours: number) => new Date(new Date(game.kickoff).getTime() + hours * 3600000);
+
+  it('is false while the game is being played', () => {
+    expect(isDone(game, after(1))).toBe(false);
+    expect(isDone(game, after(3))).toBe(false);
+  });
+
+  it('is true once long enough has passed for it to be over', () => {
+    expect(isDone(game, after(4))).toBe(true);
+  });
+
+  it('is true the moment there is a score, whatever the clock says', () => {
+    const played = { ...game, result: { us: 48, them: 26, won: true } };
+    expect(isDone(played, after(-24))).toBe(true);
+  });
+
+  /*
+   * A fixture with no kickoff time gets the end of its day rather than a
+   * guessed kickoff. Being late to move on is a smaller error than declaring a
+   * game finished while the teams are still out there.
+   */
+  it('waits for the end of the day when the feed gave no kickoff time', () => {
+    const dateOnly = { ...game, kickoff: undefined };
+    expect(isDone(dateOnly, new Date('2026-08-21T21:00:00'))).toBe(false);
+    expect(isDone(dateOnly, new Date('2026-08-22T00:30:00'))).toBe(true);
   });
 });
 

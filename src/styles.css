@@ -1287,6 +1287,26 @@ a.btn {
   line-height: 1.15;
 }
 
+/*
+ * The season, under the opponent. It is the second question anyone asks after
+ * "who's next", so it sits with the answer to the first rather than in the
+ * grey summary line below the card where it used to be the only place it
+ * appeared.
+ */
+.next-record {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.next-record b {
+  color: var(--accent);
+  font-size: 19px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
 .next-card-foot {
   display: flex;
   align-items: center;
@@ -1655,14 +1675,25 @@ a.btn {
   color: var(--accent);
 }
 
-/* The month is the group header now, so the row only carries the day — which
-   makes it a number worth reading at a glance rather than a scrap of text. */
+/* The day stays the big number worth reading at a glance; the month rides
+   above it small, because the header no longer supplies one and the played
+   half runs backwards through the calendar. */
 .fixture-date {
   color: var(--muted);
   font-size: 22px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  text-align: center;
   white-space: nowrap;
+}
+
+.fixture-month {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .fixture-result {

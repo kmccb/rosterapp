@@ -27,6 +27,7 @@ import { fetchEspnRoster, fetchEspnSeasons } from './lib/espn.mjs';
 import { fetchLeague } from './lib/ohio.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
 import { parseIcal, nextGame, canonicalOpponent } from '../src/schedule/icalParse.ts';
+import { mergeResults, seasonRecord } from '../src/schedule/mergeResults.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const teamsDir = join(root, 'teams');
@@ -263,6 +264,82 @@ async function forecastFor(team, games) {
 }
 
 /**
+ * The scores, put onto the season.
+ *
+ * The calendar feed publishes fixtures and only fixtures — no result has ever
+ * appeared in one — so left alone the Schedule tab shows a season nobody has
+ * played and a record stuck on 0-0. joeeitel has the scores and the League tab
+ * already fetches them, so they are merged onto the schedule rather than
+ * scraped a second time.
+ *
+ * This runs after the league block rather than inside writeSchedule, and reads
+ * both files back off disk, for two reasons. The block above has careful
+ * all-or-nothing fallback logic — republish yesterday rather than blank a
+ * working table — and threading league data forward into writeSchedule would
+ * mean rearranging it. And reading the file it actually wrote means a
+ * republished stale copy still supplies scores, which is what we want: last
+ * week's results beat none.
+ *
+ * Best-effort throughout. A team with no league gets nothing done to it, and a
+ * failure here leaves the schedule exactly as writeSchedule left it.
+ */
+async function applyResults(team, out) {
+  if (!team.league) return;
+
+  const scheduleFile = join(out, 'schedule.json');
+  const leagueFile = join(out, 'league.json');
+  if (!existsSync(scheduleFile) || !existsSync(leagueFile)) return;
+
+  try {
+    const season = JSON.parse(await readFile(scheduleFile, 'utf8'));
+    const league = JSON.parse(await readFile(leagueFile, 'utf8'));
+    if (!season.games?.length || !league.games?.length || !league.team) return;
+
+    const before = season.games.filter((g) => g.result).length;
+    const games = mergeResults(season.games, league.games, league.team, team.opponentAliases ?? {});
+    const record = seasonRecord(games);
+
+    /*
+     * The forecast is for whichever game is next, so it has to be redone if
+     * this merge moved it — and only then. Usually it does not: a game is
+     * counted as played once enough time has passed for it to be over, so the
+     * fixture had already dropped off before its score arrived. The case that
+     * does move it is a fixture the two sources date differently, and that is
+     * rare enough not to be worth a second call to the forecast on every
+     * build.
+     */
+    const was = nextGame(season.games)?.date;
+    const now = nextGame(games)?.date;
+    const weather = was === now ? season.weather : await forecastFor(team, games);
+
+    await writeFile(scheduleFile, JSON.stringify({ ...season, games, weather }));
+
+    const added = record.played - before;
+    console.log(
+      `           results  ${record.played} played, ${record.won}-${record.lost}` +
+        `${added > 0 ? ` (${added} from the league)` : ''}`,
+    );
+
+    /*
+     * A fixture that is in the past with nobody's score on it is either a game
+     * the league has not posted yet or — the case worth catching — an opponent
+     * the two sources spell differently enough that the merge missed it.
+     */
+    const missing = games.filter(
+      (g) => !g.result && !g.scrimmage && new Date(`${g.date}T23:59:59`) < new Date(),
+    );
+    if (missing.length) {
+      console.warn(
+        `  ? ${team.slug}: no score for ${missing.map((g) => `${g.date} ${g.opponent}`).join(', ')}` +
+          ` — not posted yet, or a name the two sources spell differently.`,
+      );
+    }
+  } catch (err) {
+    console.warn(`  ! ${team.slug}: could not merge the league's scores (${err.message}).`);
+  }
+}
+
+/**
  * The season, fetched from the school's own calendar feed.
  *
  * It happens here rather than on the phone because the feed sends no CORS
@@ -489,6 +566,9 @@ if (phase === 'pre') {
         }
       }
     }
+
+    // After the league, because it is the league's file this reads.
+    await applyResults(team, out);
 
     console.log(
       `${team.base.padEnd(10)} ${team.name.padEnd(16)} ground ${palette.ground} ` +
