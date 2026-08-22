@@ -61,6 +61,35 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
         </span>
       </p>
 
+      {/*
+        The reason the directory exists.
+
+        Every school in the state gets a schedule and scores for nothing, and
+        the one thing missing is the thing only the school can give — the
+        roster. A reader who wanted to know who number seventeen was is the
+        best possible person to go and ask for it.
+      */}
+      <section className="next-card">
+        <p className="next-card-label">Roster not added yet</p>
+        <p className="next-when">
+          {season.school.name} hasn't published their roster, so there's no way to look up a number
+          yet.
+        </p>
+        <a
+          className="fixture-row"
+          href={`mailto:?subject=${encodeURIComponent(
+            `A roster app for ${season.school.name}`,
+          )}&body=${encodeURIComponent(
+            `I was at the game looking up jersey numbers and found this:\n\n` +
+              `${location.origin}/oh/\n\n` +
+              `${season.school.name}'s schedule and scores are already on it, but the roster ` +
+              `isn't — that part has to come from the team. Any chance we could get ours added?\n`,
+          )}`}
+        >
+          <span className="fixture-team">Ask the school to add it</span>
+        </a>
+      </section>
+
       {coming.length > 0 && (
         <>
           <div className="group-head">Coming up</div>
