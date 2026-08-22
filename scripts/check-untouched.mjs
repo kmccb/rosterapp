@@ -25,6 +25,27 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
 
+/*
+ * Line endings are the checkout's, not the build's.
+ *
+ * The pages are compared with every carriage return stripped, because git
+ * hands a Windows working copy CRLF and the Linux runner that deploys the site
+ * LF, and the built page inherits whichever it was given. Comparing the raw
+ * bytes made this guard pass on the machine that recorded the baseline and
+ * fail on the one that ships — which would have blocked every deploy while
+ * proving nothing. Nothing a build config can do shows up only as a line
+ * ending, so dropping them costs no coverage.
+ *
+ * Stripping every \r rather than folding \r\n pairs is deliberate: the built
+ * page contains one `\r\r\n`, left where the entry script tag was replaced, and
+ * folding pairs turns that into `\r\n` on Windows and `\n` on Linux — the same
+ * mismatch again, one round further down.
+ *
+ * The raw hashes stay in the baseline file as the record of the exact bytes
+ * that were measured on the machine that recorded them.
+ */
+const shaLf = (text) => sha(text.replace(/\r/g, ''));
+
 const baseline = JSON.parse(await readFile(join(root, 'scripts/untouched-baseline.json'), 'utf8'));
 const problems = [];
 
@@ -35,8 +56,8 @@ const pages = {
 };
 
 for (const [key, file] of Object.entries(pages)) {
-  const got = sha(await readFile(join(root, file)));
-  if (got !== baseline[key]) problems.push(`${file} changed — it must not.`);
+  const text = await readFile(join(root, file), 'utf8');
+  if (shaLf(text) !== baseline[`${key}Lf`]) problems.push(`${file} changed — it must not.`);
 }
 
 const sw = await readFile(join(root, 'dist/sw.js'), 'utf8');
