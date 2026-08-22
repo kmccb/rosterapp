@@ -13,20 +13,22 @@ alias table. That is fine for three teams and impossible for seven hundred.
 
 But joeeitel publishes the whole state, and a survey of it says the free tier is nearly free:
 
-| Source | Requests | What it yields |
-| --- | --- | --- |
-| `/hsfoot/teams` | 1 | 720 schools with team ids |
-| `/hsfoot/scoreboard/{year}/week-{1..16}` | 16 | every game in Ohio — date, kickoff, both schools with cities, score |
-| `/hsfoot/rankings/{year}/region-{1..28}` | 28 | playoff standings, Harbin averages (optional) |
+| Source | Requests | What it yields | Used here |
+| --- | --- | --- | --- |
+| `/hsfoot/scoreboard/{year}/week-{1..16}` | 16 | every game in Ohio — date, kickoff, both schools with cities, score | **yes** |
+| `/hsfoot/teams` | 1 | 720 schools with team ids | no — see Identity |
+| `/hsfoot/rankings/{year}/region-{1..28}` | 28 | playoff standings, Harbin averages | no — out of scope |
 
-Seventeen requests covers search and every schedule and score in the state. Week 1 parses to 339
-games across 678 schools — 339 × 2 = 678, so every school is accounted for exactly once.
+**Sixteen requests** covers search and every schedule and score in the state. Measured against the
+live 2026 season: 4,275 games, of which 365 are played, across 734 Ohio schools. Week 1 alone
+parses to 385 games, and every game carries exactly two schools — the invariant the parser is
+tested on, because a regex silently dropping rows is the failure that would be hardest to see.
 
 Two things the scoreboard gives that nothing else did:
 
 - **Kickoff times.** `7pm`, per game, statewide. Until now the only source was the school's own
   ScheduleStar feed, keyed by a uuid that cannot be found without the school handing it over.
-- **Cities.** `Jackson (Massillon)` against `Jackson (Jackson)`. Thirty-five school names in Ohio
+- **Cities.** `Jackson (Massillon)` against `Jackson (Jackson)`. Forty-five school names in Ohio
   are not unique and a search box is unusable without this.
 
 So a fan from any school in Ohio can be given something useful on first open, with no setup and
@@ -66,14 +68,19 @@ does not recognise, so the page would come up wearing Poland's colours and crest
 And `globPatterns` currently precaches `**/*.json`. Seven hundred school files dropped into the
 build output would all be precached, on every installed phone.
 
-The directory is therefore **its own page, its own bundle, and its own service-worker scope**, at
+The directory is therefore **its own page and its own bundle**, with no service worker of its own, at
 `/oh/`. Poland's code path is not modified. The two share source modules but not a runtime.
 
 Three specific changes make that safe, and they are the riskiest edits in this work:
 
 1. `navigateFallbackDenylist: [/^\/oh\//]` — so the existing worker stops claiming `/oh/`.
-2. `globIgnores: ['oh/data/**']` — so school files are never precached by the root worker.
-3. `/oh/` registers its own worker, scoped to `/oh/`, precaching only its own shell and index.
+2. `globIgnores: ['**/oh/data/**', '**/oh/index.json']` — so school files are never precached.
+3. `/oh/` registers **no service worker at all**, and caches what it needs in `localStorage`.
+
+Point 3 was a second worker scoped to `/oh/` when this was first written, and it should not be:
+a second worker on one origin is a way to break the first, and the first is the one holding
+Poland's shell. The offline requirement here is small — an index of 734 schools is about 40 KB
+and a season is 3 KB — so `localStorage` covers it with no new worker and no risk to the old one.
 
 Change 1 only reaches installed phones when the worker updates, which is a launch or two behind.
 Until then `/oh/` may be served Poland's shell for existing users. That is acceptable — no such
@@ -98,7 +105,7 @@ week where nobody played — the same all-or-nothing rule the league fetch alrea
 
 The scraped data is written into the repo and committed by the scheduled workflow. No database.
 
-At seventeen requests a refresh there is no load problem for a database to solve, and a database
+At sixteen requests a refresh there is no load problem for a database to solve, and a database
 would add a bill, a service to keep alive, and a second place for the truth to live. Committing
 gives free hosting, a diff for every score that changes, and an audit trail. `teams/poland/history.json`
 already establishes the pattern of a committed record.
@@ -108,24 +115,28 @@ subscriptions — which this phase does not have.
 
 ### Identity
 
-A school is identified by `Name (City)` from the scoreboard, slugified. That is unique where the
-bare name is not.
+A school is identified by `Name (City)` from the scoreboard, slugified. Run across all sixteen
+weeks that yields **734 Ohio schools and zero duplicate slugs**, against 45 duplicated bare names —
+the town separates every one of them.
 
-The 720-entry teams index carries bare names only, so for the 35 duplicated names it cannot say
-which team id belongs to which city. Team ids are not needed for search, schedules or scores, so
-this phase does not resolve them. When the playoff region tie-in is wanted, the fix is a one-time
-fetch of those ~70 team pages to read their cities, committed as a mapping — not a per-build cost.
+The teams index is **not fetched at all**, which drops the budget from seventeen requests to
+sixteen. It lists 720 schools where the scoreboards yield 734, so it is both an extra source and a
+less complete one, and it carries bare names — meaning for the 45 shared names it cannot say which
+team id belongs to which town anyway. Team ids are only needed for the playoff region tie-in, which
+is out of scope here; when it is wanted, the fix is a one-time capture of those ~90 team pages
+committed as a mapping, not a per-build cost.
 
 ### Files
 
 ```
-public/oh/index.json          720 schools: slug, name, city, and their week range   ~40 KB
+public/oh/index.json          734 schools: slug, name, city                         ~40 KB
 public/oh/data/<slug>.json    one school's season: opponent, date, kickoff, score   ~3 KB
 ```
 
-`index.json` is precached by the `/oh/` worker so search works offline. School files are fetched on
-demand and are not precached — nobody browses another county's scores from the bleachers, and
-precaching seven hundred files is the thing this design most needs to avoid.
+`index.json` is kept in `localStorage` after the first load, so search works with no signal. School
+files are fetched on demand and only the followed school's is kept — nobody browses another
+county's scores from the bleachers, and caching seven hundred of them is the thing this design most
+needs to avoid.
 
 The school a reader picks is remembered, and *that* school's file is cached so it survives a dead
 signal at a ground. This is the one place the directory has to be as good offline as Poland is.
