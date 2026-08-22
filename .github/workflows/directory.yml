@@ -1,0 +1,47 @@
+name: Refresh the Ohio directory
+
+# Ohio plays on a Friday night. This runs early Saturday for the scores, and
+# again on Wednesday to pick up a fixture that has moved. Sixteen requests a
+# run against one person's hobby site, which is the whole budget.
+#
+# It commits to main, and that push is what triggers the deploy — so the data
+# reaches the site through the ordinary route rather than a second publisher.
+on:
+  schedule:
+    - cron: '0 7 * * 6'
+    - cron: '0 7 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: directory
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Exits non-zero if the fetch came back with too few schools, which keeps
+      # the committed copy rather than deleting schools people have bookmarked.
+      - run: npm run directory
+
+      - name: Commit whatever changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/oh/
+          if git diff --staged --quiet; then
+            echo "No change in the state's scores."
+            exit 0
+          fi
+          git commit -m "Ohio scores, $(date -u +%Y-%m-%d)"
+          git push
