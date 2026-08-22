@@ -5,7 +5,11 @@
  * the state: the date, schools with the town they play in, and the score once
  * it exists. Kickoff time is optional (some games lack it); city is optional
  * (especially for out-of-state schools with a [XX] suffix). Both "at" and "vs"
- * used as separators (vs = neutral site). Lines with "cancel" are skipped.
+ * used as separators (vs = neutral site). Cancelled games are deliberately skipped.
+ *
+ * Parser processes one line at a time, split on <br>, to prevent cross-line
+ * regex bleeding and to make the completeness invariant testable: every date line
+ * is either parsed (a game), cancelled (not a game), or unreadable (error condition).
  *
  * Pure, and pinned to saved copies of real pages, because this is one person's
  * site with no API and the shape can change without warning. A change fails a
@@ -33,6 +37,12 @@ export type StateGame = {
   overtime?: string;
 };
 
+export type ParseResult = {
+  games: StateGame[];
+  cancelled: number;
+  unreadable: string[];
+};
+
 /*
  * One side of a fixture: "Salem (Salem) " or "Everett (Everett) [PA] ",
  * or with empty city "Berea () [KY] ", followed by the score span.
@@ -45,14 +55,13 @@ const SIDE = String.raw`(.+?)\s*\(([^)]*)\)\s*(?:\[([A-Z]{2,})\]\s*)?<span class
 
 /*
  * Date, optional kickoff (time-shaped), away school, then separator (at or vs),
- * then home school. Lines with "cancel" are filtered in parseScoreboard.
+ * then home school, optional overtime. Anchored to match one line completely.
  * For lines lacking a city, city becomes '', and state defaults to 'OH' unless
  * a [XX] suffix is present.
  */
 const LINE = new RegExp(
-  String.raw`<br>\s*(\d{4}-\d{2}-\d{2})\s+(?:(\d{1,2}(?::\d{2})?(?:am|pm|noon))\s+)?${SIDE}\s*(?:at|vs)\s*${SIDE}` +
-    String.raw`(?:\s*<span class="text-danger">(OT\d+)<\/span>)?`,
-  'g',
+  String.raw`^\s*(\d{4}-\d{2}-\d{2})\s+(?:(\d{1,2}(?::\d{2})?(?:am|pm|noon))\s+)?${SIDE}\s*(?:at|vs)\s*${SIDE}` +
+    String.raw`(?:\s*<span class="text-danger">(OT\d+)<\/span>)?$`,
 );
 
 const side = (name: string, city: string, st: string | undefined, score: string): StateSide => ({
@@ -62,15 +71,36 @@ const side = (name: string, city: string, st: string | undefined, score: string)
   score: score === '***' ? null : Number(score),
 });
 
-export function parseScoreboard(html: string, week: number): StateGame[] {
-  const games: StateGame[] = [];
+export function parseScoreboardStrict(html: string, week: number): ParseResult {
+  const preMatch = html.match(/<pre>([\s\S]*?)<\/pre>/);
+  if (!preMatch) {
+    return { games: [], cancelled: 0, unreadable: [] };
+  }
 
-  for (const m of html.matchAll(LINE)) {
-    // Check if this line has "cancel" and skip it. Look only to the next <br>.
-    const lineEnd = html.indexOf('<br>', m.index!);
-    const lineBound = lineEnd > 0 ? lineEnd : html.length;
-    const lineContext = html.substring(m.index!, lineBound);
-    if (lineContext.includes('<b>cancel</b>')) {
+  const preContent = preMatch[1];
+  const lines = preContent.split('<br>');
+  const games: StateGame[] = [];
+  let cancelled = 0;
+  const unreadable: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    // Skip lines that don't start with a date.
+    if (!/^\d{4}-\d{2}-\d{2}/.test(line)) {
+      continue;
+    }
+
+    // Check if this is a cancelled game.
+    if (line.includes('<b>cancel</b>')) {
+      cancelled++;
+      continue;
+    }
+
+    // Try to parse the line.
+    const m = LINE.exec(line);
+    if (!m) {
+      unreadable.push(line.substring(0, 150));
       continue;
     }
 
@@ -86,5 +116,10 @@ export function parseScoreboard(html: string, week: number): StateGame[] {
     });
   }
 
-  return games;
+  return { games, cancelled, unreadable };
+}
+
+export function parseScoreboard(html: string, week: number): StateGame[] {
+  const result = parseScoreboardStrict(html, week);
+  return result.games;
 }

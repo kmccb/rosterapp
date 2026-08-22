@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { parseScoreboard } from './stateParse';
+import { parseScoreboard, parseScoreboardStrict } from './stateParse';
 
 const WEEK1 = readFileSync('src/ohio/fixtures/scoreboard-2026-week-1.html', 'utf8');
 const WEEK6 = readFileSync('src/ohio/fixtures/scoreboard-2026-week-6.html', 'utf8');
@@ -57,5 +57,49 @@ describe('parseScoreboard', () => {
 
   it('yields nothing rather than guessing when the page has changed shape', () => {
     expect(parseScoreboard('<html><body>Down for maintenance</body></html>', 1)).toEqual([]);
+  });
+
+  /*
+   * Completeness test: every date line is either parsed as a game, marked
+   * cancelled, or unreadable. No silent residue. Unreadable should always be empty.
+   */
+  it('accounts for every date line as parsed, cancelled, or unreadable (week 1)', () => {
+    const result = parseScoreboardStrict(WEEK1, 1);
+    const preMatch = WEEK1.match(/<pre>([\s\S]*?)<\/pre>/);
+    const preContent = preMatch![1];
+    const dateLines = preContent
+      .split('<br>')
+      .map((l) => l.trim())
+      .filter((l) => /^\d{4}-\d{2}-\d{2}/.test(l));
+
+    expect(result.games.length + result.cancelled).toBe(dateLines.length);
+    expect(result.unreadable.length).toBe(0);
+  });
+
+  it('accounts for every date line as parsed, cancelled, or unreadable (week 6)', () => {
+    const result = parseScoreboardStrict(WEEK6, 6);
+    const preMatch = WEEK6.match(/<pre>([\s\S]*?)<\/pre>/);
+    const preContent = preMatch![1];
+    const dateLines = preContent
+      .split('<br>')
+      .map((l) => l.trim())
+      .filter((l) => /^\d{4}-\d{2}-\d{2}/.test(l));
+
+    expect(result.games.length + result.cancelled).toBe(dateLines.length);
+    expect(result.unreadable.length).toBe(0);
+  });
+
+  it('correctly parses neutral-site games with "vs" separator', () => {
+    const brentwood = week1.find(
+      (x) => x.away.name === 'Brentwood Academy' && x.home.name === 'Baylor',
+    );
+    expect(brentwood).toBeDefined();
+    if (brentwood) {
+      expect(brentwood.away.score).toBe(20);
+      expect(brentwood.home.score).toBe(38);
+      // Verify it's not corrupted by cross-line bleeding (no HTML in names)
+      expect(brentwood.away.name).not.toContain('<');
+      expect(brentwood.home.name).not.toContain('<');
+    }
   });
 });
