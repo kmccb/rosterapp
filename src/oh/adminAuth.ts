@@ -75,17 +75,29 @@ export async function freshToken(): Promise<string | null> {
   if (!s) return null;
   if (s.expiresAt - Date.now() > 5 * 60 * 1000) return s.accessToken;
 
+  let res: Response;
   try {
-    const res = await fetch(`${supaBase}/auth/v1/token?grant_type=refresh_token`, {
+    res = await fetch(`${supaBase}/auth/v1/token?grant_type=refresh_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: supaKey! },
       body: JSON.stringify({ refresh_token: s.refreshToken }),
     });
-    if (!res.ok) {
-      // Server answered: the token is dead, the seller is signed out.
-      clearSession();
-      return null;
-    }
+  } catch {
+    // No answer at all — network blip, not a dead token. Retry keeps the
+    // session so the next attempt with signal will try to refresh again.
+    return null;
+  }
+
+  // The server answered. If it said no, the token is dead.
+  if (!res.ok) {
+    clearSession();
+    return null;
+  }
+
+  // Server answered ok: parse the body. If the body is garbage, the answer is
+  // still an answer — the server cannot serve this refresh token. Clear the
+  // session so the seller requests a new magic link.
+  try {
     const t = (await res.json()) as {
       access_token: string;
       refresh_token: string;
@@ -99,8 +111,8 @@ export async function freshToken(): Promise<string | null> {
     saveSession(next);
     return next.accessToken;
   } catch {
-    // No answer at all — network blip, not a dead token. Retry keeps the
-    // session so the next attempt with signal will try to refresh again.
+    // Server answered OK but the body is corrupt. Clear the session.
+    clearSession();
     return null;
   }
 }

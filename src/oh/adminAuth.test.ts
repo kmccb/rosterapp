@@ -65,4 +65,21 @@ describe('freshToken', () => {
     expect(token).toBeNull();
     expect(loadSession()).toBeNull();
   });
+
+  it('returns null and clears session on 200 with invalid JSON', async () => {
+    const session = { accessToken: 'old', refreshToken: 'refresh_old', expiresAt: Date.now() - 1 };
+    saveSession(session);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+      }),
+    );
+
+    const token = await freshToken();
+    expect(token).toBeNull();
+    expect(loadSession()).toBeNull();
+  });
 });
