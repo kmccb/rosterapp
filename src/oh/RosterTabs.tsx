@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Keypad } from '../components/Keypad';
-import { PlayerRow } from '../components/PlayerRow';
 import { numberMatches } from '../parse/rosterParse';
+import { formatHeight, formatWeight, fullName, type Player } from '../types';
 import type { SchoolRoster } from './rosterStore';
 
 /**
@@ -10,10 +10,16 @@ import type { SchoolRoster } from './rosterStore';
  * The keypad and the prefix matching are the root app's, because they are
  * the product — tap 7 and #7 leads with the 70s underneath. The list view is
  * the reverse lookup, by name. Nothing here needs an account or a signal
- * once the roster has been fetched once. `PlayerRow` is the root app's too:
- * it only reaches into `../types`, so it costs nothing to reuse, and a
- * second implementation of "number, name, vitals" would just be a second
- * place for those two to drift apart.
+ * once the roster has been fetched once.
+ *
+ * `Row` below reuses the root app's `.row`/`.rows-dense` classes so this
+ * looks exactly like `PlayerRow`, but it isn't `PlayerRow`: that component
+ * is a `<button disabled={!onSelect}>`, and every row here is a dead end —
+ * there is no card to open, so nothing was ever wired to `onSelect`. A
+ * screen reader reads a permanently-disabled button as "unavailable" on
+ * every single row, which is worse than not being a button at all. A plain
+ * `<div>` with the same classes costs a few duplicate lines and reads
+ * correctly instead.
  */
 export function RosterTabs({ roster }: { roster: SchoolRoster }) {
   const [tab, setTab] = useState<'lookup' | 'team'>('lookup');
@@ -51,7 +57,7 @@ export function RosterTabs({ roster }: { roster: SchoolRoster }) {
           {hits.length > 0 && (
             <div className="rows">
               {hits.map((p) => (
-                <PlayerRow key={p.id} player={p} />
+                <Row key={p.id} player={p} />
               ))}
             </div>
           )}
@@ -68,10 +74,43 @@ export function RosterTabs({ roster }: { roster: SchoolRoster }) {
       {tab === 'team' && (
         <div className="rows rows-dense">
           {byNumber.map((p) => (
-            <PlayerRow key={p.id} player={p} dense />
+            <Row key={p.id} player={p} dense />
           ))}
         </div>
       )}
     </div>
   );
 }
+
+const Row = ({ player, dense = false }: { player: Player; dense?: boolean }) => {
+  if (dense) {
+    const vitals = [formatHeight(player.heightIn), formatWeight(player.weightLb), player.grade]
+      .filter(Boolean)
+      .join(' · ');
+
+    return (
+      <div className="row">
+        <span className="row-number">{player.number || '—'}</span>
+        <span className="row-who">
+          <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
+          {vitals && <span className="row-details">{vitals}</span>}
+        </span>
+        {player.position && <span className="row-pos">{player.position}</span>}
+      </div>
+    );
+  }
+
+  const details = [player.position, formatHeight(player.heightIn), formatWeight(player.weightLb), player.grade]
+    .filter(Boolean)
+    .join(' · ');
+
+  return (
+    <div className="row">
+      <span className="row-number">{player.number || '—'}</span>
+      <span className="row-text">
+        <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
+        {details && <span className="row-details">{details}</span>}
+      </span>
+    </div>
+  );
+};
