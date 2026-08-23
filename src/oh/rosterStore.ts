@@ -57,9 +57,24 @@ const validColors = (v: unknown): SchoolColors => {
  * remote URL. Unlike the root app's theme, a shared roster page has no build
  * of its own to serve a baked badge from, so anything that isn't a data URI
  * is not a logo this page can use.
+ *
+ * This is a full match, not a prefix check, and that distinction is the
+ * whole point: this value is substituted straight into `url("...")` inside a
+ * CSS custom property in look.ts. Custom properties are parsed by the
+ * browser as a raw <declaration-value> — IACVT does not save you here; there
+ * is no CSS-value-type check standing between the stored string and the
+ * stylesheet, so "it's going into a CSS variable" buys no safety on its own.
+ * A value that starts with
+ * `data:image/` can still close the surrounding quote and comma its way into
+ * a second, attacker-chosen `url(...)` right behind it. Requiring the whole
+ * string to be a `data:image/<type>;base64,<payload>` — nothing else,
+ * anchored both ends — rules out the quote and the comma that smuggling
+ * needs; there's no character left in the allowed alphabet to carry one.
  */
+const LOGO_DATA_URI = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/;
+
 const validLogo = (v: unknown): string | null =>
-  typeof v === 'string' && v.startsWith('data:image/') ? v : null;
+  typeof v === 'string' && LOGO_DATA_URI.test(v) ? v : null;
 
 /** Kept strict so a cache written by a future shape cannot crash a screen. */
 export const parseCached = (raw: string | null): SchoolRoster | null => {

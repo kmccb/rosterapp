@@ -63,6 +63,18 @@ describe('roster cache plumbing', () => {
     const junk = { season: 2026, players: [], colors: null, logo: 42 };
     expect(parseCached(JSON.stringify(junk))?.logo).toBeNull();
 
+    // Quote/comma smuggling — this value lands straight inside a CSS
+    // url("...") custom property in look.ts, so a prefix check alone would
+    // let a real data:image/ opening close its own quote early and inject a
+    // second, attacker-chosen url(...) right behind it.
+    const smuggled = {
+      season: 2026,
+      players: [],
+      colors: null,
+      logo: 'data:image/png;base64,AAA") ,url(evil',
+    };
+    expect(parseCached(JSON.stringify(smuggled))?.logo).toBeNull();
+
     // Missing entirely — an older cache entry written before logo existed.
     const missing = { season: 2026, players: [] };
     expect(parseCached(JSON.stringify(missing))?.logo).toBeNull();
