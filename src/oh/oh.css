@@ -15,3 +15,46 @@
 .fixture-row.is-plain {
   display: block;
 }
+
+/* ------------------------------------------------------------- manage */
+
+/* The seller's screens. Plain and dense on purpose — one person uses these,
+   on a phone, often standing next to the person paying. */
+.mg-paste {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.mg-review {
+  max-height: 40vh;
+  overflow-y: auto;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.mg-review-row {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mg-colors {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.mg-colors label,
+.mg-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
