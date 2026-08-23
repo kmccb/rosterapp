@@ -1,7 +1,12 @@
 # Selling and operating the paid tier
 
+First time? Work through docs/going-live.md before the first sale.
+
 The system stores a paid-through date and a note. Everything else — the
 pitch, the invoice, the check — happens between people.
+
+The base tier is $200/season. This line is the one place that number lives —
+change it here, and quote whatever it says.
 
 ## Activate a school (the whole job, ~3 minutes)
 
@@ -29,9 +34,9 @@ date when the check arrives.
 
 ## Coming down
 
-"Unpublish" hides a roster instantly (row kept). "Delete" removes it
-entirely. A school's removal request is honored same-day, per the privacy
-page.
+"Save unpublished" hides a roster instantly (row kept). "Delete this roster"
+removes it entirely. A school's removal request is honored same-day, per the
+privacy page.
 
 ## The other tier
 
