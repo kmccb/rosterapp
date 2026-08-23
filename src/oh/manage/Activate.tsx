@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { parseRoster, type ParseResult } from '../../parse/rosterParse';
 import type { Player } from '../../types';
 import { loadIndex, searchSchools } from '../store';
 import type { School } from '../../ohio/stateModel';
+import { deriveVars, resizeLogo } from '../look';
 import { deleteRoster, upsertRoster, type RosterRow } from './adminApi';
 
 /**
@@ -73,6 +74,22 @@ const friendlyError = (e: unknown): string => {
 };
 
 /**
+ * The theme half of upsertRoster's contract, pulled out of save() so the
+ * three cases can be pinned directly: a fresh upload sends `{logo}`, a
+ * cleared logo sends `{}` (wipe the stored one), and neither sends `null`
+ * (keep whatever is already stored — the renewal case, same contract as
+ * `players`).
+ */
+export function themeArg(
+  logoData: string | null,
+  logoCleared: boolean,
+): { logo: string } | Record<string, never> | null {
+  if (logoData) return { logo: logoData };
+  if (logoCleared) return {};
+  return null;
+}
+
+/**
  * The whole concierge job on one screen: pick the school, paste the
  * spreadsheet, look at what the parser made of it, set the colors and the
  * paid-through date, publish. The parser is the same one the root app has
@@ -87,8 +104,39 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const [accent, setAccent] = useState(existing?.colors?.accent ?? '#4fbaf7');
   const [paidThrough, setPaidThrough] = useState(existing?.paid_through ?? defaultPaidThrough());
   const [note, setNote] = useState(existing?.note ?? '');
+  // logoData is a fresh upload's data URI; logoCleared marks "drop the
+  // stored one". Sent to upsertRoster as: logoData → {logo}; logoCleared →
+  // {} (wipe); neither → null (keep whatever is already stored — the
+  // renewal case, same contract as `players`).
+  const [logoData, setLogoData] = useState<string | null>(null);
+  const [logoCleared, setLogoCleared] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasStoredLogo = Boolean(existing?.has_logo) && !logoCleared;
+  const showRemove = Boolean(logoData) || hasStoredLogo;
+
+  const onLogoFile = async (file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    try {
+      const resized = await resizeLogo(file);
+      setLogoData(resized);
+      setLogoCleared(false);
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoData(null);
+    setLogoCleared(true);
+  };
+
+  const previewStyle = useMemo(
+    () => deriveVars({ ground, accent, logo: logoData ?? undefined }) as unknown as CSSProperties,
+    [ground, accent, logoData],
+  );
 
   useEffect(() => {
     loadIndex().then(setSchools).catch(() => setSchools([]));
@@ -126,6 +174,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         season: existing?.season ?? currentSeasonYear(),
         players: players.length ? players : null,
         colors: { ground, accent },
+        theme: themeArg(logoData, logoCleared),
         published,
         paidThrough,
         note,
@@ -222,6 +271,39 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
             <label>
               Accent <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
             </label>
+          </div>
+
+          <div className="mg-logo">
+            <label className="mg-field">
+              School logo{' '}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  void onLogoFile(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            {logoData && <img className="mg-logo-thumb" src={logoData} alt="New logo" />}
+            {!logoData && hasStoredLogo && <span className="fixture-sub">Has a logo</span>}
+            {!logoData && !hasStoredLogo && logoCleared && (
+              <span className="fixture-sub">Logo removed</span>
+            )}
+            {showRemove && (
+              <button type="button" className="fixture-row is-plain" onClick={removeLogo}>
+                <span className="fixture-team">Remove logo</span>
+              </button>
+            )}
+          </div>
+
+          <div className="mg-preview" style={previewStyle}>
+            <p className="filter-line"><span>How the page will look</span></p>
+            <div className="mg-preview-strip">
+              <span className="mg-preview-swatch mg-preview-surface" />
+              <span className="mg-preview-swatch mg-preview-accent" />
+              <span className="mg-preview-text">Aa</span>
+            </div>
           </div>
 
           <label className="mg-field">

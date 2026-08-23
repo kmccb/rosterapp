@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseRoster } from '../../parse/rosterParse';
-import { skippedRows, toPlayers } from './Activate';
+import { skippedRows, themeArg, toPlayers } from './Activate';
 
 describe('toPlayers', () => {
   it('turns a pasted spreadsheet into the app’s players', () => {
@@ -50,5 +50,24 @@ describe('toPlayers', () => {
     // The two counts always add up to every row read, so the header line
     // never lies about what actually got published.
     expect(toPlayers(parsed.rows).length + skipped.length).toBe(parsed.rows.length);
+  });
+});
+
+describe('themeArg', () => {
+  it('sends {logo} for a fresh upload, even if the stored logo was also cleared', () => {
+    expect(themeArg('data:image/png;base64,AAAA', false)).toEqual({
+      logo: 'data:image/png;base64,AAAA',
+    });
+    expect(themeArg('data:image/png;base64,AAAA', true)).toEqual({
+      logo: 'data:image/png;base64,AAAA',
+    });
+  });
+
+  it('sends {} to wipe the stored logo when it was cleared and nothing new was picked', () => {
+    expect(themeArg(null, true)).toEqual({});
+  });
+
+  it('sends null to keep whatever is already stored — the renewal case', () => {
+    expect(themeArg(null, false)).toBeNull();
   });
 });

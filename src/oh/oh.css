@@ -16,20 +16,36 @@
   display: block;
 }
 
-/* A paid school's two colors. The accent recolors what the accent already
-   colors; the ground becomes a band behind the school's name rather than
-   the page background, because the page's text contrast is tuned for the
-   default ground and an arbitrary one would break it. */
-/* The Lookup/Team seg and its content, sitting between the school head and
-   the season. The seg alone reads fine flush against either neighbor, but
-   the two together need the same breathing room the rest of the screen
-   gets between sections. */
+/* The active tab's content, sitting between the tab bar and the season.
+   The tab bar alone reads fine flush against either neighbor, but the two
+   together need the same breathing room the rest of the screen gets
+   between sections. */
 .oh-roster {
   margin: 14px 0;
 }
 
-.oh-roster .seg {
-  margin-bottom: 12px;
+/* The school's own tab bar. ../styles.css's .tabs/.tab classes are built for
+   App's bar, which lives inside .header with its own padding and border;
+   here the bar sits directly in the scroll, so this rule supplies the
+   vertical rhythm instead of duplicating the shared one. */
+.oh-school-tabs {
+  margin: 4px 0 12px;
+}
+
+/* The crest beside the school's name, when there is one. Small enough to
+   read as a badge, not a wallpaper preview. */
+.oh-school-head-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oh-crest {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
 }
 
 /* The keypad's readout. Nothing on this screen shows what's been tapped
@@ -50,7 +66,6 @@
 .oh-school-head {
   padding: 8px 12px;
   border-radius: 12px;
-  background: var(--school-band, transparent);
 }
 
 /* ------------------------------------------------------------- manage */
@@ -106,6 +121,62 @@
   gap: 8px;
   color: var(--muted);
   font-size: 14px;
+}
+
+.mg-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.mg-logo-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+
+/* The live look preview: a mini next-card mock styled with the pickers'
+   current colors via inline custom properties, so the seller can see the
+   derived palette without leaving this screen. */
+.mg-preview {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.mg-preview-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.mg-preview-swatch {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.mg-preview-surface {
+  background: var(--surface-2);
+}
+
+.mg-preview-accent {
+  background: var(--accent);
+}
+
+.mg-preview-text {
+  color: var(--text);
+  font-weight: 700;
 }
 
 /* Prose page. The app's classes are built for rows; this one needs headings

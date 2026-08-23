@@ -72,7 +72,9 @@ The logo becomes the page wallpaper behind the root app's scrim treatment, and t
 - `school_roster_list` gains `has_logo` (boolean) so the panel can show it without shipping
   every logo in the list.
 - The grants convention: schema-wide revoke, then re-grant **every** live function — the four
-  `roster_*` signatures and the five `school_*` ones, with `upsert`'s new signature.
+  `roster_*` signatures and the four `school_*` ones (fetch, upsert, delete, list — `school_admin`
+  and `school_roster_check_players` are helpers, deliberately left ungranted), with `upsert`'s new
+  signature.
 
 ### The date fix
 
