@@ -13,7 +13,7 @@
 
 create table if not exists public.school_account (
   id          uuid primary key references auth.users (id) on delete cascade,
-  email       text not null unique,
+  email       text not null,
   is_admin    boolean not null default false,
   created_at  timestamptz not null default now()
 );
