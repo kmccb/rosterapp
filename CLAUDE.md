@@ -64,11 +64,11 @@ not a config bug — wait for the next cron. Consequences:
   `notify pgrst, 'reload schema'`. Applied by hand in the dashboard SQL editor.
 - **Signature-changing migrations have a deploy ordering** (see `docs/going-live.md`):
   push → deploy green → apply migration. The panel's saves break in the window; fan pages never do.
-- Verify with `node scripts/verify-school-roster.mjs` (6 checks, needs `.env.local`).
+- Verify with `node scripts/verify-school-roster.mjs` (7 checks, needs `.env.local`).
 
 ## Tests and CI
 
-- `npx vitest run` — 295 tests / 20 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 321 tests / 22 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = `deploy.yml` (push to main: test → build+guard → Pages). Env vars are repository
