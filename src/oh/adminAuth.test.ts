@@ -82,4 +82,23 @@ describe('freshToken', () => {
     expect(token).toBeNull();
     expect(loadSession()).toBeNull();
   });
+
+  it('returns null and clears session on 200 missing expires_in', async () => {
+    const session = { accessToken: 'old', refreshToken: 'refresh_old', expiresAt: Date.now() - 1 };
+    saveSession(session);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        // A well-formed 200 that just never carries expires_in — a shape
+        // slip in the auth server's answer, not a network problem.
+        json: vi.fn().mockResolvedValue({ access_token: 'new', refresh_token: 'refresh_new' }),
+      }),
+    );
+
+    const token = await freshToken();
+    expect(token).toBeNull();
+    expect(loadSession()).toBeNull();
+  });
 });

@@ -19,7 +19,10 @@ export async function requestMagicLink(email: string): Promise<void> {
   const res = await fetch(`${supaBase}/auth/v1/otp?redirect_to=${redirect}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: supaKey! },
-    body: JSON.stringify({ email, create_user: true }),
+    // create_user stays false: the admin's auth row is made by hand (see
+    // docs/going-live.md), and this endpoint must never mint an account for
+    // whoever happens to find the /oh/?manage URL.
+    body: JSON.stringify({ email, create_user: false }),
   });
   if (!res.ok) throw new Error(`Could not send the link (${res.status}).`);
 }
@@ -98,15 +101,31 @@ export async function freshToken(): Promise<string | null> {
   // still an answer — the server cannot serve this refresh token. Clear the
   // session so the seller requests a new magic link.
   try {
-    const t = (await res.json()) as {
+    const t = (await res.json()) as Partial<{
       access_token: string;
       refresh_token: string;
       expires_in: number;
-    };
+    }>;
+    // A 200 with the wrong shape — missing expires_in, a number where a
+    // string belongs — is still a body the server cannot serve a real
+    // refresh from. Trusting it anyway stores expiresAt as NaN, and every
+    // future call sees "already expired" and refreshes forever. Treat it
+    // exactly like corrupt JSON: clear the session and make the seller sign
+    // in again.
+    const expiresIn = t.expires_in;
+    if (
+      typeof t.access_token !== 'string' ||
+      typeof t.refresh_token !== 'string' ||
+      typeof expiresIn !== 'number' ||
+      !Number.isFinite(expiresIn)
+    ) {
+      clearSession();
+      return null;
+    }
     const next: Session = {
       accessToken: t.access_token,
       refreshToken: t.refresh_token,
-      expiresAt: Date.now() + t.expires_in * 1000,
+      expiresAt: Date.now() + expiresIn * 1000,
     };
     saveSession(next);
     return next.accessToken;
