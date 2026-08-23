@@ -13,6 +13,7 @@ import type { School, SchoolSeason } from '../ohio/stateModel';
 const CHOSEN = 'oh.school';
 const INDEX = 'oh.index';
 const SEASON = (slug: string) => `oh.season.${slug}`;
+const SPORT = (slug: string) => `oh.sport.${slug}`;
 
 /** Punctuation and case are noise when somebody is typing at a game. */
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -49,15 +50,33 @@ export const choose = (slug: string): void => {
   const prev = chosenSlug();
   if (prev && prev !== slug) {
     localStorage.removeItem(SEASON(prev));
-    // The roster obeys the same rule as the season: kept for the followed
-    // school, dropped on a genuine switch. Key inlined rather than imported
-    // from rosterStore, which imports chosenSlug from here.
-    localStorage.removeItem(`oh.roster.${prev}`);
+    // Every jar the old school filled: its season above, the pre-sport
+    // roster key, one roster per sport, the live-sports list, and the
+    // remembered sport. Prefix sweep rather than a list of names, so a
+    // future jar under the same prefix cannot be forgotten here. Keys
+    // inlined rather than imported from rosterStore, which imports
+    // chosenSlug from here.
+    for (const key of Object.keys(localStorage)) {
+      if (key === `oh.roster.${prev}` || key.startsWith(`oh.roster.${prev}.`)) {
+        localStorage.removeItem(key);
+      }
+    }
+    localStorage.removeItem(`oh.livesports.${prev}`);
+    localStorage.removeItem(SPORT(prev));
   }
   localStorage.setItem(CHOSEN, slug);
 };
 
 export const forget = (): void => localStorage.removeItem(CHOSEN);
+
+/** The sport this reader last opened at this school, so a basketball
+ * parent lands on basketball next time. */
+export const chosenSport = (slug: string): string | null => localStorage.getItem(SPORT(slug));
+
+export const rememberSport = (slug: string, sport: string | null): void => {
+  if (sport) localStorage.setItem(SPORT(slug), sport);
+  else localStorage.removeItem(SPORT(slug));
+};
 
 /** Network first, then whatever was kept — the schedule screen's rule. */
 export async function loadIndex(): Promise<School[]> {

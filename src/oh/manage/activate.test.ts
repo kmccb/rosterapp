@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseRoster } from '../../parse/rosterParse';
-import { skippedRows, themeArg, toPlayers } from './Activate';
+import { scheduleArg, skippedRows, themeArg, toPlayers } from './Activate';
 
 describe('toPlayers', () => {
   it('turns a pasted spreadsheet into the app’s players', () => {
@@ -69,5 +69,25 @@ describe('themeArg', () => {
 
   it('sends null to keep whatever is already stored — the renewal case', () => {
     expect(themeArg(null, false)).toBeNull();
+  });
+});
+
+describe('scheduleArg', () => {
+  const row = { date: '2026-11-27', opponent: 'Boardman', home: true };
+
+  it('a fresh paste sends the rows', () => {
+    expect(scheduleArg([row], false)).toEqual([row]);
+  });
+
+  it('clearing sends the empty array, which the database reads as "wipe"', () => {
+    expect(scheduleArg([], true)).toEqual([]);
+  });
+
+  it('neither sends null — keep whatever is stored, the renewal case', () => {
+    expect(scheduleArg([], false)).toBeNull();
+  });
+
+  it('a paste wins over a stale clear flag', () => {
+    expect(scheduleArg([row], true)).toEqual([row]);
   });
 });

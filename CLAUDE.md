@@ -49,10 +49,14 @@ not a config bug — wait for the next cron. Consequences:
   security-definer functions, `search_path` pinned, errcode'd raises in sentence voice.
 - **Share codes** (`shared_roster`, 0001–0003): coach publishes → code + edit token. Serves
   the root app. Untouchable.
-- **Paid tier** (`school_roster`, `school_account`, 0004–0005): admin-only writes
+- **Paid tier** (`school_roster`, `school_account`, 0004–0006): admin-only writes
   (`school_admin()` checks `is_admin`), public reads only via `school_roster_fetch(slug, sport)`
-  gated on `published AND paid_through >= today` (Eastern). Renewal contract: `p_players`/`p_theme`
-  **null = keep stored, `'{}'` = clear (theme), object = set**; `p_colors` has NO keep — always send it.
+  gated on `published AND paid_through >= today` (Eastern). Renewal contract: `p_players`/`p_theme`/
+  `p_schedule` **null = keep stored, `'{}'`/`'[]'` = clear (theme/schedule), object/array = set**;
+  `p_colors` has NO keep — always send it. `school_roster_sports(slug)` (0006, NOT yet applied to
+  production) answers the fan-page hub's one question — which sports a school has live, same gate
+  as fetch — and the `schedule` jsonb column carries concierge-pasted fixtures for the sports the
+  directory can't feed. Five `school_*` grants now: fetch, sports, upsert, delete, list.
 - **Migration conventions:** new numbered file; schema-wide
   `revoke execute on all functions` then **re-grant every live function by exact signature**
   (a miss silently kills a live feature); signature changes drop BOTH old and new signatures
@@ -60,11 +64,11 @@ not a config bug — wait for the next cron. Consequences:
   `notify pgrst, 'reload schema'`. Applied by hand in the dashboard SQL editor.
 - **Signature-changing migrations have a deploy ordering** (see `docs/going-live.md`):
   push → deploy green → apply migration. The panel's saves break in the window; fan pages never do.
-- Verify with `node scripts/verify-school-roster.mjs` (6 checks, needs `.env.local`).
+- Verify with `node scripts/verify-school-roster.mjs` (7 checks, needs `.env.local`).
 
 ## Tests and CI
 
-- `npx vitest run` — 295 tests / 20 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 321 tests / 22 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = `deploy.yml` (push to main: test → build+guard → Pages). Env vars are repository
@@ -85,22 +89,34 @@ not a config bug — wait for the next cron. Consequences:
 (tabs, full theming, crest upload), migration 0005 applied twice cleanly, share-code system
 proven alive post-migrations, security script 6/6.
 
+**Shipped, pending migration:** the all-sports hub — a school with 2+ live sports (or any
+non-football live sport) opens on a sport hub, tiles ordered in-season first, football tile
+always present, remembered sport per school, pasted schedules render on the Schedule tab for
+non-football sports, sport picker + schedule paste in the panel. Migration 0006
+(`school_roster_sports`, the `schedule` column) is written and tested but **not yet applied to
+production** — until it is, fan pages fall back to football-only (the sports call fails closed)
+and panel saves are broken in the push→apply window.
+
 **Open items, in priority order:**
-1. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
+1. **Apply migration 0006** — push → deploy green → apply in the dashboard SQL editor → apply
+   a second time (apply-twice gate) → `node scripts/verify-school-roster.mjs` (7 checks). Full
+   ordering is in docs/going-live.md.
+2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
    published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
    or replace with a real roster. The seller's admin session expires hourly — re-sign-in
    via magic link is normal.
-2. **First real sale** — the pitch: "send me your roster spreadsheet, I take care of
+3. **First real sale** — the pitch: "send me your roster spreadsheet, I take care of
    everything." Panel workflow is in selling.md. A crest upload + colors makes the demo.
-3. **Remaining live checks** (nice-to-have): the theme ceiling probe (>500 kB must be
+4. **Remaining live checks** (nice-to-have): the theme ceiling probe (>500 kB must be
    refused) and the second-non-admin-account check — listed in going-live.md.
-4. **Email Joe Eitel** — still unsent. Two tabs and the whole directory now depend on his
+5. **Email Joe Eitel** — still unsent. Two tabs and the whole directory now depend on his
    hobby site; a courtesy note converts silent breakage into a heads-up.
-5. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
+6. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
    mid-season roster-change texts become a burden.
-6. **Phase 3** (all-sports package; Region standings tab) — Region tab needs the
-   school→team-id mapping (blocked on ~90 team-page captures, deliberately deferred);
-   multi-sport schedules need ScheduleStar uuids from schools (the concierge channel).
+7. **Phase 3** (Region standings tab) — needs the school→team-id mapping (blocked on ~90
+   team-page captures, deliberately deferred); multi-sport schedules for non-football sports
+   are now covered by concierge-pasted rows (0006) — a ScheduleStar uuid per sport would
+   automate them later, same as football's.
 
 ## Conventions
 

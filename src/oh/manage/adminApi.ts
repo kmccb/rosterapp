@@ -5,6 +5,7 @@
 
 import { freshToken } from '../adminAuth';
 import { rpc } from '../supa';
+import type { ScheduleRow } from '../scheduleParse';
 
 export type RosterRow = {
   school_slug: string;
@@ -13,6 +14,7 @@ export type RosterRow = {
   player_count: number;
   colors: { ground: string; accent: string } | null;
   has_logo: boolean;
+  has_schedule: boolean;
   published: boolean;
   paid_through: string;
   note: string;
@@ -37,6 +39,8 @@ export const upsertRoster = async (row: {
   colors: { ground: string; accent: string } | null;
   /** null keeps the stored theme (renewal case), {} clears it, {logo} sets it. */
   theme: { logo: string } | Record<string, never> | null;
+  /** null keeps the stored schedule (renewal case), [] clears it, rows set it. */
+  schedule: ScheduleRow[] | [] | null;
   published: boolean;
   paidThrough: string;
   note: string;
@@ -50,6 +54,7 @@ export const upsertRoster = async (row: {
       p_players: row.players,
       p_colors: row.colors,
       p_theme: row.theme,
+      p_schedule: row.schedule,
       p_published: row.published,
       p_paid_through: row.paidThrough,
       p_note: row.note,

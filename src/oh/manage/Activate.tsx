@@ -4,6 +4,7 @@ import type { Player } from '../../types';
 import { loadIndex, searchSchools } from '../store';
 import type { School } from '../../ohio/stateModel';
 import { deriveVars, resizeLogo } from '../look';
+import { parseSchedule, type ScheduleRow } from '../scheduleParse';
 import { deleteRoster, upsertRoster, type RosterRow } from './adminApi';
 
 /**
@@ -46,7 +47,10 @@ export const skippedRows = (rows: ParseResult['rows']): SkippedRow[] =>
  * renewals happen the following spring). Both the default paid-through
  * date and a new row's season number read this same clock, so a seller who
  * changes the editable date field can never change which season the row
- * files under.
+ * files under. Every sport files under the school year that starts that
+ * fall, so July onward is the season year for winter and spring sports too
+ * — their January games belong to the season labelled with the previous
+ * autumn.
  */
 const currentSeasonYear = (): number => {
   const now = new Date();
@@ -90,6 +94,17 @@ export function themeArg(
 }
 
 /**
+ * The schedule half of upsertRoster's contract, themeArg's twin: a fresh
+ * paste sends the rows, a cleared schedule sends [] (wipe the stored one),
+ * and neither sends null (keep whatever is stored — the renewal case).
+ */
+export function scheduleArg(rows: ScheduleRow[], cleared: boolean): ScheduleRow[] | [] | null {
+  if (rows.length) return rows;
+  if (cleared) return [];
+  return null;
+}
+
+/**
  * The whole concierge job on one screen: pick the school, paste the
  * spreadsheet, look at what the parser made of it, set the colors and the
  * paid-through date, publish. The parser is the same one the root app has
@@ -99,7 +114,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const [schools, setSchools] = useState<School[]>([]);
   const [slugQuery, setSlugQuery] = useState('');
   const [slug, setSlug] = useState(existing?.school_slug ?? '');
+  const [sport, setSport] = useState(existing?.sport ?? 'football');
   const [pasted, setPasted] = useState('');
+  const [schedulePasted, setSchedulePasted] = useState('');
+  const [scheduleCleared, setScheduleCleared] = useState(false);
   const [ground, setGround] = useState(existing?.colors?.ground ?? '#04043a');
   const [accent, setAccent] = useState(existing?.colors?.accent ?? '#4fbaf7');
   const [paidThrough, setPaidThrough] = useState(existing?.paid_through ?? defaultPaidThrough());
@@ -145,6 +163,15 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const parsed = useMemo(() => (pasted.trim() ? parseRoster(pasted) : null), [pasted]);
   const players = useMemo(() => (parsed ? toPlayers(parsed.rows) : []), [parsed]);
   const skipped = useMemo(() => (parsed ? skippedRows(parsed.rows) : []), [parsed]);
+
+  const effectiveSport = existing?.sport ?? sport;
+  const schedParsed = useMemo(
+    () => (effectiveSport !== 'football' && schedulePasted.trim()
+      ? parseSchedule(schedulePasted, existing?.season ?? currentSeasonYear())
+      : null),
+    [effectiveSport, schedulePasted, existing],
+  );
+
   const hits = useMemo(
     () => (slug ? [] : searchSchools(schools, slugQuery).slice(0, 8)),
     [schools, slugQuery, slug],
@@ -170,11 +197,12 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
     try {
       await upsertRoster({
         slug,
-        sport: existing?.sport ?? 'football',
+        sport: effectiveSport,
         season: existing?.season ?? currentSeasonYear(),
         players: players.length ? players : null,
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
+        schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
         published,
         paidThrough,
         note,
@@ -221,6 +249,19 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         <>
           {!existing && <p className="filter-line"><span>{slug}</span></p>}
 
+          {!existing && (
+            <label className="mg-field">
+              Sport{' '}
+              <select value={sport} onChange={(e) => setSport(e.target.value)}>
+                {['football', 'volleyball', 'soccer', 'cross country', 'golf', 'tennis', 'cheer',
+                  'basketball', 'wrestling', 'swimming', 'hockey', 'bowling',
+                  'baseball', 'softball', 'track', 'lacrosse'].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <textarea
             className="mg-paste"
             value={pasted}
@@ -261,6 +302,86 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                   </div>
                 ))}
               </div>
+            </>
+          )}
+
+          {effectiveSport !== 'football' && (
+            <>
+              <textarea
+                className="mg-paste"
+                value={schedulePasted}
+                onChange={(e) => setSchedulePasted(e.target.value)}
+                placeholder={
+                  existing?.has_schedule
+                    ? 'Paste to replace the schedule, or leave empty to keep it'
+                    : 'Paste the schedule rows here — date, opponent, time'
+                }
+                rows={6}
+              />
+
+              {schedParsed && (
+                <>
+                  <p className="filter-line">
+                    <span>
+                      {schedParsed.rows.length} games read
+                      {schedParsed.skipped.length > 0 && ` · ${schedParsed.skipped.length} rows skipped`}
+                    </span>
+                  </p>
+                  {schedParsed.skipped.length > 0 && (
+                    <div className="mg-skip">
+                      {schedParsed.skipped.map((s, i) => (
+                        <div className="mg-skip-row" key={i}>
+                          {s.text} — {s.issue}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* A count is not a review. The parser reads cells by what
+                      they contain, not which column they sat in, so the one
+                      thing the seller has to see before publishing is which
+                      cell it decided was the opponent — a leading Day column
+                      or a stray marker moves that, and nothing downstream
+                      would ever say so. Capped at 60 like the roster: past
+                      that it's a wall, not a check. */}
+                  <div className="mg-review">
+                    {schedParsed.rows.slice(0, 60).map((r, i) => {
+                      const tail = [
+                        r.time,
+                        r.score ? `${r.score.us}–${r.score.them}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ');
+                      return (
+                        <div className="mg-review-row" key={i}>
+                          <b>{r.date}</b> · {r.home ? 'vs' : 'at'} {r.opponent}
+                          {tail && <span className="fixture-sub">{tail}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {existing?.has_schedule && !scheduleCleared && !schedParsed && (
+                <span className="fixture-sub">Has a schedule</span>
+              )}
+
+              {scheduleCleared && !schedParsed && (
+                <span className="fixture-sub">Schedule removed</span>
+              )}
+
+              {(Boolean(schedParsed?.rows.length) || (existing?.has_schedule && !scheduleCleared)) && (
+                <button
+                  type="button"
+                  className="fixture-row is-plain"
+                  onClick={() => {
+                    setSchedulePasted('');
+                    setScheduleCleared(true);
+                  }}
+                >
+                  <span className="fixture-team">Remove schedule</span>
+                </button>
+              )}
             </>
           )}
 

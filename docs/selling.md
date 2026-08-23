@@ -20,6 +20,15 @@ change it here, and quote whatever it says.
 Save unpublished instead if the check hasn't cleared — publishing later is
 the same screen.
 
+### More than one sport
+
+The Activate form asks which sport. Football's schedule comes free from the
+directory; for anything else, paste the schedule too (date, opponent, time
+columns) — the parser preview shows what it read before you publish. Once a
+school has two sports live, or any live sport that isn't football, its /oh/
+page opens on a hub instead of straight to the roster. Pricing for the
+all-sports package isn't set yet.
+
 ## Mid-season changes
 
 Text arrives: "#7 is now #12." Open the school in the panel, paste the

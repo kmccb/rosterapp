@@ -196,3 +196,40 @@
 .oh-privacy a {
   color: var(--accent);
 }
+
+/* The all-sports hub: one tile per sport with anything to show. Off-season
+   tiles stay tappable — a January reader may well want the football result
+   from November — they just stop shouting. */
+.oh-sport-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.oh-sport-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.oh-sport-tile.is-off {
+  opacity: 0.55;
+}
+
+.oh-sport-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.oh-sport-name {
+  font-weight: 600;
+}
