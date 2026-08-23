@@ -174,7 +174,17 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       .then((v) => {
         // null is "couldn't ask", never an answer, so it must not wipe a kept
         // list already on screen. With no kept list `live` is null anyway.
-        if (v !== null) setLive(v);
+        //
+        // An answer that merely agrees with the kept list keeps the kept
+        // array. Identity is what the tiles memo and the roster effect below
+        // are keyed on, so handing them a fresh array saying the same thing
+        // would tear the page the reader is already reading back down to
+        // Loading, clear the theme, and fetch the roster a second time.
+        if (v !== null) {
+          setLive((prev) =>
+            prev && prev.length === v.length && prev.every((s, i) => s === v[i]) ? prev : v,
+          );
+        }
         setSportsSettled(true);
       })
       .catch(() => {
