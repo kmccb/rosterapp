@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Keypad } from '../components/Keypad';
 import { numberMatches } from '../parse/rosterParse';
 import { formatHeight, formatWeight, fullName, type Player } from '../types';
-import type { SchoolRoster } from './rosterStore';
 
 /**
  * The paid part of a school's page: who is number seventeen.
@@ -11,6 +10,12 @@ import type { SchoolRoster } from './rosterStore';
  * the product — tap 7 and #7 leads with the 70s underneath. The list view is
  * the reverse lookup, by name. Nothing here needs an account or a signal
  * once the roster has been fetched once.
+ *
+ * `School.tsx` owns the tab bar now — it needs the same `.tabs`/`.tab` shell
+ * every other tab bar on this bundle uses, sitting beside "Schedule" rather
+ * than in a `.seg` of its own. This module exports the two tab bodies,
+ * `LookupTab` and `TeamTab`, and keeps only what they share: the sort, the
+ * match, and the row.
  *
  * `Row` below reuses the root app's `.row`/`.rows-dense` classes so this
  * looks exactly like `PlayerRow`, but it isn't `PlayerRow`: that component
@@ -21,24 +26,23 @@ import type { SchoolRoster } from './rosterStore';
  * `<div>` with the same classes costs a few duplicate lines and reads
  * correctly instead.
  */
-export function RosterTabs({ roster }: { roster: SchoolRoster }) {
-  const [tab, setTab] = useState<'lookup' | 'team'>('lookup');
+
+// A number that doesn't parse (blank, "N/A") sorts to the bottom; a
+// player who legitimately wears #0 must not join it there, which
+// `Number(n) || 999` got wrong because 0 is falsy. Number("") is 0 too,
+// so blank is checked for directly rather than trusted to Number().
+const sortKey = (n: string): number => {
+  if (!n.trim()) return 999;
+  const v = Number(n);
+  return Number.isFinite(v) ? v : 999;
+};
+
+const useByNumber = (players: Player[]): Player[] =>
+  useMemo(() => [...players].sort((a, b) => sortKey(a.number) - sortKey(b.number)), [players]);
+
+export function LookupTab({ players }: { players: Player[] }) {
   const [query, setQuery] = useState('');
-
-  // A number that doesn't parse (blank, "N/A") sorts to the bottom; a
-  // player who legitimately wears #0 must not join it there, which
-  // `Number(n) || 999` got wrong because 0 is falsy. Number("") is 0 too,
-  // so blank is checked for directly rather than trusted to Number().
-  const sortKey = (n: string): number => {
-    if (!n.trim()) return 999;
-    const v = Number(n);
-    return Number.isFinite(v) ? v : 999;
-  };
-
-  const byNumber = useMemo(
-    () => [...roster.players].sort((a, b) => sortKey(a.number) - sortKey(b.number)),
-    [roster.players],
-  );
+  const byNumber = useByNumber(players);
 
   const hits = useMemo(() => {
     if (!query) return [];
@@ -48,43 +52,34 @@ export function RosterTabs({ roster }: { roster: SchoolRoster }) {
   }, [byNumber, query]);
 
   return (
-    <div className="oh-roster">
-      <div className="seg" role="group" aria-label="Roster view">
-        <button type="button" aria-pressed={tab === 'lookup'} onClick={() => setTab('lookup')}>
-          Lookup
-        </button>
-        <button type="button" aria-pressed={tab === 'team'} onClick={() => setTab('team')}>
-          Team
-        </button>
-      </div>
-
-      {tab === 'lookup' && (
-        <>
-          <div className="oh-query" aria-live="polite">{query || ' '}</div>
-          {hits.length > 0 && (
-            <div className="rows">
-              {hits.map((p) => (
-                <Row key={p.id} player={p} />
-              ))}
-            </div>
-          )}
-          {query && !hits.length && <p className="empty-text">Nobody wears {query}.</p>}
-          <Keypad
-            onDigit={(d) => setQuery((q) => (q + d).slice(0, 2))}
-            onBackspace={() => setQuery((q) => q.slice(0, -1))}
-            onClear={() => setQuery('')}
-            canDelete={query.length > 0}
-          />
-        </>
-      )}
-
-      {tab === 'team' && (
-        <div className="rows rows-dense">
-          {byNumber.map((p) => (
-            <Row key={p.id} player={p} dense />
+    <>
+      <div className="oh-query" aria-live="polite">{query || ' '}</div>
+      {hits.length > 0 && (
+        <div className="rows">
+          {hits.map((p) => (
+            <Row key={p.id} player={p} />
           ))}
         </div>
       )}
+      {query && !hits.length && <p className="empty-text">Nobody wears {query}.</p>}
+      <Keypad
+        onDigit={(d) => setQuery((q) => (q + d).slice(0, 2))}
+        onBackspace={() => setQuery((q) => q.slice(0, -1))}
+        onClear={() => setQuery('')}
+        canDelete={query.length > 0}
+      />
+    </>
+  );
+}
+
+export function TeamTab({ players }: { players: Player[] }) {
+  const byNumber = useByNumber(players);
+
+  return (
+    <div className="rows rows-dense">
+      {byNumber.map((p) => (
+        <Row key={p.id} player={p} dense />
+      ))}
     </div>
   );
 }
