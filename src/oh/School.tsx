@@ -232,17 +232,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                   </a>
                 </span>
               </p>
-              <p className="filter-line">
-                <span>
-                  <a href="/oh/?privacy">What this site knows, and doesn&rsquo;t</a>
-                </span>
-              </p>
             </>
           )}
 
           <button type="button" className="fixture-row is-plain" onClick={onChange}>
             <span className="fixture-team">Follow a different school</span>
           </button>
+
+          <p className="filter-line">
+            <span>
+              <a href="/oh/?privacy">What this site knows, and doesn&rsquo;t</a>
+            </span>
+          </p>
         </>
       ) : (
         <>
