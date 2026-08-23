@@ -1,6 +1,6 @@
 /**
- * The plain-language version of the design&rsquo;s privacy stance. This is the
- * page a parent, a coach, or a district&rsquo;s lawyer reads, so it says what is
+ * The plain-language version of the design's privacy stance. This is the
+ * page a parent, a coach, or a district's lawyer reads, so it says what is
  * true in sentences rather than clauses.
  */
 export function Privacy() {

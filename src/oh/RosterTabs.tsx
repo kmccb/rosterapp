@@ -25,11 +25,18 @@ export function RosterTabs({ roster }: { roster: SchoolRoster }) {
   const [tab, setTab] = useState<'lookup' | 'team'>('lookup');
   const [query, setQuery] = useState('');
 
+  // A number that doesn't parse (blank, "N/A") sorts to the bottom; a
+  // player who legitimately wears #0 must not join it there, which
+  // `Number(n) || 999` got wrong because 0 is falsy. Number("") is 0 too,
+  // so blank is checked for directly rather than trusted to Number().
+  const sortKey = (n: string): number => {
+    if (!n.trim()) return 999;
+    const v = Number(n);
+    return Number.isFinite(v) ? v : 999;
+  };
+
   const byNumber = useMemo(
-    () =>
-      [...roster.players].sort(
-        (a, b) => (Number(a.number) || 999) - (Number(b.number) || 999),
-      ),
+    () => [...roster.players].sort((a, b) => sortKey(a.number) - sortKey(b.number)),
     [roster.players],
   );
 
