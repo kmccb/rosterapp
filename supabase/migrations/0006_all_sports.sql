@@ -36,8 +36,8 @@ begin
   end if;
   for v_row in select jsonb_array_elements(p_schedule) loop
     if jsonb_typeof(v_row) <> 'object'
-       or jsonb_typeof(v_row->'date') <> 'string'
-       or jsonb_typeof(v_row->'opponent') <> 'string' then
+       or coalesce(jsonb_typeof(v_row->'date'), 'missing') <> 'string'
+       or coalesce(jsonb_typeof(v_row->'opponent'), 'missing') <> 'string' then
       raise exception 'each schedule row needs at least a date and an opponent' using errcode = '22023';
     end if;
   end loop;
