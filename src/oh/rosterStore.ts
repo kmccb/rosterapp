@@ -17,13 +17,33 @@ export type SchoolRoster = { season: number; players: Player[]; colors: SchoolCo
 
 export const cacheKey = (slug: string): string => `oh.roster.${slug}`;
 
+const HEX = /^#[0-9a-f]{6}$/i;
+
+/**
+ * Either the default look (null) or two real hex colors — never a shape in
+ * between. A colors value that is half-right (a missing accent, a CSS name
+ * instead of hex) must fall back to the default theme rather than hand
+ * School.tsx something it will paint verbatim into a CSS variable.
+ */
+const validColors = (v: unknown): SchoolColors => {
+  if (v === null || v === undefined) return null;
+  if (typeof v !== 'object') return null;
+  const c = v as Partial<{ ground: unknown; accent: unknown }>;
+  return typeof c.ground === 'string' &&
+    typeof c.accent === 'string' &&
+    HEX.test(c.ground) &&
+    HEX.test(c.accent)
+    ? { ground: c.ground, accent: c.accent }
+    : null;
+};
+
 /** Kept strict so a cache written by a future shape cannot crash a screen. */
 export const parseCached = (raw: string | null): SchoolRoster | null => {
   if (!raw) return null;
   try {
     const v = JSON.parse(raw) as Partial<SchoolRoster>;
     return typeof v?.season === 'number' && Array.isArray(v?.players)
-      ? ({ season: v.season, players: v.players, colors: v.colors ?? null } as SchoolRoster)
+      ? ({ season: v.season, players: v.players, colors: validColors(v.colors) } as SchoolRoster)
       : null;
   } catch {
     return null;
@@ -39,14 +59,17 @@ export async function loadSchoolRoster(slug: string): Promise<SchoolRoster | nul
       p_sport: 'football',
     });
     if (body && typeof body.season === 'number' && Array.isArray(body.players)) {
+      // Same shape guard as the cache: the network answer gets sanitized
+      // before it reaches School.tsx, not just before it reaches localStorage.
+      const clean: SchoolRoster = { season: body.season, players: body.players, colors: validColors(body.colors) };
       if (slug === chosenSlug()) {
         try {
-          localStorage.setItem(cacheKey(slug), JSON.stringify(body));
+          localStorage.setItem(cacheKey(slug), JSON.stringify(clean));
         } catch {
           // A full jar must not fail the fetch that succeeded.
         }
       }
-      return body;
+      return clean;
     }
     // The function answered null: no live roster. Clear a stale cache so an
     // expired school goes dark on phones too, not just on the server.
