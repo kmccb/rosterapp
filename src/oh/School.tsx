@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
+import { RosterTabs } from './RosterTabs';
+import { loadSchoolRoster, type SchoolRoster } from './rosterStore';
 import { loadSeason } from './store';
 
 /** "2026-08-21" -> "Fri 21 Aug", in the reader's own locale. */
@@ -20,6 +22,7 @@ const when = (g: SchoolGame) =>
 export function School({ slug, onChange }: { slug: string; onChange: () => void }) {
   const [season, setSeason] = useState<SchoolSeason | null>(null);
   const [failed, setFailed] = useState(false);
+  const [roster, setRoster] = useState<SchoolRoster | null>(null);
 
   useEffect(() => {
     setSeason(null);
@@ -27,6 +30,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     loadSeason(slug)
       .then(setSeason)
       .catch(() => setFailed(true));
+
+    // A roster failure — no signal, no live roster, whatever — must never
+    // block the season above it. That's the one thing every school gets.
+    setRoster(null);
+    loadSchoolRoster(slug)
+      .then(setRoster)
+      .catch(() => setRoster(null));
   }, [slug]);
 
   if (failed) {
@@ -51,15 +61,28 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const played = season.games.filter((g) => g.result);
   const coming = season.games.filter((g) => !g.result);
 
+  // A paid school's two colors, scoped to this screen. The accent recolors
+  // what the accent already colors; the ground becomes a band behind the
+  // school's name rather than the page background, because the page's text
+  // contrast is tuned for the default ground and an arbitrary one would
+  // break it.
+  const themed = roster?.colors
+    ? ({ '--accent': roster.colors.accent, '--school-band': roster.colors.ground } as CSSProperties)
+    : undefined;
+
   return (
-    <div className="screen">
-      <h1 className="next-card-opponent">{season.school.name}</h1>
-      <p className="filter-line">
-        <span>
-          {season.school.city}
-          {season.record.played > 0 && ` · ${season.record.won}–${season.record.lost}`}
-        </span>
-      </p>
+    <div className="screen" style={themed}>
+      <div className="oh-school-head">
+        <h1 className="next-card-opponent">{season.school.name}</h1>
+        <p className="filter-line">
+          <span>
+            {season.school.city}
+            {season.record.played > 0 && ` · ${season.record.won}–${season.record.lost}`}
+          </span>
+        </p>
+      </div>
+
+      {roster && <RosterTabs roster={roster} />}
 
       {/*
         The reason the directory exists.
@@ -69,26 +92,28 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
         roster. A reader who wanted to know who number seventeen was is the
         best possible person to go and ask for it.
       */}
-      <section className="next-card">
-        <p className="next-card-label">Roster not added yet</p>
-        <p className="next-when">
-          {season.school.name} hasn’t published their roster, so there’s no way to look up a number
-          yet.
-        </p>
-        <a
-          className="fixture-row is-plain"
-          href={`mailto:?subject=${encodeURIComponent(
-            `A roster app for ${season.school.name}`,
-          )}&body=${encodeURIComponent(
-            `I was at the game looking up jersey numbers and found this:\n\n` +
-              `${location.origin}/oh/\n\n` +
-              `${season.school.name}’s schedule and scores are already on it, but the roster ` +
-              `isn’t — that part has to come from the team. Any chance we could get ours added?\n`,
-          )}`}
-        >
-          <span className="fixture-team">Ask the school to add it</span>
-        </a>
-      </section>
+      {!roster && (
+        <section className="next-card">
+          <p className="next-card-label">Roster not added yet</p>
+          <p className="next-when">
+            {season.school.name} hasn’t published their roster, so there’s no way to look up a
+            number yet.
+          </p>
+          <a
+            className="fixture-row is-plain"
+            href={`mailto:?subject=${encodeURIComponent(
+              `A roster app for ${season.school.name}`,
+            )}&body=${encodeURIComponent(
+              `I was at the game looking up jersey numbers and found this:\n\n` +
+                `${location.origin}/oh/\n\n` +
+                `${season.school.name}’s schedule and scores are already on it, but the roster ` +
+                `isn’t — that part has to come from the team. Any chance we could get ours added?\n`,
+            )}`}
+          >
+            <span className="fixture-team">Ask the school to add it</span>
+          </a>
+        </section>
+      )}
 
       {coming.length > 0 && (
         <>
@@ -132,6 +157,20 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
             </div>
           ))}
         </>
+      )}
+
+      {roster && (
+        <p className="filter-line">
+          <span>
+            <a
+              href={`mailto:tom@scottforge.ai?subject=${encodeURIComponent(
+                `An app of our own — ${season.school.name}`,
+              )}`}
+            >
+              Want your own installable app, like Poland&rsquo;s?
+            </a>
+          </span>
+        </p>
       )}
 
       <button type="button" className="fixture-row is-plain" onClick={onChange}>

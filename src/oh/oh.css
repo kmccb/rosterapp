@@ -16,6 +16,16 @@
   display: block;
 }
 
+/* A paid school's two colors. The accent recolors what the accent already
+   colors; the ground becomes a band behind the school's name rather than
+   the page background, because the page's text contrast is tuned for the
+   default ground and an arbitrary one would break it. */
+.oh-school-head {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--school-band, transparent);
+}
+
 /* ------------------------------------------------------------- manage */
 
 /* The seller's screens. Plain and dense on purpose — one person uses these,
