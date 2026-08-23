@@ -44,6 +44,25 @@ describe('parseSchedule', () => {
     expect(rows[1]).toMatchObject({ opponent: 'Howard', home: true });
   });
 
+  it('reads past a leading day-of-week column', () => {
+    // "Day" is the first column of half the spreadsheets in the state, and a
+    // cell before the date used to claim the opponent slot outright.
+    const { rows } = parseSchedule('Fri\t8/28\tCanfield\tH\t7:00 PM', 2026);
+    expect(rows).toEqual([
+      { date: '2026-08-28', opponent: 'Canfield', home: true, time: '7:00 PM' },
+    ]);
+  });
+
+  it('reads past a leading score column, and does not read the score out of it', () => {
+    // A score printed before the date is junk this parser deliberately drops:
+    // a bare "45-21" is only a score once a date has been claimed, and
+    // re-reading it after the fact would mean a second pass for a layout
+    // nobody has actually pasted. The opponent is what matters — get that
+    // right and the seller can see the missing score in the preview.
+    const { rows } = parseSchedule('45-21\t8/28\tCanfield', 2026);
+    expect(rows).toEqual([{ date: '2026-08-28', opponent: 'Canfield', home: true }]);
+  });
+
   it('splits on runs of spaces when there are no tabs', () => {
     const { rows } = parseSchedule('Aug 28   Canfield   7:00 PM', 2026);
     expect(rows).toEqual([{ date: '2026-08-28', opponent: 'Canfield', home: true, time: '7:00 PM' }]);

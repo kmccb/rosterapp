@@ -109,31 +109,48 @@ export function parseSchedule(text: string, seasonYear: number): ParsedSchedule 
       .filter(Boolean);
 
     let date: string | null = null;
+    let dateAt = -1;
     let opponent: string | null = null;
     let home: boolean | null = null;
+    let homeAt = -1;
     let time: string | undefined;
     let score: ScheduleScore | undefined;
+    /** Cells no classifier wanted, in the order they were pasted. One of
+     * these is the opponent; which one is decided after the whole line has
+     * been read. */
+    const spare: { at: number; text: string }[] = [];
 
-    for (const cell of cells) {
+    cells.forEach((cell, at) => {
       if (!date) {
         const d = parseDate(cell, seasonYear);
-        if (d) { date = d; continue; }
+        if (d) { date = d; dateAt = at; return; }
       }
       const s = parseScore(cell, date !== null);
-      if (s && !score) { score = s; continue; }
+      if (s && !score) { score = s; return; }
       const t = parseTime(cell);
-      if (t && !time) { time = t; continue; }
+      if (t && !time) { time = t; return; }
       const ha = parseHomeAway(cell);
-      if (ha !== null && home === null) { home = ha; continue; }
-      if (!opponent) {
-        // The opponent may carry its own venue marker: "@ Canfield".
-        const marked = cell.match(/^(?:@|at|vs\.?)\s+(.+)$/i);
-        if (marked) {
-          opponent = marked[1];
-          if (home === null) home = /^vs/i.test(cell);
-        } else {
-          opponent = cell;
-        }
+      if (ha !== null && home === null) { home = ha; homeAt = at; return; }
+      spare.push({ at, text: cell });
+    });
+
+    // The opponent is the first spare cell to the RIGHT of the date, because
+    // a spreadsheet that leads with a Day or Week column — "Fri", "Wk 1" —
+    // is as ordinary as one that leads with the date, and the leading cell
+    // used to walk off with the opponent slot. A cell before the date is
+    // still better than no opponent at all, so it remains the fallback.
+    const pick = spare.find((c) => c.at > dateAt) ?? spare[0];
+    if (pick) {
+      // The opponent may carry its own venue marker: "@ Canfield".
+      const marked = pick.text.match(/^(?:@|at|vs\.?)\s+(.+)$/i);
+      if (marked) {
+        opponent = marked[1];
+        // First cell to speak wins, the same rule every other field follows
+        // — so a separate H/A column only loses to the marker if the
+        // opponent sat to its left.
+        if (home === null || pick.at < homeAt) home = /^vs/i.test(pick.text);
+      } else {
+        opponent = pick.text;
       }
     }
 
