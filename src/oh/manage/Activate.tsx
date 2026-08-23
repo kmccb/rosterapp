@@ -336,11 +336,38 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                       ))}
                     </div>
                   )}
+                  {/* A count is not a review. The parser reads cells by what
+                      they contain, not which column they sat in, so the one
+                      thing the seller has to see before publishing is which
+                      cell it decided was the opponent — a leading Day column
+                      or a stray marker moves that, and nothing downstream
+                      would ever say so. Capped at 60 like the roster: past
+                      that it's a wall, not a check. */}
+                  <div className="mg-review">
+                    {schedParsed.rows.slice(0, 60).map((r, i) => {
+                      const tail = [
+                        r.time,
+                        r.score ? `${r.score.us}–${r.score.them}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ');
+                      return (
+                        <div className="mg-review-row" key={i}>
+                          <b>{r.date}</b> · {r.home ? 'vs' : 'at'} {r.opponent}
+                          {tail && <span className="fixture-sub">{tail}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </>
               )}
 
               {existing?.has_schedule && !scheduleCleared && !schedParsed && (
                 <span className="fixture-sub">Has a schedule</span>
+              )}
+
+              {scheduleCleared && !schedParsed && (
+                <span className="fixture-sub">Schedule removed</span>
               )}
 
               {(Boolean(schedParsed?.rows.length) || (existing?.has_schedule && !scheduleCleared)) && (

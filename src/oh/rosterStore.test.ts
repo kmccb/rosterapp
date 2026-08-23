@@ -13,7 +13,7 @@ vi.mock('./supa', () => ({
   rpc: vi.fn(),
 }));
 
-import { cacheKey, loadSchoolRoster, loadSchoolSports, parseCached } from './rosterStore';
+import { cacheKey, keptSchoolSports, loadSchoolRoster, loadSchoolSports, parseCached } from './rosterStore';
 import { rpc } from './supa';
 
 const mockedRpc = vi.mocked(rpc);
@@ -236,5 +236,43 @@ describe('loadSchoolSports', () => {
   it('an empty answer is a real answer — no live sports', async () => {
     mockedRpc.mockResolvedValueOnce([]);
     expect(await loadSchoolSports('hubbard-hubbard')).toEqual([]);
+  });
+});
+
+describe('keptSchoolSports', () => {
+  let localStorageMock: Map<string, string>;
+
+  beforeEach(() => {
+    localStorageMock = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => localStorageMock.get(key) ?? null,
+      setItem: (key: string, value: string) => localStorageMock.set(key, value),
+      removeItem: (key: string) => localStorageMock.delete(key),
+      clear: () => localStorageMock.clear(),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('reads the kept list without asking the network', () => {
+    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(['football', 'volleyball']));
+    expect(keptSchoolSports('hubbard-hubbard')).toEqual(['football', 'volleyball']);
+  });
+
+  it('is unknown when nothing was ever kept', () => {
+    expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
+  });
+
+  it('treats junk in the jar as unknown, not as an empty school', () => {
+    localStorage.setItem('oh.livesports.hubbard-hubbard', 'not json');
+    expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
+
+    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify({ nope: true }));
+    expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
+
+    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(['football', 7]));
+    expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
   });
 });

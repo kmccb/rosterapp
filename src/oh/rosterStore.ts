@@ -171,22 +171,32 @@ export async function loadSchoolRoster(slug: string, sport: string): Promise<Sch
 const sportsKey = (slug: string): string => `oh.livesports.${slug}`;
 
 /**
+ * The kept copy of a school's live sports, read without asking anyone.
+ *
+ * The network answer gates the first paint — a reader who lands on football
+ * and is bounced to a hub a beat later has been lied to — but a returning
+ * reader already knows the answer, and making them wait on a round trip for
+ * it (or on a 404, through the whole window between deploy and migration
+ * 0006) buys nothing. Same validation as the fetch's own fallback path,
+ * because it is the same jar: junk is null, not an empty school.
+ */
+export const keptSchoolSports = (slug: string): string[] | null => {
+  try {
+    const raw = localStorage.getItem(sportsKey(slug));
+    const v = raw ? (JSON.parse(raw) as unknown) : null;
+    return Array.isArray(v) && v.every((s) => typeof s === 'string') ? (v as string[]) : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * Which sports this school has live. [] is a real answer — no paid sports;
  * null means the question couldn't be asked (no signal and no kept copy, or
  * a deploy running ahead of migration 0006), and the caller falls back to
  * behaving as the football-only site it was.
  */
 export async function loadSchoolSports(slug: string): Promise<string[] | null> {
-  const kept = (): string[] | null => {
-    try {
-      const raw = localStorage.getItem(sportsKey(slug));
-      const v = raw ? (JSON.parse(raw) as unknown) : null;
-      return Array.isArray(v) && v.every((s) => typeof s === 'string') ? (v as string[]) : null;
-    } catch {
-      return null;
-    }
-  };
-
   if (!supaAvailable) return null;
   try {
     const body = await rpc<unknown>('school_roster_sports', { p_slug: slug });
@@ -202,6 +212,6 @@ export async function loadSchoolSports(slug: string): Promise<string[] | null> {
     }
     return null;
   } catch {
-    return kept();
+    return keptSchoolSports(slug);
   }
 }

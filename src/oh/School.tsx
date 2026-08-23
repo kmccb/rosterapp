@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { LookupTab, TeamTab } from './RosterTabs';
-import { loadSchoolRoster, loadSchoolSports, type SchoolRoster } from './rosterStore';
+import {
+  keptSchoolSports,
+  loadSchoolRoster,
+  loadSchoolSports,
+  type SchoolRoster,
+} from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
 import { applyLook, clearLook } from './look';
 import { hubSports, inSeason, sortSportsForNow, sportEmoji, sportLabel } from './sportSeasons';
@@ -49,10 +54,12 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
       {coming.length > 0 && (
         <>
           <div className="group-head">Coming up</div>
-          {coming.map((r) => {
+          {/* The index rides in the key because a doubleheader — same day,
+              same opponent, two games — is a real row a school can paste. */}
+          {coming.map((r, i) => {
             const { day, month } = stack(r.date);
             return (
-              <div className="fixture" key={`${r.date}-${r.opponent}`}>
+              <div className="fixture" key={`${r.date}-${r.opponent}-${i}`}>
                 <div className="fixture-row">
                   <span className="fixture-date">
                     <span className="fixture-month">{month}</span>
@@ -72,11 +79,11 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
       {played.length > 0 && (
         <>
           <div className="group-head">Played</div>
-          {played.map((r) => {
+          {played.map((r, i) => {
             const { day, month } = stack(r.date);
             const won = r.score!.us > r.score!.them;
             return (
-              <div className="fixture is-played" key={`${r.date}-${r.opponent}`}>
+              <div className="fixture is-played" key={`${r.date}-${r.opponent}-${i}`}>
                 <div className="fixture-row">
                   <span className="fixture-date">
                     <span className="fixture-month">{month}</span>
@@ -136,6 +143,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [live, setLive] = useState<string[] | null>(null);
   const [sportsSettled, setSportsSettled] = useState(false);
   const [sport, setSport] = useState<string | null>(null);
+  // Whether the roster behind the chosen sport has been asked for yet. A tile
+  // tap sets the sport and the effect below clears the roster, so without
+  // this the next render is the hub the reader just tapped out of — nothing
+  // happens on screen until the network answers.
+  const [rosterFetch, setRosterFetch] = useState<'idle' | 'loading' | 'done'>('idle');
 
   useEffect(() => {
     setSeason(null);
@@ -144,20 +156,28 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       .then(setSeason)
       .catch(() => setFailed(true));
 
-    setLive(null);
-    setSportsSettled(false);
     setSport(null);
+    // A reader who has been here before already knows which sports this
+    // school sells, so the page draws on that copy at once and lets the
+    // network refine it. Only a first visit waits — otherwise every one of
+    // the 717 school pages would hold its first paint on a round trip, and
+    // hold it on a 404 for the whole window between this deploy and
+    // migration 0006.
+    const kept = keptSchoolSports(slug);
+    setLive(kept);
+    setSportsSettled(kept !== null);
     // The catch is belt and braces — loadSchoolSports swallows its own
     // failures — but the invariant lives in another module and the cost of it
     // ever being wrong is every school page stuck on "Loading…" forever. A
     // throw settles as "couldn't ask", which is the football-only fallback.
     loadSchoolSports(slug)
       .then((v) => {
-        setLive(v);
+        // null is "couldn't ask", never an answer, so it must not wipe a kept
+        // list already on screen. With no kept list `live` is null anyway.
+        if (v !== null) setLive(v);
         setSportsSettled(true);
       })
       .catch(() => {
-        setLive(null);
         setSportsSettled(true);
       });
   }, [slug]);
@@ -206,17 +226,26 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       // volleyball's, and it stays that way, because nothing re-renders to
       // correct it. Only the fetch this effect started may answer it.
       let current = true;
+      setRosterFetch('loading');
       loadSchoolRoster(slug, sport)
         .then((r) => {
-          if (current) setRoster(r);
+          if (current) {
+            setRoster(r);
+            setRosterFetch('done');
+          }
         })
         .catch(() => {
-          if (current) setRoster(null);
+          if (current) {
+            setRoster(null);
+            setRosterFetch('done');
+          }
         });
       return () => {
         current = false;
       };
     }
+    // Nothing to wait for: no sport chosen, or one this school doesn't sell.
+    setRosterFetch('done');
   }, [slug, sport, liveSports]);
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
@@ -278,6 +307,20 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       </p>
     </>
   );
+
+  // A sport in flight looks like the page loading, not like the hub the
+  // reader just left. 'idle' counts as in flight too: it is the one render
+  // between the tile tap and the effect that starts the fetch, and letting
+  // the hub paint in that gap is the flicker this is here to prevent.
+  // Football is exempt — its page stands without a roster, so it draws the
+  // moment the season is in, exactly as it did before any of this existed.
+  if (sport !== null && sport !== 'football' && rosterFetch !== 'done') {
+    return (
+      <div className="screen">
+        <p className="empty-text">Loading…</p>
+      </div>
+    );
+  }
 
   // A sport whose roster came back null — expired between visits, or a cache
   // miss with no signal — has nothing to show and no theme to show it in.
@@ -381,7 +424,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const back = tiles.length >= 2 && (
     <button
       type="button"
-      className="fixture-row is-plain oh-hub-back"
+      className="fixture-row is-plain"
       onClick={() => {
         rememberSport(slug, null);
         setSport(null);
