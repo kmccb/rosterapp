@@ -2,10 +2,14 @@
 --
 -- Same shape as 0003, which taught the share system to carry a badge: the
 -- logo rides in a jsonb column as a data URI, capped hard enough to stop a
--- phone camera original and generous enough for a detailed crest. The two
--- functions whose signatures change are dropped and recreated — Postgres
+-- phone camera original and generous enough for a detailed crest. Only
+-- school_roster_upsert's signature actually changes (8 params to 9);
+-- school_roster_fetch is dropped and recreated anyway to swap its body
+-- (it gains the theme key), since its signature is untouched. Postgres
 -- won't alter a signature in place, and a defaulted parameter would leave
 -- the old overload behind to be picked at random.
+
+begin;
 
 alter table public.school_roster
   add column if not exists theme jsonb;
@@ -21,7 +25,7 @@ as $$
 begin
   if p_theme is null then return; end if;
   if jsonb_typeof(p_theme) <> 'object' then
-    raise exception 'the theme must be a JSON object' using errcode = '22023';
+    raise exception 'theme must be a JSON object' using errcode = '22023';
   end if;
   if pg_column_size(p_theme) > 500000 then
     raise exception 'that logo is too large to store' using errcode = '22023';
@@ -58,6 +62,7 @@ $$;
 -- ------------------------------------------------------------------ upsert
 
 drop function if exists public.school_roster_upsert(text, text, integer, jsonb, jsonb, boolean, date, text);
+drop function if exists public.school_roster_upsert(text, text, integer, jsonb, jsonb, jsonb, boolean, date, text);
 
 -- p_theme follows p_players' contract: null keeps what is stored, an empty
 -- object clears it, an object with a logo sets it. A renewal must not have
@@ -76,7 +81,8 @@ declare
   v_final_players jsonb;
 begin
   if not public.school_admin() then
-    raise exception 'only the seller''s account may write here' using errcode = '42501';
+    raise exception 'this account is not the seller''s and may not touch the paid tier'
+      using errcode = '42501';
   end if;
 
   perform public.school_roster_check_players(p_players);
@@ -132,7 +138,7 @@ as $$
            'season',       season,
            'player_count', jsonb_array_length(players),
            'colors',       colors,
-           'has_logo',     (theme ? 'logo'),
+           'has_logo',     coalesce(theme ? 'logo', false),
            'published',    published,
            'paid_through', paid_through,
            'note',         note,
@@ -158,3 +164,10 @@ grant execute on function public.school_roster_fetch(text, text) to anon, authen
 grant execute on function public.school_roster_upsert(text, text, integer, jsonb, jsonb, jsonb, boolean, date, text) to authenticated;
 grant execute on function public.school_roster_delete(text, text, integer) to authenticated;
 grant execute on function public.school_roster_list() to authenticated;
+
+commit;
+
+-- PostgREST caches the function catalog; without this a dropped/recreated
+-- signature (school_roster_upsert above) can 404 until the API restarts on
+-- its own. Harmless if the listener isn't there.
+notify pgrst, 'reload schema';
