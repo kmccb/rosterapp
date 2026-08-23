@@ -105,9 +105,11 @@ writes until the new bundle is live.
    idempotent and guarded.
 
 2. **Wait for the deploy to go green.** The new bundle is now live but the
-   database still holds the old schema. The panel and the fan page both keep
-   working. Users may not see full theming or logos yet — they come when the
-   schema does.
+   database still holds the old schema. The fan page keeps working
+   throughout. The panel does not: the new bundle always sends `p_theme`, so
+   every panel save fails with PGRST202 (a 9-key body against the old
+   8-param function) until 0005 is applied. Don't save from the panel
+   between this step and applying 0005 — keep the window short.
 
 3. **Apply `0005_school_theme.sql` in the Supabase SQL editor.** The upsert
    function signature gains a `p_theme` parameter. If you apply this before
@@ -144,21 +146,33 @@ Once 0005 is applied and the schema reload is done:
 3. **Clearing the logo works.** Send `{"theme": {}}` on the same row. The logo
    should disappear from the list after the save.
 
-4. **Fetch returns theme only when live.** Publish a row with a logo and paid
+4. **The clear holds on a second save.** Re-save that same row with the theme
+   field sent as `null` this time — not `{}`. The logo must stay absent.
+   Null-keeps is symmetric with players: it means "don't touch what's
+   there," and what's there is now nothing.
+
+5. **The size ceiling is enforced.** Upsert the row with a `p_theme` over
+   500 kB. It must be refused with "that logo is too large to store" —
+   the resize path keeps real uploads well under this, so the only way to
+   hit it is a direct, oversized upsert.
+
+6. **Fetch returns theme only when live.** Publish a row with a logo and paid
    through tomorrow. Call `school_roster_fetch` with that slug and sport — it
    should return the theme. Unpublish the same row and call again — it should
    return null (anon sees nothing). Set paid-through to yesterday and call
-   again — null. Fetch is strict: the roster appears to anon only when all
-   three gates close (published, paid, future-dated).
+   again — null. Fetch is strict: the roster appears to anon only when both
+   conditions hold — published, and paid through today or later ("paid" and
+   "future-dated" are the same predicate, not two separate gates).
 
-5. **Upload a real crest and eyeball the fan page.** In the panel, pick a
+7. **Upload a real crest and eyeball the fan page.** In the panel, pick a
    published, paid row with players. Upload an image as the logo (the panel
    resizes it to 720px JPEG). Reload the fan page for that school. Confirm:
    the crest sits behind the scrim at the top; the full page uses the school's
    two colors (background, chrome, surfaces, accent); the three tabs (Lookup,
-   Team, Schedule) render at the top; fixture dates stack as `Aug / 21` (month
-   short form over day) with no overlap at 375px phone width.
+   Team, Schedule) render at the top; fixture dates stack as `AUG / 21`
+   (fixture-month uppercases the short form) over the day, with no overlap
+   at 375px phone width.
 
-6. **The guard line stays green.** Build the app one more time. The Poland
+8. **The guard line stays green.** Build the app one more time. The Poland
    guard in the build log shows the guard row unchanged — Poland's output is
    byte-identical before and after the theming logic added to the oh bundle.
