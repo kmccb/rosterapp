@@ -39,14 +39,38 @@ export const skippedRows = (rows: ParseResult['rows']): SkippedRow[] =>
       return { text: name || raw || '(blank row)', issue: r.issues[0] };
     });
 
-/** Season + playoffs + slack. Next August this defaults right on its own. */
-const defaultPaidThrough = (): string => {
+/**
+ * The football season's own clock: July onward is this year's season, the
+ * rest of the year is still last year's (playoffs run into December,
+ * renewals happen the following spring). Both the default paid-through
+ * date and a new row's season number read this same clock, so a seller who
+ * changes the editable date field can never change which season the row
+ * files under.
+ */
+const currentSeasonYear = (): number => {
   const now = new Date();
-  const seasonYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
-  return `${seasonYear + 1}-02-01`;
+  return now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
 };
 
-const seasonOf = (paidThrough: string): number => Number(paidThrough.slice(0, 4)) - 1;
+/** Season + playoffs + slack. Next August this defaults right on its own. */
+const defaultPaidThrough = (): string => `${currentSeasonYear() + 1}-02-01`;
+
+/** "Today", as the plain ISO date the paid-through field itself uses. */
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
+
+/**
+ * adminApi's signed() throws the bare string "signed-out" for both a dead
+ * token and a network blip that kept freshToken from answering — Manage.tsx
+ * translates that sentinel before showing it, but Activate showed it
+ * verbatim. Same translation here, so a seller mid-paste sees a sentence
+ * instead of an internal token.
+ */
+const friendlyError = (e: unknown): string => {
+  const message = e instanceof Error ? e.message : String(e);
+  return message === 'signed-out'
+    ? 'Signed out, or no signal — sign in again from the Manage screen and retry.'
+    : message;
+};
 
 /**
  * The whole concierge job on one screen: pick the school, paste the
@@ -84,13 +108,22 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const canSave = Boolean(slug) && (players.length > 0 || Boolean(existing));
 
   const save = async (published: boolean) => {
+    // Publishing with a paid-through date already in the past would "succeed"
+    // and then sit dark — the fetch function refuses anything past its date
+    // the instant it is asked. Catch that here, in a sentence, rather than
+    // let the seller discover it from a fan's text later.
+    if (published && paidThrough < todayIso()) {
+      setError('Paid through is already in the past — the page would publish dark. Pick a later date first.');
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
       await upsertRoster({
         slug,
         sport: existing?.sport ?? 'football',
-        season: existing?.season ?? seasonOf(paidThrough),
+        season: existing?.season ?? currentSeasonYear(),
         players: players.length ? players : null,
         colors: { ground, accent },
         published,
@@ -99,7 +132,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
       });
       onDone();
     } catch (e) {
-      setError((e as Error).message);
+      setError(friendlyError(e));
     } finally {
       setBusy(false);
     }
@@ -220,7 +253,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                 if (!confirm(`Delete ${existing.school_slug} ${existing.season} entirely?`)) return;
                 deleteRoster(existing.school_slug, existing.sport, existing.season)
                   .then(onDone)
-                  .catch((e: Error) => setError(e.message));
+                  .catch((e: Error) => setError(friendlyError(e)));
               }}>
               <span className="fixture-team">Delete this roster</span>
             </button>
