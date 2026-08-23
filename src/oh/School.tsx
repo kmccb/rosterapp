@@ -147,16 +147,32 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     setLive(null);
     setSportsSettled(false);
     setSport(null);
-    loadSchoolSports(slug).then((v) => {
-      setLive(v);
-      setSportsSettled(true);
-    });
+    // The catch is belt and braces — loadSchoolSports swallows its own
+    // failures — but the invariant lives in another module and the cost of it
+    // ever being wrong is every school page stuck on "Loading…" forever. A
+    // throw settles as "couldn't ask", which is the football-only fallback.
+    loadSchoolSports(slug)
+      .then((v) => {
+        setLive(v);
+        setSportsSettled(true);
+      })
+      .catch(() => {
+        setLive(null);
+        setSportsSettled(true);
+      });
   }, [slug]);
 
   // In-season sports first, football always present. Recomputed only when the
   // answer changes: the ordering reads the clock, and a tile grid that
   // reshuffled itself on every keystroke elsewhere would be its own bug.
   const tiles = useMemo(() => sortSportsForNow(hubSports(live ?? []), new Date()), [live]);
+
+  // The same normalization hubSports applies to what it draws. A row stored
+  // as "Volleyball " becomes the tile "volleyball", and a tile whose name
+  // can't be found in the raw list is a tile that could never fetch the
+  // roster behind it — a dead tap, forever. Compare like with like. Null
+  // stays null: "couldn't ask" is not an empty list.
+  const liveSports = useMemo(() => live?.map((s) => s.trim().toLowerCase()) ?? null, [live]);
 
   // Which sport the reader lands on. One tile is not a choice — go straight
   // in; that is the whole state of the site today and must stay invisible.
@@ -182,12 +198,26 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // Football is asked for even when the live list is unknown, because that
     // is exactly what the page did before the hub existed. A known-empty list
     // is a different answer: this school sells nothing, so nothing is fetched.
-    if (sport && (live?.includes(sport) ?? sport === 'football')) {
+    if (sport && (liveSports?.includes(sport) ?? sport === 'football')) {
+      // Two taps on a slow connection — volleyball, then basketball — can
+      // land in the order they were asked for or the other one. Without this
+      // flag the loser of that race wins the screen: the tab bar says
+      // basketball while the players, the pasted schedule and the colors are
+      // volleyball's, and it stays that way, because nothing re-renders to
+      // correct it. Only the fetch this effect started may answer it.
+      let current = true;
       loadSchoolRoster(slug, sport)
-        .then(setRoster)
-        .catch(() => setRoster(null));
+        .then((r) => {
+          if (current) setRoster(r);
+        })
+        .catch(() => {
+          if (current) setRoster(null);
+        });
+      return () => {
+        current = false;
+      };
     }
-  }, [slug, sport, live]);
+  }, [slug, sport, liveSports]);
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
   // lives on body::before, outside this component's own tree — so it has to
