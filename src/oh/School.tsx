@@ -33,7 +33,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     return (
       <div className="screen">
         <p className="empty-text">Couldn’t load that school. Try again with a signal.</p>
-        <button type="button" className="fixture-row" onClick={onChange}>
+        <button type="button" className="fixture-row is-plain" onClick={onChange}>
           Pick another school
         </button>
       </div>

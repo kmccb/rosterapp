@@ -34,14 +34,24 @@ export function searchSchools(schools: School[], q: string): School[] {
 }
 
 export const chosenSlug = (): string | null => localStorage.getItem(CHOSEN);
-export const choose = (slug: string): void => localStorage.setItem(CHOSEN, slug);
 
-/** Drop the season kept for whoever was chosen, not just the choice itself. */
-export const forget = (): void => {
-  const slug = chosenSlug();
-  if (slug) localStorage.removeItem(SEASON(slug));
-  localStorage.removeItem(CHOSEN);
+/**
+ * The old school's season is dropped on a genuine switch, not on un-choosing.
+ *
+ * Evicting in forget() read as the tidier place for it and was wrong: the tap
+ * that runs forget() is "follow a different school", which is also what an
+ * offline reader presses — and it was deleting the one file the design
+ * promises survives a dead signal at a ground. Re-picking the same school
+ * keeps its cached season; picking a different one drops the stale key, so
+ * nothing accumulates either way.
+ */
+export const choose = (slug: string): void => {
+  const prev = chosenSlug();
+  if (prev && prev !== slug) localStorage.removeItem(SEASON(prev));
+  localStorage.setItem(CHOSEN, slug);
 };
+
+export const forget = (): void => localStorage.removeItem(CHOSEN);
 
 /** Network first, then whatever was kept — the schedule screen's rule. */
 export async function loadIndex(): Promise<School[]> {
