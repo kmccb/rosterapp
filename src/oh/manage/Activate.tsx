@@ -74,6 +74,22 @@ const friendlyError = (e: unknown): string => {
 };
 
 /**
+ * The theme half of upsertRoster's contract, pulled out of save() so the
+ * three cases can be pinned directly: a fresh upload sends `{logo}`, a
+ * cleared logo sends `{}` (wipe the stored one), and neither sends `null`
+ * (keep whatever is already stored — the renewal case, same contract as
+ * `players`).
+ */
+export function themeArg(
+  logoData: string | null,
+  logoCleared: boolean,
+): { logo: string } | Record<string, never> | null {
+  if (logoData) return { logo: logoData };
+  if (logoCleared) return {};
+  return null;
+}
+
+/**
  * The whole concierge job on one screen: pick the school, paste the
  * spreadsheet, look at what the parser made of it, set the colors and the
  * paid-through date, publish. The parser is the same one the root app has
@@ -158,7 +174,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         season: existing?.season ?? currentSeasonYear(),
         players: players.length ? players : null,
         colors: { ground, accent },
-        theme: logoData ? { logo: logoData } : logoCleared ? {} : null,
+        theme: themeArg(logoData, logoCleared),
         published,
         paidThrough,
         note,
