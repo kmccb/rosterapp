@@ -24,7 +24,7 @@ describe('roster cache plumbing', () => {
   });
 
   it('round-trips a roster and rejects junk', () => {
-    const roster = { season: 2026, players: [], colors: null };
+    const roster = { season: 2026, players: [], colors: null, logo: null };
     expect(parseCached(JSON.stringify(roster))).toEqual(roster);
     expect(parseCached('{"season":"nope"}')).toBeNull();
     expect(parseCached('not json')).toBeNull();
@@ -32,17 +32,40 @@ describe('roster cache plumbing', () => {
   });
 
   it('accepts only well-formed colors, defaulting anything else to no theme', () => {
-    const good = { season: 2026, players: [], colors: { ground: '#04043a', accent: '#4fbaf7' } };
+    const good = { season: 2026, players: [], colors: { ground: '#04043a', accent: '#4fbaf7' }, logo: null };
     expect(parseCached(JSON.stringify(good))).toEqual(good);
 
     // Not hex — a CSS color name would paint fine in a browser but is not
     // the shape the school themed the page with.
-    const notHex = { season: 2026, players: [], colors: { ground: 'blue', accent: '#4fbaf7' } };
+    const notHex = { season: 2026, players: [], colors: { ground: 'blue', accent: '#4fbaf7' }, logo: null };
     expect(parseCached(JSON.stringify(notHex))?.colors).toBeNull();
 
     // Half a colors object — an accent with no ground.
-    const half = { season: 2026, players: [], colors: { ground: '#04043a' } };
+    const half = { season: 2026, players: [], colors: { ground: '#04043a' }, logo: null };
     expect(parseCached(JSON.stringify(half))?.colors).toBeNull();
+  });
+
+  it('accepts a logo only as a data:image/ URI, defaulting anything else to none', () => {
+    const dataUri = 'data:image/jpeg;base64,AAAA';
+    const good = { season: 2026, players: [], colors: null, logo: dataUri };
+    expect(parseCached(JSON.stringify(good))).toEqual(good);
+
+    // A baked path — meaningful to the root app's own build, not to a shared
+    // roster page that has no build of its own to serve it from.
+    const path = { season: 2026, players: [], colors: null, logo: '/victorychristian/badge.jpg' };
+    expect(parseCached(JSON.stringify(path))?.logo).toBeNull();
+
+    // A remote URL — not what an uploaded badge ever produces.
+    const http = { season: 2026, players: [], colors: null, logo: 'https://example.com/badge.jpg' };
+    expect(parseCached(JSON.stringify(http))?.logo).toBeNull();
+
+    // Not a string at all.
+    const junk = { season: 2026, players: [], colors: null, logo: 42 };
+    expect(parseCached(JSON.stringify(junk))?.logo).toBeNull();
+
+    // Missing entirely — an older cache entry written before logo existed.
+    const missing = { season: 2026, players: [] };
+    expect(parseCached(JSON.stringify(missing))?.logo).toBeNull();
   });
 });
 
@@ -71,14 +94,40 @@ describe('loadSchoolRoster', () => {
     mockedRpc.mockResolvedValue(roster);
 
     const got = await loadSchoolRoster('hubbard-hubbard');
-    expect(got).toEqual(roster);
-    expect(localStorageMock.get(cacheKey('hubbard-hubbard'))).toBe(JSON.stringify(roster));
+    expect(got).toEqual({ ...roster, logo: null });
+    expect(localStorageMock.get(cacheKey('hubbard-hubbard'))).toBe(JSON.stringify({ ...roster, logo: null }));
+  });
+
+  it('pulls a data-URI logo out of the fetched theme', async () => {
+    const dataUri = 'data:image/png;base64,BBBB';
+    mockedRpc.mockResolvedValue({
+      season: 2026,
+      players: [],
+      colors: null,
+      theme: { logo: dataUri },
+    });
+
+    const got = await loadSchoolRoster('hubbard-hubbard');
+    expect(got?.logo).toBe(dataUri);
+    expect(JSON.parse(localStorageMock.get(cacheKey('hubbard-hubbard'))!).logo).toBe(dataUri);
+  });
+
+  it('drops a theme logo that is not a data URI', async () => {
+    mockedRpc.mockResolvedValue({
+      season: 2026,
+      players: [],
+      colors: null,
+      theme: { logo: 'https://example.com/badge.jpg' },
+    });
+
+    const got = await loadSchoolRoster('hubbard-hubbard');
+    expect(got?.logo).toBeNull();
   });
 
   it('returns null and clears the stale cache when the function answers null', async () => {
     localStorageMock.set(
       cacheKey('hubbard-hubbard'),
-      JSON.stringify({ season: 2025, players: [], colors: null }),
+      JSON.stringify({ season: 2025, players: [], colors: null, logo: null }),
     );
     mockedRpc.mockResolvedValue(null);
 
@@ -88,11 +137,21 @@ describe('loadSchoolRoster', () => {
   });
 
   it('falls back to the cached copy when the fetch throws', async () => {
-    const cached = { season: 2025, players: [{ id: '2', number: '12' }], colors: null };
+    const cached = { season: 2025, players: [{ id: '2', number: '12' }], colors: null, logo: null };
     localStorageMock.set(cacheKey('hubbard-hubbard'), JSON.stringify(cached));
     mockedRpc.mockRejectedValue(new Error('Network error'));
 
     const got = await loadSchoolRoster('hubbard-hubbard');
     expect(got).toEqual(cached);
+  });
+
+  it('falls back to a cached logo when the fetch throws', async () => {
+    const dataUri = 'data:image/png;base64,CCCC';
+    const cached = { season: 2025, players: [], colors: null, logo: dataUri };
+    localStorageMock.set(cacheKey('hubbard-hubbard'), JSON.stringify(cached));
+    mockedRpc.mockRejectedValue(new Error('Network error'));
+
+    const got = await loadSchoolRoster('hubbard-hubbard');
+    expect(got?.logo).toBe(dataUri);
   });
 });

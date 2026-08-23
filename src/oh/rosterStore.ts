@@ -13,7 +13,22 @@ import { chosenSlug } from './store';
 import { rpc, supaAvailable } from './supa';
 
 export type SchoolColors = { ground: string; accent: string } | null;
-export type SchoolRoster = { season: number; players: Player[]; colors: SchoolColors };
+export type SchoolRoster = {
+  season: number;
+  players: Player[];
+  colors: SchoolColors;
+  /** The school's badge, as a data URI — never a bare path or remote URL. */
+  logo: string | null;
+};
+
+/** What the fetch answers with before it is sanitized: a roster plus a theme
+ * that may or may not carry a usable logo. */
+type RawRosterBody = {
+  season: number;
+  players: Player[];
+  colors: unknown;
+  theme?: { logo?: unknown };
+};
 
 export const cacheKey = (slug: string): string => `oh.roster.${slug}`;
 
@@ -37,13 +52,27 @@ const validColors = (v: unknown): SchoolColors => {
     : null;
 };
 
+/**
+ * A logo is only ever an uploaded badge — a data URI — never a bare path or a
+ * remote URL. Unlike the root app's theme, a shared roster page has no build
+ * of its own to serve a baked badge from, so anything that isn't a data URI
+ * is not a logo this page can use.
+ */
+const validLogo = (v: unknown): string | null =>
+  typeof v === 'string' && v.startsWith('data:image/') ? v : null;
+
 /** Kept strict so a cache written by a future shape cannot crash a screen. */
 export const parseCached = (raw: string | null): SchoolRoster | null => {
   if (!raw) return null;
   try {
     const v = JSON.parse(raw) as Partial<SchoolRoster>;
     return typeof v?.season === 'number' && Array.isArray(v?.players)
-      ? ({ season: v.season, players: v.players, colors: validColors(v.colors) } as SchoolRoster)
+      ? ({
+          season: v.season,
+          players: v.players,
+          colors: validColors(v.colors),
+          logo: validLogo(v.logo),
+        } as SchoolRoster)
       : null;
   } catch {
     return null;
@@ -54,14 +83,19 @@ export async function loadSchoolRoster(slug: string): Promise<SchoolRoster | nul
   if (!supaAvailable) return null;
 
   try {
-    const body = await rpc<SchoolRoster | null>('school_roster_fetch', {
+    const body = await rpc<RawRosterBody | null>('school_roster_fetch', {
       p_slug: slug,
       p_sport: 'football',
     });
     if (body && typeof body.season === 'number' && Array.isArray(body.players)) {
       // Same shape guard as the cache: the network answer gets sanitized
       // before it reaches School.tsx, not just before it reaches localStorage.
-      const clean: SchoolRoster = { season: body.season, players: body.players, colors: validColors(body.colors) };
+      const clean: SchoolRoster = {
+        season: body.season,
+        players: body.players,
+        colors: validColors(body.colors),
+        logo: validLogo(body.theme?.logo),
+      };
       if (slug === chosenSlug()) {
         try {
           localStorage.setItem(cacheKey(slug), JSON.stringify(clean));
