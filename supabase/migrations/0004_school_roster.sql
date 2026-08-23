@@ -13,7 +13,7 @@
 
 create table if not exists public.school_account (
   id          uuid primary key references auth.users (id) on delete cascade,
-  email       text not null,
+  email       text not null unique,
   is_admin    boolean not null default false,
   created_at  timestamptz not null default now()
 );
@@ -23,6 +23,20 @@ comment on table public.school_account is
 
 alter table public.school_account enable row level security;
 revoke all on table public.school_account from anon, authenticated;
+
+-- Added separately too, same reason as school_roster_players_is_array below:
+-- create table if not exists no-ops on a database where school_account
+-- already exists, so a bare inline `unique` above never lands there. This
+-- is what makes adding it safe to run every time regardless.
+do $$
+begin
+  alter table public.school_account
+    add constraint school_account_email_unique
+    unique (email);
+exception
+  when duplicate_object then null;
+end;
+$$;
 
 create table if not exists public.school_roster (
   school_slug   text not null,
@@ -107,7 +121,9 @@ as $$
   where r.school_slug = p_slug
     and r.sport = p_sport
     and r.published
-    and r.paid_through >= current_date
+    -- current_date is UTC on this server, which would go dark on a paid
+    -- school around 8pm Eastern rather than at the end of its actual day.
+    and r.paid_through >= (now() at time zone 'America/New_York')::date
   order by r.season desc
   limit 1;
 $$;
@@ -170,7 +186,8 @@ declare
   v_final_players jsonb;
 begin
   if not public.school_admin() then
-    raise exception 'not allowed';
+    raise exception 'this account is not the seller''s and may not touch the paid tier'
+      using errcode = '42501';
   end if;
 
   perform public.school_roster_check_players(p_players);
@@ -218,7 +235,8 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.school_admin() then
-    raise exception 'not allowed';
+    raise exception 'this account is not the seller''s and may not touch the paid tier'
+      using errcode = '42501';
   end if;
   delete from public.school_roster
   where school_slug = p_slug and sport = p_sport and season = p_season;
