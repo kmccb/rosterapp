@@ -36,8 +36,13 @@ export default defineConfig({
          * navigation from the precache. Without this the directory is served
          * Poland's shell — and because bakedTeam() falls back to the root team
          * for an unrecognised path, it would come up wearing Poland's colours.
+         *
+         * Bare /oh is in the pattern because somebody will always type it:
+         * with only /^\/oh\//, the worker answered the slashless form with
+         * Poland's empty-roster screen asking for a share code. Let through
+         * to the network, GitHub Pages redirects /oh to /oh/ itself.
          */
-        navigateFallbackDenylist: [/^\/oh\//],
+        navigateFallbackDenylist: [/^\/oh(\/|$)/],
       },
     }),
   ],

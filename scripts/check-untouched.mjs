@@ -134,11 +134,13 @@ if (urls.some((u) => u.startsWith('oh/'))) {
 /*
  * The pattern, not the word. A bare /denylist/ test passed against a worker
  * whose denylist had been emptied to `[]`, which is the same as having none at
- * all. What ships reads: {denylist:[/^\/oh\//]}
+ * all. What ships reads: {denylist:[/^\/oh(\/|$)/]} — the slashless
+ * alternative included, because the worker once answered a typed /oh with
+ * Poland's empty-roster screen asking for a share code.
  */
-if (!/denylist:\s*\[\s*\/\^\\\/oh\\\/\/\s*\]/.test(sw)) {
+if (!/denylist:\s*\[\s*\/\^\\\/oh\(\\\/\|\$\)\/\s*\]/.test(sw)) {
   problems.push(
-    'the worker has no /^\\/oh\\// in its navigateFallbackDenylist, so it will answer /oh/ with Poland.',
+    'the worker has no /^\\/oh(\\/|$)/ in its navigateFallbackDenylist, so it will answer /oh (or /oh/) with Poland.',
   );
 }
 if (!existsSync(join(root, 'dist/oh/index.html'))) {
