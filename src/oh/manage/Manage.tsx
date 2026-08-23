@@ -121,7 +121,7 @@ export function Manage() {
             onClick={() => setEditing(r)}
           >
             <span className="fixture-team">
-              {r.school_slug} · {r.season}
+              {r.school_slug} · {r.sport} · {r.season}
               <span className="fixture-sub">
                 {r.player_count} players · {state} · paid through {r.paid_through}
                 {r.note && ` · ${r.note}`}
