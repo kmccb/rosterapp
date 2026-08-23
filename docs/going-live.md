@@ -118,8 +118,8 @@ writes until the new bundle is live.
 4. **Apply 0005 a second time — it must succeed unchanged.** This proves
    idempotency. The file carries both the old and new `drop function` lines
    for `school_roster_upsert`, so a re-run cleanly drops both signatures
-   before recreate, and both overloads of `school_roster_list` remain present.
-   If it errors, something in the migration is not actually idempotent.
+   before recreate. If it errors, something in the migration is not actually
+   idempotent.
 
 5. **If the panel then reports "Could not find the function", reload the
    schema cache.** In Supabase, go to Settings → API → Reload Schema. The
@@ -156,8 +156,8 @@ Once 0005 is applied and the schema reload is done:
    resizes it to 720px JPEG). Reload the fan page for that school. Confirm:
    the crest sits behind the scrim at the top; the full page uses the school's
    two colors (background, chrome, surfaces, accent); the three tabs (Lookup,
-   Team, Schedule) render at the top; fixture dates stack as `MON / 01` with
-   no overlap at 375px phone width.
+   Team, Schedule) render at the top; fixture dates stack as `Aug / 21` (month
+   short form over day) with no overlap at 375px phone width.
 
 6. **The guard line stays green.** Build the app one more time. The Poland
    guard in the build log shows the guard row unchanged — Poland's output is
