@@ -1,4 +1,5 @@
-import { sessionFromUrl } from './adminAuth';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { sessionFromUrl, freshToken, saveSession, loadSession } from './adminAuth';
 
 describe('sessionFromUrl', () => {
   it('reads the tokens a magic link lands with', () => {
@@ -18,5 +19,50 @@ describe('sessionFromUrl', () => {
 
   it('returns nothing when the hash is missing a token', () => {
     expect(sessionFromUrl('https://x/oh/?manage#access_token=AAA&token_type=bearer')).toBeNull();
+  });
+});
+
+describe('freshToken', () => {
+  let localStorageMock: Map<string, string>;
+
+  beforeEach(() => {
+    localStorageMock = new Map();
+    vi.stubGlobal(
+      'localStorage',
+      {
+        getItem: (key: string) => localStorageMock.get(key) ?? null,
+        setItem: (key: string, value: string) => localStorageMock.set(key, value),
+        removeItem: (key: string) => localStorageMock.delete(key),
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('returns null and keeps session on network failure', async () => {
+    const session = { accessToken: 'old', refreshToken: 'refresh_old', expiresAt: Date.now() - 1 };
+    saveSession(session);
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+
+    const token = await freshToken();
+    expect(token).toBeNull();
+    expect(loadSession()).toEqual(session);
+  });
+
+  it('returns null and clears session on bad refresh response', async () => {
+    const session = { accessToken: 'old', refreshToken: 'refresh_old', expiresAt: Date.now() - 1 };
+    saveSession(session);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 401 }),
+    );
+
+    const token = await freshToken();
+    expect(token).toBeNull();
+    expect(loadSession()).toBeNull();
   });
 });

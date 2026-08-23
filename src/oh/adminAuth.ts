@@ -63,6 +63,12 @@ export const clearSession = (): void => localStorage.removeItem(SESSION);
  * A token that will still be alive when the request lands. Refreshed with
  * five minutes to spare rather than at the moment of expiry, because the
  * request this token is for takes time too. Null means signed out.
+ *
+ * Distinguishes between a transient network failure (no answer at all) and a
+ * dead token (the server said so). A network blip returns null without clearing,
+ * so the next attempt with signal retries the same refresh token. A genuine
+ * dead token (400/401) clears the session because the seller is no longer
+ * authenticated.
  */
 export async function freshToken(): Promise<string | null> {
   const s = loadSession();
@@ -75,7 +81,11 @@ export async function freshToken(): Promise<string | null> {
       headers: { 'Content-Type': 'application/json', apikey: supaKey! },
       body: JSON.stringify({ refresh_token: s.refreshToken }),
     });
-    if (!res.ok) throw new Error(String(res.status));
+    if (!res.ok) {
+      // Server answered: the token is dead, the seller is signed out.
+      clearSession();
+      return null;
+    }
     const t = (await res.json()) as {
       access_token: string;
       refresh_token: string;
@@ -89,8 +99,8 @@ export async function freshToken(): Promise<string | null> {
     saveSession(next);
     return next.accessToken;
   } catch {
-    // A dead refresh token is a signed-out seller, not a broken panel.
-    clearSession();
+    // No answer at all — network blip, not a dead token. Retry keeps the
+    // session so the next attempt with signal will try to refresh again.
     return null;
   }
 }
