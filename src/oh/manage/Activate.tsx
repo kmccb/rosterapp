@@ -7,11 +7,37 @@ import { deleteRoster, upsertRoster, type RosterRow } from './adminApi';
 
 /**
  * The parser already builds a full `Player` — id, number, name, position,
- * side, height, weight, grade — on `row.player`; this just lifts it out of
- * the row wrapper (which also carries `issues` and the raw cells) into the
- * exact shape every card component keys on.
+ * side, height, weight, grade — on `row.player`; this lifts it out of the row
+ * wrapper (which also carries `issues` and the raw cells) into the exact
+ * shape every card component keys on.
+ *
+ * A row the parser flagged with an issue (no number, no name, an unreadable
+ * height…) is excluded, not merely noted: this screen is paste-once and
+ * publish, with nobody editing a row in place the way the root app's Import
+ * screen lets a coach do. A hollow player — blank number, blank name —
+ * publishing into a paying customer's roster because the seller didn't
+ * cross-check a count by eye is worse than the seller re-pasting a fixed
+ * line. `skippedRows` below is what tells them which line to fix.
  */
-export const toPlayers = (rows: ParseResult['rows']): Player[] => rows.map((r) => ({ ...r.player }));
+export const toPlayers = (rows: ParseResult['rows']): Player[] =>
+  rows.filter((r) => r.issues.length === 0).map((r) => ({ ...r.player }));
+
+/** One row the paste couldn't turn into a player, and why. */
+export type SkippedRow = { text: string; issue: string };
+
+/**
+ * The rows `toPlayers` left out, in a form the seller can match back to a
+ * line in their paste: best-effort name when the parser found one, the raw
+ * cells otherwise, plus the first (usually only) reason it was skipped.
+ */
+export const skippedRows = (rows: ParseResult['rows']): SkippedRow[] =>
+  rows
+    .filter((r) => r.issues.length > 0)
+    .map((r) => {
+      const name = [r.player.firstName, r.player.lastName].filter(Boolean).join(' ');
+      const raw = r.raw.filter(Boolean).join(' ');
+      return { text: name || raw || '(blank row)', issue: r.issues[0] };
+    });
 
 /** Season + playoffs + slack. Next August this defaults right on its own. */
 const defaultPaidThrough = (): string => {
@@ -46,10 +72,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
 
   const parsed = useMemo(() => (pasted.trim() ? parseRoster(pasted) : null), [pasted]);
   const players = useMemo(() => (parsed ? toPlayers(parsed.rows) : []), [parsed]);
-  const skipped = useMemo(
-    () => (parsed ? parsed.rows.filter((r) => r.issues.length > 0).length : 0),
-    [parsed],
-  );
+  const skipped = useMemo(() => (parsed ? skippedRows(parsed.rows) : []), [parsed]);
   const hits = useMemo(
     () => (slug ? [] : searchSchools(schools, slugQuery).slice(0, 8)),
     [schools, slugQuery, slug],
@@ -133,9 +156,18 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
               <p className="filter-line">
                 <span>
                   {players.length} players read
-                  {skipped > 0 && ` · ${skipped} rows skipped`}
+                  {skipped.length > 0 && ` · ${skipped.length} rows skipped`}
                 </span>
               </p>
+              {skipped.length > 0 && (
+                <div className="mg-skip">
+                  {skipped.map((s, i) => (
+                    <div className="mg-skip-row" key={i}>
+                      {s.text} — {s.issue}
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="mg-review">
                 {players.slice(0, 60).map((p) => (
                   <div className="mg-review-row" key={p.id}>
