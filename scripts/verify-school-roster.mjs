@@ -4,7 +4,10 @@
  * Run by hand after applying 0004 — not in CI, because it needs the real
  * anon key and creates nothing. It asks the public function the questions an
  * attacker would: an unknown school, an unpublished row, an expired row.
- * The write checks assert the anon key is refused outright.
+ * The write checks assert the anon key is refused outright, and the Data
+ * API checks assert both tables — school_roster and school_account, the
+ * higher-value target since it holds the seller's email and is_admin — are
+ * unreachable directly, not just conveniently empty.
  *
  *   node scripts/verify-school-roster.mjs
  *
@@ -60,10 +63,22 @@ check('anon list yields nothing',
   anonList.status >= 400 || (Array.isArray(anonList.body) && anonList.body.length === 0),
   JSON.stringify(anonList));
 
-const rest = await fetch(`${BASE}/rest/v1/school_roster?select=*`, {
-  headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
-});
-check('table is not exposed to the Data API', rest.status >= 400 || (await rest.json()).length === 0,
-  `status ${rest.status}`);
+// A correctly locked-down table refuses the Data API outright — 401 or
+// permission-denied, never 200. A 200 with an empty array is NOT a pass: it
+// means the grant is missing but RLS-with-zero-policies happened to return
+// nothing today, which is one dropped "revoke all" away from returning rows.
+const checkNotExposed = async (table) => {
+  const res = await fetch(`${BASE}/rest/v1/${table}?select=*`, {
+    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+  });
+  const text = await res.text();
+  check(`${table} is not exposed to the Data API`, res.status >= 400,
+    `status ${res.status} — ${text}`);
+};
+
+await checkNotExposed('school_roster');
+// The higher-value target: this table holds the seller's email and the
+// is_admin flag. Same door, same requirement.
+await checkNotExposed('school_account');
 
 process.exit(failed);

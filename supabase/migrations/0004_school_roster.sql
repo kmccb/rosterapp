@@ -28,7 +28,12 @@ create table if not exists public.school_roster (
   school_slug   text not null,
   sport         text not null default 'football',
   season        integer not null,
-  players       jsonb not null default '[]'::jsonb,
+  -- Constrained at the column too, not just in the upsert function: bad data
+  -- landing here by any other route (a future migration, a manual dashboard
+  -- edit) must not be able to make jsonb_array_length() raise in
+  -- school_roster_list() and blank the admin panel for every school at once.
+  players       jsonb not null default '[]'::jsonb
+                  check (jsonb_typeof(players) = 'array'),
   -- { "ground": "#04043a", "accent": "#4fbaf7" } or null for the default look.
   colors        jsonb,
   published     boolean not null default false,
@@ -91,6 +96,37 @@ as $$
   limit 1;
 $$;
 
+-- ---------------------------------------------------------------- guards
+
+-- Unlike shared_roster's roster_check_players, null is a legal input here —
+-- it means "keep what is there" (see school_roster_upsert). Null is passed
+-- straight through; anything else has to actually be a players array, and
+-- capped the same way shared_roster caps one (mirrors 0001's
+-- roster_check_players: 300 players, 200 kB), because this table has no
+-- separate quota to fall back on.
+create or replace function public.school_roster_check_players(p_players jsonb)
+returns void
+language plpgsql
+as $$
+begin
+  if p_players is null then
+    return;
+  end if;
+
+  if jsonb_typeof(p_players) <> 'array' then
+    raise exception 'players must be a JSON array' using errcode = '22023';
+  end if;
+
+  if jsonb_array_length(p_players) > 300 then
+    raise exception 'a roster is capped at 300 players' using errcode = '22023';
+  end if;
+
+  if pg_column_size(p_players) > 200000 then
+    raise exception 'that roster is too large to share' using errcode = '22023';
+  end if;
+end;
+$$;
+
 -- ------------------------------------------------------------------ admin
 
 -- p_players null means "keep what is there" — the common edit is a renewal
@@ -98,6 +134,12 @@ $$;
 -- would turn every renewal into a data-loss hazard. Written as an explicit
 -- update-then-insert rather than ON CONFLICT, because the conflict form's
 -- excluded row would already have had the null coalesced away.
+--
+-- The invariant enforced below, on both branches, is simply: a row may not
+-- end up published with zero players. A season typo during a renewal (2027
+-- for a school whose real row is 2026) must not silently create a new,
+-- published, empty row that outranks the real one by season order and
+-- blanks the public page.
 create or replace function public.school_roster_upsert(
   p_slug text, p_sport text, p_season integer,
   p_players jsonb, p_colors jsonb,
@@ -108,10 +150,14 @@ language plpgsql
 security definer
 set search_path = public, pg_temp
 as $$
+declare
+  v_final_players jsonb;
 begin
   if not public.school_admin() then
     raise exception 'not allowed';
   end if;
+
+  perform public.school_roster_check_players(p_players);
 
   update public.school_roster set
     players      = coalesce(p_players, players),
@@ -120,14 +166,27 @@ begin
     paid_through = p_paid_through,
     note         = p_note,
     updated_at   = now()
-  where school_slug = p_slug and sport = p_sport and season = p_season;
+  where school_slug = p_slug and sport = p_sport and season = p_season
+  returning players into v_final_players;
 
   if not found then
+    v_final_players := coalesce(p_players, '[]'::jsonb);
+
+    if p_published and jsonb_array_length(v_final_players) = 0 then
+      raise exception 'publishing needs players to publish' using errcode = '22023';
+    end if;
+
     insert into public.school_roster
       (school_slug, sport, season, players, colors, published, paid_through, note)
     values
-      (p_slug, p_sport, p_season, coalesce(p_players, '[]'::jsonb), p_colors,
+      (p_slug, p_sport, p_season, v_final_players, p_colors,
        p_published, p_paid_through, p_note);
+  else
+    -- Raising here rolls back the update above too — the row is left exactly
+    -- as it was rather than half-applying a publish that has no players.
+    if p_published and jsonb_array_length(v_final_players) = 0 then
+      raise exception 'publishing needs players to publish' using errcode = '22023';
+    end if;
   end if;
 end;
 $$;
