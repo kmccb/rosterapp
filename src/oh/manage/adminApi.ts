@@ -12,6 +12,7 @@ export type RosterRow = {
   season: number;
   player_count: number;
   colors: { ground: string; accent: string } | null;
+  has_logo: boolean;
   published: boolean;
   paid_through: string;
   note: string;
@@ -34,6 +35,8 @@ export const upsertRoster = async (row: {
   /** null means keep the stored roster — the renewal case. */
   players: unknown[] | null;
   colors: { ground: string; accent: string } | null;
+  /** null keeps the stored theme (renewal case), {} clears it, {logo} sets it. */
+  theme: { logo: string } | Record<string, never> | null;
   published: boolean;
   paidThrough: string;
   note: string;
@@ -46,6 +49,7 @@ export const upsertRoster = async (row: {
       p_season: row.season,
       p_players: row.players,
       p_colors: row.colors,
+      p_theme: row.theme,
       p_published: row.published,
       p_paid_through: row.paidThrough,
       p_note: row.note,

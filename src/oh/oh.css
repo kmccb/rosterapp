@@ -108,6 +108,62 @@
   font-size: 14px;
 }
 
+.mg-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.mg-logo-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+
+/* The live look preview: a mini next-card mock styled with the pickers'
+   current colors via inline custom properties, so the seller can see the
+   derived palette without leaving this screen. */
+.mg-preview {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.mg-preview-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.mg-preview-swatch {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.mg-preview-surface {
+  background: var(--surface-2);
+}
+
+.mg-preview-accent {
+  background: var(--accent);
+}
+
+.mg-preview-text {
+  color: var(--text);
+  font-weight: 700;
+}
+
 /* Prose page. The app's classes are built for rows; this one needs headings
    and paragraphs to breathe. */
 .oh-privacy h2 {
