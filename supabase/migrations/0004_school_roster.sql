@@ -28,12 +28,13 @@ create table if not exists public.school_roster (
   school_slug   text not null,
   sport         text not null default 'football',
   season        integer not null,
-  -- Constrained at the column too, not just in the upsert function: bad data
-  -- landing here by any other route (a future migration, a manual dashboard
-  -- edit) must not be able to make jsonb_array_length() raise in
-  -- school_roster_list() and blank the admin panel for every school at once.
-  players       jsonb not null default '[]'::jsonb
-                  check (jsonb_typeof(players) = 'array'),
+  -- Bad data landing in this column by any route — a future migration, a
+  -- manual dashboard edit — must not be able to make jsonb_array_length()
+  -- raise in school_roster_list() and blank the admin panel for every
+  -- school at once. Constrained below, not inline here: a check added
+  -- inside create table if not exists is silently skipped on a database
+  -- where the table already exists, and this file has to be safe to re-run.
+  players       jsonb not null default '[]'::jsonb,
   -- { "ground": "#04043a", "accent": "#4fbaf7" } or null for the default look.
   colors        jsonb,
   published     boolean not null default false,
@@ -51,6 +52,21 @@ comment on table public.school_roster is
 
 alter table public.school_roster enable row level security;
 revoke all on table public.school_roster from anon, authenticated;
+
+-- Added separately, not as an inline column check, because create table if
+-- not exists no-ops on a database where school_roster already exists — an
+-- inline check would then silently never land. duplicate_object is the
+-- exception Postgres raises for an add constraint whose name already
+-- exists, which is what makes this safe to run every time.
+do $$
+begin
+  alter table public.school_roster
+    add constraint school_roster_players_is_array
+    check (jsonb_typeof(players) = 'array');
+exception
+  when duplicate_object then null;
+end;
+$$;
 
 -- ---------------------------------------------------------------- helpers
 

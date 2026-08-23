@@ -35,9 +35,19 @@ const rpc = async (fn, body) => {
 };
 
 let failed = 0;
+let total = 0;
+// A catastrophic failure (the table actually exposed) puts real data in
+// `detail` — minors' names, the seller's email. Truncated so a bad run
+// can't turn this script's own output into the second leak.
 const check = (name, ok, detail) => {
-  console.log(`  ${ok ? 'ok ' : 'FAIL'} ${name}${ok ? '' : ` — ${detail}`}`);
-  if (!ok) failed = 1;
+  total += 1;
+  if (ok) {
+    console.log(`  ok  ${name}`);
+    return;
+  }
+  failed = 1;
+  const trimmed = detail.length > 200 ? `${detail.slice(0, 200)}…` : detail;
+  console.log(`  FAIL ${name} — ${trimmed}`);
 };
 
 const fetchUnknown = await rpc('school_roster_fetch', {
@@ -81,4 +91,7 @@ await checkNotExposed('school_roster');
 // is_admin flag. Same door, same requirement.
 await checkNotExposed('school_account');
 
+// A fixed count here so the runbook's "expected N ok lines" can't drift out
+// of sync with this file — the script states its own total instead.
+console.log(`\n${total} checks, ${failed ? 'not all ok — see FAIL above' : 'all ok'}`);
 process.exit(failed);
