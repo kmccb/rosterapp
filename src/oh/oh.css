@@ -15,3 +15,113 @@
 .fixture-row.is-plain {
   display: block;
 }
+
+/* A paid school's two colors. The accent recolors what the accent already
+   colors; the ground becomes a band behind the school's name rather than
+   the page background, because the page's text contrast is tuned for the
+   default ground and an arbitrary one would break it. */
+/* The Lookup/Team seg and its content, sitting between the school head and
+   the season. The seg alone reads fine flush against either neighbor, but
+   the two together need the same breathing room the rest of the screen
+   gets between sections. */
+.oh-roster {
+  margin: 14px 0;
+}
+
+.oh-roster .seg {
+  margin-bottom: 12px;
+}
+
+/* The keypad's readout. Nothing on this screen shows what's been tapped
+   except this line, so it has to carry the same weight ../styles.css gives
+   its own big digit display, `.empty-number` — large, bold, steady — rather
+   than sit there as plain paragraph text underneath a segmented control. */
+.oh-query {
+  min-height: 1em;
+  margin: 4px 0 12px;
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.oh-school-head {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--school-band, transparent);
+}
+
+/* ------------------------------------------------------------- manage */
+
+/* The seller's screens. Plain and dense on purpose — one person uses these,
+   on a phone, often standing next to the person paying. */
+.mg-paste {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.mg-review {
+  max-height: 40vh;
+  overflow-y: auto;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+/* Rows the paste couldn't turn into a player — shown so the seller can fix
+   the source line, not chase a headcount mismatch by eye. */
+.mg-skip {
+  margin-top: 6px;
+}
+
+.mg-skip-row {
+  padding: 2px 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mg-review-row {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mg-colors {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.mg-colors label,
+.mg-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Prose page. The app's classes are built for rows; this one needs headings
+   and paragraphs to breathe. */
+.oh-privacy h2 {
+  margin: 18px 0 4px;
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.oh-privacy p {
+  margin: 6px 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.oh-privacy a {
+  color: var(--accent);
+}

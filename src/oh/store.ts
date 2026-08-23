@@ -47,7 +47,13 @@ export const chosenSlug = (): string | null => localStorage.getItem(CHOSEN);
  */
 export const choose = (slug: string): void => {
   const prev = chosenSlug();
-  if (prev && prev !== slug) localStorage.removeItem(SEASON(prev));
+  if (prev && prev !== slug) {
+    localStorage.removeItem(SEASON(prev));
+    // The roster obeys the same rule as the season: kept for the followed
+    // school, dropped on a genuine switch. Key inlined rather than imported
+    // from rosterStore, which imports chosenSlug from here.
+    localStorage.removeItem(`oh.roster.${prev}`);
+  }
   localStorage.setItem(CHOSEN, slug);
 };
 

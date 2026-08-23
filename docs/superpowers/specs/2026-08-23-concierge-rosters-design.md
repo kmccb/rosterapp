@@ -129,7 +129,9 @@ The school screen in `/oh/` asks `school_roster_fetch(slug, 'football')` alongsi
 already loads. When a live roster comes back:
 
 - The Lookup keypad and Team list appear as tabs on the school's page, reusing the root app's
-  components (`Keypad`, `PlayerRow`, the filter logic in `src/roster/filters.ts`).
+  `Keypad` and prefix matching. The Team list is the whole squad by number; the root app's
+  area/position filters are deliberately not carried over — a paid page's first version answers
+  "who is #17" and "who's on the team", and filters can follow when a school asks.
 - The school's two colors are applied as CSS variables scoped to the page.
 - The roster is cached in localStorage beside the season, so it survives a dead signal at the
   ground — the same offline rule, and the same eviction rule: kept for the followed school only.
