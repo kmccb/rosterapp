@@ -107,3 +107,21 @@
   color: var(--muted);
   font-size: 14px;
 }
+
+/* Prose page. The app's classes are built for rows; this one needs headings
+   and paragraphs to breathe. */
+.oh-privacy h2 {
+  margin: 18px 0 4px;
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.oh-privacy p {
+  margin: 6px 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.oh-privacy a {
+  color: var(--accent);
+}
