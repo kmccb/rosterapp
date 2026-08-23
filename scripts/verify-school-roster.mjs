@@ -57,9 +57,14 @@ const fetchUnknown = await rpc('school_roster_fetch', {
 check('unknown school returns nothing', fetchUnknown.status === 200 && fetchUnknown.body === null,
   JSON.stringify(fetchUnknown));
 
+const sportsUnknown = await rpc('school_roster_sports', { p_slug: 'no-such-school-nowhere' });
+check('unknown school has no sports',
+  sportsUnknown.status === 200 && Array.isArray(sportsUnknown.body) && sportsUnknown.body.length === 0,
+  JSON.stringify(sportsUnknown));
+
 const anonUpsert = await rpc('school_roster_upsert', {
   p_slug: 'x', p_sport: 'football', p_season: 2026, p_players: [], p_colors: null,
-  p_theme: null, p_published: false, p_paid_through: '2027-02-01', p_note: '',
+  p_theme: null, p_schedule: null, p_published: false, p_paid_through: '2027-02-01', p_note: '',
 });
 check('anon cannot upsert', anonUpsert.status >= 400, JSON.stringify(anonUpsert));
 

@@ -176,3 +176,12 @@ Once 0005 is applied and the schema reload is done:
 8. **The guard line stays green.** Build the app one more time. The Poland
    guard in the build log shows the guard row unchanged — Poland's output is
    byte-identical before and after the theming logic added to the oh bundle.
+
+## v3: the all-sports hub
+
+`0006_all_sports.sql` adds a `schedule` column and the `school_roster_sports`
+door. It follows the same signature-change ordering as 0005: merge and push,
+wait for the deploy to go green, then apply the migration — the new bundle
+always sends `p_schedule`, so the old 9-param upsert would reject it until
+0006 is applied. After applying, run `node scripts/verify-school-roster.mjs`
+(now 7 checks) and re-apply 0006 a second time to prove apply-twice.
