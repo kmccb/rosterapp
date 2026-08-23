@@ -179,7 +179,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
       <p className="filter-line">
         <span>
-          <a href="/oh/?privacy">What this site knows, and doesn't</a>
+          <a href="/oh/?privacy">What this site knows, and doesn&rsquo;t</a>
         </span>
       </p>
     </div>

@@ -1,22 +1,22 @@
 /**
- * The plain-language version of the design's privacy stance. This is the
- * page a parent, a coach, or a district's lawyer reads, so it says what is
+ * The plain-language version of the design&rsquo;s privacy stance. This is the
+ * page a parent, a coach, or a district&rsquo;s lawyer reads, so it says what is
  * true in sentences rather than clauses.
  */
 export function Privacy() {
   return (
     <div className="screen oh-privacy">
-      <h1 className="next-card-opponent">What this site knows, and doesn't</h1>
+      <h1 className="next-card-opponent">What this site knows, and doesn&rsquo;t</h1>
 
       <h2>Schedules and scores</h2>
       <p>
-        Every school's schedule and scores come from publicly published results. Nothing about
+        Every school&rsquo;s schedule and scores come from publicly published results. Nothing about
         any student is involved.
       </p>
 
       <h2>Rosters</h2>
       <p>
-        A roster appears here only when the school's athletic program asked for it and paid for
+        A roster appears here only when the school&rsquo;s athletic program asked for it and paid for
         it, and a person reviewed and published it — payment alone publishes nothing. It carries
         what the paper roster handed out at a game carries: jersey number, name, position,
         height, weight, and year in school. No photographs.
