@@ -9,6 +9,7 @@
  */
 
 import type { Player } from '../types';
+import type { ScheduleRow } from './scheduleParse';
 import { chosenSlug } from './store';
 import { rpc, supaAvailable } from './supa';
 
@@ -19,6 +20,7 @@ export type SchoolRoster = {
   colors: SchoolColors;
   /** The school's badge, as a data URI — never a bare path or remote URL. */
   logo: string | null;
+  schedule: ScheduleRow[] | null;
 };
 
 /** What the fetch answers with before it is sanitized: a roster plus a theme
@@ -28,9 +30,10 @@ type RawRosterBody = {
   players: Player[];
   colors: unknown;
   theme?: { logo?: unknown };
+  schedule?: unknown;
 };
 
-export const cacheKey = (slug: string): string => `oh.roster.${slug}`;
+export const cacheKey = (slug: string, sport: string): string => `oh.roster.${slug}.${sport}`;
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -76,6 +79,39 @@ const LOGO_DATA_URI = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={
 const validLogo = (v: unknown): string | null =>
   typeof v === 'string' && LOGO_DATA_URI.test(v) ? v : null;
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * All rows well-formed or no schedule at all — the colors rule. Half a
+ * schedule rendered as if it were whole would misinform quietly, which is
+ * worse than the tab simply not appearing.
+ */
+const validSchedule = (v: unknown): ScheduleRow[] | null => {
+  if (!Array.isArray(v) || v.length === 0) return null;
+  const rows: ScheduleRow[] = [];
+  for (const item of v) {
+    if (typeof item !== 'object' || item === null) return null;
+    const r = item as Record<string, unknown>;
+    if (typeof r.date !== 'string' || !ISO_DATE.test(r.date)) return null;
+    if (typeof r.opponent !== 'string' || !r.opponent.trim()) return null;
+    if (typeof r.home !== 'boolean') return null;
+    const row: ScheduleRow = { date: r.date, opponent: r.opponent, home: r.home };
+    if (r.time !== undefined) {
+      if (typeof r.time !== 'string') return null;
+      row.time = r.time;
+    }
+    if (r.score !== undefined) {
+      const s = r.score as Record<string, unknown>;
+      if (typeof s !== 'object' || s === null) return null;
+      if (typeof s.us !== 'number' || typeof s.them !== 'number'
+          || !Number.isFinite(s.us) || !Number.isFinite(s.them)) return null;
+      row.score = { us: s.us, them: s.them };
+    }
+    rows.push(row);
+  }
+  return rows;
+};
+
 /** Kept strict so a cache written by a future shape cannot crash a screen. */
 export const parseCached = (raw: string | null): SchoolRoster | null => {
   if (!raw) return null;
@@ -87,6 +123,7 @@ export const parseCached = (raw: string | null): SchoolRoster | null => {
           players: v.players,
           colors: validColors(v.colors),
           logo: validLogo(v.logo),
+          schedule: validSchedule(v.schedule),
         } as SchoolRoster)
       : null;
   } catch {
@@ -94,13 +131,13 @@ export const parseCached = (raw: string | null): SchoolRoster | null => {
   }
 };
 
-export async function loadSchoolRoster(slug: string): Promise<SchoolRoster | null> {
+export async function loadSchoolRoster(slug: string, sport: string): Promise<SchoolRoster | null> {
   if (!supaAvailable) return null;
 
   try {
     const body = await rpc<RawRosterBody | null>('school_roster_fetch', {
       p_slug: slug,
-      p_sport: 'football',
+      p_sport: sport,
     });
     if (body && typeof body.season === 'number' && Array.isArray(body.players)) {
       // Same shape guard as the cache: the network answer gets sanitized
@@ -110,10 +147,11 @@ export async function loadSchoolRoster(slug: string): Promise<SchoolRoster | nul
         players: body.players,
         colors: validColors(body.colors),
         logo: validLogo(body.theme?.logo),
+        schedule: validSchedule(body.schedule),
       };
       if (slug === chosenSlug()) {
         try {
-          localStorage.setItem(cacheKey(slug), JSON.stringify(clean));
+          localStorage.setItem(cacheKey(slug, sport), JSON.stringify(clean));
         } catch {
           // A full jar must not fail the fetch that succeeded.
         }
@@ -122,12 +160,48 @@ export async function loadSchoolRoster(slug: string): Promise<SchoolRoster | nul
     }
     // The function answered null: no live roster. Clear a stale cache so an
     // expired school goes dark on phones too, not just on the server.
-    if (slug === chosenSlug()) localStorage.removeItem(cacheKey(slug));
+    if (slug === chosenSlug()) localStorage.removeItem(cacheKey(slug, sport));
     return null;
   } catch {
     // No signal — the kept copy is the point of keeping one.
-    return parseCached(localStorage.getItem(cacheKey(slug)));
+    return parseCached(localStorage.getItem(cacheKey(slug, sport)));
   }
 }
 
-export const evictRosterCache = (slug: string): void => localStorage.removeItem(cacheKey(slug));
+const sportsKey = (slug: string): string => `oh.livesports.${slug}`;
+
+/**
+ * Which sports this school has live. [] is a real answer — no paid sports;
+ * null means the question couldn't be asked (no signal and no kept copy, or
+ * a deploy running ahead of migration 0006), and the caller falls back to
+ * behaving as the football-only site it was.
+ */
+export async function loadSchoolSports(slug: string): Promise<string[] | null> {
+  const kept = (): string[] | null => {
+    try {
+      const raw = localStorage.getItem(sportsKey(slug));
+      const v = raw ? (JSON.parse(raw) as unknown) : null;
+      return Array.isArray(v) && v.every((s) => typeof s === 'string') ? (v as string[]) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  if (!supaAvailable) return null;
+  try {
+    const body = await rpc<unknown>('school_roster_sports', { p_slug: slug });
+    if (Array.isArray(body) && body.every((s) => typeof s === 'string')) {
+      if (slug === chosenSlug()) {
+        try {
+          localStorage.setItem(sportsKey(slug), JSON.stringify(body));
+        } catch {
+          // A full jar must not fail the fetch that succeeded.
+        }
+      }
+      return body as string[];
+    }
+    return null;
+  } catch {
+    return kept();
+  }
+}

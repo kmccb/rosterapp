@@ -55,7 +55,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // block the season above it. That's the one thing every school gets.
     setRoster(null);
     setTab('lookup');
-    loadSchoolRoster(slug)
+    loadSchoolRoster(slug, 'football')
       .then(setRoster)
       .catch(() => setRoster(null));
   }, [slug]);
