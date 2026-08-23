@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { LookupTab, TeamTab } from './RosterTabs';
 import { loadSchoolRoster, type SchoolRoster } from './rosterStore';
@@ -94,15 +94,6 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const played = season.games.filter((g) => g.result);
   const coming = season.games.filter((g) => !g.result);
 
-  // A paid school's two colors, scoped to this screen. The ground becomes a
-  // band behind the school's name rather than the page background, because
-  // the page's text contrast is tuned for the default ground and an
-  // arbitrary one would break it. The accent itself is no longer set here:
-  // applyLook already put it on document.documentElement above.
-  const themed = roster?.colors
-    ? ({ '--school-band': roster.colors.ground } as CSSProperties)
-    : undefined;
-
   const schedule = (
     <>
       {coming.length > 0 && (
@@ -164,7 +155,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   );
 
   return (
-    <div className="screen" style={themed}>
+    <div className="screen">
       <div className="oh-school-head">
         {roster?.logo ? (
           <div className="oh-school-head-row">
