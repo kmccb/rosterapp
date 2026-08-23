@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "node scripts/build-teams.mjs --pre && tsc --noEmit && vite build && node scripts/build-teams.mjs --post",
+    "build": "node scripts/build-teams.mjs --pre && tsc --noEmit && vite build && vite build --config vite.oh.config.ts && node scripts/build-teams.mjs --post && node scripts/check-untouched.mjs",
     "preview": "vite preview --host",
     "test": "vitest run",
     "test:watch": "vitest",
-    "icons": "node scripts/build-teams.mjs --pre"
+    "icons": "node scripts/build-teams.mjs --pre",
+    "directory": "node scripts/build-directory.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

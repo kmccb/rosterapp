@@ -18,6 +18,26 @@ export default defineConfig({
         // missing with no signal, which is the one condition the app exists to
         // survive — the wallpaper and then the schedule were each lost that way.
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff2,json,webmanifest}'],
+        /*
+         * The state is not part of anybody's home screen app. Seven hundred
+         * school files match the json pattern above and would otherwise be
+         * downloaded onto every installed phone the next time the worker
+         * updated.
+         *
+         * The whole of oh/ is excluded rather than just its data, because the
+         * directory's page and bundle are no more Poland's business than its
+         * data is. They are built after this manifest is written, so they are
+         * out of reach anyway — this is what keeps that true if the build order
+         * ever changes.
+         */
+        globIgnores: ['**/oh/**'],
+        /*
+         * The fallback is bound to Poland's index.html and answers every
+         * navigation from the precache. Without this the directory is served
+         * Poland's shell — and because bakedTeam() falls back to the root team
+         * for an unrecognised path, it would come up wearing Poland's colours.
+         */
+        navigateFallbackDenylist: [/^\/oh\//],
       },
     }),
   ],

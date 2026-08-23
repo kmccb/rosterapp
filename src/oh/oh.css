@@ -1,0 +1,17 @@
+/*
+ * Rules for the /oh/ directory only — never imported by src/main.tsx.
+ *
+ * ../styles.css is shared with Poland's own screens, and the Poland
+ * regression guard hashes their built pages byte for byte. A rule added
+ * there, however harmless, changes the shared stylesheet's build output and
+ * trips that guard on every team page, not just this one. Anything that is
+ * true only for the directory belongs here instead.
+ */
+
+/* Some fixture-row usages carry one label — a search hit, "Follow a
+   different school" — not a fixture's date/team/result. ../styles.css puts
+   a lone child in the row's 56px date column, where it clips against the
+   row's real width. Block layout lets the label use the whole row instead. */
+.fixture-row.is-plain {
+  display: block;
+}
