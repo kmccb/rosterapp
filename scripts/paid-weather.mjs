@@ -144,8 +144,29 @@ try {
   } else if (!Object.keys(forecasts).length && paid.length && Object.keys(kept).length) {
     console.warn('  ! nothing came back — keeping the forecasts already committed.');
   } else {
-    await writeFile(weatherFile, `${JSON.stringify(forecasts)}\n`);
+    /*
+     * And a school that failed on its own keeps the forecast it had.
+     *
+     * The guard above only catches an outage that took everybody down at once.
+     * Two schools answering and a third timing out is far likelier, and writing
+     * only what this run learned would strip the line off that third page for
+     * six hours over one bad request. So the file starts as what is already
+     * committed and this run is written over the top of it — restricted to the
+     * schools still on the paid list, because a school that stopped paying
+     * should lose its line and would otherwise be carried forward for ever.
+     *
+     * Nothing here can go stale on screen: every entry names the fixture date
+     * it is for, and the page draws a forecast on the fixture that names the
+     * same day and on no other.
+     */
+    const out = {};
+    for (const slug of paid) if (kept[slug]) out[slug] = kept[slug];
+    Object.assign(out, forecasts);
+
+    await writeFile(weatherFile, `${JSON.stringify(out)}\n`);
     console.log(`weather.json: ${Object.keys(forecasts).length} of ${paid.length} paid schools.`);
+    const carried = Object.keys(out).length - Object.keys(forecasts).length;
+    if (carried) console.log(`  · ${carried} kept from an earlier run.`);
   }
 } catch (err) {
   // The whole pass failing is still not a reason to fail a deploy. Poland's
