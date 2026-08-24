@@ -56,6 +56,25 @@ school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. Pricing for the
 all-sports package isn't set yet.
 
+### The conference
+
+On a football activation, ask which conference the school plays in and who
+else is in it — that's the whole input the League tab's standings run on;
+everything else (who played whom, who won) already lives in the directory
+data. Type the conference name and pick the member schools in the panel.
+
+Re-picking members **replaces** the stored list, it doesn't add to it — the
+panel has no way to show what's already saved, so treat every save here as
+the full roster of the conference, not an addition to it. Leaving the
+picker empty and saving clears the league instead, and the tab disappears
+from that school's fan page.
+
+### Colors and crest are effectively a set
+
+Pick both at activation if you can. A crest with no colors dresses the
+header but leaves the rest of the page unthemed — the two want to arrive
+together, not one now and the other at renewal.
+
 ## Mid-season changes
 
 Text arrives: "#7 is now #12." Open the school in the panel, paste the
