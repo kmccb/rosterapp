@@ -99,11 +99,10 @@
 
 /*
  * The Lookup tab, in the arrangement src/screens/Lookup.tsx uses: the column
- * is .lookup, the keys are its last child at `flex: none`, and what is above
- * them scrolls. The one difference is that LookupTab hands over a flat run of
- * children — readout, hits, "nobody wears that" — rather than a single
- * .results box to make the scroller out of, so these rules name the parts
- * instead. The side padding is .screen's, since the column replaces it.
+ * is .lookup, the keys are its last child at `flex: none`, and one box between
+ * them takes the rest and scrolls. That box is .oh-lookup-body rather than
+ * .results because .results carries padding of its own, which would inset the
+ * hits twice inside a column that already has the screen's side padding.
  */
 .oh-lookup {
   padding: 0 var(--screen-pad, 14px);
@@ -114,13 +113,26 @@
   flex: none;
 }
 
-/* The hits are the only part with height to give up, so they are the part
-   that scrolls: one player or twenty-two, the keys do not move. */
-.oh-lookup > .rows {
-  flex: 0 1 auto;
+/* Everything between the readout and the keys: the hits, the "nobody wears
+   that" line, and the footer rows. It takes all the height the readout and the
+   pad leave, and it is the only part that scrolls — one player or twenty-two,
+   the keys do not move. */
+.oh-lookup > .oh-lookup-body {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The way out of the school, and the privacy notice. They belong at the foot
+   of what is on screen rather than floating under a single search hit, so with
+   room to spare they take it; with the hits overflowing, the auto margin
+   collapses and they sit where they always would, after the last row. */
+.oh-lookup-foot {
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .oh-lookup > .keypad {

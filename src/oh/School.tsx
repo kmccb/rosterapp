@@ -519,13 +519,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * exactly the pieces that column expects, so the arrangement is
            * the same one Poland's Lookup screen has always used.
            *
-           * The footer rows are the price. They live below the active tab,
-           * and below the keys there is nothing: the pad owns the bottom of
-           * the screen now. They stay one tap away on Team and Schedule,
-           * which is where Poland keeps its own way out too.
+           * The footer rows go *inside* the tab rather than under it, because
+           * below the keys there is nothing — the pad owns the bottom of the
+           * screen now. Poland has no footer on its own Lookup screen and does
+           * not need one, but this is a public page and Lookup is where every
+           * paid school lands, so the privacy notice has to stay reachable
+           * without first tapping through to another tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} />
+            <LookupTab players={roster.players} footer={footer} />
           </div>
         ) : (
           <div className="screen">
