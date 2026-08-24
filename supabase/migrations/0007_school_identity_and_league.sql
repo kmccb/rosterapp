@@ -44,8 +44,20 @@ begin
   if coalesce(jsonb_typeof(p_league->'name'), 'missing') <> 'string' then
     raise exception 'a league needs a name' using errcode = '22023';
   end if;
+  -- A blank name and an empty membership are both shapes the page refuses to
+  -- draw: rosterStore's validLeague reads either as no league at all. Stored,
+  -- they would be the worst kind of wrong — the panel would report a
+  -- conference set, every fan page would quietly show no League tab, and
+  -- nothing anywhere would have raised. The database refuses what the page
+  -- cannot use.
+  if btrim(p_league->>'name') = '' then
+    raise exception 'a league needs a name with something in it' using errcode = '22023';
+  end if;
   if coalesce(jsonb_typeof(p_league->'members'), 'missing') <> 'array' then
     raise exception 'a league needs a members array' using errcode = '22023';
+  end if;
+  if jsonb_array_length(p_league->'members') = 0 then
+    raise exception 'a league needs at least one member school' using errcode = '22023';
   end if;
   if jsonb_array_length(p_league->'members') > 40 then
     raise exception 'that is more schools than a conference has' using errcode = '22023';
