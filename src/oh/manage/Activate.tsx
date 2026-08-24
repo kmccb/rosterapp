@@ -249,7 +249,13 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
         schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
-        league: leagueArg(leagueName, leagueMembers, leagueCleared),
+        // Gated on the same sport the section is, or a seller who fills the
+        // conference in and then switches the Sport select on a new row
+        // stores a league nothing will ever render — the fan side draws it
+        // for football only. Invisible dead data is worse than none.
+        league: effectiveSport === 'football'
+          ? leagueArg(leagueName, leagueMembers, leagueCleared)
+          : null,
         published,
         paidThrough,
         note,

@@ -9,11 +9,13 @@
  */
 
 import type { School, SchoolSeason } from '../ohio/stateModel';
+import type { LeagueRow } from './leagueTable';
 
 const CHOSEN = 'oh.school';
 const INDEX = 'oh.index';
 const SEASON = (slug: string) => `oh.season.${slug}`;
 const SPORT = (slug: string) => `oh.sport.${slug}`;
+const LEAGUE = (slug: string) => `oh.league.${slug}`;
 
 /** Punctuation and case are noise when somebody is typing at a game. */
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -63,6 +65,7 @@ export const choose = (slug: string): void => {
     }
     localStorage.removeItem(`oh.livesports.${prev}`);
     localStorage.removeItem(SPORT(prev));
+    localStorage.removeItem(LEAGUE(prev));
   }
   localStorage.setItem(CHOSEN, slug);
 };
@@ -76,6 +79,55 @@ export const chosenSport = (slug: string): string | null => localStorage.getItem
 export const rememberSport = (slug: string, sport: string | null): void => {
   if (sport) localStorage.setItem(SPORT(slug), sport);
   else localStorage.removeItem(SPORT(slug));
+};
+
+/*
+ * The League tab's kept copy.
+ *
+ * The tab is built from nine or ten other schools' seasons, and loadSeason
+ * keeps a copy of exactly one school — the followed one, because caching every
+ * school anybody browsed would fill the jar with counties nobody reopens. So
+ * the member seasons are network-only, and at a ground with no signal the tab
+ * would resolve one season and say the conference hadn't reported, while every
+ * other tab served happily from cache. That is the one place this app is not
+ * allowed to fail.
+ *
+ * What is kept is the computed table rather than the seasons behind it: it is
+ * a kilobyte instead of thirty, and it is exactly what the tab draws. Stored
+ * for the followed school only, on the same rule as the season above it, and
+ * stamped with the member list it was computed from so that a conference the
+ * seller has since changed cannot be served under the new one's name.
+ */
+const isLeagueRow = (v: unknown): v is LeagueRow => {
+  if (typeof v !== 'object' || v === null) return false;
+  const r = v as Record<string, unknown>;
+  if (typeof r.slug !== 'string' || typeof r.name !== 'string') return false;
+  return (['leagueWon', 'leagueLost', 'overallWon', 'overallLost'] as const).every(
+    (k) => typeof r[k] === 'number' && Number.isFinite(r[k]),
+  );
+};
+
+/** The kept table, or null — for a different conference, or for junk. */
+export const keptLeagueTable = (slug: string, members: string): LeagueRow[] | null => {
+  if (!members) return null;
+  try {
+    const raw = localStorage.getItem(LEAGUE(slug));
+    if (!raw) return null;
+    const kept = JSON.parse(raw) as { members?: unknown; rows?: unknown };
+    if (kept?.members !== members) return null;
+    return Array.isArray(kept.rows) && kept.rows.every(isLeagueRow) ? (kept.rows as LeagueRow[]) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const rememberLeagueTable = (slug: string, members: string, rows: LeagueRow[]): void => {
+  if (slug !== chosenSlug()) return;
+  try {
+    localStorage.setItem(LEAGUE(slug), JSON.stringify({ members, rows }));
+  } catch {
+    // A full jar must not fail the fetch that already succeeded.
+  }
 };
 
 /** Network first, then whatever was kept — the schedule screen's rule. */

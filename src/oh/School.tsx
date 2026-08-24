@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
-import { leagueTable } from './leagueTable';
+import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
   keptSchoolSports,
@@ -12,7 +12,13 @@ import {
 import type { ScheduleRow } from './scheduleParse';
 import { applyLook, clearLook } from './look';
 import { hubSports, inSeason, sortSportsForNow, sportEmoji, sportLabel } from './sportSeasons';
-import { chosenSport, loadSeason, rememberSport } from './store';
+import {
+  chosenSport,
+  keptLeagueTable,
+  loadSeason,
+  rememberLeagueTable,
+  rememberSport,
+} from './store';
 
 /** "2026-08-21" -> { day: "21", month: "Aug" }, in the reader's own locale —
  * a stacked pair rather than one long string, because a weekday plus a
@@ -186,11 +192,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // this the next render is the hub the reader just tapped out of — nothing
   // happens on screen until the network answers.
   const [rosterFetch, setRosterFetch] = useState<'idle' | 'loading' | 'done'>('idle');
-  // The member seasons behind the League tab, and the member list they were
-  // fetched for. The key is what stops a re-entry into the tab refetching ten
-  // school files, and what stops a previous school's table flashing up under
-  // this school's conference name while the new one is still in the air.
-  const [leagueSeasons, setLeagueSeasons] = useState<SchoolSeason[] | null>(null);
+  // The table the network built, and the member list it was built for. The key
+  // is what stops a re-entry into the tab refetching ten school files, and what
+  // stops a previous school's table flashing up under this school's conference
+  // name while the new one is still in the air.
+  const [leagueRows, setLeagueRows] = useState<LeagueRow[] | null>(null);
   const [leagueKey, setLeagueKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -386,19 +392,40 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       // A member whose file never came — a mistyped slug, a school that fell
       // out of the directory, a dead signal — is simply absent. leagueTable
       // drops it and renders the rest.
-      setLeagueSeasons(got.filter((s): s is SchoolSeason => s !== null));
+      const rows = leagueTable(
+        got.filter((s): s is SchoolSeason => s !== null),
+        membersKey.split(','),
+      );
+
+      if (rows.length >= 2) {
+        rememberLeagueTable(slug, membersKey, rows);
+      } else if (keptLeagueTable(slug, membersKey)) {
+        // Fewer than two members is what a dead signal looks like from here:
+        // loadSeason keeps a copy of the followed school only, so offline the
+        // school resolves itself and nobody else. A table that was right on
+        // Saturday must not be replaced by a sentence saying the conference
+        // hasn't reported. With nothing kept there is nothing to protect, and
+        // the honest empty state is the right answer.
+        return;
+      }
+
+      setLeagueRows(rows);
       setLeagueKey(membersKey);
     });
 
     return () => {
       current = false;
     };
-  }, [tab, membersKey, leagueKey]);
+  }, [tab, membersKey, leagueKey, slug]);
 
-  // Null until the seasons on screen are the ones this conference asked for.
+  // The kept table stands in until the network has one for this same
+  // conference — the rhythm loadSeason and loadSchoolRoster already use, so
+  // the tab opens at a ground on what it showed last time rather than on a
+  // spinner that never resolves.
   const standings = useMemo(
-    () => (leagueSeasons && leagueKey === membersKey ? leagueTable(leagueSeasons, members) : null),
-    [leagueSeasons, leagueKey, membersKey, members],
+    () =>
+      leagueRows && leagueKey === membersKey ? leagueRows : keptLeagueTable(slug, membersKey),
+    [leagueRows, leagueKey, membersKey, slug],
   );
 
   if (failed) {
