@@ -42,10 +42,42 @@ const read = async (file) => JSON.parse(await readFile(file, 'utf8'));
 /** Whatever this run managed to learn; a school it could not is absent. */
 const forecasts = {};
 
+/** What was found where a list of slugs should have been, for the log. */
+const shapeOf = (v) =>
+  v === undefined ? 'missing' : v === null ? 'null' : `a ${typeof v}`;
+
 try {
-  const { slugs } = existsSync(paidFile) ? await read(paidFile) : { slugs: [] };
+  /*
+   * The paid list, and whether it is a list at all.
+   *
+   * `{"school":[…]}`, `{"slugs":"strasburg-…"}` and `{}` all parse perfectly
+   * well and all yield no slugs, and so does the file not being there. Reading
+   * that as "nobody is paying" was a quiet way to lose data: the seller adds a
+   * school, fat-fingers the key, pushes — and the next refresh strips the
+   * forecast off every paying page while the log reads a wholly plausible
+   * "0 of 0 paid schools".
+   *
+   * So the two are told apart. A real `"slugs": []` is an instruction and is
+   * obeyed. Anything else is a file this cannot read, and a file it cannot read
+   * gets to change nothing.
+   */
+  const havePaidFile = existsSync(paidFile);
+  const listed = havePaidFile ? (await read(paidFile)).slugs : undefined;
+  const usable = Array.isArray(listed);
+  const paid = usable ? listed : [];
+
+  if (!usable) {
+    console.warn(
+      havePaidFile
+        ? `! paid-schools.json parsed, but its "slugs" is ${shapeOf(listed)} rather than an ` +
+            `array — a mistyped key, most likely. It should read ` +
+            `{"slugs":["their-school-theirtown"]}.`
+        : '! paid-schools.json is not there.',
+    );
+    console.warn('  Nothing was written — the forecasts already committed stand.');
+  }
+
   const geo = existsSync(geoFile) ? await read(geoFile) : {};
-  const paid = Array.isArray(slugs) ? slugs : [];
 
   for (const slug of paid) {
     try {
@@ -103,10 +135,13 @@ try {
    * perfectly good one an hour ago. What is already there stays until a run
    * has something to replace it with — and it cannot go stale on screen,
    * because each entry names the date it is for. A paid list that is genuinely
-   * empty is a different thing and does clear the file.
+   * empty is a different thing and does clear the file; a list this could not
+   * read is not an empty one, and was said so above.
    */
   const kept = existsSync(weatherFile) ? await read(weatherFile) : {};
-  if (!Object.keys(forecasts).length && paid.length && Object.keys(kept).length) {
+  if (!usable) {
+    // Already explained, in more detail than a second line here could add.
+  } else if (!Object.keys(forecasts).length && paid.length && Object.keys(kept).length) {
     console.warn('  ! nothing came back — keeping the forecasts already committed.');
   } else {
     await writeFile(weatherFile, `${JSON.stringify(forecasts)}\n`);

@@ -30,8 +30,10 @@ Add the school's slug to `paid-schools.json` at the repo root and push:
 
 That is the whole list the weather pass reads. Every six hours the refresh
 workflow looks up the next unplayed fixture for each slug on it, fetches the
-forecast for that kickoff, and commits it into the deploy — so the school's
-Schedule tab carries the weather at kickoff the way Poland's always has.
+forecast for that kickoff, and writes it into the build that deploys — nothing
+is committed, so the live forecast is always the one that run fetched. The
+school's Schedule tab then carries the weather at kickoff the way Poland's
+always has.
 
 It is one line and it is optional: a school left off the list simply has no
 forecast, and nothing else about its page changes. The slug is the one in the
