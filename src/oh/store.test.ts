@@ -2,6 +2,7 @@ import {
   choose,
   chosenSport,
   keptLeagueTable,
+  loadWeather,
   rememberLeagueTable,
   rememberSport,
   searchSchools,
@@ -166,5 +167,103 @@ describe('the kept league table', () => {
 
   it('has nothing to say about a school with no conference at all', () => {
     expect(keptLeagueTable('a-town', '')).toBeNull();
+  });
+});
+
+/*
+ * The kickoff forecast.
+ *
+ * One committed file holds a line for each paying school, fetched here rather
+ * than from a phone — see scripts/paid-weather.mjs. What is worth testing is
+ * the two ways it can be wrong on screen: junk printing "NaN°" beside a
+ * school's name, and a school that no longer has a forecast keeping one alive
+ * out of a phone for ever.
+ */
+describe('the kickoff forecast', () => {
+  const forecast = {
+    code: 3,
+    tempF: 61,
+    precipChance: 40,
+    windMph: 14,
+    day: false,
+    at: '2026-08-28T23:00:00.000Z',
+    date: '2026-08-28',
+  };
+
+  beforeEach(() => {
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => (k in store ? store[k] : null),
+      setItem: (k: string, v: string) => { store[k] = v; },
+      removeItem: (k: string) => { delete store[k]; },
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const serve = (body: unknown, ok = true) =>
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok, json: async () => body })));
+
+  it('picks this school’s line out of the file and keeps it', async () => {
+    choose('a-town');
+    serve({ 'a-town': forecast, 'b-town': { ...forecast, tempF: 70 } });
+
+    expect(await loadWeather('a-town')).toEqual(forecast);
+    expect(JSON.parse(localStorage.getItem('oh.weather.a-town')!)).toEqual(forecast);
+  });
+
+  it('keeps nothing for a school the reader is only browsing', async () => {
+    choose('a-town');
+    serve({ 'b-town': forecast });
+
+    expect(await loadWeather('b-town')).toEqual(forecast);
+    expect(localStorage.getItem('oh.weather.b-town')).toBeNull();
+  });
+
+  it('serves the kept copy when there is no signal', async () => {
+    choose('a-town');
+    localStorage.setItem('oh.weather.a-town', JSON.stringify(forecast));
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+
+    expect(await loadWeather('a-town')).toEqual(forecast);
+  });
+
+  it('drops the kept copy when the file no longer names this school', async () => {
+    // A school that stopped paying, or whose next game has gone past the
+    // forecast's range. An answer of "no forecast" is an answer.
+    choose('a-town');
+    localStorage.setItem('oh.weather.a-town', JSON.stringify(forecast));
+    serve({});
+
+    expect(await loadWeather('a-town')).toBeNull();
+    expect(localStorage.getItem('oh.weather.a-town')).toBeNull();
+  });
+
+  it('treats junk as no forecast rather than printing half of one', async () => {
+    choose('a-town');
+
+    for (const bad of [
+      { ...forecast, tempF: 'sixty' },
+      { ...forecast, date: undefined },
+      { ...forecast, code: null },
+      { ...forecast, day: 'yes' },
+      'not an object',
+    ]) {
+      serve({ 'a-town': bad });
+      expect(await loadWeather('a-town')).toBeNull();
+    }
+
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    localStorage.setItem('oh.weather.a-town', 'not json');
+    expect(await loadWeather('a-town')).toBeNull();
+  });
+
+  it('falls back rather than throwing when the file is missing', async () => {
+    choose('a-town');
+    serve('', false);
+
+    expect(await loadWeather('a-town')).toBeNull();
   });
 });

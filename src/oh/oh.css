@@ -336,3 +336,29 @@
 .oh-sport-name {
   font-weight: 600;
 }
+
+/*
+ * The forecast, under the fixture it is for.
+ *
+ * On Poland it is the next-game card's own line and stands at full size.
+ * Here there is no card — the next fixture is the first row of a list — so
+ * the same three classes are asked to sit inside a row instead: indented to
+ * clear the 56px date column so the line begins where the opponent's name
+ * does, and a size down, because it is an annotation on a fixture rather
+ * than a heading of its own. The colours and the layout are the shared
+ * stylesheet's; only the fitting is said here.
+ */
+.fixture .forecast {
+  margin: 0;
+  padding: 0 0 11px 66px;
+  font-size: 14px;
+}
+
+.fixture .sky-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.fixture .forecast-temp {
+  font-size: 17px;
+}

@@ -9,6 +9,7 @@
  */
 
 import type { School, SchoolSeason } from '../ohio/stateModel';
+import type { Weather } from '../schedule/weather';
 import type { LeagueRow } from './leagueTable';
 
 const CHOSEN = 'oh.school';
@@ -16,6 +17,18 @@ const INDEX = 'oh.index';
 const SEASON = (slug: string) => `oh.season.${slug}`;
 const SPORT = (slug: string) => `oh.sport.${slug}`;
 const LEAGUE = (slug: string) => `oh.league.${slug}`;
+const WEATHER = (slug: string) => `oh.weather.${slug}`;
+
+/**
+ * A forecast with the fixture it is for written on it.
+ *
+ * The date is what keeps a stale file honest. `scripts/paid-weather.mjs` writes
+ * the weather for whichever game is next when it runs, and the page draws it on
+ * the fixture naming that same day and on no other — so a refresh that failed
+ * to run leaves last week's forecast attached to last week's game, where
+ * nothing will ever show it, rather than on tonight's.
+ */
+export type FixtureWeather = Weather & { date: string };
 
 /** Punctuation and case are noise when somebody is typing at a game. */
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -66,6 +79,7 @@ export const choose = (slug: string): void => {
     localStorage.removeItem(`oh.livesports.${prev}`);
     localStorage.removeItem(SPORT(prev));
     localStorage.removeItem(LEAGUE(prev));
+    localStorage.removeItem(WEATHER(prev));
   }
   localStorage.setItem(CHOSEN, slug);
 };
@@ -173,4 +187,62 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
   const kept = localStorage.getItem(SEASON(slug));
   if (kept) return JSON.parse(kept) as SchoolSeason;
   throw new Error('no season');
+}
+
+/*
+ * The weather at kickoff.
+ *
+ * One committed file holds a line for each school that pays for a page, so
+ * this is a couple of hundred bytes however many schools are in it. It is
+ * fetched rather than computed and it is fetched from this origin: the
+ * forecast itself was asked for once, in the refresh workflow, precisely so
+ * that nobody reading the site has to ask a weather service anything. See
+ * scripts/paid-weather.mjs.
+ *
+ * Junk is treated as nothing. The file is small enough to hand-edit and one
+ * missing field would otherwise print "NaN°" next to a school's name on the
+ * one screen its parents opened.
+ */
+const isFixtureWeather = (v: unknown): v is FixtureWeather => {
+  if (typeof v !== 'object' || v === null) return false;
+  const w = v as Record<string, unknown>;
+  if (typeof w.date !== 'string' || typeof w.day !== 'boolean' || typeof w.at !== 'string') {
+    return false;
+  }
+  return (['code', 'tempF', 'precipChance', 'windMph'] as const).every(
+    (k) => typeof w[k] === 'number' && Number.isFinite(w[k]),
+  );
+};
+
+/** Network first, then whatever was kept — the same rule as the season. */
+export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
+  try {
+    const res = await fetch(`/oh/weather.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const all = (await res.json()) as Record<string, unknown>;
+      const mine = isFixtureWeather(all?.[slug]) ? (all[slug] as FixtureWeather) : null;
+      // Only the followed school's copy is kept, as with the season — and an
+      // answer of "no forecast for this school" clears it, so a school that
+      // stops paying, or whose next game has gone past the forecast's range,
+      // does not keep serving one out of a phone for ever.
+      if (slug === chosenSlug()) {
+        try {
+          if (mine) localStorage.setItem(WEATHER(slug), JSON.stringify(mine));
+          else localStorage.removeItem(WEATHER(slug));
+        } catch {
+          // A full jar must not fail a fetch that already succeeded.
+        }
+      }
+      return mine;
+    }
+  } catch {
+    /* no signal */
+  }
+  try {
+    const kept = localStorage.getItem(WEATHER(slug));
+    const parsed = kept ? (JSON.parse(kept) as unknown) : null;
+    return isFixtureWeather(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }

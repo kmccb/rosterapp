@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
+import { SkyIcon } from '../components/SkyIcon';
+import { describeSky, worthMentioning } from '../schedule/weather';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
@@ -16,8 +18,10 @@ import {
   chosenSport,
   keptLeagueTable,
   loadSeason,
+  loadWeather,
   rememberLeagueTable,
   rememberSport,
+  type FixtureWeather,
 } from './store';
 
 /** "2026-08-21" -> { day: "21", month: "Aug" }, in the reader's own locale —
@@ -114,6 +118,40 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
   );
 };
 
+/**
+ * What it will be like to stand there.
+ *
+ * Poland's Schedule screen has had this since it existed and this is the same
+ * treatment, deliberately: sky, temperature, and only the rain or the wind
+ * worth mentioning. A forecast that lists every number for a still, dry evening
+ * is noise above the thing people opened this screen for.
+ *
+ * Written out here rather than imported, because the original lives inside
+ * `src/screens/Schedule.tsx` and nothing under `src/oh/` may reach into the
+ * root app's runtime — the same rule `src/oh/look.ts` observes by duplicating
+ * `src/theme/theme.ts`'s color math. The two pieces it uses are imported
+ * rather than copied because both are genuinely pure: `describeSky` and
+ * `worthMentioning` import nothing at all, and `SkyIcon` imports only them.
+ *
+ * `.forecast` and its parts come from the shared stylesheet, which `/oh/`'s
+ * entry loads; `oh.css` only says how the line sits inside a fixture row.
+ */
+function Forecast({ weather }: { weather: FixtureWeather }) {
+  const notes = [
+    worthMentioning(weather.precipChance) ? `${weather.precipChance}% rain` : null,
+    weather.windMph >= 12 ? `${weather.windMph} mph wind` : null,
+  ].filter(Boolean);
+
+  return (
+    <p className="forecast">
+      <SkyIcon code={weather.code} day={weather.day} />
+      <span className="forecast-temp">{weather.tempF}°</span>
+      <span className="forecast-sky">{describeSky(weather.code)}</span>
+      {notes.length > 0 && <span className="forecast-note">{notes.join(' · ')}</span>}
+    </p>
+  );
+}
+
 type SchoolTab = 'lookup' | 'team' | 'schedule' | 'league';
 
 const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
@@ -198,6 +236,10 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // name while the new one is still in the air.
   const [leagueRows, setLeagueRows] = useState<LeagueRow[] | null>(null);
   const [leagueKey, setLeagueKey] = useState<string | null>(null);
+  // The forecast for this school's next fixture, when it has one. Only paying
+  // schools do, so on nearly every page in the state this settles as null and
+  // the schedule looks exactly as it does today.
+  const [weather, setWeather] = useState<FixtureWeather | null>(null);
 
   useEffect(() => {
     setSeason(null);
@@ -252,6 +294,38 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       .catch(() => {
         setSportsSettled(true);
       });
+  }, [slug]);
+
+  /*
+   * The forecast, on its own errand.
+   *
+   * A separate effect from the one above rather than another branch inside it:
+   * that effect carries the sports answer, the kept identity and the theme, and
+   * its ordering has been got right once already. This is one small file with
+   * no bearing on any of that, and it needs a cancellation guard of its own so
+   * a slow answer for the school a reader has just left cannot land on the
+   * school they are now looking at.
+   *
+   * Asked for on every school page, not only the paid ones, because there is no
+   * way to know which is which before asking — and the file is a couple of
+   * hundred bytes, one line per paying school. loadWeather swallows its own
+   * failures; the catch is for a jar or a parse that surprises it.
+   */
+  useEffect(() => {
+    setWeather(null);
+
+    let current = true;
+    loadWeather(slug)
+      .then((w) => {
+        if (current) setWeather(w);
+      })
+      .catch(() => {
+        // No forecast is the normal state of nearly every page here.
+      });
+
+    return () => {
+      current = false;
+    };
   }, [slug]);
 
   // In-season sports first, football always present. Recomputed only when the
@@ -543,12 +617,26 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const played = season.games.filter((g) => g.result);
   const coming = season.games.filter((g) => !g.result);
 
+  /*
+   * Which fixture the forecast belongs on: the one it names, and no other.
+   *
+   * Matching on the date rather than simply taking the first fixture in the
+   * list is what makes a stale file harmless. The refresh picks the next game
+   * that has not been played *and* has not already happened; this list shows
+   * every game without a score on it, which for a day or two after a Friday is
+   * a longer list. When the two disagree nothing matches and nothing prints,
+   * which is the right answer — the schedule is exactly today's screen, and a
+   * school with no forecast shows no forecast rather than an empty space where
+   * one goes.
+   */
+  const forecastOn = weather ? coming.findIndex((g) => g.date === weather.date) : -1;
+
   const schedule = (
     <>
       {coming.length > 0 && (
         <>
           <div className="group-head">Coming up</div>
-          {coming.map((g) => {
+          {coming.map((g, i) => {
             const { day, month } = fixtureDate(g);
             return (
               <div className="fixture" key={`${g.date}-${g.opponent}`}>
@@ -563,6 +651,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                   </span>
                   <span className="fixture-result">{g.kickoff}</span>
                 </div>
+                {i === forecastOn && weather && <Forecast weather={weather} />}
               </div>
             );
           })}

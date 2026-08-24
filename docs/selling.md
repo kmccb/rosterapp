@@ -20,6 +20,31 @@ change it here, and quote whatever it says.
 Save unpublished instead if the check hasn't cleared — publishing later is
 the same screen.
 
+### One more line, in the repo
+
+Add the school's slug to `paid-schools.json` at the repo root and push:
+
+```json
+{ "slugs": ["strasburg-franklin-strasburg", "their-school-theirtown"] }
+```
+
+That is the whole list the weather pass reads. Every six hours the refresh
+workflow looks up the next unplayed fixture for each slug on it, fetches the
+forecast for that kickoff, and commits it into the deploy — so the school's
+Schedule tab carries the weather at kickoff the way Poland's always has.
+
+It is one line and it is optional: a school left off the list simply has no
+forecast, and nothing else about its page changes. The slug is the one in the
+school's /oh/ URL. Take a slug back off the list when a school comes down.
+
+Nothing here is fetched from a reader's phone — that is the point, and the
+privacy page says so.
+
+The forecast needs the school's town on the map. `public/oh/geo.json` already
+holds 716 of the 717, so this is nearly always already done. If the refresh log
+says a school has no coordinates, run `node scripts/geocode-schools.mjs` and
+commit — it tops the file up rather than rewriting it.
+
 ### More than one sport
 
 The Activate form asks which sport. Football's schedule comes free from the
