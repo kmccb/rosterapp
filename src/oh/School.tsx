@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
@@ -113,6 +113,31 @@ const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'team', label: 'Team' },
   { id: 'schedule', label: 'Schedule' },
 ];
+
+/**
+ * The frame every state of this page hangs in.
+ *
+ * The root app's shell, borrowed whole: `.app` is a full-height flex column,
+ * `.header` is pinned above it at `flex: none`, and whatever follows takes the
+ * rest of the viewport and scrolls inside itself. Until now this page was a
+ * single `.screen` sitting in normal document flow, where `.screen`'s `flex: 1`
+ * and the keypad's `flex: none` both meant nothing — which is why the keys
+ * landed halfway down the page instead of under the reader's thumb.
+ *
+ * The directory does not share this container: `Directory.tsx` returns its own
+ * `.screen` and hands off to this component only when a school is chosen, so
+ * wearing `.app` here changes nothing on the picker.
+ *
+ * `head` is optional because the two waiting states — a failed fetch, a season
+ * still in flight — have no school name to pin yet, and an empty bar with a
+ * rule under it would just be furniture.
+ */
+const Frame = ({ head, children }: { head?: ReactNode; children: ReactNode }) => (
+  <div className="app">
+    {head && <div className="header oh-school-header">{head}</div>}
+    {children}
+  </div>
+);
 
 /**
  * One school's season: what is coming, and what has happened.
@@ -273,12 +298,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   if (failed) {
     return (
-      <div className="screen">
-        <p className="empty-text">Couldn’t load that school. Try again with a signal.</p>
-        <button type="button" className="fixture-row is-plain" onClick={onChange}>
-          Pick another school
-        </button>
-      </div>
+      <Frame>
+        <div className="screen">
+          <p className="empty-text">Couldn’t load that school. Try again with a signal.</p>
+          <button type="button" className="fixture-row is-plain" onClick={onChange}>
+            Pick another school
+          </button>
+        </div>
+      </Frame>
     );
   }
 
@@ -286,9 +313,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // being bounced to a hub a beat later would be worse than waiting for it.
   if (!season || !sportsSettled) {
     return (
-      <div className="screen">
-        <p className="empty-text">Loading…</p>
-      </div>
+      <Frame>
+        <div className="screen">
+          <p className="empty-text">Loading…</p>
+        </div>
+      </Frame>
     );
   }
 
@@ -326,9 +355,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // moment the season is in, exactly as it did before any of this existed.
   if (sport !== null && sport !== 'football' && rosterFetch !== 'done') {
     return (
-      <div className="screen">
-        <p className="empty-text">Loading…</p>
-      </div>
+      <Frame>
+        <div className="screen">
+          <p className="empty-text">Loading…</p>
+        </div>
+      </Frame>
     );
   }
 
@@ -338,30 +369,30 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // exempt: its free page stands on the directory's own schedule and scores.
   if (sport === null || (sport !== 'football' && !roster)) {
     return (
-      <div className="screen">
-        <div className="oh-school-head">{headline}</div>
+      <Frame head={<div className="oh-school-head">{headline}</div>}>
+        <div className="screen">
+          <div className="oh-sport-grid">
+            {tiles.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={`oh-sport-tile${inSeason(s, new Date().getMonth() + 1) ? '' : ' is-off'}`}
+                onClick={() => {
+                  rememberSport(slug, s);
+                  setSport(s);
+                }}
+              >
+                <span className="oh-sport-emoji" aria-hidden="true">
+                  {sportEmoji(s)}
+                </span>
+                <span className="oh-sport-name">{sportLabel(s)}</span>
+              </button>
+            ))}
+          </div>
 
-        <div className="oh-sport-grid">
-          {tiles.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={`oh-sport-tile${inSeason(s, new Date().getMonth() + 1) ? '' : ' is-off'}`}
-              onClick={() => {
-                rememberSport(slug, s);
-                setSport(s);
-              }}
-            >
-              <span className="oh-sport-emoji" aria-hidden="true">
-                {sportEmoji(s)}
-              </span>
-              <span className="oh-sport-name">{sportLabel(s)}</span>
-            </button>
-          ))}
+          {footer}
         </div>
-
-        {footer}
-      </div>
+      </Frame>
     );
   }
 
@@ -444,8 +475,8 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     </button>
   );
 
-  return (
-    <div className="screen">
+  const head = (
+    <>
       <div className="oh-school-head">
         {roster?.logo ? (
           <div className="oh-school-head-row">
@@ -459,62 +490,81 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
       {back}
 
+      {roster && (
+        <nav className="tabs oh-school-tabs" aria-label="Sections">
+          {SCHOOL_TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`tab${tab === t.id ? ' active' : ''}`}
+              onClick={() => setTab(t.id)}
+              aria-current={tab === t.id ? 'page' : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+      )}
+    </>
+  );
+
+  return (
+    <Frame head={head}>
       {roster ? (
-        <>
-          <nav className="tabs oh-school-tabs" aria-label="Sections">
-            {SCHOOL_TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`tab${tab === t.id ? ' active' : ''}`}
-                onClick={() => setTab(t.id)}
-                aria-current={tab === t.id ? 'page' : undefined}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
+        tab === 'lookup' ? (
+          /*
+           * The one tab that is not a plain scroll. `.lookup` is the root
+           * app's own column — keys at the bottom at `flex: none`, everything
+           * above them shrinking and scrolling — and `LookupTab` hands over
+           * exactly the pieces that column expects, so the arrangement is
+           * the same one Poland's Lookup screen has always used.
+           *
+           * The footer rows are the price. They live below the active tab,
+           * and below the keys there is nothing: the pad owns the bottom of
+           * the screen now. They stay one tap away on Team and Schedule,
+           * which is where Poland keeps its own way out too.
+           */
+          <div className="lookup oh-lookup">
+            <LookupTab players={roster.players} />
+          </div>
+        ) : (
+          <div className="screen">
+            {tab === 'team' && (
+              <div className="oh-roster">
+                <TeamTab players={roster.players} />
+              </div>
+            )}
+            {tab === 'schedule' && (
+              <>
+                {/* Football's fixtures come from the directory, which every
+                    school in the state has. Any other sport can only show what
+                    was pasted for it. */}
+                {sport === 'football' ? (
+                  schedule
+                ) : roster.schedule ? (
+                  <PastedSchedule rows={roster.schedule} />
+                ) : (
+                  <p className="empty-text">No schedule added yet for {sportLabel(sport)}.</p>
+                )}
+                <p className="filter-line">
+                  <span>
+                    <a
+                      href={`mailto:tom@scottforge.ai?subject=${encodeURIComponent(
+                        `An app of our own — ${season.school.name}`,
+                      )}`}
+                    >
+                      Want your own installable app, like Poland&rsquo;s?
+                    </a>
+                  </span>
+                </p>
+              </>
+            )}
 
-          {tab === 'lookup' && (
-            <div className="oh-roster">
-              <LookupTab players={roster.players} />
-            </div>
-          )}
-          {tab === 'team' && (
-            <div className="oh-roster">
-              <TeamTab players={roster.players} />
-            </div>
-          )}
-          {tab === 'schedule' && (
-            <>
-              {/* Football's fixtures come from the directory, which every
-                  school in the state has. Any other sport can only show what
-                  was pasted for it. */}
-              {sport === 'football' ? (
-                schedule
-              ) : roster.schedule ? (
-                <PastedSchedule rows={roster.schedule} />
-              ) : (
-                <p className="empty-text">No schedule added yet for {sportLabel(sport)}.</p>
-              )}
-              <p className="filter-line">
-                <span>
-                  <a
-                    href={`mailto:tom@scottforge.ai?subject=${encodeURIComponent(
-                      `An app of our own — ${season.school.name}`,
-                    )}`}
-                  >
-                    Want your own installable app, like Poland&rsquo;s?
-                  </a>
-                </span>
-              </p>
-            </>
-          )}
-
-          {footer}
-        </>
+            {footer}
+          </div>
+        )
       ) : (
-        <>
+        <div className="screen">
           {/*
             The reason the directory exists.
 
@@ -547,8 +597,8 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
           {schedule}
 
           {footer}
-        </>
+        </div>
       )}
-    </div>
+    </Frame>
   );
 }

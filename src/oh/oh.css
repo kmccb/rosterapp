@@ -16,18 +16,20 @@
   display: block;
 }
 
-/* The active tab's content, sitting between the tab bar and the season.
-   The tab bar alone reads fine flush against either neighbor, but the two
-   together need the same breathing room the rest of the screen gets
-   between sections. */
+/* A scrolling tab's content, sitting between the pinned header and the
+   footer rows. The header alone reads fine flush against either neighbor,
+   but the two together need the same breathing room the rest of the screen
+   gets between sections. The Lookup tab is not one of these — it is its own
+   column, further down. */
 .oh-roster {
   margin: 14px 0;
 }
 
-/* The school's own tab bar. ../styles.css's .tabs/.tab classes are built for
-   App's bar, which lives inside .header with its own padding and border;
-   here the bar sits directly in the scroll, so this rule supplies the
-   vertical rhythm instead of duplicating the shared one. */
+/* The school's own tab bar. It now sits inside .header, where App's bar sits,
+   so the only thing left to say is how far it stands off the school's name
+   above it — the shared .tabs/.tab classes carry everything else. The bottom
+   margin is dropped in the header rule below so the active tab's underline
+   lands on the header's own rule, exactly as Poland's does. */
 .oh-school-tabs {
   margin: 4px 0 12px;
 }
@@ -66,6 +68,71 @@
 .oh-school-head {
   padding: 8px 12px;
   border-radius: 12px;
+}
+
+/* ------------------------------------------------------------------ shell */
+
+/*
+ * The school page wears the root app's frame — .app, .header, .screen and
+ * .lookup, all of them already in this bundle because src/oh/main.tsx imports
+ * ../styles.css. What was missing was the container those classes are written
+ * for: without a full-height flex column above it, .screen's `flex: 1` and
+ * .keypad's `flex: none` are both inert, and the keys ended up wherever the
+ * document happened to put them — a third of the way down the page.
+ *
+ * Only the differences from Poland's chrome belong here.
+ */
+
+/* The header supplies the side padding for everything pinned in it, so the
+   school's name must not add its own on top and inset itself twice. */
+.oh-school-header .oh-school-head {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Poland's tab strip ends flush against the header's rule, and the active
+   tab's 3px underline reads as part of that rule rather than a stripe
+   floating above it. Same here. */
+.oh-school-header .oh-school-tabs {
+  margin-bottom: 0;
+}
+
+/*
+ * The Lookup tab, in the arrangement src/screens/Lookup.tsx uses: the column
+ * is .lookup, the keys are its last child at `flex: none`, and what is above
+ * them scrolls. The one difference is that LookupTab hands over a flat run of
+ * children — readout, hits, "nobody wears that" — rather than a single
+ * .results box to make the scroller out of, so these rules name the parts
+ * instead. The side padding is .screen's, since the column replaces it.
+ */
+.oh-lookup {
+  padding: 0 var(--screen-pad, 14px);
+}
+
+/* The readout is one line and always the same line. It never gives ground. */
+.oh-lookup > .oh-query {
+  flex: none;
+}
+
+/* The hits are the only part with height to give up, so they are the part
+   that scrolls: one player or twenty-two, the keys do not move. */
+.oh-lookup > .rows {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.oh-lookup > .keypad {
+  /* With no hits at all — the state this screen opens in — nothing above the
+     keys wants the leftover height, and without somewhere for it to go the
+     pad would ride up under the readout. An auto margin takes it. */
+  margin-top: auto;
+  /* The keys are chrome and run to both edges, the way they do in the root
+     app, so they come back out through the column's side padding. Their own
+     padding already carries env(safe-area-inset-bottom). */
+  margin-left: calc(var(--screen-pad, 14px) * -1);
+  margin-right: calc(var(--screen-pad, 14px) * -1);
 }
 
 /* ------------------------------------------------------------- manage */
