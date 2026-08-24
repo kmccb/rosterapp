@@ -187,6 +187,30 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* The conference builder. The two inputs and the search hits are the same
+   controls the rest of this screen uses; all this adds is room around the
+   block, so it doesn't read as a continuation of the paste box above it. */
+.mg-league {
+  margin: 12px 0;
+}
+
+/* A picked member, in the review list's clothes but tappable to take it back
+   out again. A button carries none of a div's layout, so the row's own look
+   has to be restated here — everything else comes from .mg-review-row. */
+.mg-member {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border-width: 0 0 1px 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .mg-colors {
   display: flex;
   gap: 16px;

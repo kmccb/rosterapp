@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
+import { leagueTable } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
   keptSchoolSports,
@@ -107,13 +108,17 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
   );
 };
 
-type SchoolTab = 'lookup' | 'team' | 'schedule';
+type SchoolTab = 'lookup' | 'team' | 'schedule' | 'league';
 
 const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
   { id: 'team', label: 'Team' },
   { id: 'schedule', label: 'Schedule' },
 ];
+
+/** Only a football row with a conference on it gets this fourth tab, so it
+ * hangs on the end of the three rather than living among them. */
+const LEAGUE_TAB: { id: SchoolTab; label: string } = { id: 'league', label: 'League' };
 
 /**
  * The frame every state of this page hangs in.
@@ -181,6 +186,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // this the next render is the hub the reader just tapped out of — nothing
   // happens on screen until the network answers.
   const [rosterFetch, setRosterFetch] = useState<'idle' | 'loading' | 'done'>('idle');
+  // The member seasons behind the League tab, and the member list they were
+  // fetched for. The key is what stops a re-entry into the tab refetching ten
+  // school files, and what stops a previous school's table flashing up under
+  // this school's conference name while the new one is still in the air.
+  const [leagueSeasons, setLeagueSeasons] = useState<SchoolSeason[] | null>(null);
+  const [leagueKey, setLeagueKey] = useState<string | null>(null);
 
   useEffect(() => {
     setSeason(null);
@@ -335,6 +346,60 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     applyLook({ ground, accent, logo: crest ?? undefined });
     return () => clearLook();
   }, [ground, accent, crest]);
+
+  /*
+   * The conference, and the schools whose seasons it is folded out of.
+   *
+   * Football only: the standings come from the directory's own files, and the
+   * directory only knows football. Every other sport's fixtures arrive as a
+   * paste with no opponent slugs on them, so there is nothing to find another
+   * school's season by.
+   *
+   * The school's own slug goes on the front of the member list without being
+   * asked. It is trivially in its own conference, and leaving that to the
+   * seller would make one forgotten tap a way to publish a table the paying
+   * school is missing from.
+   */
+  const conference = sport === 'football' ? (roster?.league ?? null) : null;
+  const members = useMemo(
+    () => (conference ? [...new Set([slug, ...conference.members])] : []),
+    [slug, conference],
+  );
+  // The list as one comparable value, so the effect below can be keyed on what
+  // the members *are* rather than on the identity of the array holding them —
+  // a fresh roster fetch that agrees with the last one must not refetch.
+  const membersKey = members.join(',');
+
+  useEffect(() => {
+    // Ten school files is not a download to make on every football page view.
+    // The tab pays for its own data, once, the first time it is opened.
+    if (tab !== 'league' || !membersKey || leagueKey === membersKey) return;
+
+    let current = true;
+    Promise.all(
+      // Split rather than close over `members`: the key already says exactly
+      // which schools this run is for, and one dependency cannot disagree
+      // with itself the way two can.
+      membersKey.split(',').map((member) => loadSeason(member).catch(() => null)),
+    ).then((got) => {
+      if (!current) return;
+      // A member whose file never came — a mistyped slug, a school that fell
+      // out of the directory, a dead signal — is simply absent. leagueTable
+      // drops it and renders the rest.
+      setLeagueSeasons(got.filter((s): s is SchoolSeason => s !== null));
+      setLeagueKey(membersKey);
+    });
+
+    return () => {
+      current = false;
+    };
+  }, [tab, membersKey, leagueKey]);
+
+  // Null until the seasons on screen are the ones this conference asked for.
+  const standings = useMemo(
+    () => (leagueSeasons && leagueKey === membersKey ? leagueTable(leagueSeasons, members) : null),
+    [leagueSeasons, leagueKey, membersKey, members],
+  );
 
   if (failed) {
     return (
@@ -535,7 +600,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
       {roster && (
         <nav className="tabs oh-school-tabs" aria-label="Sections">
-          {SCHOOL_TABS.map((t) => (
+          {(conference ? [...SCHOOL_TABS, LEAGUE_TAB] : SCHOOL_TABS).map((t) => (
             <button
               key={t.id}
               type="button"
@@ -578,6 +643,42 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
               <div className="oh-roster">
                 <TeamTab players={roster.players} />
               </div>
+            )}
+            {tab === 'league' && conference && (
+              <>
+                <div className="group-head">{conference.name}</div>
+                {standings === null ? (
+                  <p className="empty-text">Loading…</p>
+                ) : standings.length < 2 ? (
+                  /* One row is not a table — it is this school, alone, next to
+                     a heading claiming to be a conference. Say what is
+                     actually true instead. */
+                  <p className="empty-text">Not enough of the conference has reported yet.</p>
+                ) : (
+                  <table className="table-lite table-standings">
+                    <thead>
+                      <tr>
+                        <th>Standings</th>
+                        <th>League</th>
+                        <th>All</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((r) => (
+                        <tr key={r.slug} className={r.slug === slug ? 'is-us' : undefined}>
+                          <td>{r.name}</td>
+                          <td>
+                            {r.leagueWon}–{r.leagueLost}
+                          </td>
+                          <td>
+                            {r.overallWon}–{r.overallLost}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </>
             )}
             {tab === 'schedule' && (
               <>
