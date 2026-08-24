@@ -118,8 +118,11 @@ seller can ask once: "what conference are you in?" So:
   directory index exactly as the school picker already does, so members are stored as slugs and
   can never drift from a typo.
 - The fan page shows a **League** tab only when a member list exists. It loads each member's
-  committed season JSON, counts games between members, and prints the standings table plus the
-  week-by-week fixtures — Poland's League tab, computed from the directory instead of scraped.
+  committed season JSON, counts games between members, and prints the standings table —
+  Poland's League tab, computed from the directory instead of scraped. (Planning narrowed this
+  to standings only: the week-by-week fixtures this spec first promised were dropped, since the
+  Schedule tab beside it already prints this school's own week by week and the conference's
+  other results are what the standings row says. What shipped is the standings table.)
 - Football only in v1. Other sports would need their schedules, which are concierge-pasted and
   carry no opponent slugs.
 

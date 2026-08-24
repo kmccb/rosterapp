@@ -87,7 +87,7 @@ not a config bug — wait for the next cron. Consequences:
 - `docs/selling.md` — the seller's runbook (activate a school in ~3 min; price lives here).
 - `docs/going-live.md` — first-time checklist + v2 (crest/tabs), v3 (all-sports), and v4
   (identity/league) verification, each with its own deploy ordering. **The original 17-item
-  0004 sweep has never been run end-to-end** — partial coverage exists (verify script 6/6,
+  0004 sweep has never been run end-to-end** — partial coverage exists (verify script 7/7,
   share-code smoke, theme contract partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
@@ -95,7 +95,7 @@ not a config bug — wait for the next cron. Consequences:
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
 (tabs, full theming, crest upload), the all-sports hub (0006), migration 0006 applied and
-verified, share-code system proven alive post-migrations, security script 6/6.
+verified, share-code system proven alive post-migrations, security script 7/7.
 
 **Shipped, pending migration:** Poland parity for the paid `/oh/` page — the root app's shell
 (pinned header, scrolling body, keypad pinned to the bottom on Lookup, measured flush at

@@ -13,7 +13,17 @@ vi.mock('./supa', () => ({
   rpc: vi.fn(),
 }));
 
-import { cacheKey, keptSchoolSports, loadSchoolRoster, loadSchoolSports, parseCached } from './rosterStore';
+import {
+  cacheKey,
+  keptSchoolSports,
+  loadSchoolRoster,
+  loadSchoolSports,
+  lookFor,
+  parseCached,
+  type SchoolColors,
+  type SchoolIdentity,
+  type SchoolRoster,
+} from './rosterStore';
 import { rpc } from './supa';
 
 const mockedRpc = vi.mocked(rpc);
@@ -113,6 +123,23 @@ describe('roster cache plumbing', () => {
       league: { name: 'Inter-Valley Conference', members: ['strasburg-franklin', '  '] } };
     expect(parseCached(JSON.stringify(blankMember))?.league).toBeNull();
 
+    // A member is a directory slug and nothing else — store.ts drops each one
+    // straight into `/oh/data/${slug}.json`, where a slash or a `..` resolves
+    // to a fetch nobody asked for.
+    const pathMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['../../index'] } };
+    expect(parseCached(JSON.stringify(pathMember))?.league).toBeNull();
+
+    const slashMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['strasburg-franklin/../poland'] } };
+    expect(parseCached(JSON.stringify(slashMember))?.league).toBeNull();
+
+    // The directory writes every slug in lower case, so anything else is not a
+    // slug it will ever answer to.
+    const shoutedMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['Strasburg-Franklin'] } };
+    expect(parseCached(JSON.stringify(shoutedMember))?.league).toBeNull();
+
     // No name to head the table with.
     const noName = { season: 2026, players: [], colors: null, logo: null,
       league: { members: ['strasburg-franklin'] } };
@@ -124,6 +151,70 @@ describe('roster cache plumbing', () => {
 
     const absent = { season: 2026, players: [], colors: null, logo: null };
     expect(parseCached(JSON.stringify(absent))?.league).toBeNull();
+  });
+});
+
+describe('lookFor', () => {
+  // The two colors and the crest are all this rule ever reads; the rest of a
+  // roster is here only because the type asks for it.
+  const roster = (colors: SchoolColors, logo: string | null): SchoolRoster => ({
+    season: 2026, players: [], colors, logo, schedule: null, league: null,
+  });
+  const identity = (colors: SchoolColors, logo: string | null): SchoolIdentity => ({
+    sports: ['football'], colors, logo,
+  });
+
+  const sportColors = { ground: '#04043a', accent: '#4fbaf7' };
+  const schoolColors = { ground: '#3a0404', accent: '#f7ba4f' };
+  const sportCrest = 'data:image/png;base64,FFFF';
+  const schoolCrest = 'data:image/png;base64,GGGG';
+
+  it('lets the sport the reader is in win, field by field', () => {
+    expect(lookFor(roster(sportColors, sportCrest), identity(schoolColors, schoolCrest))).toEqual({
+      colors: sportColors,
+      logo: sportCrest,
+    });
+  });
+
+  it('fills each field the sport left empty from the school', () => {
+    // A volleyball program that runs its own colors but never uploaded a crest
+    // keeps the colors and wears the school's badge.
+    expect(lookFor(roster(sportColors, null), identity(schoolColors, schoolCrest))).toEqual({
+      colors: sportColors,
+      logo: schoolCrest,
+    });
+    expect(lookFor(roster(null, sportCrest), identity(schoolColors, schoolCrest))).toEqual({
+      colors: schoolColors,
+      logo: sportCrest,
+    });
+  });
+
+  it('takes colors as a pair, never one school’s ground under another’s accent', () => {
+    // The store hands over both colors or neither, so there is no half-set to
+    // fill in from the other side — a sport with no colors takes the school's
+    // two, whole.
+    expect(lookFor(roster(null, null), identity(schoolColors, null))?.colors).toEqual(schoolColors);
+  });
+
+  it('is no look at all when neither has anything', () => {
+    expect(lookFor(null, null)).toBeNull();
+    expect(lookFor(roster(null, null), identity(null, null))).toBeNull();
+  });
+
+  it('keeps a crest that arrives with no colors', () => {
+    // A real answer, and the documented behaviour of the caller: the badge
+    // still goes beside the school's name, while the page stays in the default
+    // theme because there are no colors to derive one from.
+    expect(lookFor(roster(null, sportCrest), null)).toEqual({ colors: null, logo: sportCrest });
+    expect(lookFor(null, identity(null, schoolCrest))).toEqual({ colors: null, logo: schoolCrest });
+  });
+
+  it('reads the school alone before any roster has arrived', () => {
+    // The hub, which carries no roster and had nowhere else to get a look from.
+    expect(lookFor(null, identity(schoolColors, schoolCrest))).toEqual({
+      colors: schoolColors,
+      logo: schoolCrest,
+    });
   });
 });
 

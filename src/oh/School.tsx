@@ -8,6 +8,7 @@ import {
   keptSchoolSports,
   loadSchoolRoster,
   loadSchoolSports,
+  lookFor,
   type SchoolIdentity,
   type SchoolRoster,
 } from './rosterStore';
@@ -236,6 +237,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // name while the new one is still in the air.
   const [leagueRows, setLeagueRows] = useState<LeagueRow[] | null>(null);
   const [leagueKey, setLeagueKey] = useState<string | null>(null);
+  // A run that came back short of the conference it asked for, held apart from
+  // the pinned pair above precisely because it must not pin: it is drawn only
+  // when there is nothing better, it says on screen that it is short, and it is
+  // deliberately not a dependency of the effect below, so setting it neither
+  // re-runs that effect nor stops the next visit to the tab from asking again.
+  const [shortTable, setShortTable] = useState<{ key: string; rows: LeagueRow[] } | null>(null);
   // The forecast for this school's next fixture, when it has one. Only paying
   // schools do, so on nearly every page in the state this settles as null and
   // the schedule looks exactly as it does today.
@@ -394,16 +401,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     setRosterFetch('done');
   }, [slug, sport, liveSports]);
 
-  // What to paint the page in, decided field by field: the sport the reader
-  // is in wins wherever its own row has an answer, and the school's identity
-  // fills in the rest. So a volleyball program that runs different colors
-  // keeps them, while a volleyball row that never uploaded a crest still
-  // wears the school's. Colors travel as a pair — the store hands over both
-  // or neither — so they are taken as a pair here too.
-  const colors = roster?.colors ?? identity?.colors ?? null;
-  const ground = colors?.ground ?? null;
-  const accent = colors?.accent ?? null;
-  const crest = roster?.logo ?? identity?.logo ?? null;
+  // What to paint the page in: the sport's own row wins field by field and the
+  // school's identity fills in the rest. The rule itself lives in rosterStore,
+  // where it is pure and pinned by tests; these three lines are only it being
+  // spread out for the effect below to key on.
+  const look = lookFor(roster, identity);
+  const ground = look?.colors?.ground ?? null;
+  const accent = look?.colors?.accent ?? null;
+  const crest = look?.logo ?? null;
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
   // lives on body::before, outside this component's own tree — so it has to
@@ -456,50 +461,82 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     if (tab !== 'league' || !membersKey || leagueKey === membersKey) return;
 
     let current = true;
-    Promise.all(
-      // Split rather than close over `members`: the key already says exactly
-      // which schools this run is for, and one dependency cannot disagree
-      // with itself the way two can.
-      membersKey.split(',').map((member) => loadSeason(member).catch(() => null)),
-    ).then((got) => {
-      if (!current) return;
-      // A member whose file never came — a mistyped slug, a school that fell
-      // out of the directory, a dead signal — is simply absent. leagueTable
-      // drops it and renders the rest.
-      const rows = leagueTable(
-        got.filter((s): s is SchoolSeason => s !== null),
-        membersKey.split(','),
-      );
+    // Split rather than close over `members`: the key already says exactly
+    // which schools this run is for, and one dependency cannot disagree with
+    // itself the way two can.
+    const asked = membersKey.split(',');
+    Promise.all(asked.map((member) => loadSeason(member).catch(() => null)))
+      .then((got) => {
+        if (!current) return;
+        // A member whose file never came — a mistyped slug, a school that fell
+        // out of the directory, a dead signal — is simply absent. leagueTable
+        // drops it and counts the rest.
+        const rows = leagueTable(
+          got.filter((s): s is SchoolSeason => s !== null),
+          asked,
+        );
 
-      if (rows.length >= 2) {
-        rememberLeagueTable(slug, membersKey, rows);
-      } else if (keptLeagueTable(slug, membersKey)) {
-        // Fewer than two members is what a dead signal looks like from here:
-        // loadSeason keeps a copy of the followed school only, so offline the
-        // school resolves itself and nobody else. A table that was right on
-        // Saturday must not be replaced by a sentence saying the conference
-        // hasn't reported. With nothing kept there is nothing to protect, and
-        // the honest empty state is the right answer.
-        return;
-      }
+        /*
+         * The whole conference or none of it — the rule rosterStore keeps for
+         * a league it parses, kept here for a league it fetches.
+         *
+         * Counting the rows against the members *asked for* is the whole of
+         * it. Four of ten timing out on the signal at a ground — the exact
+         * evening this app exists for — leaves a six-row table under a heading
+         * naming a ten-school conference, and a standings table missing a
+         * member is a table that says the wrong school is top. So only a run
+         * that brought back everybody is kept for offline and pinned as the
+         * answer for this conference; a short one is neither.
+         */
+        if (rows.length === asked.length) {
+          rememberLeagueTable(slug, membersKey, rows);
+          setLeagueRows(rows);
+          setLeagueKey(membersKey);
+          return;
+        }
 
-      setLeagueRows(rows);
-      setLeagueKey(membersKey);
-    });
+        // Short. A table kept from a run that had everybody beats one built
+        // now out of whoever answered — including the case this branch used to
+        // be written for, a dead signal, where loadSeason resolves the
+        // followed school and nobody else. A table that was right on Saturday
+        // must not be replaced by a shorter one, or by a sentence saying the
+        // conference hasn't reported.
+        if (keptLeagueTable(slug, membersKey)) return;
+        // Nothing kept, so what came back is all there is. It is drawn with a
+        // line saying it is short, and nothing is pinned — leaving the tab and
+        // coming back asks the missing schools again.
+        setShortTable({ key: membersKey, rows });
+      })
+      .catch(() => {
+        // Each loadSeason is caught on its own, but leagueTable reads fields
+        // loadSeason never validates — a member file with no `games` on it
+        // throws here rather than resolving. Unhandled that is a rejection
+        // nobody sees and a tab left on "Loading…" for good; settled, it is
+        // the kept table if there is one and the honest short-table line if
+        // there is not.
+        if (current) setShortTable({ key: membersKey, rows: [] });
+      });
 
     return () => {
       current = false;
     };
   }, [tab, membersKey, leagueKey, slug]);
 
+  // What this run managed, when it managed less than the conference. Null
+  // unless it belongs to the conference on screen now.
+  const short = shortTable && shortTable.key === membersKey ? shortTable.rows : null;
+
   // The kept table stands in until the network has one for this same
   // conference — the rhythm loadSeason and loadSchoolRoster already use, so
   // the tab opens at a ground on what it showed last time rather than on a
-  // spinner that never resolves.
+  // spinner that never resolves. A short table is the last resort under both,
+  // and the reader is told it is one.
   const standings = useMemo(
     () =>
-      leagueRows && leagueKey === membersKey ? leagueRows : keptLeagueTable(slug, membersKey),
-    [leagueRows, leagueKey, membersKey, slug],
+      leagueRows && leagueKey === membersKey
+        ? leagueRows
+        : (keptLeagueTable(slug, membersKey) ?? short),
+    [leagueRows, leagueKey, membersKey, slug, short],
   );
 
   if (failed) {
@@ -771,28 +808,40 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                      actually true instead. */
                   <p className="empty-text">Not enough of the conference has reported yet.</p>
                 ) : (
-                  <table className="table-lite table-standings">
-                    <thead>
-                      <tr>
-                        <th>Standings</th>
-                        <th>League</th>
-                        <th>All</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {standings.map((r) => (
-                        <tr key={r.slug} className={r.slug === slug ? 'is-us' : undefined}>
-                          <td>{r.name}</td>
-                          <td>
-                            {r.leagueWon}–{r.leagueLost}
-                          </td>
-                          <td>
-                            {r.overallWon}–{r.overallLost}
-                          </td>
+                  <>
+                    {/* A table built out of whoever answered, under a heading
+                        naming a conference it is short of. Saying so is the
+                        difference between a reader knowing the table is
+                        incomplete and a reader believing the wrong school is
+                        top. */}
+                    {standings === short && (
+                      <p className="filter-line">
+                        <span>Some of the conference hasn’t reported yet.</span>
+                      </p>
+                    )}
+                    <table className="table-lite">
+                      <thead>
+                        <tr>
+                          <th>Standings</th>
+                          <th>League</th>
+                          <th>All</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {standings.map((r) => (
+                          <tr key={r.slug} className={r.slug === slug ? 'is-us' : undefined}>
+                            <td>{r.name}</td>
+                            <td>
+                              {r.leagueWon}–{r.leagueLost}
+                            </td>
+                            <td>
+                              {r.overallWon}–{r.overallLost}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
                 )}
               </>
             )}

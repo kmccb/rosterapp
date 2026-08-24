@@ -127,6 +127,18 @@ const validSchedule = (v: unknown): ScheduleRow[] | null => {
 };
 
 /**
+ * A member is a directory slug and nothing else.
+ *
+ * store.ts interpolates each one straight into `/oh/data/${slug}.json`, so a
+ * member carrying a slash or a `..` resolves to a fetch nobody asked for.
+ * Only the panel can write this field and it is same-origin either way, so
+ * this is not a hole — but a shape that holds only because of who is allowed
+ * to write it is not a shape, and every real slug in the directory is these
+ * characters and no others.
+ */
+const SLUG = /^[a-z0-9-]+$/;
+
+/**
  * The whole conference or none of it — the schedule rule again. A standings
  * table missing a member it should have had is a table that says the wrong
  * school is top, which is worse than no League tab at all.
@@ -138,7 +150,7 @@ const validLeague = (v: unknown): SchoolLeague => {
   if (!Array.isArray(l.members) || l.members.length === 0) return null;
   const members: string[] = [];
   for (const m of l.members) {
-    if (typeof m !== 'string' || !m.trim()) return null;
+    if (typeof m !== 'string' || !SLUG.test(m)) return null;
     members.push(m);
   }
   return { name: l.name, members };
@@ -256,6 +268,39 @@ export const keptSchoolSports = (slug: string): SchoolIdentity | null => {
   } catch {
     return null;
   }
+};
+
+/** The look a page is actually drawn in, once the sport's own row and the
+ * school's identity have both had their say. */
+export type ChosenLook = { colors: SchoolColors; logo: string | null };
+
+/**
+ * What to paint the page in, decided field by field.
+ *
+ * The sport the reader is in wins wherever its own row has an answer, and the
+ * school's identity fills in the rest. So a volleyball program that runs
+ * different colors keeps them, while a volleyball row that never uploaded a
+ * crest still wears the school's. Colors travel as a pair — the store hands
+ * over both or neither — so they are taken as a pair here too, never one
+ * school's ground under another's accent.
+ *
+ * Null is "nothing to draw with": no colors and no crest between them, which
+ * is every unthemed school on the site and the state the default stylesheet
+ * already describes. A crest with no colors is a real answer and keeps the
+ * crest — the badge still goes beside the name — though the caller applies no
+ * theme for it, because there are no colors to derive one from.
+ *
+ * Lives here rather than inside School.tsx because it is the branch's central
+ * design decision and School.tsx is a component the node-env suite cannot
+ * render; here it is pure, and pinned in rosterStore.test.ts.
+ */
+export const lookFor = (
+  roster: SchoolRoster | null,
+  identity: SchoolIdentity | null,
+): ChosenLook | null => {
+  const colors = roster?.colors ?? identity?.colors ?? null;
+  const logo = roster?.logo ?? identity?.logo ?? null;
+  return colors || logo ? { colors, logo } : null;
 };
 
 /**
