@@ -5,6 +5,7 @@ import {
   keptSchoolSports,
   loadSchoolRoster,
   loadSchoolSports,
+  type SchoolIdentity,
   type SchoolRoster,
 } from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
@@ -166,6 +167,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // site falls back to the football-only page it was, rather than showing a
   // reader a hub built out of a failure.
   const [live, setLive] = useState<string[] | null>(null);
+  // The same answer, kept whole, for the sake of the colors and the crest on
+  // it. The sports list is held separately above rather than read back out of
+  // here, because what the memo and the roster effect below key on is that
+  // array's referential sameness — and a sports array reached through a
+  // freshly fetched object is a fresh array every time, however identical its
+  // contents. See the setLive call below.
+  const [identity, setIdentity] = useState<SchoolIdentity | null>(null);
   const [sportsSettled, setSportsSettled] = useState(false);
   const [sport, setSport] = useState<string | null>(null);
   // Whether the roster behind the chosen sport has been asked for yet. A tile
@@ -190,6 +198,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // migration behind it.
     const kept = keptSchoolSports(slug);
     setLive(kept?.sports ?? null);
+    // Cleared here rather than left to the network, so that following a
+    // different school drops the old school's colors on the same render that
+    // drops its sports. A returning reader's kept copy puts them straight
+    // back up, before the first paint.
+    setIdentity(kept);
     setSportsSettled(kept !== null);
     // The catch is belt and braces — loadSchoolSports swallows its own
     // failures — but the invariant lives in another module and the cost of it
@@ -211,6 +224,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
               ? prev
               : v.sports,
           );
+          // No such care needed for the look: the effect that applies it is
+          // keyed on the three values inside, not on this object, so an answer
+          // that merely agrees with the kept copy costs a render and repaints
+          // nothing.
+          setIdentity(v);
         }
         setSportsSettled(true);
       })
@@ -285,18 +303,38 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     setRosterFetch('done');
   }, [slug, sport, liveSports]);
 
+  // What to paint the page in, decided field by field: the sport the reader
+  // is in wins wherever its own row has an answer, and the school's identity
+  // fills in the rest. So a volleyball program that runs different colors
+  // keeps them, while a volleyball row that never uploaded a crest still
+  // wears the school's. Colors travel as a pair — the store hands over both
+  // or neither — so they are taken as a pair here too.
+  const colors = roster?.colors ?? identity?.colors ?? null;
+  const ground = colors?.ground ?? null;
+  const accent = colors?.accent ?? null;
+  const crest = roster?.logo ?? identity?.logo ?? null;
+
   // The look lifecycle. Applied to document.documentElement — the wallpaper
   // lives on body::before, outside this component's own tree — so it has to
   // be taken back down again, not just left to be overwritten: the cleanup
-  // fires both on unmount and the moment `roster` changes identity, which
-  // covers a slug change even on a future Directory that stops routing
-  // through its own null step between schools. The hub carries no roster, so
-  // it sits in the default look and each sport paints itself on arrival.
+  // fires on unmount and whenever the look itself changes, which covers a
+  // slug change even on a future Directory that stops routing through its own
+  // null step between schools.
+  //
+  // The identity arrives before any roster does, and that is the point: the
+  // hub is the first screen anybody sees and it carries no roster to get a
+  // look from, so it used to sit in default navy while the crest appeared
+  // only once football had loaded. Now the hub is dressed and the sport page
+  // inherits rather than flashing.
+  //
+  // Keyed on the three values rather than on the objects holding them, so a
+  // refetch that agrees with what is already on screen does not strobe the
+  // page through the default theme and back.
   useEffect(() => {
-    if (!roster?.colors) return;
-    applyLook({ ground: roster.colors.ground, accent: roster.colors.accent, logo: roster.logo ?? undefined });
+    if (!ground || !accent) return;
+    applyLook({ ground, accent, logo: crest ?? undefined });
     return () => clearLook();
-  }, [roster]);
+  }, [ground, accent, crest]);
 
   if (failed) {
     return (
@@ -335,6 +373,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     </>
   );
 
+  // The name with the crest beside it, wherever the school has one. The hub
+  // gets the same treatment as a sport page: it is the school's front door,
+  // and a front door with no badge on it was the whole complaint.
+  const nameBlock = crest ? (
+    <div className="oh-school-head-row">
+      <img className="oh-crest" src={crest} alt="" />
+      <div>{headline}</div>
+    </div>
+  ) : (
+    headline
+  );
+
   const footer = (
     <>
       <button type="button" className="fixture-row is-plain" onClick={onChange}>
@@ -371,7 +421,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // exempt: its free page stands on the directory's own schedule and scores.
   if (sport === null || (sport !== 'football' && !roster)) {
     return (
-      <Frame head={<div className="oh-school-head">{headline}</div>}>
+      <Frame head={<div className="oh-school-head">{nameBlock}</div>}>
         <div className="screen">
           <div className="oh-sport-grid">
             {tiles.map((s) => (
@@ -479,16 +529,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   const head = (
     <>
-      <div className="oh-school-head">
-        {roster?.logo ? (
-          <div className="oh-school-head-row">
-            <img className="oh-crest" src={roster.logo} alt="" />
-            <div>{headline}</div>
-          </div>
-        ) : (
-          headline
-        )}
-      </div>
+      <div className="oh-school-head">{nameBlock}</div>
 
       {back}
 
