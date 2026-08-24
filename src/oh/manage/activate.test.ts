@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseRoster } from '../../parse/rosterParse';
-import { scheduleArg, skippedRows, themeArg, toPlayers } from './Activate';
+import { leagueArg, scheduleArg, skippedRows, themeArg, toPlayers } from './Activate';
 
 describe('toPlayers', () => {
   it('turns a pasted spreadsheet into the app’s players', () => {
@@ -89,5 +89,40 @@ describe('scheduleArg', () => {
 
   it('a paste wins over a stale clear flag', () => {
     expect(scheduleArg([row], true)).toEqual([row]);
+  });
+});
+
+describe('leagueArg', () => {
+  const members = ['strasburg-franklin-strasburg', 'malvern-malvern'];
+
+  it('a filled form sends the conference, with the name trimmed for a heading', () => {
+    expect(leagueArg('  Inter-Valley Conference ', members, false)).toEqual({
+      name: 'Inter-Valley Conference',
+      members,
+    });
+  });
+
+  it('clearing sends {} — the theme’s contract, because a league is an object', () => {
+    expect(leagueArg('', [], true)).toEqual({});
+  });
+
+  it('neither sends null — keep whatever is stored, the renewal case', () => {
+    expect(leagueArg('', [], false)).toBeNull();
+  });
+
+  it('a filled form wins over a stale clear flag', () => {
+    expect(leagueArg('Inter-Valley Conference', members, true)).toEqual({
+      name: 'Inter-Valley Conference',
+      members,
+    });
+  });
+
+  it('half a form is not a form: a name with nobody in it, or the other way round', () => {
+    // Neither is a conference, so neither may overwrite one. Without the
+    // clear flag both read as "nothing was filled in" and keep what's stored.
+    expect(leagueArg('Inter-Valley Conference', [], false)).toBeNull();
+    expect(leagueArg('   ', members, false)).toBeNull();
+    // With it, the clear still wins — the seller asked for the league to go.
+    expect(leagueArg('Inter-Valley Conference', [], true)).toEqual({});
   });
 });

@@ -16,18 +16,20 @@
   display: block;
 }
 
-/* The active tab's content, sitting between the tab bar and the season.
-   The tab bar alone reads fine flush against either neighbor, but the two
-   together need the same breathing room the rest of the screen gets
-   between sections. */
+/* A scrolling tab's content, sitting between the pinned header and the
+   footer rows. The header alone reads fine flush against either neighbor,
+   but the two together need the same breathing room the rest of the screen
+   gets between sections. The Lookup tab is not one of these — it is its own
+   column, further down. */
 .oh-roster {
   margin: 14px 0;
 }
 
-/* The school's own tab bar. ../styles.css's .tabs/.tab classes are built for
-   App's bar, which lives inside .header with its own padding and border;
-   here the bar sits directly in the scroll, so this rule supplies the
-   vertical rhythm instead of duplicating the shared one. */
+/* The school's own tab bar. It now sits inside .header, where App's bar sits,
+   so the only thing left to say is how far it stands off the school's name
+   above it — the shared .tabs/.tab classes carry everything else. The bottom
+   margin is dropped in the header rule below so the active tab's underline
+   lands on the header's own rule, exactly as Poland's does. */
 .oh-school-tabs {
   margin: 4px 0 12px;
 }
@@ -68,6 +70,83 @@
   border-radius: 12px;
 }
 
+/* ------------------------------------------------------------------ shell */
+
+/*
+ * The school page wears the root app's frame — .app, .header, .screen and
+ * .lookup, all of them already in this bundle because src/oh/main.tsx imports
+ * ../styles.css. What was missing was the container those classes are written
+ * for: without a full-height flex column above it, .screen's `flex: 1` and
+ * .keypad's `flex: none` are both inert, and the keys ended up wherever the
+ * document happened to put them — a third of the way down the page.
+ *
+ * Only the differences from Poland's chrome belong here.
+ */
+
+/* The header supplies the side padding for everything pinned in it, so the
+   school's name must not add its own on top and inset itself twice. */
+.oh-school-header .oh-school-head {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Poland's tab strip ends flush against the header's rule, and the active
+   tab's 3px underline reads as part of that rule rather than a stripe
+   floating above it. Same here. */
+.oh-school-header .oh-school-tabs {
+  margin-bottom: 0;
+}
+
+/*
+ * The Lookup tab, in the arrangement src/screens/Lookup.tsx uses: the column
+ * is .lookup, the keys are its last child at `flex: none`, and one box between
+ * them takes the rest and scrolls. That box is .oh-lookup-body rather than
+ * .results because .results carries padding of its own, which would inset the
+ * hits twice inside a column that already has the screen's side padding.
+ */
+.oh-lookup {
+  padding: 0 var(--screen-pad, 14px);
+}
+
+/* The readout is one line and always the same line. It never gives ground. */
+.oh-lookup > .oh-query {
+  flex: none;
+}
+
+/* Everything between the readout and the keys: the hits, the "nobody wears
+   that" line, and the footer rows. It takes all the height the readout and the
+   pad leave, and it is the only part that scrolls — one player or twenty-two,
+   the keys do not move. */
+.oh-lookup > .oh-lookup-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The way out of the school, and the privacy notice. They belong at the foot
+   of what is on screen rather than floating under a single search hit, so with
+   room to spare they take it; with the hits overflowing, the auto margin
+   collapses and they sit where they always would, after the last row. */
+.oh-lookup-foot {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.oh-lookup > .keypad {
+  /* With no hits at all — the state this screen opens in — nothing above the
+     keys wants the leftover height, and without somewhere for it to go the
+     pad would ride up under the readout. An auto margin takes it. */
+  margin-top: auto;
+  /* The keys are chrome and run to both edges, the way they do in the root
+     app, so they come back out through the column's side padding. Their own
+     padding already carries env(safe-area-inset-bottom). */
+  margin-left: calc(var(--screen-pad, 14px) * -1);
+  margin-right: calc(var(--screen-pad, 14px) * -1);
+}
+
 /* ------------------------------------------------------------- manage */
 
 /* The seller's screens. Plain and dense on purpose — one person uses these,
@@ -106,6 +185,30 @@
 .mg-review-row {
   padding: 6px 10px;
   border-bottom: 1px solid var(--line);
+}
+
+/* The conference builder. The two inputs and the search hits are the same
+   controls the rest of this screen uses; all this adds is room around the
+   block, so it doesn't read as a continuation of the paste box above it. */
+.mg-league {
+  margin: 12px 0;
+}
+
+/* A picked member, in the review list's clothes but tappable to take it back
+   out again. A button carries none of a div's layout, so the row's own look
+   has to be restated here — everything else comes from .mg-review-row. */
+.mg-member {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border-width: 0 0 1px 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .mg-colors {
@@ -232,4 +335,30 @@
 
 .oh-sport-name {
   font-weight: 600;
+}
+
+/*
+ * The forecast, under the fixture it is for.
+ *
+ * On Poland it is the next-game card's own line and stands at full size.
+ * Here there is no card — the next fixture is the first row of a list — so
+ * the same three classes are asked to sit inside a row instead: indented to
+ * clear the 56px date column so the line begins where the opponent's name
+ * does, and a size down, because it is an annotation on a fixture rather
+ * than a heading of its own. The colours and the layout are the shared
+ * stylesheet's; only the fitting is said here.
+ */
+.fixture .forecast {
+  margin: 0;
+  padding: 0 0 11px 66px;
+  font-size: 14px;
+}
+
+.fixture .sky-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.fixture .forecast-temp {
+  font-size: 17px;
 }

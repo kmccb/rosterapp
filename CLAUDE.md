@@ -43,20 +43,25 @@ not a config bug — wait for the next cron. Consequences:
   → triggers deploy. `refresh.yml` (every 6h) rebuilds Poland's schedule/league/weather.
   All deploys are **fail-closed** behind the guard.
 
-## Supabase (migrations 0001–0005 ALL APPLIED in production)
+## Supabase (migrations 0001–0006 APPLIED in production; 0007 WRITTEN, NOT applied)
 
 - Posture everywhere: RLS on with **zero policies**, table grants revoked, access only via
   security-definer functions, `search_path` pinned, errcode'd raises in sentence voice.
 - **Share codes** (`shared_roster`, 0001–0003): coach publishes → code + edit token. Serves
   the root app. Untouchable.
-- **Paid tier** (`school_roster`, `school_account`, 0004–0006): admin-only writes
+- **Paid tier** (`school_roster`, `school_account`, 0004–0007): admin-only writes
   (`school_admin()` checks `is_admin`), public reads only via `school_roster_fetch(slug, sport)`
   gated on `published AND paid_through >= today` (Eastern). Renewal contract: `p_players`/`p_theme`/
-  `p_schedule` **null = keep stored, `'{}'`/`'[]'` = clear (theme/schedule), object/array = set**;
-  `p_colors` has NO keep — always send it. `school_roster_sports(slug)` (0006, NOT yet applied to
-  production) answers the fan-page hub's one question — which sports a school has live, same gate
-  as fetch — and the `schedule` jsonb column carries concierge-pasted fixtures for the sports the
-  directory can't feed. Five `school_*` grants now: fetch, sports, upsert, delete, list.
+  `p_schedule`/`p_league` **null = keep stored, `'{}'`/`'[]'` = clear (theme/schedule/league),
+  object/array = set**; `p_colors` has NO keep — always send it. `school_roster_upsert` is 11
+  params now (`p_league` is the 8th). `school_roster_sports(slug)` (0007, written, NOT yet
+  applied to production) no longer answers a bare array — it answers the school's identity,
+  `{sports, colors, theme}`, choosing colors and crest per-field from the best published-and-paid
+  row (football preferred, then most recently updated), so a crest uploaded on any sport paints
+  the whole school, hub included. The `league jsonb` column (also 0007) carries
+  `{name, members: [slug, …]}`, the conference the seller typed in at activation — the one fact a
+  conference table can't get from the directory. Still five `school_*` grants: fetch, sports,
+  upsert, delete, list — only upsert's signature moved.
 - **Migration conventions:** new numbered file; schema-wide
   `revoke execute on all functions` then **re-grant every live function by exact signature**
   (a miss silently kills a live feature); signature changes drop BOTH old and new signatures
@@ -64,11 +69,13 @@ not a config bug — wait for the next cron. Consequences:
   `notify pgrst, 'reload schema'`. Applied by hand in the dashboard SQL editor.
 - **Signature-changing migrations have a deploy ordering** (see `docs/going-live.md`):
   push → deploy green → apply migration. The panel's saves break in the window; fan pages never do.
-- Verify with `node scripts/verify-school-roster.mjs` (7 checks, needs `.env.local`).
+- Verify with `node scripts/verify-school-roster.mjs` (7 checks, needs `.env.local`). Since 0007
+  the sports check expects the identity object, so it fails against a database that only has 0006
+  applied — that's the runbook telling the truth, not a bug.
 
 ## Tests and CI
 
-- `npx vitest run` — 321 tests / 22 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 375 tests / 25 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = `deploy.yml` (push to main: test → build+guard → Pages). Env vars are repository
@@ -78,29 +85,37 @@ not a config bug — wait for the next cron. Consequences:
 ## Ops documents
 
 - `docs/selling.md` — the seller's runbook (activate a school in ~3 min; price lives here).
-- `docs/going-live.md` — first-time checklist + v2 (crest/tabs) verification + the deploy
-  ordering. **The original 17-item 0004 sweep has never been run end-to-end** — partial
-  coverage exists (verify script 6/6, share-code smoke, theme contract partially).
+- `docs/going-live.md` — first-time checklist + v2 (crest/tabs), v3 (all-sports), and v4
+  (identity/league) verification, each with its own deploy ordering. **The original 17-item
+  0004 sweep has never been run end-to-end** — partial coverage exists (verify script 7/7,
+  share-code smoke, theme contract partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
-## Where things stand (2026-08-23, end of session)
+## Where things stand (2026-08-24, end of session)
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
-(tabs, full theming, crest upload), migration 0005 applied twice cleanly, share-code system
-proven alive post-migrations, security script 6/6.
+(tabs, full theming, crest upload), the all-sports hub (0006), migration 0006 applied and
+verified, share-code system proven alive post-migrations, security script 7/7.
 
-**Shipped, pending migration:** the all-sports hub — a school with 2+ live sports (or any
-non-football live sport) opens on a sport hub, tiles ordered in-season first, football tile
-always present, remembered sport per school, pasted schedules render on the Schedule tab for
-non-football sports, sport picker + schedule paste in the panel. Migration 0006
-(`school_roster_sports`, the `schedule` column) is written and tested but **not yet applied to
-production** — until it is, fan pages fall back to football-only (the sports call fails closed)
-and panel saves are broken in the push→apply window.
+**Shipped, pending migration:** Poland parity for the paid `/oh/` page — the root app's shell
+(pinned header, scrolling body, keypad pinned to the bottom on Lookup, measured flush at
+375x812), Poland's Team-tab filters (search, All/Offense/Defense/Special, position chips, count
++ Clear, reusing `src/roster/filters.ts`, degrading to a bare search box for sports with no
+positions), the school's colors and crest applied school-wide including the hub, a League tab on
+paid football pages with conference standings computed from the committed directory data (no
+scraping, no team-id mapping — just a member list typed in at activation), and kickoff weather on
+paid football pages fetched server-side into `public/oh/weather.json` for the slugs listed in
+`paid-schools.json`, using coordinates from `public/oh/geo.json` (716 of 717 schools;
+`coventry-coventry-twp` unplaceable). Migration 0007 (identity-shaped `school_roster_sports`, the
+`league` column, 11-param upsert) is written and tested but **not yet applied to production** —
+until it is, the League tab and school-wide crest/colors have no live data to draw on, and panel
+saves are broken in the push→apply window.
 
 **Open items, in priority order:**
-1. **Apply migration 0006** — push → deploy green → apply in the dashboard SQL editor → apply
-   a second time (apply-twice gate) → `node scripts/verify-school-roster.mjs` (7 checks). Full
-   ordering is in docs/going-live.md.
+1. **Apply migration 0007** — push → deploy green → apply in the dashboard SQL editor → apply
+   a second time (apply-twice gate) → `node scripts/verify-school-roster.mjs` (7 checks, and
+   expect the sports check to fail until 0007 is applied). Full ordering is in
+   docs/going-live.md's v4 section.
 2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
    published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
    or replace with a real roster. The seller's admin session expires hourly — re-sign-in
@@ -113,10 +128,11 @@ and panel saves are broken in the push→apply window.
    hobby site; a courtesy note converts silent breakage into a heads-up.
 6. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
    mid-season roster-change texts become a burden.
-7. **Phase 3** (Region standings tab) — needs the school→team-id mapping (blocked on ~90
-   team-page captures, deliberately deferred); multi-sport schedules for non-football sports
-   are now covered by concierge-pasted rows (0006) — a ScheduleStar uuid per sport would
-   automate them later, same as football's.
+7. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
+   member list from the panel); what's left is the **Region standings** tab, which needs the
+   school→team-id mapping (blocked on ~90 team-page captures, deliberately deferred), and
+   multi-sport schedules for non-football sports beyond the concierge-pasted rows 0006 already
+   covers — a ScheduleStar uuid per sport would automate those later, same as football's.
 
 ## Conventions
 

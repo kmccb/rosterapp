@@ -9,11 +9,26 @@
  */
 
 import type { School, SchoolSeason } from '../ohio/stateModel';
+import type { Weather } from '../schedule/weather';
+import type { LeagueRow } from './leagueTable';
 
 const CHOSEN = 'oh.school';
 const INDEX = 'oh.index';
 const SEASON = (slug: string) => `oh.season.${slug}`;
 const SPORT = (slug: string) => `oh.sport.${slug}`;
+const LEAGUE = (slug: string) => `oh.league.${slug}`;
+const WEATHER = (slug: string) => `oh.weather.${slug}`;
+
+/**
+ * A forecast with the fixture it is for written on it.
+ *
+ * The date is what keeps a stale file honest. `scripts/paid-weather.mjs` writes
+ * the weather for whichever game is next when it runs, and the page draws it on
+ * the fixture naming that same day and on no other — so a refresh that failed
+ * to run leaves last week's forecast attached to last week's game, where
+ * nothing will ever show it, rather than on tonight's.
+ */
+export type FixtureWeather = Weather & { date: string };
 
 /** Punctuation and case are noise when somebody is typing at a game. */
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -63,6 +78,8 @@ export const choose = (slug: string): void => {
     }
     localStorage.removeItem(`oh.livesports.${prev}`);
     localStorage.removeItem(SPORT(prev));
+    localStorage.removeItem(LEAGUE(prev));
+    localStorage.removeItem(WEATHER(prev));
   }
   localStorage.setItem(CHOSEN, slug);
 };
@@ -76,6 +93,55 @@ export const chosenSport = (slug: string): string | null => localStorage.getItem
 export const rememberSport = (slug: string, sport: string | null): void => {
   if (sport) localStorage.setItem(SPORT(slug), sport);
   else localStorage.removeItem(SPORT(slug));
+};
+
+/*
+ * The League tab's kept copy.
+ *
+ * The tab is built from nine or ten other schools' seasons, and loadSeason
+ * keeps a copy of exactly one school — the followed one, because caching every
+ * school anybody browsed would fill the jar with counties nobody reopens. So
+ * the member seasons are network-only, and at a ground with no signal the tab
+ * would resolve one season and say the conference hadn't reported, while every
+ * other tab served happily from cache. That is the one place this app is not
+ * allowed to fail.
+ *
+ * What is kept is the computed table rather than the seasons behind it: it is
+ * a kilobyte instead of thirty, and it is exactly what the tab draws. Stored
+ * for the followed school only, on the same rule as the season above it, and
+ * stamped with the member list it was computed from so that a conference the
+ * seller has since changed cannot be served under the new one's name.
+ */
+const isLeagueRow = (v: unknown): v is LeagueRow => {
+  if (typeof v !== 'object' || v === null) return false;
+  const r = v as Record<string, unknown>;
+  if (typeof r.slug !== 'string' || typeof r.name !== 'string') return false;
+  return (['leagueWon', 'leagueLost', 'overallWon', 'overallLost'] as const).every(
+    (k) => typeof r[k] === 'number' && Number.isFinite(r[k]),
+  );
+};
+
+/** The kept table, or null — for a different conference, or for junk. */
+export const keptLeagueTable = (slug: string, members: string): LeagueRow[] | null => {
+  if (!members) return null;
+  try {
+    const raw = localStorage.getItem(LEAGUE(slug));
+    if (!raw) return null;
+    const kept = JSON.parse(raw) as { members?: unknown; rows?: unknown };
+    if (kept?.members !== members) return null;
+    return Array.isArray(kept.rows) && kept.rows.every(isLeagueRow) ? (kept.rows as LeagueRow[]) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const rememberLeagueTable = (slug: string, members: string, rows: LeagueRow[]): void => {
+  if (slug !== chosenSlug()) return;
+  try {
+    localStorage.setItem(LEAGUE(slug), JSON.stringify({ members, rows }));
+  } catch {
+    // A full jar must not fail the fetch that already succeeded.
+  }
 };
 
 /** Network first, then whatever was kept — the schedule screen's rule. */
@@ -121,4 +187,62 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
   const kept = localStorage.getItem(SEASON(slug));
   if (kept) return JSON.parse(kept) as SchoolSeason;
   throw new Error('no season');
+}
+
+/*
+ * The weather at kickoff.
+ *
+ * One committed file holds a line for each school that pays for a page, so
+ * this is a couple of hundred bytes however many schools are in it. It is
+ * fetched rather than computed and it is fetched from this origin: the
+ * forecast itself was asked for once, in the refresh workflow, precisely so
+ * that nobody reading the site has to ask a weather service anything. See
+ * scripts/paid-weather.mjs.
+ *
+ * Junk is treated as nothing. The file is small enough to hand-edit and one
+ * missing field would otherwise print "NaN°" next to a school's name on the
+ * one screen its parents opened.
+ */
+const isFixtureWeather = (v: unknown): v is FixtureWeather => {
+  if (typeof v !== 'object' || v === null) return false;
+  const w = v as Record<string, unknown>;
+  if (typeof w.date !== 'string' || typeof w.day !== 'boolean' || typeof w.at !== 'string') {
+    return false;
+  }
+  return (['code', 'tempF', 'precipChance', 'windMph'] as const).every(
+    (k) => typeof w[k] === 'number' && Number.isFinite(w[k]),
+  );
+};
+
+/** Network first, then whatever was kept — the same rule as the season. */
+export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
+  try {
+    const res = await fetch(`/oh/weather.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const all = (await res.json()) as Record<string, unknown>;
+      const mine = isFixtureWeather(all?.[slug]) ? (all[slug] as FixtureWeather) : null;
+      // Only the followed school's copy is kept, as with the season — and an
+      // answer of "no forecast for this school" clears it, so a school that
+      // stops paying, or whose next game has gone past the forecast's range,
+      // does not keep serving one out of a phone for ever.
+      if (slug === chosenSlug()) {
+        try {
+          if (mine) localStorage.setItem(WEATHER(slug), JSON.stringify(mine));
+          else localStorage.removeItem(WEATHER(slug));
+        } catch {
+          // A full jar must not fail a fetch that already succeeded.
+        }
+      }
+      return mine;
+    }
+  } catch {
+    /* no signal */
+  }
+  try {
+    const kept = localStorage.getItem(WEATHER(slug));
+    const parsed = kept ? (JSON.parse(kept) as unknown) : null;
+    return isFixtureWeather(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }

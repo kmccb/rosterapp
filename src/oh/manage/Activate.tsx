@@ -105,6 +105,27 @@ export function scheduleArg(rows: ScheduleRow[], cleared: boolean): ScheduleRow[
 }
 
 /**
+ * The conference half of the contract. A league is an object, so it follows
+ * themeArg's shape rather than scheduleArg's: a filled form sends the
+ * conference, a cleared one sends {} (wipe the stored one), and neither sends
+ * null (keep whatever is stored — the renewal case).
+ *
+ * Half a conference is not a conference: a name with nobody in it, or members
+ * under no name, is treated as an unfilled form rather than saved as a table
+ * that would head itself with an empty string or stand one school up alone.
+ * The name is trimmed on the way out, because it is about to be a heading.
+ */
+export function leagueArg(
+  name: string,
+  members: string[],
+  cleared: boolean,
+): { name: string; members: string[] } | Record<string, never> | null {
+  if (name.trim() && members.length) return { name: name.trim(), members };
+  if (cleared) return {};
+  return null;
+}
+
+/**
  * The whole concierge job on one screen: pick the school, paste the
  * spreadsheet, look at what the parser made of it, set the colors and the
  * paid-through date, publish. The parser is the same one the root app has
@@ -128,6 +149,15 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   // renewal case, same contract as `players`).
   const [logoData, setLogoData] = useState<string | null>(null);
   const [logoCleared, setLogoCleared] = useState(false);
+  // The conference, in the same three-state shape as the logo: a filled form
+  // sets it, `leagueCleared` wipes the stored one, neither keeps it. The list
+  // holds directory slugs, never typed names — the standings are folded out
+  // of `public/oh/data/<slug>.json`, so a slug is the only thing that can find
+  // a member's season.
+  const [leagueName, setLeagueName] = useState('');
+  const [leagueMembers, setLeagueMembers] = useState<string[]>([]);
+  const [leagueQuery, setLeagueQuery] = useState('');
+  const [leagueCleared, setLeagueCleared] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -177,6 +207,22 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
     [schools, slugQuery, slug],
   );
 
+  // The same search, pointed at the conference instead of the customer.
+  // Schools already picked drop out of the hits so a second tap on the same
+  // name can't file anyone twice; so does the school itself, which the fan
+  // page puts in its own table without being asked.
+  const leagueHits = useMemo(
+    () =>
+      searchSchools(schools, leagueQuery)
+        .filter((s) => s.slug !== slug && !leagueMembers.includes(s.slug))
+        .slice(0, 8),
+    [schools, leagueQuery, slug, leagueMembers],
+  );
+
+  // A slug is what gets stored and a name is what the seller recognises.
+  const schoolName = (memberSlug: string): string =>
+    schools.find((s) => s.slug === memberSlug)?.name ?? memberSlug;
+
   // Editing an existing school keeps its roster unless a new paste replaces
   // it: a save with no paste sends null and the database keeps what it has.
   // That is the renewal flow — new date, new note, roster untouched.
@@ -203,6 +249,13 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
         schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
+        // Gated on the same sport the section is, or a seller who fills the
+        // conference in and then switches the Sport select on a new row
+        // stores a league nothing will ever render — the fan side draws it
+        // for football only. Invisible dead data is worse than none.
+        league: effectiveSport === 'football'
+          ? leagueArg(leagueName, leagueMembers, leagueCleared)
+          : null,
         published,
         paidThrough,
         note,
@@ -383,6 +436,110 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                 </button>
               )}
             </>
+          )}
+
+          {/* Football only, for now. The standings are folded out of the
+              directory, and the directory only knows football — every other
+              sport's fixtures arrive as a paste, with no opponent slugs on
+              them to find anyone else's season by. */}
+          {effectiveSport === 'football' && (
+            <div className="mg-league">
+              <input
+                className="search"
+                type="text"
+                value={leagueName}
+                onChange={(e) => {
+                  setLeagueName(e.target.value);
+                  setLeagueCleared(false);
+                }}
+                placeholder="Conference name — heads the table"
+                aria-label="Conference name"
+              />
+
+              <input
+                className="search"
+                type="search"
+                value={leagueQuery}
+                onChange={(e) => setLeagueQuery(e.target.value)}
+                placeholder="Add a school to the conference"
+                aria-label="Search for a school to add to the conference"
+              />
+
+              {leagueQuery.trim() !== '' &&
+                leagueHits.map((s) => (
+                  <button
+                    key={s.slug}
+                    type="button"
+                    className="fixture-row is-plain"
+                    onClick={() => {
+                      setLeagueMembers((prev) => [...prev, s.slug]);
+                      setLeagueQuery('');
+                      setLeagueCleared(false);
+                    }}
+                  >
+                    <span className="fixture-team">
+                      {s.name}
+                      <span className="fixture-sub">{s.city}</span>
+                    </span>
+                  </button>
+                ))}
+
+              {leagueMembers.length > 0 && (
+                <>
+                  <p className="filter-line">
+                    <span>
+                      {leagueMembers.length} added — this school joins its own table
+                      without being picked
+                    </span>
+                  </p>
+                  <div className="mg-review">
+                    {leagueMembers.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        className="mg-review-row mg-member"
+                        onClick={() => setLeagueMembers((prev) => prev.filter((x) => x !== m))}
+                      >
+                        {schoolName(m)}
+                        <span className="fixture-sub">Remove</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* A name with nobody in it saves nothing at all — leagueArg
+                  reads it as an unfilled form. Say so here rather than let
+                  the seller find out from a tab that never appeared. */}
+              {leagueName.trim() !== '' && leagueMembers.length === 0 && (
+                <span className="fixture-sub">
+                  Add at least one school, or the conference won&rsquo;t save.
+                </span>
+              )}
+
+              {existing?.has_league && !leagueCleared && leagueMembers.length === 0 && (
+                <span className="fixture-sub">Has a conference</span>
+              )}
+
+              {leagueCleared && leagueMembers.length === 0 && (
+                <span className="fixture-sub">Conference removed</span>
+              )}
+
+              {(leagueMembers.length > 0 || (existing?.has_league && !leagueCleared)) && (
+                <button
+                  type="button"
+                  className="fixture-row is-plain"
+                  onClick={() => {
+                    setLeagueName('');
+                    setLeagueMembers([]);
+                    setLeagueQuery('');
+                    setLeagueCleared(true);
+                  }}
+                >
+                  <span className="fixture-team">Remove conference</span>
+                </button>
+              )}
+            </div>
           )}
 
           <div className="mg-colors">

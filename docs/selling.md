@@ -20,6 +20,33 @@ change it here, and quote whatever it says.
 Save unpublished instead if the check hasn't cleared — publishing later is
 the same screen.
 
+### One more line, in the repo
+
+Add the school's slug to `paid-schools.json` at the repo root and push:
+
+```json
+{ "slugs": ["strasburg-franklin-strasburg", "their-school-theirtown"] }
+```
+
+That is the whole list the weather pass reads. Every six hours the refresh
+workflow looks up the next unplayed fixture for each slug on it, fetches the
+forecast for that kickoff, and writes it into the build that deploys — nothing
+is committed, so the live forecast is always the one that run fetched. The
+school's Schedule tab then carries the weather at kickoff the way Poland's
+always has.
+
+It is one line and it is optional: a school left off the list simply has no
+forecast, and nothing else about its page changes. The slug is the one in the
+school's /oh/ URL. Take a slug back off the list when a school comes down.
+
+Nothing here is fetched from a reader's phone — that is the point, and the
+privacy page says so.
+
+The forecast needs the school's town on the map. `public/oh/geo.json` already
+holds 716 of the 717, so this is nearly always already done. If the refresh log
+says a school has no coordinates, run `node scripts/geocode-schools.mjs` and
+commit — it tops the file up rather than rewriting it.
+
 ### More than one sport
 
 The Activate form asks which sport. Football's schedule comes free from the
@@ -28,6 +55,25 @@ columns) — the parser preview shows what it read before you publish. Once a
 school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. Pricing for the
 all-sports package isn't set yet.
+
+### The conference
+
+On a football activation, ask which conference the school plays in and who
+else is in it — that's the whole input the League tab's standings run on;
+everything else (who played whom, who won) already lives in the directory
+data. Type the conference name and pick the member schools in the panel.
+
+Re-picking members **replaces** the stored list, it doesn't add to it — the
+panel has no way to show what's already saved, so treat every save here as
+the full roster of the conference, not an addition to it. Leaving the
+picker empty and saving clears the league instead, and the tab disappears
+from that school's fan page.
+
+### Colors and crest are effectively a set
+
+Pick both at activation if you can. A crest with no colors dresses the
+header but leaves the rest of the page unthemed — the two want to arrive
+together, not one now and the other at renewal.
 
 ## Mid-season changes
 

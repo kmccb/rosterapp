@@ -29,6 +29,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The forecast for each paying school's next fixture, written into
+      # public/oh/ so the build copies it into the deploy — the same trip
+      # Poland's own forecast makes, and for the same reason: it is asked for
+      # once here rather than once per spectator, so nobody reading /oh/ has to
+      # announce themselves to a weather service. The script never exits
+      # non-zero, and continue-on-error is the belt to that brace: a weather
+      # outage must not be the reason Friday's scores fail to deploy.
+      - run: node scripts/paid-weather.mjs
+        continue-on-error: true
       - run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}

@@ -13,7 +13,17 @@ vi.mock('./supa', () => ({
   rpc: vi.fn(),
 }));
 
-import { cacheKey, keptSchoolSports, loadSchoolRoster, loadSchoolSports, parseCached } from './rosterStore';
+import {
+  cacheKey,
+  keptSchoolSports,
+  loadSchoolRoster,
+  loadSchoolSports,
+  lookFor,
+  parseCached,
+  type SchoolColors,
+  type SchoolIdentity,
+  type SchoolRoster,
+} from './rosterStore';
 import { rpc } from './supa';
 
 const mockedRpc = vi.mocked(rpc);
@@ -24,7 +34,7 @@ describe('roster cache plumbing', () => {
   });
 
   it('round-trips a roster and rejects junk', () => {
-    const roster = { season: 2026, players: [], colors: null, logo: null, schedule: null };
+    const roster = { season: 2026, players: [], colors: null, logo: null, schedule: null, league: null };
     expect(parseCached(JSON.stringify(roster))).toEqual(roster);
     expect(parseCached('{"season":"nope"}')).toBeNull();
     expect(parseCached('not json')).toBeNull();
@@ -32,7 +42,7 @@ describe('roster cache plumbing', () => {
   });
 
   it('accepts only well-formed colors, defaulting anything else to no theme', () => {
-    const good = { season: 2026, players: [], colors: { ground: '#04043a', accent: '#4fbaf7' }, logo: null, schedule: null };
+    const good = { season: 2026, players: [], colors: { ground: '#04043a', accent: '#4fbaf7' }, logo: null, schedule: null, league: null };
     expect(parseCached(JSON.stringify(good))).toEqual(good);
 
     // Not hex — a CSS color name would paint fine in a browser but is not
@@ -47,7 +57,7 @@ describe('roster cache plumbing', () => {
 
   it('accepts a logo only as a data:image/ URI, defaulting anything else to none', () => {
     const dataUri = 'data:image/jpeg;base64,AAAA';
-    const good = { season: 2026, players: [], colors: null, logo: dataUri, schedule: null };
+    const good = { season: 2026, players: [], colors: null, logo: dataUri, schedule: null, league: null };
     expect(parseCached(JSON.stringify(good))).toEqual(good);
 
     // A baked path — meaningful to the root app's own build, not to a shared
@@ -97,6 +107,115 @@ describe('roster cache plumbing', () => {
     const missing = { season: 2026, players: [], colors: null, logo: null };
     expect(parseCached(JSON.stringify(missing))?.schedule).toBeNull();
   });
+
+  it('accepts a league only whole, defaulting anything else to none', () => {
+    const league = { name: 'Inter-Valley Conference', members: ['strasburg-franklin', 'tuscarawas-valley'] };
+    const good = { season: 2026, players: [], colors: null, logo: null, schedule: null, league };
+    expect(parseCached(JSON.stringify(good))?.league).toEqual(league);
+
+    // One member that isn't a slug poisons the lot — a standings table
+    // missing a school says the wrong team is top.
+    const badMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['strasburg-franklin', 7] } };
+    expect(parseCached(JSON.stringify(badMember))?.league).toBeNull();
+
+    const blankMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['strasburg-franklin', '  '] } };
+    expect(parseCached(JSON.stringify(blankMember))?.league).toBeNull();
+
+    // A member is a directory slug and nothing else — store.ts drops each one
+    // straight into `/oh/data/${slug}.json`, where a slash or a `..` resolves
+    // to a fetch nobody asked for.
+    const pathMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['../../index'] } };
+    expect(parseCached(JSON.stringify(pathMember))?.league).toBeNull();
+
+    const slashMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['strasburg-franklin/../poland'] } };
+    expect(parseCached(JSON.stringify(slashMember))?.league).toBeNull();
+
+    // The directory writes every slug in lower case, so anything else is not a
+    // slug it will ever answer to.
+    const shoutedMember = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: ['Strasburg-Franklin'] } };
+    expect(parseCached(JSON.stringify(shoutedMember))?.league).toBeNull();
+
+    // No name to head the table with.
+    const noName = { season: 2026, players: [], colors: null, logo: null,
+      league: { members: ['strasburg-franklin'] } };
+    expect(parseCached(JSON.stringify(noName))?.league).toBeNull();
+
+    const noMembers = { season: 2026, players: [], colors: null, logo: null,
+      league: { name: 'Inter-Valley Conference', members: [] } };
+    expect(parseCached(JSON.stringify(noMembers))?.league).toBeNull();
+
+    const absent = { season: 2026, players: [], colors: null, logo: null };
+    expect(parseCached(JSON.stringify(absent))?.league).toBeNull();
+  });
+});
+
+describe('lookFor', () => {
+  // The two colors and the crest are all this rule ever reads; the rest of a
+  // roster is here only because the type asks for it.
+  const roster = (colors: SchoolColors, logo: string | null): SchoolRoster => ({
+    season: 2026, players: [], colors, logo, schedule: null, league: null,
+  });
+  const identity = (colors: SchoolColors, logo: string | null): SchoolIdentity => ({
+    sports: ['football'], colors, logo,
+  });
+
+  const sportColors = { ground: '#04043a', accent: '#4fbaf7' };
+  const schoolColors = { ground: '#3a0404', accent: '#f7ba4f' };
+  const sportCrest = 'data:image/png;base64,FFFF';
+  const schoolCrest = 'data:image/png;base64,GGGG';
+
+  it('lets the sport the reader is in win, field by field', () => {
+    expect(lookFor(roster(sportColors, sportCrest), identity(schoolColors, schoolCrest))).toEqual({
+      colors: sportColors,
+      logo: sportCrest,
+    });
+  });
+
+  it('fills each field the sport left empty from the school', () => {
+    // A volleyball program that runs its own colors but never uploaded a crest
+    // keeps the colors and wears the school's badge.
+    expect(lookFor(roster(sportColors, null), identity(schoolColors, schoolCrest))).toEqual({
+      colors: sportColors,
+      logo: schoolCrest,
+    });
+    expect(lookFor(roster(null, sportCrest), identity(schoolColors, schoolCrest))).toEqual({
+      colors: schoolColors,
+      logo: sportCrest,
+    });
+  });
+
+  it('takes colors as a pair, never one school’s ground under another’s accent', () => {
+    // The store hands over both colors or neither, so there is no half-set to
+    // fill in from the other side — a sport with no colors takes the school's
+    // two, whole.
+    expect(lookFor(roster(null, null), identity(schoolColors, null))?.colors).toEqual(schoolColors);
+  });
+
+  it('is no look at all when neither has anything', () => {
+    expect(lookFor(null, null)).toBeNull();
+    expect(lookFor(roster(null, null), identity(null, null))).toBeNull();
+  });
+
+  it('keeps a crest that arrives with no colors', () => {
+    // A real answer, and the documented behaviour of the caller: the badge
+    // still goes beside the school's name, while the page stays in the default
+    // theme because there are no colors to derive one from.
+    expect(lookFor(roster(null, sportCrest), null)).toEqual({ colors: null, logo: sportCrest });
+    expect(lookFor(null, identity(null, schoolCrest))).toEqual({ colors: null, logo: schoolCrest });
+  });
+
+  it('reads the school alone before any roster has arrived', () => {
+    // The hub, which carries no roster and had nowhere else to get a look from.
+    expect(lookFor(null, identity(schoolColors, schoolCrest))).toEqual({
+      colors: schoolColors,
+      logo: schoolCrest,
+    });
+  });
 });
 
 describe('loadSchoolRoster', () => {
@@ -124,10 +243,19 @@ describe('loadSchoolRoster', () => {
     mockedRpc.mockResolvedValue(roster);
 
     const got = await loadSchoolRoster('hubbard-hubbard', 'football');
-    expect(got).toEqual({ ...roster, logo: null, schedule: null });
+    expect(got).toEqual({ ...roster, logo: null, schedule: null, league: null });
     expect(localStorageMock.get(cacheKey('hubbard-hubbard', 'football'))).toBe(
-      JSON.stringify({ ...roster, logo: null, schedule: null }),
+      JSON.stringify({ ...roster, logo: null, schedule: null, league: null }),
     );
+  });
+
+  it('carries the conference the school told us about', async () => {
+    const league = { name: 'Inter-Valley Conference', members: ['strasburg-franklin', 'tuscarawas-valley'] };
+    mockedRpc.mockResolvedValue({ season: 2026, players: [], colors: null, league });
+
+    const got = await loadSchoolRoster('hubbard-hubbard', 'football');
+    expect(got?.league).toEqual(league);
+    expect(JSON.parse(localStorageMock.get(cacheKey('hubbard-hubbard', 'football'))!).league).toEqual(league);
   });
 
   it('pulls a data-URI logo out of the fetched theme', async () => {
@@ -174,7 +302,7 @@ describe('loadSchoolRoster', () => {
     mockedRpc.mockRejectedValue(new Error('Network error'));
 
     const got = await loadSchoolRoster('hubbard-hubbard', 'football');
-    expect(got).toEqual({ ...cached, schedule: null });
+    expect(got).toEqual({ ...cached, schedule: null, league: null });
   });
 
   it('falls back to a cached logo when the fetch throws', async () => {
@@ -210,11 +338,41 @@ describe('loadSchoolSports', () => {
     vi.unstubAllGlobals();
   });
 
-  it('answers the live list and caches it for the chosen school', async () => {
+  const dataUri = 'data:image/png;base64,DDDD';
+
+  it('answers who the school is and caches it for the chosen school', async () => {
     localStorage.setItem('oh.school', 'hubbard-hubbard');
-    mockedRpc.mockResolvedValueOnce(['football', 'volleyball']);
-    expect(await loadSchoolSports('hubbard-hubbard')).toEqual(['football', 'volleyball']);
-    expect(JSON.parse(localStorage.getItem('oh.livesports.hubbard-hubbard')!)).toEqual(['football', 'volleyball']);
+    mockedRpc.mockResolvedValueOnce({
+      sports: ['football', 'volleyball'],
+      colors: { ground: '#04043a', accent: '#4fbaf7' },
+      theme: { logo: dataUri },
+    });
+
+    expect(await loadSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['football', 'volleyball'],
+      colors: { ground: '#04043a', accent: '#4fbaf7' },
+      logo: dataUri,
+    });
+    // Kept in the sanitized shape, and read back out of the jar unchanged —
+    // otherwise a returning reader loses the crest the network just handed us.
+    expect(keptSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['football', 'volleyball'],
+      colors: { ground: '#04043a', accent: '#4fbaf7' },
+      logo: dataUri,
+    });
+  });
+
+  it('drops a look it cannot use without losing the sports', async () => {
+    mockedRpc.mockResolvedValueOnce({
+      sports: ['football'],
+      colors: { ground: 'navy', accent: '#4fbaf7' },
+      theme: { logo: 'https://example.com/badge.jpg' },
+    });
+    expect(await loadSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['football'],
+      colors: null,
+      logo: null,
+    });
   });
 
   it('treats junk answers as unknown, not as an empty school', async () => {
@@ -223,9 +381,16 @@ describe('loadSchoolSports', () => {
   });
 
   it('falls back to the kept copy without a signal', async () => {
-    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(['basketball']));
+    localStorage.setItem(
+      'oh.livesports.hubbard-hubbard',
+      JSON.stringify({ sports: ['basketball'], colors: null, logo: null }),
+    );
     mockedRpc.mockRejectedValueOnce(new Error('no signal'));
-    expect(await loadSchoolSports('hubbard-hubbard')).toEqual(['basketball']);
+    expect(await loadSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['basketball'],
+      colors: null,
+      logo: null,
+    });
   });
 
   it('is unknown with no signal and no kept copy', async () => {
@@ -234,8 +399,21 @@ describe('loadSchoolSports', () => {
   });
 
   it('an empty answer is a real answer — no live sports', async () => {
-    mockedRpc.mockResolvedValueOnce([]);
-    expect(await loadSchoolSports('hubbard-hubbard')).toEqual([]);
+    mockedRpc.mockResolvedValueOnce({ sports: [], colors: null, theme: null });
+    expect(await loadSchoolSports('hubbard-hubbard')).toEqual({ sports: [], colors: null, logo: null });
+  });
+
+  it('reads the old bare-array answer as a school with no look of its own', async () => {
+    // What the live function still answers with in the window between this
+    // deploy and 0007 being applied by hand. Sending every school back to a
+    // football-only page for the length of that window would be a worse
+    // outcome than simply not having a crest yet.
+    mockedRpc.mockResolvedValueOnce(['football', 'volleyball']);
+    expect(await loadSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['football', 'volleyball'],
+      colors: null,
+      logo: null,
+    });
   });
 });
 
@@ -256,9 +434,26 @@ describe('keptSchoolSports', () => {
     vi.unstubAllGlobals();
   });
 
-  it('reads the kept list without asking the network', () => {
+  it('reads the kept identity without asking the network', () => {
+    const kept = {
+      sports: ['football', 'volleyball'],
+      colors: { ground: '#04043a', accent: '#4fbaf7' },
+      logo: 'data:image/png;base64,EEEE',
+    };
+    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(kept));
+    expect(keptSchoolSports('hubbard-hubbard')).toEqual(kept);
+  });
+
+  it('reads a jar written before the identity shape as sports with no look', () => {
+    // Every returning reader's jar holds a bare array today. Throwing it away
+    // would put them back on the network — and on a first paint held behind
+    // it — to learn something they already knew.
     localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(['football', 'volleyball']));
-    expect(keptSchoolSports('hubbard-hubbard')).toEqual(['football', 'volleyball']);
+    expect(keptSchoolSports('hubbard-hubbard')).toEqual({
+      sports: ['football', 'volleyball'],
+      colors: null,
+      logo: null,
+    });
   });
 
   it('is unknown when nothing was ever kept', () => {
@@ -273,6 +468,9 @@ describe('keptSchoolSports', () => {
     expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
 
     localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify(['football', 7]));
+    expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
+
+    localStorage.setItem('oh.livesports.hubbard-hubbard', JSON.stringify({ sports: 'football' }));
     expect(keptSchoolSports('hubbard-hubbard')).toBeNull();
   });
 });

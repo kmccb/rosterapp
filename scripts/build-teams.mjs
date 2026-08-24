@@ -25,6 +25,7 @@ import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchEspnRoster, fetchEspnSeasons } from './lib/espn.mjs';
 import { fetchLeague } from './lib/ohio.mjs';
+import { forecastAt } from './lib/forecast.mjs';
 import { paletteFor, writeIcons, writeWallpaper } from './lib/badge.mjs';
 import { parseIcal, nextGame, canonicalOpponent } from '../src/schedule/icalParse.ts';
 import { mergeResults, seasonRecord } from '../src/schedule/mergeResults.ts';
@@ -213,6 +214,10 @@ async function writeSeasons(team, out) {
  *
  * Only the next game gets one. Anything further out is a guess dressed up as a
  * fact, and the rebuild will reach it in time.
+ *
+ * The fetch and the hour matching moved to lib/forecast.mjs when the paid /oh/
+ * pages wanted the same line on their own next fixture. What stays here is what
+ * is Poland's alone: which game counts as next, and what to say in this log.
  */
 async function forecastFor(team, games) {
   // Scrimmages are not shown any more, so the card the forecast sits on is
@@ -221,39 +226,14 @@ async function forecastFor(team, games) {
   const at = team.location && nextGame(games.filter((g) => !g.scrimmage));
   if (!at?.kickoff) return undefined;
 
-  const kickoff = Math.floor(new Date(at.kickoff).getTime() / 1000);
-  const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${team.location.lat}` +
-    `&longitude=${team.location.lon}` +
-    `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,weather_code,is_day` +
-    `&temperature_unit=fahrenheit&wind_speed_unit=mph&timeformat=unixtime&forecast_days=16`;
-
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { hourly } = await res.json();
-
-    // The forecast is hourly and kickoff is not on the hour, so take the
-    // closest one — and give up rather than guess if the game is beyond range.
-    let best = -1;
-    let gap = Infinity;
-    hourly.time.forEach((t, i) => {
-      const d = Math.abs(t - kickoff);
-      if (d < gap) {
-        gap = d;
-        best = i;
-      }
+    const weather = await forecastAt({
+      lat: team.location.lat,
+      lon: team.location.lon,
+      at: new Date(at.kickoff),
     });
-    if (best < 0 || gap > 3600 * 2) return undefined;
+    if (!weather) return undefined;
 
-    const weather = {
-      code: hourly.weather_code[best],
-      tempF: Math.round(hourly.temperature_2m[best]),
-      precipChance: Math.round(hourly.precipitation_probability[best] ?? 0),
-      windMph: Math.round(hourly.wind_speed_10m[best]),
-      day: hourly.is_day[best] === 1,
-      at: new Date(hourly.time[best] * 1000).toISOString(),
-    };
     console.log(
       `           weather  ${weather.tempF}°F, ${weather.precipChance}% rain, ` +
         `${weather.windMph}mph wind at ${at.opponent}`,

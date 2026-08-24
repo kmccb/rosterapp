@@ -1,4 +1,13 @@
-import { choose, chosenSport, rememberSport, searchSchools } from './store';
+import {
+  choose,
+  chosenSport,
+  keptLeagueTable,
+  loadWeather,
+  rememberLeagueTable,
+  rememberSport,
+  searchSchools,
+} from './store';
+import type { LeagueRow } from './leagueTable';
 
 const schools = [
   { slug: 'jackson-jackson', name: 'Jackson', city: 'Jackson' },
@@ -63,7 +72,9 @@ describe('choose', () => {
     localStorage.setItem('oh.roster.old-school.basketball', '{}');
     localStorage.setItem('oh.livesports.old-school', '[]');
     localStorage.setItem('oh.sport.old-school', 'basketball');
+    localStorage.setItem('oh.league.old-school', '{}');
     choose('new-school');
+    expect(localStorage.getItem('oh.league.old-school')).toBeNull();
     expect(localStorage.getItem('oh.roster.old-school')).toBeNull();
     expect(localStorage.getItem('oh.roster.old-school.football')).toBeNull();
     expect(localStorage.getItem('oh.roster.old-school.basketball')).toBeNull();
@@ -76,5 +87,183 @@ describe('choose', () => {
     expect(chosenSport('hubbard-hubbard')).toBe('basketball');
     rememberSport('hubbard-hubbard', null);
     expect(chosenSport('hubbard-hubbard')).toBeNull();
+  });
+});
+
+/*
+ * The League tab's kept copy. It is the only jar in the app that stands in for
+ * data nobody caches — the member schools' seasons — so an offline reader at a
+ * ground sees the table instead of a sentence saying nobody reported.
+ */
+describe('the kept league table', () => {
+  const members = 'a-town,b-town,c-town';
+  const rows: LeagueRow[] = [
+    { slug: 'a-town', name: 'Ash', leagueWon: 2, leagueLost: 0, overallWon: 3, overallLost: 0 },
+    { slug: 'b-town', name: 'Birch', leagueWon: 0, leagueLost: 2, overallWon: 0, overallLost: 3 },
+  ];
+
+  beforeEach(() => {
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => (k in store ? store[k] : null),
+      setItem: (k: string, v: string) => { store[k] = v; },
+      removeItem: (k: string) => { delete store[k]; },
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('round-trips a table for the followed school', () => {
+    choose('a-town');
+    rememberLeagueTable('a-town', members, rows);
+
+    expect(keptLeagueTable('a-town', members)).toEqual(rows);
+  });
+
+  it('keeps nothing for a school the reader is only browsing', () => {
+    // The same rule loadSeason follows: caching every school anybody opens
+    // would fill the jar with counties nobody will reopen.
+    choose('a-town');
+    rememberLeagueTable('z-town', members, rows);
+
+    expect(keptLeagueTable('z-town', members)).toBeNull();
+  });
+
+  it('refuses a table computed for a different conference', () => {
+    // The seller adds a school to the conference; the kept table is now a
+    // table of somebody else's league, and must not be served under the new
+    // one's name.
+    choose('a-town');
+    rememberLeagueTable('a-town', members, rows);
+
+    expect(keptLeagueTable('a-town', `${members},d-town`)).toBeNull();
+  });
+
+  it('rejects junk rather than handing a screen half a row', () => {
+    choose('a-town');
+
+    localStorage.setItem('oh.league.a-town', 'not json');
+    expect(keptLeagueTable('a-town', members)).toBeNull();
+
+    // A row missing its numbers, from a jar written by some future shape.
+    localStorage.setItem(
+      'oh.league.a-town',
+      JSON.stringify({ members, rows: [{ slug: 'a-town', name: 'Ash' }] }),
+    );
+    expect(keptLeagueTable('a-town', members)).toBeNull();
+
+    // A win count that is not a number.
+    localStorage.setItem(
+      'oh.league.a-town',
+      JSON.stringify({ members, rows: [{ ...rows[0], leagueWon: '2' }] }),
+    );
+    expect(keptLeagueTable('a-town', members)).toBeNull();
+
+    localStorage.setItem('oh.league.a-town', JSON.stringify({ members, rows: 'nope' }));
+    expect(keptLeagueTable('a-town', members)).toBeNull();
+  });
+
+  it('has nothing to say about a school with no conference at all', () => {
+    expect(keptLeagueTable('a-town', '')).toBeNull();
+  });
+});
+
+/*
+ * The kickoff forecast.
+ *
+ * One committed file holds a line for each paying school, fetched here rather
+ * than from a phone — see scripts/paid-weather.mjs. What is worth testing is
+ * the two ways it can be wrong on screen: junk printing "NaN°" beside a
+ * school's name, and a school that no longer has a forecast keeping one alive
+ * out of a phone for ever.
+ */
+describe('the kickoff forecast', () => {
+  const forecast = {
+    code: 3,
+    tempF: 61,
+    precipChance: 40,
+    windMph: 14,
+    day: false,
+    at: '2026-08-28T23:00:00.000Z',
+    date: '2026-08-28',
+  };
+
+  beforeEach(() => {
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => (k in store ? store[k] : null),
+      setItem: (k: string, v: string) => { store[k] = v; },
+      removeItem: (k: string) => { delete store[k]; },
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const serve = (body: unknown, ok = true) =>
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok, json: async () => body })));
+
+  it('picks this school’s line out of the file and keeps it', async () => {
+    choose('a-town');
+    serve({ 'a-town': forecast, 'b-town': { ...forecast, tempF: 70 } });
+
+    expect(await loadWeather('a-town')).toEqual(forecast);
+    expect(JSON.parse(localStorage.getItem('oh.weather.a-town')!)).toEqual(forecast);
+  });
+
+  it('keeps nothing for a school the reader is only browsing', async () => {
+    choose('a-town');
+    serve({ 'b-town': forecast });
+
+    expect(await loadWeather('b-town')).toEqual(forecast);
+    expect(localStorage.getItem('oh.weather.b-town')).toBeNull();
+  });
+
+  it('serves the kept copy when there is no signal', async () => {
+    choose('a-town');
+    localStorage.setItem('oh.weather.a-town', JSON.stringify(forecast));
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+
+    expect(await loadWeather('a-town')).toEqual(forecast);
+  });
+
+  it('drops the kept copy when the file no longer names this school', async () => {
+    // A school that stopped paying, or whose next game has gone past the
+    // forecast's range. An answer of "no forecast" is an answer.
+    choose('a-town');
+    localStorage.setItem('oh.weather.a-town', JSON.stringify(forecast));
+    serve({});
+
+    expect(await loadWeather('a-town')).toBeNull();
+    expect(localStorage.getItem('oh.weather.a-town')).toBeNull();
+  });
+
+  it('treats junk as no forecast rather than printing half of one', async () => {
+    choose('a-town');
+
+    for (const bad of [
+      { ...forecast, tempF: 'sixty' },
+      { ...forecast, date: undefined },
+      { ...forecast, code: null },
+      { ...forecast, day: 'yes' },
+      'not an object',
+    ]) {
+      serve({ 'a-town': bad });
+      expect(await loadWeather('a-town')).toBeNull();
+    }
+
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    localStorage.setItem('oh.weather.a-town', 'not json');
+    expect(await loadWeather('a-town')).toBeNull();
+  });
+
+  it('falls back rather than throwing when the file is missing', async () => {
+    choose('a-town');
+    serve('', false);
+
+    expect(await loadWeather('a-town')).toBeNull();
   });
 });

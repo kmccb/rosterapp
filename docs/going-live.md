@@ -185,3 +185,44 @@ wait for the deploy to go green, then apply the migration — the new bundle
 always sends `p_schedule`, so the old 9-param upsert would reject it until
 0006 is applied. After applying, run `node scripts/verify-school-roster.mjs`
 (now 7 checks) and re-apply 0006 a second time to prove apply-twice.
+
+## v4: identity and league
+
+`0007_school_identity_and_league.sql` turns `school_roster_sports` from a
+bare array of sport names into the school's identity — `{sports, colors,
+theme}` — and adds the `league` column the League tab reads its conference
+members from. `school_roster_upsert` grows to eleven parameters, `p_league`
+the eighth.
+
+The deploy ordering is the same shape as 0005 and 0006, with one more step
+at the end because this is the migration the panel and the fan page both
+lean on hardest:
+
+1. **Merge and push to main.** The code is production-ready against a
+   database that doesn't have 0007 yet — the fan page keeps working off the
+   old bare-array `school_roster_sports` and the 10-param upsert throughout.
+2. **Wait for the deploy to go green.** The new bundle is live; the database
+   still has the old schema. The panel breaks here: the new bundle always
+   sends `p_league`, so every save 404s (PostgREST finds no 11-param upsert)
+   until 0007 is applied. Keep this window short — don't save from the panel.
+3. **Apply `0007_school_identity_and_league.sql` in the Supabase SQL
+   editor.**
+4. **Apply it a second time.** It must succeed unchanged — the file carries
+   both the ten- and eleven-parameter `drop function` lines for
+   `school_roster_upsert` for exactly this reason. If the second apply
+   errors, something isn't actually idempotent.
+5. **Run `node scripts/verify-school-roster.mjs`.** It now expects the
+   identity object from `school_roster_sports`, not a bare array — so if you
+   run it against a database that only has 0006 applied (before step 3, or
+   after a rollback), the sports check will FAIL. That's the script telling
+   the truth about what's live, not a bug in the script or the deploy.
+   After 0007 is applied, all 7 checks should pass.
+
+**What the verify script can't see:** the per-field colors/crest choice —
+that `school_roster_sports` picks a school's look from whichever published,
+paid row actually carries one, football preferred but not required. Check
+this by hand: upload a crest and colors on a *non-football* row for a school
+whose football row has neither, then load the school's hub. The crest and
+colors should be there. This is the case the old single-winning-row design
+would have gotten wrong, and no automated check reaches it without a
+database to seed.

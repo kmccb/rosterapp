@@ -57,14 +57,25 @@ const fetchUnknown = await rpc('school_roster_fetch', {
 check('unknown school returns nothing', fetchUnknown.status === 200 && fetchUnknown.body === null,
   JSON.stringify(fetchUnknown));
 
+// Since 0007 this door answers with the school's identity, not a bare list:
+// an unknown school must come back as a school with nothing — no sports and
+// no look — rather than leaking a colors or crest value from a row that
+// failed the published-and-paid gate.
 const sportsUnknown = await rpc('school_roster_sports', { p_slug: 'no-such-school-nowhere' });
-check('unknown school has no sports',
-  sportsUnknown.status === 200 && Array.isArray(sportsUnknown.body) && sportsUnknown.body.length === 0,
+check('unknown school has no sports and no look',
+  sportsUnknown.status === 200 && sportsUnknown.body !== null
+    && Array.isArray(sportsUnknown.body.sports) && sportsUnknown.body.sports.length === 0
+    && sportsUnknown.body.colors === null,
   JSON.stringify(sportsUnknown));
 
+// p_league is sent so this probe hits the live eleven-parameter signature.
+// Without it PostgREST finds no matching function and answers 404 — which
+// is >= 400, so the check would pass without ever reaching the permission
+// wall it exists to prove.
 const anonUpsert = await rpc('school_roster_upsert', {
   p_slug: 'x', p_sport: 'football', p_season: 2026, p_players: [], p_colors: null,
-  p_theme: null, p_schedule: null, p_published: false, p_paid_through: '2027-02-01', p_note: '',
+  p_theme: null, p_schedule: null, p_league: null, p_published: false,
+  p_paid_through: '2027-02-01', p_note: '',
 });
 check('anon cannot upsert', anonUpsert.status >= 400, JSON.stringify(anonUpsert));
 

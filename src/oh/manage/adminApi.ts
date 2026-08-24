@@ -15,6 +15,7 @@ export type RosterRow = {
   colors: { ground: string; accent: string } | null;
   has_logo: boolean;
   has_schedule: boolean;
+  has_league: boolean;
   published: boolean;
   paid_through: string;
   note: string;
@@ -41,6 +42,10 @@ export const upsertRoster = async (row: {
   theme: { logo: string } | Record<string, never> | null;
   /** null keeps the stored schedule (renewal case), [] clears it, rows set it. */
   schedule: ScheduleRow[] | [] | null;
+  /** A league is an object, so it follows the theme's contract rather than the
+   * schedule's: null keeps the stored conference, {} clears it, an object
+   * sets it. */
+  league: { name: string; members: string[] } | Record<string, never> | null;
   published: boolean;
   paidThrough: string;
   note: string;
@@ -55,6 +60,7 @@ export const upsertRoster = async (row: {
       p_colors: row.colors,
       p_theme: row.theme,
       p_schedule: row.schedule,
+      p_league: row.league,
       p_published: row.published,
       p_paid_through: row.paidThrough,
       p_note: row.note,
