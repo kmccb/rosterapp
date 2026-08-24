@@ -203,6 +203,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
         schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
+        // Nothing on this screen sets a conference yet, and null is the one
+        // value that cannot lose one: it keeps whatever is stored, so a save
+        // made here never quietly empties a league set elsewhere.
+        league: null,
         published,
         paidThrough,
         note,

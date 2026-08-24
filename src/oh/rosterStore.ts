@@ -14,6 +14,10 @@ import { chosenSlug } from './store';
 import { rpc, supaAvailable } from './supa';
 
 export type SchoolColors = { ground: string; accent: string } | null;
+/** The conference the school told us about: a name to head the table with and
+ * the directory slugs of everyone in it. Nobody scrapes this — it arrives
+ * through the concierge, or not at all. */
+export type SchoolLeague = { name: string; members: string[] } | null;
 export type SchoolRoster = {
   season: number;
   players: Player[];
@@ -21,6 +25,15 @@ export type SchoolRoster = {
   /** The school's badge, as a data URI — never a bare path or remote URL. */
   logo: string | null;
   schedule: ScheduleRow[] | null;
+  league: SchoolLeague;
+};
+
+/** Who this school is, before a sport is chosen: the sports it has live and
+ * the look to draw the whole page — hub included — in. */
+export type SchoolIdentity = {
+  sports: string[];
+  colors: SchoolColors;
+  logo: string | null;
 };
 
 /** What the fetch answers with before it is sanitized: a roster plus a theme
@@ -31,6 +44,7 @@ type RawRosterBody = {
   colors: unknown;
   theme?: { logo?: unknown };
   schedule?: unknown;
+  league?: unknown;
 };
 
 export const cacheKey = (slug: string, sport: string): string => `oh.roster.${slug}.${sport}`;
@@ -112,6 +126,24 @@ const validSchedule = (v: unknown): ScheduleRow[] | null => {
   return rows;
 };
 
+/**
+ * The whole conference or none of it — the schedule rule again. A standings
+ * table missing a member it should have had is a table that says the wrong
+ * school is top, which is worse than no League tab at all.
+ */
+const validLeague = (v: unknown): SchoolLeague => {
+  if (typeof v !== 'object' || v === null) return null;
+  const l = v as Record<string, unknown>;
+  if (typeof l.name !== 'string' || !l.name.trim()) return null;
+  if (!Array.isArray(l.members) || l.members.length === 0) return null;
+  const members: string[] = [];
+  for (const m of l.members) {
+    if (typeof m !== 'string' || !m.trim()) return null;
+    members.push(m);
+  }
+  return { name: l.name, members };
+};
+
 /** Kept strict so a cache written by a future shape cannot crash a screen. */
 export const parseCached = (raw: string | null): SchoolRoster | null => {
   if (!raw) return null;
@@ -124,6 +156,7 @@ export const parseCached = (raw: string | null): SchoolRoster | null => {
           colors: validColors(v.colors),
           logo: validLogo(v.logo),
           schedule: validSchedule(v.schedule),
+          league: validLeague(v.league),
         } as SchoolRoster)
       : null;
   } catch {
@@ -148,6 +181,7 @@ export async function loadSchoolRoster(slug: string, sport: string): Promise<Sch
         colors: validColors(body.colors),
         logo: validLogo(body.theme?.logo),
         schedule: validSchedule(body.schedule),
+        league: validLeague(body.league),
       };
       if (slug === chosenSlug()) {
         try {
@@ -171,44 +205,81 @@ export async function loadSchoolRoster(slug: string, sport: string): Promise<Sch
 const sportsKey = (slug: string): string => `oh.livesports.${slug}`;
 
 /**
- * The kept copy of a school's live sports, read without asking anyone.
+ * A school's identity out of anything that has ever been an answer to it.
+ *
+ * Two shapes reach this. The one migration 0007 introduced — an object with
+ * sports, colors and a theme — and the bare array of sport names that came
+ * before it. The old shape has to keep working in two places at once: it is
+ * what is sitting in every returning reader's jar today, and it is what the
+ * live function still answers with through the window between this deploy
+ * and the migration being applied by hand. Discarding it would send both of
+ * them back to a football-only page for no reason; reading it as a school
+ * with sports but no look of its own is exactly what it is.
+ *
+ * Junk is null, never an empty school — "couldn't ask" and "sells nothing"
+ * are different answers and the hub draws them differently.
+ */
+const asIdentity = (v: unknown): SchoolIdentity | null => {
+  if (Array.isArray(v)) {
+    return v.every((s) => typeof s === 'string')
+      ? { sports: v as string[], colors: null, logo: null }
+      : null;
+  }
+  if (typeof v !== 'object' || v === null) return null;
+  const o = v as { sports?: unknown; colors?: unknown; logo?: unknown; theme?: { logo?: unknown } };
+  if (!Array.isArray(o.sports) || !o.sports.every((s) => typeof s === 'string')) return null;
+  return {
+    sports: o.sports as string[],
+    colors: validColors(o.colors),
+    // The network answers with the stored shape — a theme carrying the badge
+    // — and the jar holds the sanitized one, where the badge is already a
+    // plain string. Same value, two spellings, and this function is the one
+    // door both come through.
+    logo: validLogo(o.logo) ?? validLogo(o.theme?.logo),
+  };
+};
+
+/**
+ * The kept copy of who this school is, read without asking anyone.
  *
  * The network answer gates the first paint — a reader who lands on football
  * and is bounced to a hub a beat later has been lied to — but a returning
  * reader already knows the answer, and making them wait on a round trip for
  * it (or on a 404, through the whole window between deploy and migration
- * 0006) buys nothing. Same validation as the fetch's own fallback path,
- * because it is the same jar: junk is null, not an empty school.
+ * 0007) buys nothing. Same validation as the fetch's own fallback path,
+ * because it is the same jar.
  */
-export const keptSchoolSports = (slug: string): string[] | null => {
+export const keptSchoolSports = (slug: string): SchoolIdentity | null => {
   try {
     const raw = localStorage.getItem(sportsKey(slug));
-    const v = raw ? (JSON.parse(raw) as unknown) : null;
-    return Array.isArray(v) && v.every((s) => typeof s === 'string') ? (v as string[]) : null;
+    return raw ? asIdentity(JSON.parse(raw) as unknown) : null;
   } catch {
     return null;
   }
 };
 
 /**
- * Which sports this school has live. [] is a real answer — no paid sports;
- * null means the question couldn't be asked (no signal and no kept copy, or
- * a deploy running ahead of migration 0006), and the caller falls back to
- * behaving as the football-only site it was.
+ * Who this school is: the sports it has live, and the colors and crest to
+ * paint every screen of it — the hub included, which carries no roster and
+ * so had nowhere else to get a look from.
+ *
+ * An empty sports list is a real answer — no paid sports; null means the
+ * question couldn't be asked (no signal and no kept copy), and the caller
+ * falls back to behaving as the football-only site it was.
  */
-export async function loadSchoolSports(slug: string): Promise<string[] | null> {
+export async function loadSchoolSports(slug: string): Promise<SchoolIdentity | null> {
   if (!supaAvailable) return null;
   try {
-    const body = await rpc<unknown>('school_roster_sports', { p_slug: slug });
-    if (Array.isArray(body) && body.every((s) => typeof s === 'string')) {
+    const identity = asIdentity(await rpc<unknown>('school_roster_sports', { p_slug: slug }));
+    if (identity) {
       if (slug === chosenSlug()) {
         try {
-          localStorage.setItem(sportsKey(slug), JSON.stringify(body));
+          localStorage.setItem(sportsKey(slug), JSON.stringify(identity));
         } catch {
           // A full jar must not fail the fetch that succeeded.
         }
       }
-      return body as string[];
+      return identity;
     }
     return null;
   } catch {

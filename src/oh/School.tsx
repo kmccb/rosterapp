@@ -162,9 +162,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [roster, setRoster] = useState<SchoolRoster | null>(null);
   const [tab, setTab] = useState<SchoolTab>('lookup');
   // null is not "no sports" — it is "couldn't ask": offline on a first visit,
-  // or a deploy running ahead of migration 0006. The site falls back to the
-  // football-only page it was, rather than showing a reader a hub built out
-  // of a failure.
+  // or a deploy running ahead of the migration behind the sports door. The
+  // site falls back to the football-only page it was, rather than showing a
+  // reader a hub built out of a failure.
   const [live, setLive] = useState<string[] | null>(null);
   const [sportsSettled, setSportsSettled] = useState(false);
   const [sport, setSport] = useState<string | null>(null);
@@ -186,10 +186,10 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // school sells, so the page draws on that copy at once and lets the
     // network refine it. Only a first visit waits — otherwise every one of
     // the 717 school pages would hold its first paint on a round trip, and
-    // hold it on a 404 for the whole window between this deploy and
-    // migration 0006.
+    // hold it on a 404 for the whole window between a deploy and the
+    // migration behind it.
     const kept = keptSchoolSports(slug);
-    setLive(kept);
+    setLive(kept?.sports ?? null);
     setSportsSettled(kept !== null);
     // The catch is belt and braces — loadSchoolSports swallows its own
     // failures — but the invariant lives in another module and the cost of it
@@ -207,7 +207,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
         // Loading, clear the theme, and fetch the roster a second time.
         if (v !== null) {
           setLive((prev) =>
-            prev && prev.length === v.length && prev.every((s, i) => s === v[i]) ? prev : v,
+            prev && prev.length === v.sports.length && prev.every((s, i) => s === v.sports[i])
+              ? prev
+              : v.sports,
           );
         }
         setSportsSettled(true);
