@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
+import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
@@ -589,8 +590,24 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     headline
   );
 
+  /*
+   * One quiet line saying what this is.
+   *
+   * A prospect looking at Springfield Local has to be able to tell at a glance
+   * that the players are invented, or the first thing they will ask is why
+   * their own roster is wrong. It sits in the footer in the muted voice the
+   * rest of the small print uses — the pitch is that this looks like a real
+   * page, and a banner across the screen would spend the pitch to make the
+   * point.
+   */
+  const demoNote = isDemo() ? (
+    <p className="oh-demo-note">Sample data — a demo of your school’s page</p>
+  ) : null;
+
   const footer = (
     <>
+      {demoNote}
+
       <button type="button" className="fixture-row is-plain" onClick={onChange}>
         <span className="fixture-team">Follow a different school</span>
       </button>
@@ -701,6 +718,8 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
             </button>
           ))}
         </div>
+
+        {demoNote}
 
         <div className="oh-hub-foot">
           <button type="button" className="oh-hub-change" onClick={onChange}>

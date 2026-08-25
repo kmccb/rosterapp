@@ -10,6 +10,7 @@
 
 import type { School, SchoolSeason } from '../ohio/stateModel';
 import type { Weather } from '../schedule/weather';
+import { demoSeason, demoWeather, isDemo } from './demo';
 import type { LeagueRow } from './leagueTable';
 
 const CHOSEN = 'oh.school';
@@ -86,11 +87,24 @@ export const choose = (slug: string): void => {
 
 export const forget = (): void => localStorage.removeItem(CHOSEN);
 
-/** The sport this reader last opened at this school, so a basketball
- * parent lands on basketball next time. */
-export const chosenSport = (slug: string): string | null => localStorage.getItem(SPORT(slug));
+/*
+ * The sport this reader last opened at this school, so a basketball parent
+ * lands on basketball next time.
+ *
+ * The demo remembers nothing, and both halves of that are the same decision.
+ * The hub — six bands in the school's own colors — is the screen the demo
+ * exists to open on, and a seller who tapped Volleyball to show a prospect
+ * would otherwise hand the next prospect a volleyball roster. It would also
+ * leave a key behind for ever: choose()'s sweep evicts the school a reader
+ * was following, and nobody follows the demo.
+ */
+export const chosenSport = (slug: string): string | null => {
+  if (isDemo()) return null;
+  return localStorage.getItem(SPORT(slug));
+};
 
 export const rememberSport = (slug: string, sport: string | null): void => {
+  if (isDemo()) return;
   if (sport) localStorage.setItem(SPORT(slug), sport);
   else localStorage.removeItem(SPORT(slug));
 };
@@ -166,6 +180,18 @@ export async function loadIndex(): Promise<School[]> {
 }
 
 export async function loadSeason(slug: string): Promise<SchoolSeason> {
+  /*
+   * The demo page answers out of its own committed file — its school and every
+   * member of its fictional conference, so the League tab folds out of baked
+   * results exactly as it folds out of the directory's. Only that page takes
+   * this branch, and only for a slug the file actually carries: anything else
+   * falls through to the fetch below, untouched.
+   */
+  if (isDemo()) {
+    const baked = await demoSeason(slug);
+    if (baked) return baked;
+  }
+
   try {
     const res = await fetch(`/oh/data/${slug}.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
@@ -216,6 +242,11 @@ const isFixtureWeather = (v: unknown): v is FixtureWeather => {
 
 /** Network first, then whatever was kept — the same rule as the season. */
 export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
+  // The demo's forecast is baked beside its fixtures, and the jar is left
+  // alone: nothing a prospect looks at should survive into the next school
+  // they look at.
+  if (isDemo()) return demoWeather(slug);
+
   try {
     const res = await fetch(`/oh/weather.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {

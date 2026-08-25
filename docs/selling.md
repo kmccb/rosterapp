@@ -8,6 +8,36 @@ pitch, the invoice, the check — happens between people.
 The base tier is $200/season. This line is the one place that number lives —
 change it here, and quote whatever it says.
 
+## What to show a prospect
+
+https://roster.scottforge.ai/oh/demo/ — open it on a phone and hand it over.
+No login, no setup, nothing to explain first.
+
+It is Springfield Local, a school that does not exist, in colors and a crest
+that are its own. Six sports across all three seasons, so whatever month you
+are selling in, some bands read "In season" and the rest say when they come
+back. Every sport opens the way a paying school's does: keypad, roster,
+schedule. Football also carries scores, a forecast at kickoff and a
+standings table for a conference of five more invented schools.
+
+The school is fictional on purpose. The demo used to be invented players on
+Strasburg-Franklin's real page, which is fine as a smoke test and not fine
+as the thing shown to strangers. A quiet line in the footer says it is
+sample data, so nobody mistakes the squad for their own.
+
+It works with no signal once loaded, and it asks the database for nothing —
+so it is safe to show on a school's guest wifi, in a car park, anywhere.
+
+**Maintenance:** the page carries its own dates forward as it ages, so what
+has been played and what is coming always split at today without anyone
+touching it. What does drift is the calendar — the season travels with the
+dates, so about six months on the football fixtures are reading January to
+March under a tile that says "Starts in August". So run
+`node scripts/build-demo.mjs` and commit `public/oh/demo.json` **twice a
+year**, near the start of the autumn and again around February. It refuses
+to write a season that would argue with itself, and prints the dates it
+wrote.
+
 ## Activate a school (the whole job, ~3 minutes)
 
 1. Open https://roster.scottforge.ai/oh/?manage and sign in (email link).

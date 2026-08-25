@@ -577,3 +577,22 @@
 .fixture .forecast-temp {
   font-size: 17px;
 }
+
+/*
+ * The line that says this is a demo.
+ *
+ * One class for both places it appears — above the hub's footer bar, where it
+ * has to be `flex: none` so the sport bands keep the height they divide, and
+ * inside a sport page's footer, where it is an ordinary paragraph. Muted and
+ * small on purpose: a prospect must not mistake the sample roster for their
+ * own, and the pitch is that the page in front of them looks real, which a
+ * banner would undo.
+ */
+.oh-demo-note {
+  flex: none;
+  margin: 0;
+  padding: 12px 16px 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
