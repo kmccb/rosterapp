@@ -103,16 +103,24 @@ const GLYPHS: Record<string, ReactNode> = {
     </>
   ),
 
-  // Ear guards: the one piece of a wrestler's kit that is a shape rather than
-  // a posture. Two figures locked together is the true picture of the sport
-  // and an unreadable smudge at this weight.
+  // Two wrestlers in a tie-up: heads together, arms crossed at the collar,
+  // legs braced back. This was ear guards first, and rasterized at 200px they
+  // were a pair of headphones — the one drawing here that had to be looked at
+  // rather than measured. The locked pair was the thing to fear as a smudge
+  // and isn't: at nine per cent the two bodies still separate, because there
+  // are only eight strokes in it and none of them cross at a shallow angle.
   wrestling: (
     <>
-      <circle cx="12" cy="11.6" r="6" />
-      <circle cx="4.6" cy="11.6" r="2.6" />
-      <circle cx="19.4" cy="11.6" r="2.6" />
-      <path d="M7.6 7 Q12 3.4 16.4 7" />
-      <path d="M7.6 16.2 Q12 19.8 16.4 16.2" />
+      <circle cx="8.4" cy="6.5" r="2.2" fill="currentColor" stroke="none" />
+      <circle cx="15.6" cy="6.5" r="2.2" fill="currentColor" stroke="none" />
+      <path d="M9.9 8.3 Q6.6 10.6 4.8 14.2" />
+      <path d="M14.1 8.3 Q17.4 10.6 19.2 14.2" />
+      <path d="M4.8 14.2 L3.4 20.4" />
+      <path d="M4.8 14.2 L7.8 20.4" />
+      <path d="M19.2 14.2 L20.6 20.4" />
+      <path d="M19.2 14.2 L16.2 20.4" />
+      <path d="M9.8 9.6 L15.2 11.6" />
+      <path d="M14.2 9.6 L8.8 11.6" />
     </>
   ),
 
