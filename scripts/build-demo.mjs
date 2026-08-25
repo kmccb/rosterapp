@@ -22,11 +22,17 @@
  * that a scored game is always in the past and an unplayed one always ahead —
  * a demo printing "W 21–14" against next month's date is the single most
  * visible way for this page to look broken, and athletic directors are exactly
- * the audience that reads a schedule closely. But the file it writes is static,
- * so it drifts: five weeks after a run the last of the "Coming up" fixtures has
- * gone by with no score on it, and the played half has stopped growing. The
- * script says on its way out when that happens. Re-run it before any serious
- * demo, and certainly if it has been more than a month.
+ * the audience that reads a schedule closely.
+ *
+ * The drift that would otherwise follow is handled at the other end:
+ * src/oh/demo.ts carries every date forward by whole weeks when the page loads,
+ * so the split between what has been played and what is to come stays where it
+ * was put, indefinitely, with nobody remembering anything. What that cannot fix
+ * is the calendar itself — carry an autumn far enough and it lands in February,
+ * under a hub still saying "Starts in August". So this wants re-running once or
+ * twice a year rather than weekly, and it is worth doing before a demo that
+ * matters. `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it
+ * writes on a day of your choosing.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -120,7 +126,12 @@ const LOGO = `data:image/png;base64,${crestPng.toString('base64')}`;
  * change turning the 4th into the 3rd; UTC has no such hour.
  */
 const DAY = 86_400_000;
-const todayLocal = new Date();
+// DEMO_TODAY=2027-02-10 pretends it is that day. The calendar has two halves —
+// the autumn under way, and the autumn not yet begun — and the second one is
+// otherwise only reachable by changing the machine's clock.
+const todayLocal = process.env.DEMO_TODAY
+  ? new Date(`${process.env.DEMO_TODAY}T12:00:00`)
+  : new Date();
 const TODAY = new Date(
   Date.UTC(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate()),
 );
@@ -131,23 +142,48 @@ const iso = (d) => d.toISOString().slice(0, 10);
 // answer is a week ago, not today — today's game has not been played yet.
 const ANCHOR = addDays(TODAY, -((((TODAY.getUTCDay() - 5) + 7) % 7) || 7));
 
-/** Half the season behind, half ahead: enough played for a record, a Played
- * group and a standings table, and enough to come for the page to be about
- * something. */
-const PLAYED_WEEKS = 5;
+/*
+ * Which months each sport runs in — the same table src/oh/sportSeasons.ts
+ * keeps, and the reason it is here twice.
+ *
+ * That file is what the hub reads to print "In season" or "Starts in November"
+ * under a sport's name, and it is TypeScript, which this script cannot import.
+ * So it is copied, and a test holds the copy to the original — because the one
+ * thing this script must not do is write a season the hub will contradict on
+ * the very next tap.
+ */
+const SPORT_MONTHS = {
+  football: [8, 9, 10, 11],
+  volleyball: [8, 9, 10, 11],
+  soccer: [8, 9, 10, 11],
+  basketball: [11, 12, 1, 2, 3],
+  wrestling: [11, 12, 1, 2, 3],
+  baseball: [3, 4, 5, 6],
+};
+
+const MONTH_NOW = TODAY.getUTCMonth() + 1;
+const liveNow = (sport) => SPORT_MONTHS[sport].includes(MONTH_NOW);
+
+/*
+ * Whether the autumn is on.
+ *
+ * Football, volleyball and soccer run to one calendar, so they take one
+ * verdict. In the autumn they are anchored to today: results behind, fixtures
+ * ahead, the season under way. Out of it they are moved bodily to the next
+ * autumn with nothing played — which is precisely what a real school's page
+ * looks like in February, and the only arrangement that does not argue with the
+ * hub's own "Starts in August" above it. A season cannot both have results in
+ * the past and sit in months 8 to 11 when today is the second of February.
+ */
+const AUTUMN = ['football', 'volleyball', 'soccer'];
+const AUTUMN_LIVE = liveNow('football');
+
 const TOTAL_WEEKS = 10;
 
-/** Ten Fridays, with week five landing on the anchor. */
-const WEEKS = Array.from({ length: TOTAL_WEEKS }, (_, i) =>
-  iso(addDays(ANCHOR, (i - (PLAYED_WEEKS - 1)) * 7)),
-);
-
-/** A day that has been: the anchor, or `n` days before it. */
-const played = (n) => iso(addDays(ANCHOR, -n));
-
-/** A day that has not: `n` days past the anchor, counted from a week out so
- * that it clears today however recently the anchor fell. */
-const upcoming = (n) => iso(addDays(ANCHOR, 7 + n));
+/** Half the season behind, half ahead: enough played for a record, a Played
+ * group and a standings table, and enough to come for the page to be about
+ * something. Out of season nothing has been played, because nothing has. */
+const PLAYED_WEEKS = AUTUMN_LIVE ? 5 : 0;
 
 /**
  * The next time a given month and day comes round, at least a fortnight off.
@@ -178,7 +214,39 @@ const nextOn = (month, day) => {
  * list src/oh/sportSeasons.ts keeps for the sport.
  */
 const seasonStart = (month, day, months) =>
-  months.includes(TODAY.getUTCMonth() + 1) ? addDays(TODAY, 14) : nextOn(month, day);
+  months.includes(MONTH_NOW) ? addDays(TODAY, 14) : nextOn(month, day);
+
+/** The Friday the next autumn opens on: the first one from late August. */
+const nextAutumnOpener = () => {
+  const late = nextOn(8, 21);
+  return addDays(late, (5 - late.getUTCDay() + 7) % 7);
+};
+
+const AUTUMN_OPENER = AUTUMN_LIVE ? null : nextAutumnOpener();
+
+/** Ten Fridays. In season, week five lands on the anchor; out of it, week one
+ * lands on the next autumn's opening Friday and none of them has been played. */
+const WEEKS = Array.from({ length: TOTAL_WEEKS }, (_, i) =>
+  AUTUMN_LIVE
+    ? iso(addDays(ANCHOR, (i - (PLAYED_WEEKS - 1)) * 7))
+    : iso(addDays(AUTUMN_OPENER, i * 7)),
+);
+
+/**
+ * One autumn schedule, on whichever calendar is in force.
+ *
+ * `liveDays` are offsets from the anchor — negative or zero for a match that
+ * has been played, eight or more for one to come, so that it clears today
+ * however recently the anchor fell. `openerDays` are offsets from the next
+ * autumn's opening Friday, used out of season, where every row is a fixture and
+ * the scores are dropped along with the calendar they belonged to.
+ */
+const autumnSchedule = (fixtures, liveDays, openerDays) =>
+  fixtures.map((f, i) =>
+    AUTUMN_LIVE
+      ? row(iso(addDays(ANCHOR, liveDays[i])), f.opponent, f.home, f.time, f.score)
+      : row(iso(addDays(AUTUMN_OPENER, openerDays[i])), f.opponent, f.home, f.time),
+  );
 
 /** A season is named for the autumn it starts in — a basketball season labelled
  * 2026 plays its February games in 2027. */
@@ -271,6 +339,11 @@ const NON_CONFERENCE_WEEKS = [1, 2, 8, 9, 10];
 
 const KICKOFF = '7:00 PM';
 
+/** Only the first PLAYED_WEEKS weeks carry a result, so an out-of-season run —
+ * where nothing has been played, because the season has not begun — drops every
+ * score in the tables above rather than needing tables of its own. */
+const isPlayed = (week) => week <= PLAYED_WEEKS;
+
 /** One school's ten games, folded out of the two tables above. */
 function seasonFor(index) {
   const me = MEMBERS[index];
@@ -286,7 +359,7 @@ function seasonFor(index) {
       opponent: g.opponent,
       opponentCity: '',
       opponentSlug: null,
-      ...(g.us === undefined
+      ...(g.us === undefined || !isPlayed(week)
         ? {}
         : { result: { us: g.us, them: g.them, won: g.us > g.them } }),
     });
@@ -308,7 +381,9 @@ function seasonFor(index) {
         opponent: them.name,
         opponentCity: them.city,
         opponentSlug: them.slug,
-        ...(us === undefined ? {} : { result: { us, them: theirs, won: us > theirs } }),
+        ...(us === undefined || !isPlayed(week)
+          ? {}
+          : { result: { us, them: theirs, won: us > theirs } }),
       });
     }
   });
@@ -489,28 +564,36 @@ const row = (date, opponent, home, time, score) => ({
  * spring sports have not started, which is what the hub's "Starts in November"
  * and "Starts in March" notes are there to say.
  */
-const VOLLEYBALL_SCHEDULE = [
-  row(played(10), 'Ashcombe', true, '6:30 PM', { us: 3, them: 1 }),
-  row(played(3), 'Bellhaven', false, '6:30 PM', { us: 1, them: 3 }),
-  row(upcoming(1), 'Cedar Ridge', true, '6:30 PM'),
-  row(upcoming(3), 'Elmbrook', false, '6:30 PM'),
-  row(upcoming(8), 'Marlow Central', true, '6:30 PM'),
-  row(upcoming(10), 'Ashcombe', false, '6:30 PM'),
-  row(upcoming(15), 'Bellhaven', true, '6:30 PM'),
-  row(upcoming(17), 'Cedar Ridge', false, '6:30 PM'),
-  row(upcoming(22), 'Elmbrook', true, '6:30 PM'),
-];
+const VOLLEYBALL_SCHEDULE = autumnSchedule(
+  [
+    { opponent: 'Ashcombe', home: true, time: '6:30 PM', score: { us: 3, them: 1 } },
+    { opponent: 'Bellhaven', home: false, time: '6:30 PM', score: { us: 1, them: 3 } },
+    { opponent: 'Cedar Ridge', home: true, time: '6:30 PM' },
+    { opponent: 'Elmbrook', home: false, time: '6:30 PM' },
+    { opponent: 'Marlow Central', home: true, time: '6:30 PM' },
+    { opponent: 'Ashcombe', home: false, time: '6:30 PM' },
+    { opponent: 'Bellhaven', home: true, time: '6:30 PM' },
+    { opponent: 'Cedar Ridge', home: false, time: '6:30 PM' },
+    { opponent: 'Elmbrook', home: true, time: '6:30 PM' },
+  ],
+  [-10, -3, 8, 10, 15, 17, 22, 24, 29],
+  [3, 10, 17, 24, 31, 38, 45, 52, 59],
+);
 
-const SOCCER_SCHEDULE = [
-  row(played(12), 'Kirkwood Prep', false, '7:00 PM', { us: 2, them: 1 }),
-  row(played(8), 'Ashcombe', true, '7:00 PM', { us: 0, them: 3 }),
-  row(played(2), 'Bellhaven', false, '7:00 PM', { us: 3, them: 2 }),
-  row(upcoming(2), 'Cedar Ridge', true, '7:00 PM'),
-  row(upcoming(6), 'Elmbrook', false, '11:00 AM'),
-  row(upcoming(9), 'Marlow Central', true, '7:00 PM'),
-  row(upcoming(13), 'Harmony Ridge', false, '11:00 AM'),
-  row(upcoming(16), 'Stonebridge Central', true, '7:00 PM'),
-];
+const SOCCER_SCHEDULE = autumnSchedule(
+  [
+    { opponent: 'Kirkwood Prep', home: false, time: '7:00 PM', score: { us: 2, them: 1 } },
+    { opponent: 'Ashcombe', home: true, time: '7:00 PM', score: { us: 0, them: 3 } },
+    { opponent: 'Bellhaven', home: false, time: '7:00 PM', score: { us: 3, them: 2 } },
+    { opponent: 'Cedar Ridge', home: true, time: '7:00 PM' },
+    { opponent: 'Elmbrook', home: false, time: '11:00 AM' },
+    { opponent: 'Marlow Central', home: true, time: '7:00 PM' },
+    { opponent: 'Harmony Ridge', home: false, time: '11:00 AM' },
+    { opponent: 'Stonebridge Central', home: true, time: '7:00 PM' },
+  ],
+  [-12, -8, -2, 9, 13, 16, 20, 23],
+  [1, 8, 15, 22, 29, 36, 43, 50],
+);
 
 const WINTER_MONTHS = [11, 12, 1, 2, 3];
 const SPRING_MONTHS = [3, 4, 5, 6];
@@ -591,6 +674,9 @@ const weather = {
 const demo = {
   slug: SLUG,
   season: SEASON_YEAR,
+  // The day this was made, so a test can hold the file to the month table as it
+  // stood then rather than as it stands whenever the suite happens to run.
+  generatedOn: iso(TODAY),
   school: { slug: SLUG, name: NAME, city: CITY },
   colors: { ground: GROUND, accent: ACCENT },
   logo: LOGO,
@@ -631,6 +717,74 @@ if (wrong.length) {
   throw new Error(`${wrong.length} games are on the wrong side of today`);
 }
 
+/*
+ * The second thing that must be true: no sport may argue with the hub above it.
+ *
+ * The today-boundary above says nothing about which months a season lands in,
+ * and on its own it would happily pass a run made in February — January results
+ * and March fixtures under a football tile reading "Starts in August". So each
+ * sport is checked against the month table as well, and the check is different
+ * either side of the sport's own season:
+ *
+ *  - out of season, the hub is saying the sport has not started. Nothing may
+ *    carry a score, and every date must fall inside the sport's own months.
+ *  - in season, the two dates a reader's eye actually lands on — the last
+ *    result and the next fixture — must sit in the sport's months or the month
+ *    either side of them. That tolerance is deliberate: a real autumn opens in
+ *    the last week of August and can run a playoff into December, and refusing
+ *    the shoulder would refuse a season nobody would look at twice.
+ *
+ * Nothing here demands that an in-season sport have results. Basketball in
+ * January is a fixture list and no more, which is a thin page but not a
+ * contradiction — the hub says the season is on and the page shows games to
+ * come. What the hub cannot survive is the other one: "Starts in August" over
+ * a row of January scores.
+ */
+const MONTH_OF = (date) => Number(date.slice(5, 7));
+const neighbours = (months) =>
+  new Set(months.flatMap((m) => [m, (m % 12) + 1, ((m + 10) % 12) + 1]));
+
+const bySport = new Map();
+for (const [where, date, scored] of dated) {
+  const sport = where.endsWith(' football') ? 'football' : where;
+  if (!bySport.has(sport)) bySport.set(sport, []);
+  bySport.get(sport).push([date, scored]);
+}
+
+const quarrels = [];
+for (const [sport, games] of bySport) {
+  const months = SPORT_MONTHS[sport];
+  if (!months) {
+    quarrels.push(`${sport} is not in the month table`);
+    continue;
+  }
+  const scored = games.filter(([, s]) => s).map(([d]) => d).sort();
+  const ahead = games.filter(([, s]) => !s).map(([d]) => d).sort();
+
+  if (!liveNow(sport)) {
+    if (scored.length) {
+      quarrels.push(`${sport} is out of season today but carries ${scored.length} results`);
+    }
+    const stray = games.map(([d]) => d).filter((d) => !months.includes(MONTH_OF(d)));
+    if (stray.length) {
+      quarrels.push(`${sport} is out of season today but ${stray.length} of its dates fall outside its months (${stray[0]})`);
+    }
+    continue;
+  }
+
+  const window = neighbours(months);
+  const edges = [scored[scored.length - 1], ahead[0]].filter(Boolean);
+  for (const edge of edges) {
+    if (!window.has(MONTH_OF(edge))) {
+      quarrels.push(`${sport}: ${edge} is too far outside its season for the hub to agree with`);
+    }
+  }
+}
+if (quarrels.length) {
+  for (const q of quarrels) console.error(`  ${q}`);
+  throw new Error('the calendar contradicts src/oh/sportSeasons.ts');
+}
+
 const out = join(root, 'public/oh/demo.json');
 writeFileSync(out, `${JSON.stringify(demo, null, 2)}\n`);
 
@@ -644,11 +798,26 @@ console.log(`  ${Object.keys(seasons).length} seasons, ${Object.keys(sports).len
 for (const [sport, s] of Object.entries(sports)) {
   console.log(`  ${sport}: ${s.players.length} players, ${s.schedule?.length ?? 0} pasted rows`);
 }
-console.log(`  anchored on ${iso(ANCHOR)}, generated ${TODAY_ISO}`);
+console.log(
+  `  generated ${TODAY_ISO}; the autumn is ${AUTUMN_LIVE ? 'on' : `off, so ${AUTUMN.join('/')} are dated to the next one`}`,
+);
+console.log(`  anchored on ${iso(ANCHOR)}`);
 console.log(`  football ${WEEKS[0]} → ${WEEKS[TOTAL_WEEKS - 1]}, ${PLAYED_WEEKS} played`);
-console.log(`  played  ${scoredDates[0]} → ${scoredDates[scoredDates.length - 1]} (${scoredDates.length} games)`);
-console.log(`  ahead   ${aheadDates[0]} → ${aheadDates[aheadDates.length - 1]} (${aheadDates.length} games)`);
+const spread = (dates) =>
+  dates.length ? `${dates[0]} → ${dates[dates.length - 1]} (${dates.length} games)` : 'none';
+console.log(`  played  ${spread(scoredDates)}`);
+console.log(`  ahead   ${spread(aheadDates)}`);
 console.log(`  ${NAME}: ${seasons[SLUG].record.won}–${seasons[SLUG].record.lost}`);
-// The date the file stops telling the truth: the last autumn fixture goes by
-// with no score on it and the Played group quietly stops growing.
-console.log(`  re-run before a demo — this one reads as stale after ${WEEKS[TOTAL_WEEKS - 1]}`);
+/*
+ * What the page does with this file from here on.
+ *
+ * src/oh/demo.ts moves every date forward by whole weeks at read time, so the
+ * split between played and coming stays where it was put however long this file
+ * sits — that part looks after itself and nobody has to remember anything.
+ * What the shift cannot do is keep the season in its own months for ever: carry
+ * an autumn far enough and it lands in February, with the hub saying "Starts in
+ * August" over it. That is the reason to re-run this, and it is a once or twice
+ * a year job rather than a weekly one.
+ */
+console.log('  the page carries these dates forward by whole weeks as it ages;');
+console.log('  re-run once or twice a year, so the season stays in its own months');
