@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#2f1466" />
+    <meta name="description" content="A sample school page — what a school gets when it signs up." />
+    <title>Springfield Local — a demo</title>
+    <!--
+      No manifest and no service worker registration, deliberately.
+
+      The root app registers a worker whose navigation fallback is bound to
+      Poland's index.html, and a second worker on the same origin is a way to
+      break the first. This page caches what it needs in localStorage instead,
+      which is enough: the school a reader picks is a few kilobytes.
+
+      This page lives under /oh/ for a second reason of its own. The root
+      worker's navigateFallbackDenylist is exactly /^\/oh(\/|$)/ and the
+      precache ignores **/oh/**, both of which scripts/check-untouched.mjs
+      asserts to the letter — so a demo at /demo would mean editing the one
+      alarm this repo has. Inside /oh/ it needs neither changed.
+    -->
+    <!-- Without this, body::before falls back to /badge.jpg — Poland's badge —
+         and this page would wear another team's wallpaper. -->
+    <style>
+      :root {
+        --wallpaper: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/oh/main.tsx"></script>
+  </body>
+</html>

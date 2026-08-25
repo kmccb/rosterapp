@@ -35,8 +35,18 @@ export default defineConfig({
     emptyOutDir: false,
     assetsDir: 'oh/assets',
     rollupOptions: {
-      // Relative to the project root, so the page is emitted at dist/oh/index.html.
-      input: 'oh/index.html',
+      /*
+       * Relative to the project root, so the pages are emitted at
+       * dist/oh/index.html and dist/oh/demo/index.html.
+       *
+       * Two entries here do what two entries in the main build did — rollup
+       * sees them sharing React and hoists it into a chunk of its own — and
+       * that is harmless in exactly the way it was fatal there. Nothing this
+       * build emits is precached, service-worked or byte-compared: the guard
+       * checks the three root pages and the directory's data, and everything
+       * under dist/oh/assets is free to be arranged however rollup likes.
+       */
+      input: ['oh/index.html', 'oh/demo/index.html'],
     },
   },
 });

@@ -9,6 +9,7 @@
  */
 
 import type { Player } from '../types';
+import { demoIdentity, demoRosterBody, isDemo, keptDemoIdentity } from './demo';
 import type { ScheduleRow } from './scheduleParse';
 import { chosenSlug } from './store';
 import { rpc, supaAvailable } from './supa';
@@ -177,6 +178,22 @@ export const parseCached = (raw: string | null): SchoolRoster | null => {
 };
 
 export async function loadSchoolRoster(slug: string, sport: string): Promise<SchoolRoster | null> {
+  /*
+   * The demo's rosters are baked, so this branch stands in front of everything
+   * below — including the Supabase gate, because the demo page has to work in a
+   * build with no database configured at all and must never ask one anything.
+   *
+   * Sanitized through parseCached rather than trusted: it is the same door the
+   * kept copy comes through, so a hand-edited demo file gets exactly the colors
+   * and badge checks a network answer gets, and the demo cannot become the one
+   * page on the site where a bad value reaches a CSS variable. Nothing is
+   * written to the jar — a demo is not a school anybody follows.
+   */
+  if (isDemo()) {
+    const baked = await demoRosterBody(slug, sport);
+    return baked ? parseCached(JSON.stringify(baked)) : null;
+  }
+
   if (!supaAvailable) return null;
 
   try {
@@ -262,6 +279,11 @@ const asIdentity = (v: unknown): SchoolIdentity | null => {
  * because it is the same jar.
  */
 export const keptSchoolSports = (slug: string): SchoolIdentity | null => {
+  // The demo's identity, if its file has landed yet — read through asIdentity
+  // like every other answer. Before it lands this is null, which is "couldn't
+  // ask": one Loading frame, exactly what a first visit to a real school is.
+  if (isDemo()) return asIdentity(keptDemoIdentity(slug));
+
   try {
     const raw = localStorage.getItem(sportsKey(slug));
     return raw ? asIdentity(JSON.parse(raw) as unknown) : null;
@@ -313,6 +335,10 @@ export const lookFor = (
  * falls back to behaving as the football-only site it was.
  */
 export async function loadSchoolSports(slug: string): Promise<SchoolIdentity | null> {
+  // Ahead of the Supabase gate for the same reason the roster's branch is: the
+  // demo owes the database nothing. Same door, same validation, no jar.
+  if (isDemo()) return asIdentity(await demoIdentity(slug));
+
   if (!supaAvailable) return null;
   try {
     const identity = asIdentity(await rpc<unknown>('school_roster_sports', { p_slug: slug }));
