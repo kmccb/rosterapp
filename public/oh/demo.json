@@ -1069,7 +1069,7 @@
           "number": "3",
           "firstName": "Nadia",
           "lastName": "Fontaine",
-          "position": "S",
+          "position": "Setter",
           "side": "",
           "grade": "Jr"
         },
@@ -1114,7 +1114,7 @@
           "number": "10",
           "firstName": "Priya",
           "lastName": "Raghavan",
-          "position": "S",
+          "position": "Setter",
           "side": "",
           "grade": "So"
         },
@@ -1446,7 +1446,7 @@
           "number": "3",
           "firstName": "Cole",
           "lastName": "Brennan",
-          "position": "G",
+          "position": "Guard",
           "side": "",
           "heightIn": 74,
           "grade": "Sr"
@@ -1456,7 +1456,7 @@
           "number": "4",
           "firstName": "Simon",
           "lastName": "Reyes",
-          "position": "G",
+          "position": "Guard",
           "side": "",
           "heightIn": 70,
           "grade": "Jr"
@@ -1466,7 +1466,7 @@
           "number": "5",
           "firstName": "Reece",
           "lastName": "Kimball",
-          "position": "G",
+          "position": "Guard",
           "side": "",
           "heightIn": 68,
           "grade": "So"
@@ -1476,7 +1476,7 @@
           "number": "11",
           "firstName": "Julian",
           "lastName": "Marsh",
-          "position": "G",
+          "position": "Guard",
           "side": "",
           "heightIn": 72,
           "grade": "Sr"
@@ -1486,7 +1486,7 @@
           "number": "12",
           "firstName": "Owen",
           "lastName": "Castellano",
-          "position": "G",
+          "position": "Guard",
           "side": "",
           "heightIn": 68,
           "grade": "Jr"
@@ -1496,7 +1496,7 @@
           "number": "14",
           "firstName": "Isaiah",
           "lastName": "Tarrant",
-          "position": "F",
+          "position": "Forward",
           "side": "",
           "heightIn": 73,
           "grade": "So"
@@ -1506,7 +1506,7 @@
           "number": "20",
           "firstName": "Ethan",
           "lastName": "Kowal",
-          "position": "F",
+          "position": "Forward",
           "side": "",
           "heightIn": 75,
           "grade": "Jr"
@@ -1516,7 +1516,7 @@
           "number": "21",
           "firstName": "Dante",
           "lastName": "Alvarado",
-          "position": "F",
+          "position": "Forward",
           "side": "",
           "heightIn": 76,
           "grade": "Sr"
@@ -1526,7 +1526,7 @@
           "number": "23",
           "firstName": "Bennett",
           "lastName": "Hoyle",
-          "position": "F",
+          "position": "Forward",
           "side": "",
           "heightIn": 73,
           "grade": "So"
@@ -1536,7 +1536,7 @@
           "number": "32",
           "firstName": "Nico",
           "lastName": "Ferraro",
-          "position": "C",
+          "position": "Center",
           "side": "",
           "heightIn": 79,
           "grade": "Sr"
@@ -1546,7 +1546,7 @@
           "number": "40",
           "firstName": "Brady",
           "lastName": "Kellerman",
-          "position": "F",
+          "position": "Forward",
           "side": "",
           "heightIn": 74,
           "grade": "Jr"
@@ -1556,7 +1556,7 @@
           "number": "44",
           "firstName": "Xander",
           "lastName": "Pruitt",
-          "position": "C",
+          "position": "Center",
           "side": "",
           "heightIn": 78,
           "grade": "So"
@@ -1776,7 +1776,7 @@
           "number": "2",
           "firstName": "Nate",
           "lastName": "Whitcomb",
-          "position": "SS",
+          "position": "Shortstop",
           "side": "",
           "grade": "So"
         },
@@ -1803,7 +1803,7 @@
           "number": "7",
           "firstName": "Cole",
           "lastName": "Brennan",
-          "position": "P/1B",
+          "position": "Pitcher/1B",
           "side": "",
           "grade": "Sr"
         },
@@ -1812,7 +1812,7 @@
           "number": "8",
           "firstName": "Griffin",
           "lastName": "Doyle",
-          "position": "C",
+          "position": "Catcher",
           "side": "",
           "grade": "Sr"
         },
@@ -1839,7 +1839,7 @@
           "number": "12",
           "firstName": "Rowan",
           "lastName": "Pike",
-          "position": "P",
+          "position": "Pitcher",
           "side": "",
           "grade": "So"
         },
@@ -1866,7 +1866,7 @@
           "number": "18",
           "firstName": "Cash",
           "lastName": "Delaney",
-          "position": "P",
+          "position": "Pitcher",
           "side": "",
           "grade": "Sr"
         },
@@ -1875,7 +1875,7 @@
           "number": "21",
           "firstName": "Hugo",
           "lastName": "Barrett",
-          "position": "C",
+          "position": "Catcher",
           "side": "",
           "grade": "So"
         },
@@ -1884,7 +1884,7 @@
           "number": "24",
           "firstName": "Wyatt",
           "lastName": "Coburn",
-          "position": "2B/SS",
+          "position": "2B/Shortstop",
           "side": "",
           "grade": "Jr"
         },
@@ -1902,7 +1902,7 @@
           "number": "31",
           "firstName": "Milo",
           "lastName": "Standish",
-          "position": "P",
+          "position": "Pitcher",
           "side": "",
           "grade": "Fr"
         }

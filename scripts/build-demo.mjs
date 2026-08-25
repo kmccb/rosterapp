@@ -285,47 +285,57 @@ const FOOTBALL = [
   player('88', 'Levi', 'Ashford', 'TE', 'O', { heightIn: 75, weightLb: 220, grade: 'Jr' }),
 ];
 
+/*
+ * Positions are spelled out wherever the abbreviation is also a football one.
+ *
+ * The Team tab's side filter is the root app's, and its table is football's: a
+ * basketball G and C read as guard and centre, a baseball SS as a strong
+ * safety, a volleyball S as a safety. Left as initials, this page offers a
+ * basketball squad an "Offense" chip. Any school may paste initials and get
+ * the same, which is a wart worth knowing about — but the demo is the one page
+ * whose job is to look like the product working.
+ */
 const BASKETBALL = [
-  player('3', 'Cole', 'Brennan', 'G', '', { heightIn: 74, grade: 'Sr' }),
-  player('4', 'Simon', 'Reyes', 'G', '', { heightIn: 70, grade: 'Jr' }),
-  player('5', 'Reece', 'Kimball', 'G', '', { heightIn: 68, grade: 'So' }),
-  player('11', 'Julian', 'Marsh', 'G', '', { heightIn: 72, grade: 'Sr' }),
-  player('12', 'Owen', 'Castellano', 'G', '', { heightIn: 68, grade: 'Jr' }),
-  player('14', 'Isaiah', 'Tarrant', 'F', '', { heightIn: 73, grade: 'So' }),
-  player('20', 'Ethan', 'Kowal', 'F', '', { heightIn: 75, grade: 'Jr' }),
-  player('21', 'Dante', 'Alvarado', 'F', '', { heightIn: 76, grade: 'Sr' }),
-  player('23', 'Bennett', 'Hoyle', 'F', '', { heightIn: 73, grade: 'So' }),
-  player('32', 'Nico', 'Ferraro', 'C', '', { heightIn: 79, grade: 'Sr' }),
-  player('40', 'Brady', 'Kellerman', 'F', '', { heightIn: 74, grade: 'Jr' }),
-  player('44', 'Xander', 'Pruitt', 'C', '', { heightIn: 78, grade: 'So' }),
+  player('3', 'Cole', 'Brennan', 'Guard', '', { heightIn: 74, grade: 'Sr' }),
+  player('4', 'Simon', 'Reyes', 'Guard', '', { heightIn: 70, grade: 'Jr' }),
+  player('5', 'Reece', 'Kimball', 'Guard', '', { heightIn: 68, grade: 'So' }),
+  player('11', 'Julian', 'Marsh', 'Guard', '', { heightIn: 72, grade: 'Sr' }),
+  player('12', 'Owen', 'Castellano', 'Guard', '', { heightIn: 68, grade: 'Jr' }),
+  player('14', 'Isaiah', 'Tarrant', 'Forward', '', { heightIn: 73, grade: 'So' }),
+  player('20', 'Ethan', 'Kowal', 'Forward', '', { heightIn: 75, grade: 'Jr' }),
+  player('21', 'Dante', 'Alvarado', 'Forward', '', { heightIn: 76, grade: 'Sr' }),
+  player('23', 'Bennett', 'Hoyle', 'Forward', '', { heightIn: 73, grade: 'So' }),
+  player('32', 'Nico', 'Ferraro', 'Center', '', { heightIn: 79, grade: 'Sr' }),
+  player('40', 'Brady', 'Kellerman', 'Forward', '', { heightIn: 74, grade: 'Jr' }),
+  player('44', 'Xander', 'Pruitt', 'Center', '', { heightIn: 78, grade: 'So' }),
 ];
 
 const BASEBALL = [
-  player('2', 'Nate', 'Whitcomb', 'SS', '', { grade: 'So' }),
+  player('2', 'Nate', 'Whitcomb', 'Shortstop', '', { grade: 'So' }),
   player('4', 'Reece', 'Kimball', '2B', '', { grade: 'So' }),
   player('6', 'Devin', 'Raker', 'OF', '', { grade: 'Sr' }),
-  player('7', 'Cole', 'Brennan', 'P/1B', '', { grade: 'Sr' }),
-  player('8', 'Griffin', 'Doyle', 'C', '', { grade: 'Sr' }),
+  player('7', 'Cole', 'Brennan', 'Pitcher/1B', '', { grade: 'Sr' }),
+  player('8', 'Griffin', 'Doyle', 'Catcher', '', { grade: 'Sr' }),
   player('9', 'Emmett', 'Braddock', 'OF', '', { grade: 'Jr' }),
   player('10', 'Gus', 'Thorne', '3B', '', { grade: 'Jr' }),
-  player('12', 'Rowan', 'Pike', 'P', '', { grade: 'So' }),
+  player('12', 'Rowan', 'Pike', 'Pitcher', '', { grade: 'So' }),
   player('14', 'Silas', 'Merrick', 'OF', '', { grade: 'Fr' }),
   player('16', 'Tobias', 'Lane', '1B', '', { grade: 'Jr' }),
-  player('18', 'Cash', 'Delaney', 'P', '', { grade: 'Sr' }),
-  player('21', 'Hugo', 'Barrett', 'C', '', { grade: 'So' }),
-  player('24', 'Wyatt', 'Coburn', '2B/SS', '', { grade: 'Jr' }),
+  player('18', 'Cash', 'Delaney', 'Pitcher', '', { grade: 'Sr' }),
+  player('21', 'Hugo', 'Barrett', 'Catcher', '', { grade: 'So' }),
+  player('24', 'Wyatt', 'Coburn', '2B/Shortstop', '', { grade: 'Jr' }),
   player('27', 'Jonah', 'Reeves', 'OF', '', { grade: 'Sr' }),
-  player('31', 'Milo', 'Standish', 'P', '', { grade: 'Fr' }),
+  player('31', 'Milo', 'Standish', 'Pitcher', '', { grade: 'Fr' }),
 ];
 
 const VOLLEYBALL = [
   player('1', 'Harper', 'Quinlan', 'OH', '', { grade: 'Sr' }),
-  player('3', 'Nadia', 'Fontaine', 'S', '', { grade: 'Jr' }),
+  player('3', 'Nadia', 'Fontaine', 'Setter', '', { grade: 'Jr' }),
   player('5', 'Elise', 'Vandermeer', 'MB', '', { grade: 'Sr' }),
   player('6', 'Camille', 'Rourke', 'L', '', { grade: 'So' }),
   player('7', 'Marisol', 'Ibarra', 'OH', '', { grade: 'Jr' }),
   player('9', 'Tessa', 'Bramwell', 'RS', '', { grade: 'Sr' }),
-  player('10', 'Priya', 'Raghavan', 'S', '', { grade: 'So' }),
+  player('10', 'Priya', 'Raghavan', 'Setter', '', { grade: 'So' }),
   player('12', 'June', 'Okafor', 'MB', '', { grade: 'Jr' }),
   player('14', 'Delaney', 'Voss', 'OH', '', { grade: 'Fr' }),
   player('16', 'Sloane', 'Petrakis', 'DS', '', { grade: 'So' }),
