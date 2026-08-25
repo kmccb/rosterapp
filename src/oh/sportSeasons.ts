@@ -69,3 +69,8 @@ export const sportLabel = (sport: string): string =>
   norm(sport).replace(/\b[a-z]/g, (c) => c.toUpperCase());
 
 export const sportEmoji = (sport: string): string => EMOJI[norm(sport)] ?? '🎽';
+
+/** Every sport this table has an opinion about. The hub's glyph set is held
+ * to this list by a test, so a sport added above can't ship without a mark to
+ * draw it by. */
+export const knownSports = (): string[] => Object.keys(MONTHS);
