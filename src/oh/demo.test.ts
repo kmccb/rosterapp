@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { inSeason, knownSports } from './sportSeasons';
 
 /*
  * The demo shim, pinned.
@@ -44,8 +45,17 @@ describe('which page is the demo', () => {
   });
 
   it('accepts ?demo as an alias, so a link cannot land on the directory', async () => {
-    const { isDemo } = await load(committed(), { pathname: '/oh/', search: '?demo' });
-    expect(isDemo()).toBe(true);
+    for (const search of ['?demo', '?demo=1', '?demo=yes']) {
+      const { isDemo } = await load(committed(), { pathname: '/oh/', search });
+      expect(isDemo(), search).toBe(true);
+    }
+  });
+
+  it('reads ?demo=false as somebody turning it off', async () => {
+    for (const search of ['?demo=false', '?demo=0', '?demo=no', '?demo=OFF']) {
+      const { isDemo } = await load(committed(), { pathname: '/oh/', search });
+      expect(isDemo(), search).toBe(false);
+    }
   });
 
   it('leaves every other page alone', async () => {
@@ -165,6 +175,65 @@ describe('the committed file', () => {
     }
   });
 
+  /*
+   * The file is generated in one sport-season and read in another, and the hub
+   * prints "In season" or "Starts in November" out of its own fixed table. This
+   * holds the committed dates to that table as it stood on the day they were
+   * written — `generatedOn`, rather than the clock the suite happens to run on,
+   * because the file is static and the point is what the generator produced.
+   */
+  it('never writes a season the hub would contradict', () => {
+    // Read straight off the committed file rather than through loadDemo, which
+    // carries the dates forward to today — what is being checked here is what
+    // the generator wrote, on the day it wrote it.
+    const raw = committed() as unknown as {
+      generatedOn: string;
+      seasons: Record<string, { games: Array<{ date: string; result?: unknown }> }>;
+      sports: Record<string, { schedule: Array<{ date: string; score?: unknown }> | null }>;
+    };
+    const month = Number(raw.generatedOn.slice(5, 7));
+
+    const dates: Array<[string, string, boolean]> = [];
+    for (const season of Object.values(raw.seasons)) {
+      for (const g of season.games) dates.push(['football', g.date, !!g.result]);
+    }
+    for (const [sport, entry] of Object.entries(raw.sports)) {
+      for (const r of entry.schedule ?? []) dates.push([sport, r.date, !!r.score]);
+    }
+
+    for (const [sport, date, scored] of dates) {
+      if (inSeason(sport, month)) continue;
+      // Out of season on the day it was written, a sport may have no results
+      // and may only be dated inside its own months — the alternative is
+      // "Starts in August" printed over a row of January scores.
+      expect(scored, `${sport} ${date}`).toBe(false);
+      expect(inSeason(sport, Number(date.slice(5, 7))), `${sport} ${date}`).toBe(true);
+    }
+  });
+
+  /*
+   * The generator is a .mjs script that cannot import this bundle's TypeScript,
+   * so it keeps its own copy of the month table and this holds the two
+   * together. Read out of the source text rather than imported, because
+   * importing the script runs it — it rasterizes a crest and writes a file.
+   */
+  it('keeps the generator’s copy of the month table honest', () => {
+    const src = readFileSync(new URL('../../scripts/build-demo.mjs', import.meta.url), 'utf8');
+    const block = src.match(/const SPORT_MONTHS = \{([\s\S]*?)\n\};/);
+    expect(block, 'SPORT_MONTHS is no longer where this test looks for it').not.toBeNull();
+
+    const rows = [...block![1].matchAll(/^\s*(\w+): \[([\d, ]+)\],$/gm)];
+    expect(rows.length).toBeGreaterThan(0);
+
+    for (const [, sport, list] of rows) {
+      expect(knownSports(), sport).toContain(sport);
+      const copied = list.split(',').map((n) => Number(n.trim()));
+      for (let month = 1; month <= 12; month += 1) {
+        expect(copied.includes(month), `${sport} month ${month}`).toBe(inSeason(sport, month));
+      }
+    }
+  });
+
   it('keeps every rival on the same ten dates as the school', async () => {
     const { loadDemo, DEMO_SLUG } = await load(committed());
     const demo = await loadDemo();
@@ -175,6 +244,100 @@ describe('the committed file', () => {
     for (const [slug, season] of Object.entries(demo!.seasons)) {
       expect(season.games.map((g) => g.date), slug).toEqual(ours);
     }
+  });
+});
+
+/*
+ * Carrying the calendar forward.
+ *
+ * The file is committed and then sits still while the world moves, and the
+ * screen splits Played from Coming up on whether a game has a score rather than
+ * on its date — so without this the demo starts listing last Friday's game as
+ * coming up. These are the only tests here that name a day, and they name a
+ * made-up one rather than reading the clock.
+ */
+describe('the calendar, weeks after it was written', () => {
+  const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
+
+  const everyDate = (demo: {
+    seasons: Record<string, { games: Array<{ date: string; result?: unknown }> }>;
+    sports: Record<string, { schedule: Array<{ date: string; score?: unknown }> | null }>;
+  }) => {
+    const all: Array<[string, boolean]> = [];
+    for (const season of Object.values(demo.seasons)) {
+      for (const g of season.games) all.push([g.date, !!g.result]);
+    }
+    for (const entry of Object.values(demo.sports)) {
+      for (const r of entry.schedule ?? []) all.push([r.date, !!r.score]);
+    }
+    return all;
+  };
+
+  it('lands the split on today, however long the file has sat', async () => {
+    const { loadDemo, shiftToNow } = await load(committed());
+    const demo = await loadDemo();
+
+    for (const when of ['2026-09-14', '2027-01-02', '2027-06-30', '2029-03-05']) {
+      const moved = shiftToNow(demo!, day(when));
+      for (const [date, scored] of everyDate(moved)) {
+        if (scored) expect(date < when, `${when}: ${date} has a score`).toBe(true);
+        else expect(date >= when, `${when}: ${date} has no score`).toBe(true);
+      }
+    }
+  });
+
+  it('moves whole weeks, so Friday football stays on a Friday', async () => {
+    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
+    const demo = await loadDemo();
+    const before = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
+    const after = shiftToNow(demo!, day('2027-06-30')).seasons[DEMO_SLUG].games.map((g) => g.date);
+
+    for (let i = 0; i < before.length; i += 1) {
+      expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
+      const weeks = (day(after[i]).getTime() - day(before[i]).getTime()) / (7 * 86_400_000);
+      expect(Number.isInteger(weeks), before[i]).toBe(true);
+    }
+  });
+
+  it('moves all six seasons by the same amount, or the standings stop agreeing', async () => {
+    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
+    const demo = await loadDemo();
+    const moved = shiftToNow(demo!, day('2027-06-30'));
+
+    const ours = moved.seasons[DEMO_SLUG].games.map((g) => g.date);
+    for (const [slug, season] of Object.entries(moved.seasons)) {
+      expect(season.games.map((g) => g.date), slug).toEqual(ours);
+    }
+    // The record is a count, so it cannot move — but it still has to agree with
+    // the games after the shift, which is what the League tab reads.
+    const played = moved.seasons[DEMO_SLUG].games.filter((g) => g.result);
+    expect(moved.seasons[DEMO_SLUG].record.played).toBe(played.length);
+    expect(moved.seasons[DEMO_SLUG].record.won).toBe(played.filter((g) => g.result!.won).length);
+  });
+
+  it('carries the forecast along with the fixture it belongs to', async () => {
+    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
+    const moved = shiftToNow((await loadDemo())!, day('2027-01-02'));
+    const next = moved.seasons[DEMO_SLUG].games.find((g) => !g.result);
+
+    expect(moved.weather!.date).toBe(next!.date);
+    expect(moved.weather!.at.startsWith(next!.date)).toBe(true);
+  });
+
+  it('leaves a file generated today exactly as it is', async () => {
+    const { loadDemo, shiftToNow, weeksBehind, DEMO_SLUG } = await load(committed());
+    const demo = await loadDemo();
+    const scored = demo!.seasons[DEMO_SLUG].games.filter((g) => g.result);
+    const theDayAfter = day(scored[scored.length - 1].date);
+    theDayAfter.setUTCDate(theDayAfter.getUTCDate() + 1);
+
+    expect(weeksBehind(demo!, theDayAfter)).toBe(0);
+    expect(shiftToNow(demo!, theDayAfter)).toBe(demo);
+  });
+
+  it('never drags a file backwards for a clock that is behind', async () => {
+    const { loadDemo, weeksBehind } = await load(committed());
+    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
   });
 });
 
@@ -264,6 +427,33 @@ describe('the store, in demo mode', () => {
     expect(rosterStore.keptSchoolSports(DEMO_SLUG)).toBeNull();
     await rosterStore.loadSchoolSports(DEMO_SLUG);
     expect(rosterStore.keptSchoolSports(DEMO_SLUG)!.sports).toHaveLength(6);
+  });
+
+  it('refuses to remember a sport, so every prospect gets the hub', async () => {
+    await load(committed());
+    const { DEMO_SLUG, store } = await stores();
+    const jar: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => jar[k] ?? null,
+      setItem: (k: string, v: string) => {
+        jar[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete jar[k];
+      },
+    });
+
+    // What a seller tapping Volleyball to show a prospect does. It must leave
+    // nothing behind: the hub is the screen the demo opens on, and the key
+    // would outlive the visit anyway — choose()'s sweep only evicts the school
+    // a reader was following, and nobody follows the demo.
+    store.rememberSport(DEMO_SLUG, 'volleyball');
+    expect(Object.keys(jar)).toEqual([]);
+    expect(store.chosenSport(DEMO_SLUG)).toBeNull();
+
+    // A key from some earlier build is not read either.
+    jar[`oh.sport.${DEMO_SLUG}`] = 'basketball';
+    expect(store.chosenSport(DEMO_SLUG)).toBeNull();
   });
 
   it('resolves a conference member the same way, so the League tab can count', async () => {

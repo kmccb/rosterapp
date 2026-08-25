@@ -87,11 +87,24 @@ export const choose = (slug: string): void => {
 
 export const forget = (): void => localStorage.removeItem(CHOSEN);
 
-/** The sport this reader last opened at this school, so a basketball
- * parent lands on basketball next time. */
-export const chosenSport = (slug: string): string | null => localStorage.getItem(SPORT(slug));
+/*
+ * The sport this reader last opened at this school, so a basketball parent
+ * lands on basketball next time.
+ *
+ * The demo remembers nothing, and both halves of that are the same decision.
+ * The hub — six bands in the school's own colors — is the screen the demo
+ * exists to open on, and a seller who tapped Volleyball to show a prospect
+ * would otherwise hand the next prospect a volleyball roster. It would also
+ * leave a key behind for ever: choose()'s sweep evicts the school a reader
+ * was following, and nobody follows the demo.
+ */
+export const chosenSport = (slug: string): string | null => {
+  if (isDemo()) return null;
+  return localStorage.getItem(SPORT(slug));
+};
 
 export const rememberSport = (slug: string, sport: string | null): void => {
+  if (isDemo()) return;
   if (sport) localStorage.setItem(SPORT(slug), sport);
   else localStorage.removeItem(SPORT(slug));
 };

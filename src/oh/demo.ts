@@ -66,9 +66,16 @@ export type DemoData = {
  */
 const DEMO_PATH = /^\/oh\/demo(\/(index\.html)?)?$/;
 
+/** `?demo=false` is somebody turning it off, not a flag that happens to be
+ * present — the query string is the one place a reader can spell it either
+ * way, and `has()` alone reads both as yes. */
+const OFF = new Set(['false', '0', 'no', 'off']);
+
 export function isDemo(): boolean {
   if (typeof location === 'undefined') return false;
-  return DEMO_PATH.test(location.pathname) || new URLSearchParams(location.search).has('demo');
+  if (DEMO_PATH.test(location.pathname)) return true;
+  const flag = new URLSearchParams(location.search).get('demo');
+  return flag !== null && !OFF.has(flag.toLowerCase());
 }
 
 // ------------------------------------------------------------- reading it in
@@ -174,6 +181,109 @@ const asDemo = (v: unknown): DemoData | null => {
   };
 };
 
+// ------------------------------------------------------------ moving it on
+
+/*
+ * The demo's calendar, carried forward to today.
+ *
+ * The file is generated with results behind and fixtures ahead, and then it is
+ * committed and sits still while the world moves. School.tsx splits Played from
+ * Coming up on whether a game carries a score, not on its date, so a week after
+ * a generation the page starts listing games under "Coming up" that were played
+ * last Friday — to an audience that reads schedules for a living. Asking anyone
+ * to remember to re-run a script is not a fix.
+ *
+ * So the dates are moved at read time. Whole weeks, which is the whole trick:
+ * every date keeps its day of the week, so Friday football stays on a Friday
+ * and a Tuesday volleyball match stays on a Tuesday.
+ *
+ * One delta, computed once, applied to everything — six seasons, five pasted
+ * schedules and the forecast. Not per sport and not per school: the rivals
+ * carry the same conference games from the other side, and a season shifted by
+ * a different number of weeks would put the standings table at odds with the
+ * school's own record.
+ */
+const MS_DAY = 86_400_000;
+
+const dayOf = (date: string): number => Date.parse(`${date}T00:00:00Z`);
+
+const moveDate = (date: string, days: number): string => {
+  const at = dayOf(date);
+  return Number.isNaN(at) ? date : new Date(at + days * MS_DAY).toISOString().slice(0, 10);
+};
+
+/**
+ * How many whole weeks the file is behind.
+ *
+ * The last day anything was played is the hinge: the generator put it on the
+ * most recent day that had been, and it has to land there again. Moving it into
+ * the window from yesterday back to a week ago does that, and because the
+ * earliest unplayed date the generator writes is a clear week the far side of
+ * that hinge, everything ahead lands on today or later without being counted
+ * separately.
+ *
+ * Never negative. A file that somehow reads as generated in the future — a
+ * phone with a slow clock, most likely — is left exactly as it was written
+ * rather than dragged backwards.
+ */
+export const weeksBehind = (data: DemoData, today: Date): number => {
+  const scored: string[] = [];
+  for (const season of Object.values(data.seasons)) {
+    for (const game of season.games) if (game.result) scored.push(game.date);
+  }
+  for (const entry of Object.values(data.sports)) {
+    for (const row of entry.schedule ?? []) if (row.score) scored.push(row.date);
+  }
+  if (!scored.length) return 0;
+
+  const hinge = dayOf(scored.reduce((a, b) => (a > b ? a : b)));
+  const now = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  if (Number.isNaN(hinge)) return 0;
+
+  const gap = Math.round((now - hinge) / MS_DAY);
+  return Math.max(0, Math.floor((gap - 1) / 7));
+};
+
+/** The same demo, every date `weeks` weeks later. */
+export const shiftToNow = (data: DemoData, today: Date): DemoData => {
+  const weeks = weeksBehind(data, today);
+  if (weeks === 0) return data;
+  const days = weeks * 7;
+
+  const seasons: Record<string, SchoolSeason> = {};
+  for (const [slug, season] of Object.entries(data.seasons)) {
+    seasons[slug] = {
+      ...season,
+      games: season.games.map((g) => ({ ...g, date: moveDate(g.date, days) })),
+    };
+  }
+
+  const sports: Record<string, DemoSport> = {};
+  for (const [name, entry] of Object.entries(data.sports)) {
+    sports[name] = {
+      players: entry.players,
+      schedule: entry.schedule?.map((r) => ({ ...r, date: moveDate(r.date, days) })) ?? null,
+    };
+  }
+
+  const weather = data.weather;
+  return {
+    ...data,
+    seasons,
+    sports,
+    weather: weather
+      ? {
+          ...weather,
+          date: moveDate(weather.date, days),
+          // `at` is the same day with an hour on it; only the day moves.
+          at: weather.at.includes('T')
+            ? `${moveDate(weather.at.slice(0, 10), days)}${weather.at.slice(10)}`
+            : weather.at,
+        }
+      : null,
+  };
+};
+
 /*
  * Fetched once, whatever asks for it.
  *
@@ -191,7 +301,10 @@ export function loadDemo(): Promise<DemoData | null> {
     pending = fetch('/oh/demo.json', { cache: 'no-store' })
       .then((res) => (res.ok ? (res.json() as Promise<unknown>) : null))
       .then((body) => {
-        arrived = asDemo(body);
+        const parsed = asDemo(body);
+        // Moved on to today once, here, so that every reader of `arrived`
+        // below sees the same calendar.
+        arrived = parsed ? shiftToNow(parsed, new Date()) : null;
         return arrived;
       })
       .catch(() => null);
