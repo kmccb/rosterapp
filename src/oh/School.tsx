@@ -577,9 +577,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     </>
   );
 
-  // The name with the crest beside it, wherever the school has one. The hub
-  // gets the same treatment as a sport page: it is the school's front door,
-  // and a front door with no badge on it was the whole complaint.
+  // The name with the crest beside it, wherever the school has one. This is
+  // the sport pages' header now — the hub has its own, further down, with a
+  // fixed crest plate and the town in place of the record.
   const nameBlock = crest ? (
     <div className="oh-school-head-row">
       <img className="oh-crest" src={crest} alt="" />
@@ -610,6 +610,28 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // Football is exempt — its page stands without a roster, so it draws the
   // moment the season is in, exactly as it did before any of this existed.
   if (sport !== null && sport !== 'football' && rosterFetch !== 'done') {
+    return (
+      <Frame>
+        <div className="screen">
+          <p className="empty-text">Loading…</p>
+        </div>
+      </Frame>
+    );
+  }
+
+  /*
+   * A school with one sport never sees the hub — the effect above sends the
+   * reader straight in, which is the state of nearly every school in the
+   * state and has to stay invisible. But that effect runs after paint, so
+   * without this the hub gets one frame first. It was survivable when the hub
+   * was a couple of small tiles; a full-height band that appears and vanishes
+   * is a flash nobody can miss.
+   *
+   * Not the in-flight gate below and nothing to do with it: this is the frame
+   * before a sport has been chosen at all, and it resolves on the very next
+   * render, because the effect always chooses when tiles has one entry.
+   */
+  if (sport === null && tiles.length === 1) {
     return (
       <Frame>
         <div className="screen">

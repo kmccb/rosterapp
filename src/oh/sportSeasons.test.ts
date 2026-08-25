@@ -62,6 +62,19 @@ describe('sport seasons', () => {
     expect(seasonNote('esports', september)).toBe('In season');
   });
 
+  it('names the run a two-season sport reaches next, over the year end', () => {
+    // Tennis is the one sport in two runs — girls' in autumn, boys' in spring.
+    // In June it is between them and the next one is August.
+    expect(seasonNote('tennis', new Date('2026-06-15T12:00:00'))).toBe('Starts in August');
+    // In November the next run is the following March, which means walking
+    // through December and out the other side of the year.
+    expect(seasonNote('tennis', new Date('2026-11-15T12:00:00'))).toBe('Starts in March');
+    // The same wrap from December itself, where every remaining month of the
+    // year is behind the reader.
+    expect(seasonNote('golf', new Date('2026-12-15T12:00:00'))).toBe('Starts in August');
+    expect(seasonNote('baseball', new Date('2026-12-15T12:00:00'))).toBe('Starts in March');
+  });
+
   it('knows every sport it has a calendar for', () => {
     expect(knownSports()).toContain('football');
     expect(knownSports()).toHaveLength(16);

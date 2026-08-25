@@ -403,15 +403,26 @@
 }
 
 /*
- * Pressed. The gradient painted twice over itself, rather than a second pair
- * of hardcoded alphas: two layers at .22 compose to .39 and two at .72 to .92,
- * which is within a hair of the design's .34 and .55 — and it stays the
- * school's own accent and surface, which a literal could not.
+ * Pressed: the gradient painted twice over itself, rather than a second pair
+ * of hardcoded alphas that could not stay the school's own colours. Two layers
+ * of the same alpha a compose to 2a − a², so the accent end goes .22 → .39,
+ * near enough the .34 a literal would have used, and the surface end goes
+ * .72 → .92, which is a good deal further. The band therefore deepens along
+ * its whole length under the thumb rather than only at its left edge — a
+ * stronger press than the design drew, and the right way round: the part of
+ * the row nobody is touching should not be the part that reacts most.
  */
 .oh-hub-row:active {
   background-image:
     linear-gradient(90deg, var(--ghost), var(--surface)),
     linear-gradient(90deg, var(--ghost), var(--surface));
+}
+
+/* The last band's rule and the footer's would otherwise sit on top of each
+   other, and one 2px hairline among 1px ones reads as a mistake. The footer
+   keeps its border; the row gives its up. */
+.oh-hub-row:last-child {
+  border-bottom: 0;
 }
 
 .oh-hub-row:focus-visible {
@@ -484,6 +495,28 @@
   pointer-events: none;
 }
 
+/*
+ * The one line on a veiled row that has to survive it.
+ *
+ * Half the school's ground over 12px of --muted measures about 3.8:1 for the
+ * demo school — under AA, and no colour fixes it: veiling text and its
+ * backdrop together costs far more contrast than pure white can win back
+ * (white under the same veil only reaches 3.9:1). So the note is lifted above
+ * the veil instead and drawn from --text at .78, which puts it near 9:1 while
+ * still reading as quieter than an in-season row's.
+ *
+ * Only the note. The 40px name stays under the veil — at that size it clears
+ * AA's large-text 3:1 on its own, and it is what makes an off-season band look
+ * off-season. Rasterized against the alternative of lifting the whole text
+ * block, that one lost the dimming altogether.
+ */
+.oh-hub-row.is-off .oh-hub-note {
+  position: relative;
+  z-index: 1;
+  color: var(--text);
+  opacity: 0.78;
+}
+
 /* The way out, and the notice. Both on one row: the footer is chrome, and the
    less height it takes the more the sports get. */
 .oh-hub-foot {
@@ -504,6 +537,10 @@
   border: 0;
   background: none;
   color: var(--text);
+  /* Without this the button wears Chrome's own button font — Arial next to the
+     system-ui everything else on the hub is set in. The bands say `font:
+     inherit` for the same reason. */
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
