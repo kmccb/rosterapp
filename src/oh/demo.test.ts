@@ -116,13 +116,65 @@ describe('the committed file', () => {
     expect(season.record.lost).toBeGreaterThan(0);
   });
 
-  it('files the forecast on a fixture that has not been played', async () => {
+  it('files the forecast on the next fixture, which has not been played', async () => {
     const { loadDemo, DEMO_SLUG } = await load(committed());
     const demo = await loadDemo();
-    const game = demo!.seasons[DEMO_SLUG].games.find((g) => g.date === demo!.weather!.date);
+    const games = demo!.seasons[DEMO_SLUG].games;
+    const next = games.find((g) => !g.result);
 
-    expect(game).toBeDefined();
-    expect(game!.result).toBeUndefined();
+    // Not merely "some unplayed game": School.tsx draws a forecast on the
+    // fixture naming that same date and on no other, so a forecast pointed at
+    // week nine would silently print nothing.
+    expect(demo!.weather!.date).toBe(next!.date);
+  });
+
+  /*
+   * The invariant the generator is anchored to produce: a score is only ever
+   * printed on a day that has been.
+   *
+   * Checked as an ordering rather than against the clock, deliberately. The
+   * file is static and drifts — five weeks after a generation the last autumn
+   * fixture has gone by with no score on it — and a test that read `new Date()`
+   * would turn that expected drift into a red build. What must never be true,
+   * at any distance from the generation, is a scored game dated after an
+   * unscored one; that is a generator bug rather than staleness.
+   */
+  it('puts every result behind every fixture, in all six seasons', async () => {
+    const { loadDemo } = await load(committed());
+    const demo = await loadDemo();
+
+    for (const [slug, season] of Object.entries(demo!.seasons)) {
+      const scored = season.games.filter((g) => g.result).map((g) => g.date);
+      const ahead = season.games.filter((g) => !g.result).map((g) => g.date);
+      expect(scored.length, slug).toBeGreaterThan(0);
+      expect(ahead.length, slug).toBeGreaterThan(0);
+      // ISO dates sort as strings, so this is the whole comparison.
+      expect(scored.every((s) => ahead.every((a) => s < a)), slug).toBe(true);
+    }
+  });
+
+  it('puts every result behind every fixture in the pasted schedules too', async () => {
+    const { loadDemo } = await load(committed());
+    const demo = await loadDemo();
+
+    for (const [sport, entry] of Object.entries(demo!.sports)) {
+      const rows = entry.schedule ?? [];
+      const scored = rows.filter((r) => r.score).map((r) => r.date);
+      const ahead = rows.filter((r) => !r.score).map((r) => r.date);
+      expect(scored.every((s) => ahead.every((a) => s < a)), sport).toBe(true);
+    }
+  });
+
+  it('keeps every rival on the same ten dates as the school', async () => {
+    const { loadDemo, DEMO_SLUG } = await load(committed());
+    const demo = await loadDemo();
+    const ours = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
+
+    // A rival left on an older calendar would still fill its row, and the
+    // standings would quietly stop agreeing with the school's own record.
+    for (const [slug, season] of Object.entries(demo!.seasons)) {
+      expect(season.games.map((g) => g.date), slug).toEqual(ours);
+    }
   });
 });
 
@@ -202,7 +254,7 @@ describe('the store, in demo mode', () => {
     expect(season.school.name).toBe('Springfield Local');
 
     const weather = await store.loadWeather(DEMO_SLUG);
-    expect(weather!.date).toBe('2026-09-25');
+    expect(weather!.date).toBe(season.games.find((g) => !g.result)!.date);
   });
 
   it('leaves the kept-identity door where it was: null until the file lands', async () => {

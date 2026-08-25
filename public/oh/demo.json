@@ -39,7 +39,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Kirkwood Prep",
@@ -53,7 +53,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Twin Lakes",
@@ -67,7 +67,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Ashcombe",
@@ -81,7 +81,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Bellhaven",
@@ -95,7 +95,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Cedar Ridge",
@@ -109,7 +109,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Elmbrook",
@@ -118,7 +118,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Marlow Central",
@@ -127,7 +127,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Harmony Ridge",
@@ -136,7 +136,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Pinecrest Academy",
@@ -145,7 +145,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Stonebridge Central",
@@ -168,7 +168,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Harmony Ridge",
@@ -182,7 +182,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Stonebridge Central",
@@ -196,7 +196,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Springfield Local",
@@ -210,7 +210,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Cedar Ridge",
@@ -224,7 +224,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Marlow Central",
@@ -238,7 +238,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Bellhaven",
@@ -247,7 +247,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Elmbrook",
@@ -256,7 +256,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Twin Lakes",
@@ -265,7 +265,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Kirkwood Prep",
@@ -274,7 +274,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Pinecrest Academy",
@@ -297,7 +297,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Pinecrest Academy",
@@ -311,7 +311,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Kirkwood Prep",
@@ -325,7 +325,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Marlow Central",
@@ -339,7 +339,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Springfield Local",
@@ -353,7 +353,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Elmbrook",
@@ -367,7 +367,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Ashcombe",
@@ -376,7 +376,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Cedar Ridge",
@@ -385,7 +385,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Harmony Ridge",
@@ -394,7 +394,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Stonebridge Central",
@@ -403,7 +403,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Twin Lakes",
@@ -426,7 +426,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Twin Lakes",
@@ -440,7 +440,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Harmony Ridge",
@@ -454,7 +454,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Elmbrook",
@@ -468,7 +468,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Ashcombe",
@@ -482,7 +482,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Springfield Local",
@@ -496,7 +496,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Marlow Central",
@@ -505,7 +505,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Bellhaven",
@@ -514,7 +514,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Kirkwood Prep",
@@ -523,7 +523,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Pinecrest Academy",
@@ -532,7 +532,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Stonebridge Central",
@@ -555,7 +555,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Stonebridge Central",
@@ -569,7 +569,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Pinecrest Academy",
@@ -583,7 +583,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Cedar Ridge",
@@ -597,7 +597,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Marlow Central",
@@ -611,7 +611,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Bellhaven",
@@ -625,7 +625,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Springfield Local",
@@ -634,7 +634,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Ashcombe",
@@ -643,7 +643,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Harmony Ridge",
@@ -652,7 +652,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Twin Lakes",
@@ -661,7 +661,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Kirkwood Prep",
@@ -684,7 +684,7 @@
       "games": [
         {
           "week": 1,
-          "date": "2026-08-21",
+          "date": "2026-07-24",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Harmony Ridge",
@@ -698,7 +698,7 @@
         },
         {
           "week": 2,
-          "date": "2026-08-28",
+          "date": "2026-07-31",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Twin Lakes",
@@ -712,7 +712,7 @@
         },
         {
           "week": 3,
-          "date": "2026-09-04",
+          "date": "2026-08-07",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Bellhaven",
@@ -726,7 +726,7 @@
         },
         {
           "week": 4,
-          "date": "2026-09-11",
+          "date": "2026-08-14",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Elmbrook",
@@ -740,7 +740,7 @@
         },
         {
           "week": 5,
-          "date": "2026-09-18",
+          "date": "2026-08-21",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Ashcombe",
@@ -754,7 +754,7 @@
         },
         {
           "week": 6,
-          "date": "2026-09-25",
+          "date": "2026-08-28",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Cedar Ridge",
@@ -763,7 +763,7 @@
         },
         {
           "week": 7,
-          "date": "2026-10-02",
+          "date": "2026-09-04",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Springfield Local",
@@ -772,7 +772,7 @@
         },
         {
           "week": 8,
-          "date": "2026-10-09",
+          "date": "2026-09-11",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Stonebridge Central",
@@ -781,7 +781,7 @@
         },
         {
           "week": 9,
-          "date": "2026-10-16",
+          "date": "2026-09-18",
           "kickoff": "7:00 PM",
           "home": true,
           "opponent": "Kirkwood Prep",
@@ -790,7 +790,7 @@
         },
         {
           "week": 10,
-          "date": "2026-10-23",
+          "date": "2026-09-25",
           "kickoff": "7:00 PM",
           "home": false,
           "opponent": "Pinecrest Academy",
@@ -1166,7 +1166,7 @@
       ],
       "schedule": [
         {
-          "date": "2026-09-10",
+          "date": "2026-08-11",
           "opponent": "Ashcombe",
           "home": true,
           "time": "6:30 PM",
@@ -1176,7 +1176,7 @@
           }
         },
         {
-          "date": "2026-09-15",
+          "date": "2026-08-18",
           "opponent": "Bellhaven",
           "home": false,
           "time": "6:30 PM",
@@ -1186,43 +1186,43 @@
           }
         },
         {
-          "date": "2026-09-17",
+          "date": "2026-08-29",
           "opponent": "Cedar Ridge",
           "home": true,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-09-22",
+          "date": "2026-08-31",
           "opponent": "Elmbrook",
           "home": false,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-09-24",
+          "date": "2026-09-05",
           "opponent": "Marlow Central",
           "home": true,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-09-29",
+          "date": "2026-09-07",
           "opponent": "Ashcombe",
           "home": false,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-10-01",
+          "date": "2026-09-12",
           "opponent": "Bellhaven",
           "home": true,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-10-06",
+          "date": "2026-09-14",
           "opponent": "Cedar Ridge",
           "home": false,
           "time": "6:30 PM"
         },
         {
-          "date": "2026-10-08",
+          "date": "2026-09-19",
           "opponent": "Elmbrook",
           "home": true,
           "time": "6:30 PM"
@@ -1378,7 +1378,7 @@
       ],
       "schedule": [
         {
-          "date": "2026-09-03",
+          "date": "2026-08-09",
           "opponent": "Kirkwood Prep",
           "home": false,
           "time": "7:00 PM",
@@ -1388,7 +1388,7 @@
           }
         },
         {
-          "date": "2026-09-08",
+          "date": "2026-08-13",
           "opponent": "Ashcombe",
           "home": true,
           "time": "7:00 PM",
@@ -1398,7 +1398,7 @@
           }
         },
         {
-          "date": "2026-09-15",
+          "date": "2026-08-19",
           "opponent": "Bellhaven",
           "home": false,
           "time": "7:00 PM",
@@ -1408,31 +1408,31 @@
           }
         },
         {
-          "date": "2026-09-22",
+          "date": "2026-08-30",
           "opponent": "Cedar Ridge",
           "home": true,
           "time": "7:00 PM"
         },
         {
-          "date": "2026-09-26",
+          "date": "2026-09-03",
           "opponent": "Elmbrook",
           "home": false,
           "time": "11:00 AM"
         },
         {
-          "date": "2026-09-29",
+          "date": "2026-09-06",
           "opponent": "Marlow Central",
           "home": true,
           "time": "7:00 PM"
         },
         {
-          "date": "2026-10-03",
+          "date": "2026-09-10",
           "opponent": "Harmony Ridge",
           "home": false,
           "time": "11:00 AM"
         },
         {
-          "date": "2026-10-08",
+          "date": "2026-09-13",
           "opponent": "Stonebridge Central",
           "home": true,
           "time": "7:00 PM"
@@ -1738,7 +1738,7 @@
       ],
       "schedule": [
         {
-          "date": "2026-12-05",
+          "date": "2026-11-28",
           "opponent": "Stonebridge Invitational",
           "home": false,
           "time": "9:00 AM"
@@ -1750,19 +1750,19 @@
           "time": "6:00 PM"
         },
         {
-          "date": "2027-01-09",
+          "date": "2027-01-02",
           "opponent": "Pinecrest Academy",
           "home": false,
           "time": "9:00 AM"
         },
         {
-          "date": "2027-01-21",
+          "date": "2027-01-14",
           "opponent": "Bellhaven",
           "home": true,
           "time": "6:00 PM"
         },
         {
-          "date": "2027-02-06",
+          "date": "2027-01-30",
           "opponent": "Riverbend Conference Meet",
           "home": false,
           "time": "10:00 AM"
@@ -1960,12 +1960,12 @@
     }
   },
   "weather": {
-    "date": "2026-09-25",
+    "date": "2026-08-28",
     "code": 2,
     "tempF": 63,
     "precipChance": 20,
     "windMph": 9,
     "day": false,
-    "at": "2026-09-25T19:00"
+    "at": "2026-08-28T19:00"
   }
 }

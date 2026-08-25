@@ -13,8 +13,20 @@
  * as the thing shown to prospects; Springfield Local misrepresents nobody, and
  * its five conference rivals are invented for the same reason.
  *
- * Run by hand — `node scripts/build-demo.mjs` — not by the build. The output
- * is committed, like the directory beside it. Re-run it to move the season on.
+ * Run by hand — `node scripts/build-demo.mjs` — then commit public/oh/demo.json.
+ * It is not part of `npm run build` and must not become part of it: it
+ * rasterizes a crest through sharp, and the guarded build has no business
+ * doing that.
+ *
+ * WHEN TO RE-RUN. Every date below is anchored to the day the script runs, so
+ * that a scored game is always in the past and an unplayed one always ahead —
+ * a demo printing "W 21–14" against next month's date is the single most
+ * visible way for this page to look broken, and athletic directors are exactly
+ * the audience that reads a schedule closely. But the file it writes is static,
+ * so it drifts: five weeks after a run the last of the "Coming up" fixtures has
+ * gone by with no score on it, and the played half has stopped growing. The
+ * script says on its way out when that happens. Re-run it before any serious
+ * demo, and certainly if it has been more than a month.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -92,11 +104,87 @@ const LOGO = `data:image/png;base64,${crestPng.toString('base64')}`;
 
 // ----------------------------------------------------------------- football
 
-/** Ten Fridays, the way an Ohio autumn actually runs. */
-const WEEKS = [
-  '2026-08-21', '2026-08-28', '2026-09-04', '2026-09-11', '2026-09-18',
-  '2026-09-25', '2026-10-02', '2026-10-09', '2026-10-16', '2026-10-23',
-];
+/*
+ * Every date in this file hangs off one day: the most recent Friday that has
+ * already been.
+ *
+ * The rule the whole calendar has to keep is that a score is only ever printed
+ * on a date that has passed. So the anchor is a Friday in the past, the played
+ * half of the season is counted backwards from it, and everything unplayed
+ * starts a week the far side of it — a week, not a day, because the anchor can
+ * be as recent as yesterday and the next fixture has to clear today whatever
+ * day of the week the script is run on.
+ *
+ * Dates are done in UTC. The output is a plain YYYY-MM-DD and the arithmetic is
+ * whole days, so the one thing that could go wrong is an hour lost to a clock
+ * change turning the 4th into the 3rd; UTC has no such hour.
+ */
+const DAY = 86_400_000;
+const todayLocal = new Date();
+const TODAY = new Date(
+  Date.UTC(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate()),
+);
+const addDays = (d, n) => new Date(d.getTime() + n * DAY);
+const iso = (d) => d.toISOString().slice(0, 10);
+
+// Friday is 5. `|| 7` is the case that matters: run this on a Friday and the
+// answer is a week ago, not today — today's game has not been played yet.
+const ANCHOR = addDays(TODAY, -((((TODAY.getUTCDay() - 5) + 7) % 7) || 7));
+
+/** Half the season behind, half ahead: enough played for a record, a Played
+ * group and a standings table, and enough to come for the page to be about
+ * something. */
+const PLAYED_WEEKS = 5;
+const TOTAL_WEEKS = 10;
+
+/** Ten Fridays, with week five landing on the anchor. */
+const WEEKS = Array.from({ length: TOTAL_WEEKS }, (_, i) =>
+  iso(addDays(ANCHOR, (i - (PLAYED_WEEKS - 1)) * 7)),
+);
+
+/** A day that has been: the anchor, or `n` days before it. */
+const played = (n) => iso(addDays(ANCHOR, -n));
+
+/** A day that has not: `n` days past the anchor, counted from a week out so
+ * that it clears today however recently the anchor fell. */
+const upcoming = (n) => iso(addDays(ANCHOR, 7 + n));
+
+/**
+ * The next time a given month and day comes round, at least a fortnight off.
+ *
+ * The winter and spring sports are dated by the calendar rather than by an
+ * offset from the anchor. Their schedules have no scores on them, so any future
+ * date would satisfy the rule above — but the hub tells a reader that basketball
+ * "Starts in November" out of a fixed table, and a schedule that then opens in
+ * June because the script happened to run in March would contradict it on the
+ * next tap.
+ */
+const nextOn = (month, day) => {
+  const year = TODAY.getUTCFullYear();
+  for (const y of [year, year + 1, year + 2]) {
+    const d = new Date(Date.UTC(y, month - 1, day));
+    if (d.getTime() >= TODAY.getTime() + 14 * DAY) return d;
+  }
+  throw new Error('no future date for that month and day');
+};
+
+/**
+ * Where an off-season sport's fixtures begin.
+ *
+ * Normally the next time its opening date comes round. But a script run *during*
+ * that sport's own season would otherwise push its first fixture eleven months
+ * out while the hub said "In season" above it — so when today is already inside
+ * the run, the fixtures start a fortnight from now instead. `months` is the same
+ * list src/oh/sportSeasons.ts keeps for the sport.
+ */
+const seasonStart = (month, day, months) =>
+  months.includes(TODAY.getUTCMonth() + 1) ? addDays(TODAY, 14) : nextOn(month, day);
+
+/** A season is named for the autumn it starts in — a basketball season labelled
+ * 2026 plays its February games in 2027. */
+const openedIn = new Date(`${WEEKS[0]}T00:00:00Z`);
+const SEASON_YEAR =
+  openedIn.getUTCMonth() + 1 >= 7 ? openedIn.getUTCFullYear() : openedIn.getUTCFullYear() - 1;
 
 /*
  * Weeks 3 to 7 are the conference, a full round robin over six schools: five
@@ -395,62 +483,74 @@ const row = (date, opponent, home, time, score) => ({
  * The pasted schedules — every sport but football, which draws its fixtures
  * from the season above.
  *
- * All six sports are set to one moment: a demo school about five weeks into
- * its autumn. Football has played five of ten, volleyball two of nine, soccer
- * three of eight, and the winter and spring sports have not started, which is
- * what the hub's "Starts in November" and "Starts in March" notes are there to
- * say.
+ * All six sports are set to one moment: a demo school five weeks into its
+ * autumn. Football has played five of ten, volleyball two of nine and soccer
+ * three of eight, every one of those on a day that has been; the winter and
+ * spring sports have not started, which is what the hub's "Starts in November"
+ * and "Starts in March" notes are there to say.
  */
 const VOLLEYBALL_SCHEDULE = [
-  row('2026-09-10', 'Ashcombe', true, '6:30 PM', { us: 3, them: 1 }),
-  row('2026-09-15', 'Bellhaven', false, '6:30 PM', { us: 1, them: 3 }),
-  row('2026-09-17', 'Cedar Ridge', true, '6:30 PM'),
-  row('2026-09-22', 'Elmbrook', false, '6:30 PM'),
-  row('2026-09-24', 'Marlow Central', true, '6:30 PM'),
-  row('2026-09-29', 'Ashcombe', false, '6:30 PM'),
-  row('2026-10-01', 'Bellhaven', true, '6:30 PM'),
-  row('2026-10-06', 'Cedar Ridge', false, '6:30 PM'),
-  row('2026-10-08', 'Elmbrook', true, '6:30 PM'),
+  row(played(10), 'Ashcombe', true, '6:30 PM', { us: 3, them: 1 }),
+  row(played(3), 'Bellhaven', false, '6:30 PM', { us: 1, them: 3 }),
+  row(upcoming(1), 'Cedar Ridge', true, '6:30 PM'),
+  row(upcoming(3), 'Elmbrook', false, '6:30 PM'),
+  row(upcoming(8), 'Marlow Central', true, '6:30 PM'),
+  row(upcoming(10), 'Ashcombe', false, '6:30 PM'),
+  row(upcoming(15), 'Bellhaven', true, '6:30 PM'),
+  row(upcoming(17), 'Cedar Ridge', false, '6:30 PM'),
+  row(upcoming(22), 'Elmbrook', true, '6:30 PM'),
 ];
 
 const SOCCER_SCHEDULE = [
-  row('2026-09-03', 'Kirkwood Prep', false, '7:00 PM', { us: 2, them: 1 }),
-  row('2026-09-08', 'Ashcombe', true, '7:00 PM', { us: 0, them: 3 }),
-  row('2026-09-15', 'Bellhaven', false, '7:00 PM', { us: 3, them: 2 }),
-  row('2026-09-22', 'Cedar Ridge', true, '7:00 PM'),
-  row('2026-09-26', 'Elmbrook', false, '11:00 AM'),
-  row('2026-09-29', 'Marlow Central', true, '7:00 PM'),
-  row('2026-10-03', 'Harmony Ridge', false, '11:00 AM'),
-  row('2026-10-08', 'Stonebridge Central', true, '7:00 PM'),
+  row(played(12), 'Kirkwood Prep', false, '7:00 PM', { us: 2, them: 1 }),
+  row(played(8), 'Ashcombe', true, '7:00 PM', { us: 0, them: 3 }),
+  row(played(2), 'Bellhaven', false, '7:00 PM', { us: 3, them: 2 }),
+  row(upcoming(2), 'Cedar Ridge', true, '7:00 PM'),
+  row(upcoming(6), 'Elmbrook', false, '11:00 AM'),
+  row(upcoming(9), 'Marlow Central', true, '7:00 PM'),
+  row(upcoming(13), 'Harmony Ridge', false, '11:00 AM'),
+  row(upcoming(16), 'Stonebridge Central', true, '7:00 PM'),
 ];
 
+const WINTER_MONTHS = [11, 12, 1, 2, 3];
+const SPRING_MONTHS = [3, 4, 5, 6];
+
+const tipOff = seasonStart(11, 27, WINTER_MONTHS);
+const firstMat = seasonStart(11, 28, WINTER_MONTHS);
+const firstPitch = seasonStart(3, 30, SPRING_MONTHS);
+
+const from = (start) => (n) => iso(addDays(start, n));
+const hoops = from(tipOff);
+const mat = from(firstMat);
+const diamond = from(firstPitch);
+
 const BASKETBALL_SCHEDULE = [
-  row('2026-11-27', 'Kirkwood Prep', true, '7:30 PM'),
-  row('2026-12-04', 'Ashcombe', false, '7:30 PM'),
-  row('2026-12-11', 'Bellhaven', true, '7:30 PM'),
-  row('2026-12-19', 'Harmony Ridge', false, '2:00 PM'),
-  row('2027-01-02', 'Cedar Ridge', true, '7:30 PM'),
-  row('2027-01-08', 'Elmbrook', false, '7:30 PM'),
-  row('2027-01-15', 'Marlow Central', true, '7:30 PM'),
+  row(hoops(0), 'Kirkwood Prep', true, '7:30 PM'),
+  row(hoops(7), 'Ashcombe', false, '7:30 PM'),
+  row(hoops(14), 'Bellhaven', true, '7:30 PM'),
+  row(hoops(22), 'Harmony Ridge', false, '2:00 PM'),
+  row(hoops(36), 'Cedar Ridge', true, '7:30 PM'),
+  row(hoops(42), 'Elmbrook', false, '7:30 PM'),
+  row(hoops(49), 'Marlow Central', true, '7:30 PM'),
 ];
 
 const WRESTLING_SCHEDULE = [
-  row('2026-12-05', 'Stonebridge Invitational', false, '9:00 AM'),
-  row('2026-12-12', 'Ashcombe', true, '6:00 PM'),
-  row('2027-01-09', 'Pinecrest Academy', false, '9:00 AM'),
-  row('2027-01-21', 'Bellhaven', true, '6:00 PM'),
-  row('2027-02-06', 'Riverbend Conference Meet', false, '10:00 AM'),
+  row(mat(0), 'Stonebridge Invitational', false, '9:00 AM'),
+  row(mat(14), 'Ashcombe', true, '6:00 PM'),
+  row(mat(35), 'Pinecrest Academy', false, '9:00 AM'),
+  row(mat(47), 'Bellhaven', true, '6:00 PM'),
+  row(mat(63), 'Riverbend Conference Meet', false, '10:00 AM'),
 ];
 
 const BASEBALL_SCHEDULE = [
-  row('2027-03-30', 'Kirkwood Prep', true, '4:30 PM'),
-  row('2027-04-02', 'Ashcombe', false, '4:30 PM'),
-  row('2027-04-09', 'Bellhaven', true, '4:30 PM'),
-  row('2027-04-16', 'Cedar Ridge', false, '4:30 PM'),
-  row('2027-04-21', 'Elmbrook', true, '4:30 PM'),
-  row('2027-04-27', 'Marlow Central', false, '4:30 PM'),
-  row('2027-05-04', 'Harmony Ridge', true, '4:30 PM'),
-  row('2027-05-08', 'Twin Lakes', false, '4:30 PM'),
+  row(diamond(0), 'Kirkwood Prep', true, '4:30 PM'),
+  row(diamond(3), 'Ashcombe', false, '4:30 PM'),
+  row(diamond(10), 'Bellhaven', true, '4:30 PM'),
+  row(diamond(17), 'Cedar Ridge', false, '4:30 PM'),
+  row(diamond(22), 'Elmbrook', true, '4:30 PM'),
+  row(diamond(28), 'Marlow Central', false, '4:30 PM'),
+  row(diamond(35), 'Harmony Ridge', true, '4:30 PM'),
+  row(diamond(39), 'Twin Lakes', false, '4:30 PM'),
 ];
 
 /** Ids have to be unique and stable; nothing reads them but React's keys. */
@@ -476,19 +576,21 @@ const sports = {
  * nowhere else. Written out rather than fetched, because the demo page is not
  * allowed to ask anybody anything.
  */
+const NEXT_FIXTURE = WEEKS[PLAYED_WEEKS];
+
 const weather = {
-  date: '2026-09-25',
+  date: NEXT_FIXTURE,
   code: 2,
   tempF: 63,
   precipChance: 20,
   windMph: 9,
   day: false,
-  at: '2026-09-25T19:00',
+  at: `${NEXT_FIXTURE}T19:00`,
 };
 
 const demo = {
   slug: SLUG,
-  season: 2026,
+  season: SEASON_YEAR,
   school: { slug: SLUG, name: NAME, city: CITY },
   colors: { ground: GROUND, accent: ACCENT },
   logo: LOGO,
@@ -500,14 +602,53 @@ const demo = {
   weather,
 };
 
+/*
+ * The one thing that must be true, checked before the file is written.
+ *
+ * Every scored game strictly in the past and every unscored one ahead, across
+ * football, all five pasted schedules and all six baked seasons — the rivals
+ * included, because they carry the same conference games from the other side
+ * and a rival left on the old calendar would put the standings table at odds
+ * with the school's own record. This throws rather than warns: a demo.json that
+ * fails it is the exact file this rewrite exists to stop being committed.
+ */
+const TODAY_ISO = iso(TODAY);
+const dated = [];
+for (const season of Object.values(seasons)) {
+  for (const g of season.games) dated.push([`${season.school.slug} football`, g.date, !!g.result]);
+}
+for (const [sport, s] of Object.entries(sports)) {
+  for (const r of s.schedule ?? []) dated.push([sport, r.date, !!r.score]);
+}
+
+const wrong = dated.filter(([, date, scored]) =>
+  scored ? date >= TODAY_ISO : date < TODAY_ISO,
+);
+if (wrong.length) {
+  for (const [where, date, scored] of wrong) {
+    console.error(`  ${where}: ${date} ${scored ? 'has a score and is not past' : 'has no score and is not ahead'}`);
+  }
+  throw new Error(`${wrong.length} games are on the wrong side of today`);
+}
+
 const out = join(root, 'public/oh/demo.json');
 writeFileSync(out, `${JSON.stringify(demo, null, 2)}\n`);
 
 const kb = (n) => `${(n / 1024).toFixed(1)} kB`;
+const scoredDates = dated.filter(([, , s]) => s).map(([, d]) => d).sort();
+const aheadDates = dated.filter(([, , s]) => !s).map(([, d]) => d).sort();
+
 console.log(`wrote ${out}`);
 console.log(`  crest ${kb(crestPng.length)} png, ${kb(LOGO.length)} as a data URI`);
 console.log(`  ${Object.keys(seasons).length} seasons, ${Object.keys(sports).length} sports`);
 for (const [sport, s] of Object.entries(sports)) {
   console.log(`  ${sport}: ${s.players.length} players, ${s.schedule?.length ?? 0} pasted rows`);
 }
+console.log(`  anchored on ${iso(ANCHOR)}, generated ${TODAY_ISO}`);
+console.log(`  football ${WEEKS[0]} → ${WEEKS[TOTAL_WEEKS - 1]}, ${PLAYED_WEEKS} played`);
+console.log(`  played  ${scoredDates[0]} → ${scoredDates[scoredDates.length - 1]} (${scoredDates.length} games)`);
+console.log(`  ahead   ${aheadDates[0]} → ${aheadDates[aheadDates.length - 1]} (${aheadDates.length} games)`);
 console.log(`  ${NAME}: ${seasons[SLUG].record.won}–${seasons[SLUG].record.lost}`);
+// The date the file stops telling the truth: the last autumn fixture goes by
+// with no score on it and the Played group quietly stops growing.
+console.log(`  re-run before a demo — this one reads as stale after ${WEEKS[TOTAL_WEEKS - 1]}`);
