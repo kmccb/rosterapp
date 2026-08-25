@@ -14,7 +14,8 @@ import {
 } from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
 import { applyLook, clearLook } from './look';
-import { hubSports, inSeason, sortSportsForNow, sportEmoji, sportLabel } from './sportSeasons';
+import { SportGlyph } from './SportGlyph';
+import { hubSports, inSeason, seasonNote, sortSportsForNow, sportLabel } from './sportSeasons';
 import {
   chosenSport,
   keptLeagueTable,
@@ -623,31 +624,71 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // The hub is the honest answer; a dead sport page is not one. Football is
   // exempt: its free page stands on the directory's own schedule and scores.
   if (sport === null || (sport !== 'football' && !roster)) {
+    // One reading of the clock for the whole hub, so a row can't be sorted
+    // in-season by one call and labelled off-season by the next.
+    const now = new Date();
     return (
-      <Frame head={<div className="oh-school-head">{nameBlock}</div>}>
-        <div className="screen">
-          <div className="oh-sport-grid">
-            {tiles.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={`oh-sport-tile${inSeason(s, new Date().getMonth() + 1) ? '' : ' is-off'}`}
-                onClick={() => {
-                  rememberSport(slug, s);
-                  setSport(s);
-                }}
-              >
-                <span className="oh-sport-emoji" aria-hidden="true">
-                  {sportEmoji(s)}
-                </span>
-                <span className="oh-sport-name">{sportLabel(s)}</span>
-              </button>
-            ))}
+      /*
+       * The hub is a screen, not a page: header pinned, footer pinned, and the
+       * sports between them dividing whatever height is left. It wears .app
+       * and .header for the shell and the chrome plate, but not Frame — Frame's
+       * header carries the sport pages' own inset rules, and the two want
+       * opposite things from the same box.
+       *
+       * The rows are the reason for the arrangement. Each is tall enough to
+       * take a 40px name and a 172px watermark, and they share the leftover
+       * height between them, so a school with three sports gets three bands
+       * filling the phone rather than three tiles floating at the top of it.
+       */
+      <div className="app oh-hub">
+        <div className="header oh-hub-head">
+          {/* The plate is there whether or not there is a crest on it yet: a
+              school that has paid but not sent its badge gets a quiet square
+              in the school's own surface colour rather than a name sliding
+              left into the space where the badge goes. */}
+          {crest ? (
+            <img className="oh-hub-crest" src={crest} alt="" />
+          ) : (
+            <div className="oh-hub-crest" aria-hidden="true" />
+          )}
+          <div>
+            <h1 className="oh-hub-name">{season.school.name}</h1>
+            {/* No win-loss line here: the hub is in front of every sport this
+                school sells, and a football record under the school's name
+                would be a claim about all of them. */}
+            <p className="oh-hub-city">{season.school.city}, Ohio</p>
           </div>
-
-          {footer}
         </div>
-      </Frame>
+
+        <div className="oh-hub-body">
+          {tiles.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`oh-hub-row${inSeason(s, now.getMonth() + 1) ? '' : ' is-off'}`}
+              onClick={() => {
+                rememberSport(slug, s);
+                setSport(s);
+              }}
+            >
+              <SportGlyph sport={s} className="oh-hub-glyph" />
+              <span className="oh-hub-row-text">
+                <span className="oh-hub-sport">{sportLabel(s)}</span>
+                <span className="oh-hub-note">{seasonNote(s, now)}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="oh-hub-foot">
+          <button type="button" className="oh-hub-change" onClick={onChange}>
+            Follow a different school
+          </button>
+          <a className="oh-hub-privacy" href="/oh/?privacy">
+            Privacy
+          </a>
+        </div>
+      </div>
     );
   }
 
