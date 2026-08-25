@@ -300,41 +300,256 @@
   color: var(--accent);
 }
 
-/* The all-sports hub: one tile per sport with anything to show. Off-season
-   tiles stay tappable — a January reader may well want the football result
-   from November — they just stop shouting. */
-.oh-sport-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin: 16px 0;
+/* --------------------------------------------------------------- the hub */
+
+/*
+ * The all-sports hub: one full-width band per sport, in-season first, filling
+ * the screen between a pinned header and a pinned footer. It replaced a grid
+ * of small tiles because this is the school's front door and the sports are
+ * the only thing on it — there is nothing else for the height to go to.
+ *
+ * Every colour here is one of the custom properties src/oh/look.ts derives
+ * from the school's two colours, never a literal, which is the whole point:
+ * the same rules dress a crimson school and a green one.
+ */
+
+/*
+ * The display face, self-hosted from public/oh/fonts/ rather than fetched from
+ * Google. /oh/?privacy promises the reader that nothing here follows them
+ * between sites, and a stylesheet request to fonts.googleapis.com would be
+ * exactly that. It sits under public/oh/ deliberately: vite.config.ts's
+ * globIgnores keeps everything there out of the root service worker's
+ * precache, which the Poland guard counts.
+ *
+ * swap, not block: at a ground on a bad signal the sport's name must be
+ * readable in the fallback while 18 KB of woff2 makes up its mind.
+ */
+@font-face {
+  font-family: 'Anton';
+  src: url('/oh/fonts/anton-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-.oh-sport-tile {
+/* A phone screen, held to a phone's width on anything wider. */
+.oh-hub {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* The header's own padding, in place of the sport pages' 10px 12px 0 — there
+   are no tabs under this one to sit flush against. */
+.oh-hub-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.oh-hub-crest {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.oh-hub-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.oh-hub-city {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* The rows share the height the header and footer leave, and scroll only when
+   a school sells enough sports that 172px each no longer fits. */
+.oh-hub-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
+}
+
+.oh-hub-row {
+  position: relative;
+  flex: 1;
+  min-height: 172px;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 18px 8px 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
+  padding: 0 20px;
+  /* The watermark is drawn hanging off the right edge; this is what stops it
+     widening the page instead. */
+  overflow: hidden;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background-image: linear-gradient(90deg, var(--ghost), var(--surface));
   color: var(--text);
   font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
-.oh-sport-tile.is-off {
-  opacity: 0.55;
+/*
+ * Pressed: the gradient painted twice over itself, rather than a second pair
+ * of hardcoded alphas that could not stay the school's own colours. Two layers
+ * of the same alpha a compose to 2a − a², so the accent end goes .22 → .39,
+ * near enough the .34 a literal would have used, and the surface end goes
+ * .72 → .92, which is a good deal further. The band therefore deepens along
+ * its whole length under the thumb rather than only at its left edge — a
+ * stronger press than the design drew, and the right way round: the part of
+ * the row nobody is touching should not be the part that reacts most.
+ */
+.oh-hub-row:active {
+  background-image:
+    linear-gradient(90deg, var(--ghost), var(--surface)),
+    linear-gradient(90deg, var(--ghost), var(--surface));
 }
 
-.oh-sport-emoji {
-  font-size: 28px;
+/* The last band's rule and the footer's would otherwise sit on top of each
+   other, and one 2px hairline among 1px ones reads as a mistake. The footer
+   keeps its border; the row gives its up. */
+.oh-hub-row:last-child {
+  border-bottom: 0;
+}
+
+.oh-hub-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+
+/*
+ * The sport's mark, sunk into the row: it bleeds past the right edge and is
+ * clipped by the row's own overflow, so it reads as a watermark under the
+ * name rather than an icon set beside it. --text at 9% rather than a fixed
+ * white, so a school whose text is ever anything else keeps its own.
+ */
+.oh-hub-glyph {
+  position: absolute;
+  right: -26px;
+  top: 50%;
+  transform: translateY(-50%);
+  /* The mark is 1em square, so its size is a font-size like any other. Said
+     here as well as on the element, because a bare width="1em" attribute is
+     not something every browser parses. */
+  width: 1em;
+  height: 1em;
+  font-size: 172px;
+  color: var(--text);
+  opacity: 0.09;
+  pointer-events: none;
+}
+
+/* Static content paints under an absolutely positioned sibling; the name has
+   to be told to sit above the mark. */
+.oh-hub-row-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.oh-hub-sport {
+  font-family: 'Anton', 'Arial Narrow', system-ui, sans-serif;
+  font-size: 40px;
+  font-weight: 400;
   line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 
-.oh-sport-name {
+.oh-hub-note {
+  margin-top: 6px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/*
+ * An off-season row keeps its place and stays tappable — a January reader may
+ * well want November's football result — but it is veiled in the school's own
+ * ground so the sports that are on now are the ones the eye lands on. Half
+ * the ground, laid over the whole row: --bg at half opacity rather than
+ * --scrim-near, which is built for the wallpaper behind the page and at .78
+ * would take the name down with it.
+ */
+.oh-hub-row.is-off::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/*
+ * The one line on a veiled row that has to survive it.
+ *
+ * Half the school's ground over 12px of --muted measures about 3.8:1 for the
+ * demo school — under AA, and no colour fixes it: veiling text and its
+ * backdrop together costs far more contrast than pure white can win back
+ * (white under the same veil only reaches 3.9:1). So the note is lifted above
+ * the veil instead and drawn from --text at .78, which puts it near 9:1 while
+ * still reading as quieter than an in-season row's.
+ *
+ * Only the note. The 40px name stays under the veil — at that size it clears
+ * AA's large-text 3:1 on its own, and it is what makes an off-season band look
+ * off-season. Rasterized against the alternative of lifting the whole text
+ * block, that one lost the dimming altogether.
+ */
+.oh-hub-row.is-off .oh-hub-note {
+  position: relative;
+  z-index: 1;
+  color: var(--text);
+  opacity: 0.78;
+}
+
+/* The way out, and the notice. Both on one row: the footer is chrome, and the
+   less height it takes the more the sports get. */
+.oh-hub-foot {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--chrome);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.oh-hub-change {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  /* Without this the button wears Chrome's own button font — Arial next to the
+     system-ui everything else on the hub is set in. The bands say `font:
+     inherit` for the same reason. */
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oh-hub-privacy {
+  flex: none;
+  color: var(--accent);
+  font-size: 13px;
 }
 
 /*

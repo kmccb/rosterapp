@@ -29,12 +29,14 @@ const MONTHS: Record<string, number[]> = {
   lacrosse: [3, 4, 5],
 };
 
-const EMOJI: Record<string, string> = {
-  football: '🏈', volleyball: '🏐', soccer: '⚽', 'cross country': '🏃',
-  golf: '⛳', tennis: '🎾', cheer: '📣', basketball: '🏀', wrestling: '🤼',
-  swimming: '🏊', hockey: '🏒', bowling: '🎳', baseball: '⚾', softball: '🥎',
-  track: '🏃', lacrosse: '🥍',
-};
+/* Written out rather than read off a Date, because the note this feeds is a
+   fixed sentence about a fixed Ohio calendar, not a formatted date: the reader
+   is told the month a season opens, and pinning the words keeps the test
+   honest on a machine set to any locale. */
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 const norm = (sport: string): string => sport.trim().toLowerCase();
 
@@ -42,6 +44,29 @@ const norm = (sport: string): string => sport.trim().toLowerCase();
 export const inSeason = (sport: string, month: number): boolean => {
   const months = MONTHS[norm(sport)];
   return months ? months.includes(month) : true;
+};
+
+/**
+ * The line under a sport's name on the hub: whether it is on now, and if it
+ * isn't, when it comes back.
+ *
+ * The month is found by walking forward from this one and wrapping the year,
+ * so a sport is always announced by the run it is *next* in rather than the
+ * one it has just left — basketball in April says November, not the March it
+ * finished a fortnight ago. A sport the table doesn't know counts as in
+ * season, the same charity inSeason extends it, so it never claims a start
+ * date nobody told it.
+ */
+export const seasonNote = (sport: string, now: Date): string => {
+  const month = now.getMonth() + 1;
+  if (inSeason(sport, month)) return 'In season';
+  const months = MONTHS[norm(sport)];
+  for (let step = 1; step <= 12; step += 1) {
+    const next = ((month + step - 1) % 12) + 1;
+    if (months.includes(next)) return `Starts in ${MONTH_NAMES[next - 1]}`;
+  }
+  // Unreachable: a sport out of season has at least one month it is in.
+  return 'In season';
 };
 
 /** In-season sports first, alphabetical within each group. */
@@ -68,4 +93,7 @@ export const hubSports = (live: string[]): string[] => {
 export const sportLabel = (sport: string): string =>
   norm(sport).replace(/\b[a-z]/g, (c) => c.toUpperCase());
 
-export const sportEmoji = (sport: string): string => EMOJI[norm(sport)] ?? '🎽';
+/** Every sport this table has an opinion about. The hub's glyph set is held
+ * to this list by a test, so a sport added above can't ship without a mark to
+ * draw it by. */
+export const knownSports = (): string[] => Object.keys(MONTHS);
