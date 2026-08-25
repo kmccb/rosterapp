@@ -30,10 +30,13 @@ so it is safe to show on a school's guest wifi, in a car park, anywhere.
 
 **Maintenance:** the page carries its own dates forward as it ages, so what
 has been played and what is coming always split at today without anyone
-touching it. What does drift is the calendar: run `node scripts/build-demo.mjs`
-and commit `public/oh/demo.json` once or twice a year, so the football
-season stays in the autumn. It refuses to write a season that would argue
-with itself, and prints the dates it wrote.
+touching it. What does drift is the calendar — the season travels with the
+dates, so about six months on the football fixtures are reading January to
+March under a tile that says "Starts in August". So run
+`node scripts/build-demo.mjs` and commit `public/oh/demo.json` **twice a
+year**, near the start of the autumn and again around February. It refuses
+to write a season that would argue with itself, and prints the dates it
+wrote.
 
 ## Activate a school (the whole job, ~3 minutes)
 

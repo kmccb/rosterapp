@@ -27,12 +27,15 @@
  * The drift that would otherwise follow is handled at the other end:
  * src/oh/demo.ts carries every date forward by whole weeks when the page loads,
  * so the split between what has been played and what is to come stays where it
- * was put, indefinitely, with nobody remembering anything. What that cannot fix
- * is the calendar itself — carry an autumn far enough and it lands in February,
- * under a hub still saying "Starts in August". So this wants re-running once or
- * twice a year rather than weekly, and it is worth doing before a demo that
- * matters. `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it
- * writes on a day of your choosing.
+ * was put, indefinitely, with nobody remembering anything.
+ *
+ * What that cannot fix is the calendar itself. The shift moves the autumn along
+ * with everything else, so about six months on the football season is reading
+ * January to March under a hub tile still saying "Starts in August". So this
+ * wants re-running about every six months — twice a year, near the start of the
+ * autumn and again around February — and before any demo that matters.
+ * `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it writes on a
+ * day of your choosing.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -814,10 +817,10 @@ console.log(`  ${NAME}: ${seasons[SLUG].record.won}–${seasons[SLUG].record.los
  * src/oh/demo.ts moves every date forward by whole weeks at read time, so the
  * split between played and coming stays where it was put however long this file
  * sits — that part looks after itself and nobody has to remember anything.
- * What the shift cannot do is keep the season in its own months for ever: carry
- * an autumn far enough and it lands in February, with the hub saying "Starts in
- * August" over it. That is the reason to re-run this, and it is a once or twice
- * a year job rather than a weekly one.
+ * What the shift cannot do is keep the season in its own months: it carries the
+ * autumn along too, so about six months from now this season is reading January
+ * to March under a hub still saying "Starts in August". That is the reason to
+ * re-run this, and it makes it a twice-a-year job.
  */
 console.log('  the page carries these dates forward by whole weeks as it ages;');
-console.log('  re-run once or twice a year, so the season stays in its own months');
+console.log('  re-run about every six months, so the season stays in its own months');

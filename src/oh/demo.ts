@@ -215,33 +215,56 @@ const moveDate = (date: string, days: number): string => {
 /**
  * How many whole weeks the file is behind.
  *
- * The last day anything was played is the hinge: the generator put it on the
- * most recent day that had been, and it has to land there again. Moving it into
- * the window from yesterday back to a week ago does that, and because the
- * earliest unplayed date the generator writes is a clear week the far side of
- * that hinge, everything ahead lands on today or later without being counted
- * separately.
+ * Two kinds of file arrive here, and they hinge on opposite ends of themselves.
  *
- * Never negative. A file that somehow reads as generated in the future — a
- * phone with a slow clock, most likely — is left exactly as it was written
- * rather than dragged backwards.
+ * The usual one was generated in the autumn and has results on it. The last day
+ * anything was played is the hinge: the generator put it on the most recent day
+ * that had been, and it has to land there again. Moving it into the window from
+ * yesterday back to a week ago does that, and because the earliest unplayed date
+ * the generator writes is a clear week the far side of that hinge, everything
+ * ahead lands on today or later without being counted separately.
+ *
+ * The other was generated between December and July, when the autumn has not
+ * begun — the generator writes the whole season as fixtures, with nothing played
+ * at all, because that is the only arrangement that does not argue with a hub
+ * saying "Starts in August". A file like that has no last-played day to hinge
+ * on, and hinging on nothing meant never moving: its fixtures would slide into
+ * the past one by one and sit under "Coming up", which is the exact fault this
+ * whole function exists to prevent. So it hinges on the other end instead — the
+ * first fixture — and moves by enough whole weeks to put that back in front of
+ * today, carrying the rest with it.
+ *
+ * Never negative either way. A file that somehow reads as generated in the
+ * future — a phone with a slow clock, most likely — is left exactly as it was
+ * written rather than dragged backwards.
  */
 export const weeksBehind = (data: DemoData, today: Date): number => {
   const scored: string[] = [];
+  const ahead: string[] = [];
   for (const season of Object.values(data.seasons)) {
-    for (const game of season.games) if (game.result) scored.push(game.date);
+    for (const game of season.games) (game.result ? scored : ahead).push(game.date);
   }
   for (const entry of Object.values(data.sports)) {
-    for (const row of entry.schedule ?? []) if (row.score) scored.push(row.date);
+    for (const row of entry.schedule ?? []) (row.score ? scored : ahead).push(row.date);
   }
-  if (!scored.length) return 0;
 
-  const hinge = dayOf(scored.reduce((a, b) => (a > b ? a : b)));
   const now = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  if (Number.isNaN(hinge)) return 0;
 
+  if (scored.length) {
+    const hinge = dayOf(scored.reduce((a, b) => (a > b ? a : b)));
+    if (Number.isNaN(hinge)) return 0;
+    const gap = Math.round((now - hinge) / MS_DAY);
+    return Math.max(0, Math.floor((gap - 1) / 7));
+  }
+
+  if (!ahead.length) return 0;
+  const hinge = dayOf(ahead.reduce((a, b) => (a < b ? a : b)));
+  if (Number.isNaN(hinge)) return 0;
+  // Enough weeks to put the first fixture on today or later — `ceil` rather
+  // than the `floor` above, because this end is being pushed forward over the
+  // line rather than back behind it.
   const gap = Math.round((now - hinge) / MS_DAY);
-  return Math.max(0, Math.floor((gap - 1) / 7));
+  return Math.max(0, Math.ceil(gap / 7));
 };
 
 /** The same demo, every date `weeks` weeks later. */

@@ -78,6 +78,24 @@ describe('which page is the demo', () => {
   });
 });
 
+/*
+ * Whether the file was written with the autumn on.
+ *
+ * The generator has two honest outputs and they look nothing alike. Written
+ * between August and November it produces a season under way — half played,
+ * a record, a standings table. Written between December and July it produces
+ * the next autumn as fixtures with **nothing** played, because a season cannot
+ * both carry results and sit in months eight to eleven when today is February,
+ * and the hub would otherwise print "Starts in August" over a row of January
+ * scores.
+ *
+ * So "no results anywhere" is a correct file half the year and a broken one the
+ * other half, and the tests below have to ask which half before they judge. The
+ * day it was written is on the file for exactly this reason.
+ */
+const bornInSeason = (): boolean =>
+  inSeason('football', Number((committed() as { generatedOn: string }).generatedOn.slice(5, 7)));
+
 describe('the committed file', () => {
   it('reads as a demo, with the six sports the hub is sold on', async () => {
     const { loadDemo, DEMO_SLUG } = await load(committed());
@@ -120,10 +138,17 @@ describe('the committed file', () => {
     expect(season.record.played).toBe(played.length);
     expect(season.record.won).toBe(played.filter((g) => g.result!.won).length);
     expect(season.record.lost).toBe(played.filter((g) => !g.result!.won).length);
-    // A demo school that wins everything reads as a brochure rather than a
-    // product, and both chips have to be on screen to be worth showing.
-    expect(season.record.won).toBeGreaterThan(0);
-    expect(season.record.lost).toBeGreaterThan(0);
+
+    // Only a file written in the autumn owes anybody a record. When it is, a
+    // demo school that wins everything reads as a brochure rather than a
+    // product, so both chips have to be on screen. Out of season 0–0 is the
+    // true answer and the school's own page would say so.
+    if (bornInSeason()) {
+      expect(season.record.won).toBeGreaterThan(0);
+      expect(season.record.lost).toBeGreaterThan(0);
+    } else {
+      expect(season.record.played).toBe(0);
+    }
   });
 
   it('files the forecast on the next fixture, which has not been played', async () => {
@@ -156,7 +181,9 @@ describe('the committed file', () => {
     for (const [slug, season] of Object.entries(demo!.seasons)) {
       const scored = season.games.filter((g) => g.result).map((g) => g.date);
       const ahead = season.games.filter((g) => !g.result).map((g) => g.date);
-      expect(scored.length, slug).toBeGreaterThan(0);
+      // Results only when the autumn was on — see bornInSeason above. Fixtures
+      // always: a season with nothing to come is not a page worth opening.
+      expect(scored.length > 0, slug).toBe(bornInSeason());
       expect(ahead.length, slug).toBeGreaterThan(0);
       // ISO dates sort as strings, so this is the whole comparison.
       expect(scored.every((s) => ahead.every((a) => s < a)), slug).toBe(true);
@@ -325,14 +352,76 @@ describe('the calendar, weeks after it was written', () => {
   });
 
   it('leaves a file generated today exactly as it is', async () => {
-    const { loadDemo, shiftToNow, weeksBehind, DEMO_SLUG } = await load(committed());
+    const born = (committed() as { generatedOn: string }).generatedOn;
+    const { loadDemo, shiftToNow, weeksBehind } = await load(committed());
     const demo = await loadDemo();
-    const scored = demo!.seasons[DEMO_SLUG].games.filter((g) => g.result);
-    const theDayAfter = day(scored[scored.length - 1].date);
-    theDayAfter.setUTCDate(theDayAfter.getUTCDate() + 1);
 
-    expect(weeksBehind(demo!, theDayAfter)).toBe(0);
-    expect(shiftToNow(demo!, theDayAfter)).toBe(demo);
+    // Keyed on the day it was written rather than on its last result, because
+    // a file written out of season has no results to key on.
+    expect(weeksBehind(demo!, day(born))).toBe(0);
+    expect(shiftToNow(demo!, day(born))).toBe(demo);
+  });
+
+  /*
+   * The other kind of file: written between December and July, when the autumn
+   * has not begun, so the generator writes every game as a fixture and nothing
+   * as a result. It has no last-played day, and hinging on nothing used to mean
+   * never moving — its fixtures would slide into the past one at a time and sit
+   * there under "Coming up", which is the whole fault this is here to prevent.
+   *
+   * Made by stripping the scores off the committed file rather than by shipping
+   * a second one, so it stays honest whichever half of the year the real file
+   * was generated in.
+   */
+  const scoreless = () => {
+    const raw = committed() as unknown as {
+      seasons: Record<string, { games: Array<Record<string, unknown>> }>;
+      sports: Record<string, { schedule: Array<Record<string, unknown>> | null }>;
+    };
+    for (const season of Object.values(raw.seasons)) {
+      for (const g of season.games) delete g.result;
+    }
+    for (const entry of Object.values(raw.sports)) {
+      for (const r of entry.schedule ?? []) delete r.score;
+    }
+    return raw as unknown as Record<string, unknown>;
+  };
+
+  it('still moves a file with nothing played on it', async () => {
+    const { loadDemo, shiftToNow, weeksBehind } = await load(scoreless());
+    const demo = await loadDemo();
+
+    for (const when of ['2027-03-01', '2027-11-11', '2030-01-20']) {
+      const moved = shiftToNow(demo!, day(when));
+      expect(weeksBehind(demo!, day(when)), when).toBeGreaterThan(0);
+      for (const [date, scored] of everyDate(moved)) {
+        expect(scored, `${when}: ${date}`).toBe(false);
+        expect(date >= when, `${when}: ${date} is behind today`).toBe(true);
+      }
+    }
+  });
+
+  it('moves a scoreless file by whole weeks, all seasons together', async () => {
+    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(scoreless());
+    const demo = await loadDemo();
+    const before = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
+    const moved = shiftToNow(demo!, day('2027-11-11'));
+    const after = moved.seasons[DEMO_SLUG].games.map((g) => g.date);
+
+    for (let i = 0; i < before.length; i += 1) {
+      const weeks = (day(after[i]).getTime() - day(before[i]).getTime()) / (7 * 86_400_000);
+      expect(Number.isInteger(weeks), before[i]).toBe(true);
+      expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
+    }
+    for (const [slug, season] of Object.entries(moved.seasons)) {
+      expect(season.games.map((g) => g.date), slug).toEqual(after);
+    }
+    expect(moved.weather!.at.startsWith(moved.weather!.date)).toBe(true);
+  });
+
+  it('does not drag a scoreless file backwards either', async () => {
+    const { loadDemo, weeksBehind } = await load(scoreless());
+    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
   });
 
   it('never drags a file backwards for a clock that is behind', async () => {
