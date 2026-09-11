@@ -35,6 +35,20 @@ const easternDate = (now: Date): string =>
   }).format(now);
 
 /**
+ * Whether `date` is a real calendar date, not just YYYY-MM-DD shaped.
+ * `Date.parse` silently rolls an out-of-range day into the next month
+ * (2026-02-30 becomes March 2) instead of failing, so a day that overflows
+ * its month must not quietly become a game next month — round-trip it
+ * through ISO and compare.
+ */
+const isRealDate = (date: string): boolean => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const at = Date.parse(`${date}T00:00:00Z`);
+  if (Number.isNaN(at)) return false;
+  return new Date(at).toISOString().slice(0, 10) === date;
+};
+
+/**
  * The instant a timed fixture starts, or null for an untimed one. Built here
  * rather than through kickoffAt, whose seven-o'clock default is right for a
  * forecast and wrong for this: a time nobody could read must not open the
@@ -53,7 +67,7 @@ export const landingTab = (fixtures: LandingFixture[], players: number, now: Dat
   if (players === 0) return 'schedule';
   const today = easternDate(now);
   for (const fixture of fixtures) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fixture.date)) continue;
+    if (!isRealDate(fixture.date)) continue;
     const start = startOf(fixture);
     if (start === null) {
       if (fixture.date === today) return 'lookup';

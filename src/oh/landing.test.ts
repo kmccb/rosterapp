@@ -58,4 +58,14 @@ describe('where a sport lands', () => {
   it('survives a date it cannot parse', () => {
     expect(landingTab([{ date: 'soon', time: '7:00 PM' }], 40, at('2026-09-11T23:00:00Z'))).toBe('schedule');
   });
+
+  it('survives a date it cannot parse, even one that looks the right shape', () => {
+    // Date.parse rolls Feb 30 into March 2 instead of failing; the overflow
+    // must not quietly become a game next month.
+    expect(landingTab([{ date: '2026-02-30', time: '7:00 PM' }], 40, at('2026-03-02T23:30:00Z'))).toBe('schedule');
+    // Same overflow, untimed: 2026-03-02T20:00:00Z is 2026-03-02 Eastern (EST, UTC-5).
+    expect(landingTab([{ date: '2026-02-30' }], 40, at('2026-03-02T20:00:00Z'))).toBe('schedule');
+    // An out-of-range month already yields Invalid Date, but covered here too.
+    expect(landingTab([{ date: '2026-13-01', time: '7:00 PM' }], 40, at('2026-03-02T23:30:00Z'))).toBe('schedule');
+  });
 });
