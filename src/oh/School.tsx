@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
@@ -390,7 +390,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // block the season above it. That's the one thing every school gets.
     setRoster(null);
     // A placeholder until the landing rule below has something to read; the
-    // tab bar is not drawn until the roster lands, so nobody sees it.
+    // layout effect below replaces it before the browser paints.
     setTab('schedule');
     // Football is asked for even when the live list is unknown, because that
     // is exactly what the page did before the hub existed. A known-empty list
@@ -432,8 +432,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
    * football the season, since football's fixtures are the directory's. Every
    * dependency here changes only on entering a sport (or a school), never on
    * a tab tap, so a reader who has moved to Team is not dragged back.
+   *
+   * A layout effect, not a passive one: the tab bar first appears on the same
+   * render the roster lands, so a passive effect would let that first frame
+   * paint with the placeholder before this correction ever ran.
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (sport === null || rosterFetch !== 'done') return;
     if (sport === 'football' && season === null) return;
     const fixtures: LandingFixture[] =
