@@ -1,6 +1,6 @@
 # rosterapp — working notes for Claude
 
-Three products share this repo and one deployment (GitHub Pages at https://roster.scottforge.ai):
+Three products share this repo and one deployment (Cloudflare Pages at https://roster.scottforge.ai):
 
 1. **The root PWA** (`/`, `/ysu/`, `/victorychristian/`) — the original "who is #17" app.
    Poland Seminary is the root team; installed on real phones; used offline at games.
@@ -9,7 +9,7 @@ Three products share this repo and one deployment (GitHub Pages at https://roste
 3. **The paid tier** — a school pays (~$200/season, concierge: the seller does everything),
    its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest.
    Admin panel at `/oh/?manage` (magic-link auth, single admin account). Privacy page at
-   `/oh/?privacy`. Routing is by query flag — Pages has no SPA fallback.
+   `/oh/?privacy`. Routing is by query flag — an unknown path falls back to Poland's root page.
 
 ## The one rule that outranks everything
 
@@ -40,7 +40,8 @@ not a config bug — wait for the next cron. Consequences:
   concierge relationship (phase 3 — no scrapeable source exists).
 - Directory data is **committed** (`public/oh/`, 717 school JSONs) — no database for it.
   Refreshed by `.github/workflows/directory.yml` (Sat+Wed 07:00 UTC), which commits to main
-  → triggers deploy. `refresh.yml` (every 6h) rebuilds Poland's schedule/league/weather.
+  → triggers deploy. `refresh.yml` (every 6h) POSTs a Cloudflare deploy hook (`CF_PAGES_DEPLOY_HOOK`
+  secret) — a rebuild of the same commit that re-fetches Poland's schedule/league/weather.
   All deploys are **fail-closed** behind the guard.
 
 ## Supabase (migrations 0001–0006 APPLIED in production; 0007 WRITTEN, NOT applied)
@@ -78,9 +79,13 @@ not a config bug — wait for the next cron. Consequences:
 - `npx vitest run` — 375 tests / 25 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
-- CI = `deploy.yml` (push to main: test → build+guard → Pages). Env vars are repository
-  *variables*, not secrets — they ship in the bundle by design (`VITE_SUPABASE_URL`,
-  `VITE_SUPABASE_ANON_KEY`, `VITE_CF_BEACON` for Cloudflare Web Analytics).
+- CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
+  deploys; every other branch/PR gets a preview build with a check on the PR. The build command
+  (in the Pages dashboard, and in README's Deploying section) runs env-free `npm test` →
+  `paid-weather.mjs` (fail-soft) → `npm run build` (+guard). Env vars live in the Pages project,
+  **Production and Preview separately**, plain text — they ship in the bundle by design
+  (`NODE_VERSION`=22, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; `VITE_CF_BEACON` empty —
+  the beacon is off). The GitHub repo *variables* of the same names are no longer read by anything.
 
 ## Ops documents
 
@@ -92,6 +97,11 @@ not a config bug — wait for the next cron. Consequences:
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
 ## Where things stand (2026-08-24, end of session)
+
+**Hosting moved 2026-09-11:** GitHub Pages → Cloudflare Pages, same domain (the `scottforge.ai`
+zone is on Cloudflare; `roster` is a proxied CNAME to `rosterapp-7zt.pages.dev`). Verified
+byte-identical pages, service-worker update on an existing install, Supabase and admin sign-in on
+the real domain. GitHub Pages retired; its repo *variables* are now dead config.
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
 (tabs, full theming, crest upload), the all-sports hub (0006), migration 0006 applied and

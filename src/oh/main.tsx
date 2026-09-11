@@ -9,9 +9,10 @@ import '../styles.css';
 import './oh.css';
 
 /*
- * Routed on query flags, not paths: GitHub Pages has no SPA fallback and the
- * root service worker deliberately refuses /oh/ navigations, so /oh/manage as
- * a path would be a 404. ?manage and ?privacy always resolve to this page.
+ * Routed on query flags, not paths: the host's only fallback for a path with
+ * no file is Poland's root page, and the root service worker deliberately
+ * refuses /oh/ navigations, so /oh/manage as a path would open the wrong app.
+ * ?manage and ?privacy always resolve to this page.
  *
  * The demo is the exception, and it is not a fallback: vite.oh.config.ts emits
  * a second page at dist/oh/demo/index.html, so /oh/demo/ is a file Pages can

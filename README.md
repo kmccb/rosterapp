@@ -171,33 +171,36 @@ icon.
 
 ## Deploying
 
-Live at **https://roster.scottforge.ai**. Pushing to `main` builds and publishes via
-`.github/workflows/deploy.yml`.
+Live at **https://roster.scottforge.ai**, on Cloudflare Pages. The Pages project is connected to
+this repo, so every push to `main` is built and published by Cloudflare itself — no deploy
+workflow in `.github/`. Each other branch gets a preview build on its own `*.pages.dev` address,
+which is also what puts a pass or fail on a pull request.
 
-One-time setup, in order:
+The build command, set in the Pages project:
 
-1. **The repo must be public**, unless the account is on GitHub Pro or higher — Pages doesn't
-   publish from a private repo on the free plan. Public is fine here: no roster data is in the
-   repo, and none ends up in the built site either. Players are entered on the device and stay
-   there.
-2. **Settings → Pages → Source: GitHub Actions.**
-3. **DNS**: a `CNAME` record for `roster` pointing at `kmccb.github.io.` (that's the GitHub user,
-   not the repo, and the trailing dot matters on some providers).
-4. **Settings → Pages → Custom domain**: `roster.scottforge.ai`, then tick **Enforce HTTPS** once
-   the certificate finishes provisioning — that can take a few minutes to an hour after DNS
-   resolves. Go back and check the box actually got ticked: until it is, GitHub serves and links
-   to `http://`, which is a *different storage origin* from `https://` — so rosters vanish
-   depending on which one you arrive at — and service workers refuse to register outside a secure
-   context, which quietly costs you the offline support the app exists for.
-   Verify with `gh api repos/<owner>/<repo>/pages --jq .https_enforced`.
-5. **Get the workflow onto `main`.** It triggers on pushes to `main`, and the manual "Run workflow"
-   button only appears for workflows already on the default branch — so nothing deploys while this
-   lives on a feature branch.
-6. **Settings → Secrets and variables → Actions → Variables**: add `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_ANON_KEY`. Variables rather than secrets, deliberately — both are readable in
-   the shipped bundle anyway, and hiding them would only make the build harder to audit. Skip
-   this and the site deploys fine without sharing.
+```sh
+env -u VITE_SUPABASE_URL -u VITE_SUPABASE_ANON_KEY -u VITE_CF_BEACON npm test && (node scripts/paid-weather.mjs || true) && npm run build
+```
 
-`public/CNAME` carries the domain into every build, which is what keeps the custom domain from
-being dropped on each deploy. Because a custom domain serves from the root, `vite.config.ts` sets
-`base: '/'`; reverting to plain `github.io` hosting means putting `/rosterapp/` back.
+Tests first, with the variables stripped, because they must pass with no Supabase configured;
+then the paying schools' forecast, which is allowed to fail; then the build, which ends in the
+Poland guard. Anything but a clean pass publishes nothing. Output directory `dist`.
+
+The variables live in the Pages project too, under **Settings → Variables and secrets**, set in
+*both* the Production and the Preview environment — they're separate, and a preview missing one
+fails the guard: `NODE_VERSION` = `22`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and
+`VITE_CF_BEACON` present but empty until the beacon is switched on. Plain text rather than
+secrets, deliberately — every one is readable in the shipped bundle anyway, and hiding them would
+only make the build harder to audit.
+
+Cloudflare rebuilds on a push and on nothing else, and the six-hourly schedule refresh has nothing
+to push, so `refresh.yml` asks for a rebuild through a Pages deploy hook whose URL is the
+`CF_PAGES_DEPLOY_HOOK` repository secret. The directory refresh does commit, and that push is its
+rebuild.
+
+DNS is the `scottforge.ai` zone on the same Cloudflare account, where `roster` is a proxied
+`CNAME` to the project's `pages.dev` name — attaching the custom domain in the Pages project writes
+it. Plain `http://` redirects to `https://`, which matters more than it looks: they are different
+storage origins, so rosters would vanish depending on which one you arrived at, and service workers
+refuse to register outside a secure context. Because a custom domain serves from the root,
+`vite.config.ts` sets `base: '/'`.

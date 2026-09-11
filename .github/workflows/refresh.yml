@@ -5,70 +5,32 @@ name: Refresh the schedule
 # what carries a fixture change or a final score through to everyone. Every six
 # hours keeps a Friday night result current by Saturday morning without anyone
 # remembering to do anything.
+#
+# The site is built by Cloudflare Pages, which rebuilds on a push and on
+# nothing else, and this refresh has nothing to push: the point is a rebuild of
+# the same commit against newer data. A deploy hook is how Cloudflare is asked
+# for one. Its build runs the same fetches a push does — the paying schools'
+# kickoff forecast, then Poland's schedule, league and weather — behind the same
+# tests and the same guard.
 on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
+permissions: {}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      # The forecast for each paying school's next fixture, written into
-      # public/oh/ so the build copies it into the deploy — the same trip
-      # Poland's own forecast makes, and for the same reason: it is asked for
-      # once here rather than once per spectator, so nobody reading /oh/ has to
-      # announce themselves to a weather service. The script never exits
-      # non-zero, and continue-on-error is the belt to that brace: a weather
-      # outage must not be the reason Friday's scores fail to deploy.
-      - run: node scripts/paid-weather.mjs
-        continue-on-error: true
-      - run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-          VITE_CF_BEACON: ${{ vars.VITE_CF_BEACON }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-  # Cloudflare Pages builds straight from the repo, so a push reaches it with
-  # no help — but this workflow never pushes. A rebuild with nothing changed in
-  # git is its whole point, and a deploy hook is how Cloudflare is asked for
-  # one: its build runs the same fetches the job above does, on its own
-  # machine. It stands apart from that job rather than after it, because
-  # neither host's refresh should wait on, or fail with, the other's. Until
-  # the secret exists the step skips, so nothing here can break a run.
   cloudflare:
     runs-on: ubuntu-latest
     env:
       HOOK: ${{ secrets.CF_PAGES_DEPLOY_HOOK }}
     steps:
-      - if: env.HOOK != ''
-        run: curl -fsS -X POST "$HOOK" -o /dev/null
+      # A missing secret fails the run rather than skipping it. This job is the
+      # whole refresh now, so a quiet skip would be a site that stops updating
+      # with every run green.
+      - run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::CF_PAGES_DEPLOY_HOOK is not set, so nothing asked Cloudflare to rebuild."
+            exit 1
+          fi
+          curl -fsS --retry 3 --retry-all-errors -X POST "$HOOK" -o /dev/null

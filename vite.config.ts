@@ -40,7 +40,7 @@ export default defineConfig({
          * Bare /oh is in the pattern because somebody will always type it:
          * with only /^\/oh\//, the worker answered the slashless form with
          * Poland's empty-roster screen asking for a share code. Let through
-         * to the network, GitHub Pages redirects /oh to /oh/ itself.
+         * to the network, the host redirects /oh to /oh/ itself.
          */
         navigateFallbackDenylist: [/^\/oh(\/|$)/],
       },
