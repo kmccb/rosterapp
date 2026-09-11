@@ -77,9 +77,25 @@ try {
     console.warn('  Nothing was written — the forecasts already committed stand.');
   }
 
+  /*
+   * The demo page is forecast too. It is not a paying school and must never be
+   * written into paid-schools.json, so its slug is read off its own file: the
+   * seller's demo shows the kickoff sky the way a paying page does, and a
+   * missing demo file is one quiet line, not a failed run.
+   */
+  const demoFile = join(root, 'public/oh/demo.json');
+  let demoSlug = null;
+  try {
+    const demo = await read(demoFile);
+    if (typeof demo.slug === 'string' && demo.slug) demoSlug = demo.slug;
+  } catch {
+    console.log('  · no demo file to forecast for.');
+  }
+  const slugs = demoSlug && !paid.includes(demoSlug) ? [...paid, demoSlug] : paid;
+
   const geo = existsSync(geoFile) ? await read(geoFile) : {};
 
-  for (const slug of paid) {
+  for (const slug of slugs) {
     try {
       if (!existsSync(seasonFile(slug))) {
         console.warn(`  ! ${slug}: not a school in the directory.`);
@@ -160,11 +176,11 @@ try {
      * same day and on no other.
      */
     const out = {};
-    for (const slug of paid) if (kept[slug]) out[slug] = kept[slug];
+    for (const slug of slugs) if (kept[slug]) out[slug] = kept[slug];
     Object.assign(out, forecasts);
 
     await writeFile(weatherFile, `${JSON.stringify(out)}\n`);
-    console.log(`weather.json: ${Object.keys(forecasts).length} of ${paid.length} paid schools.`);
+    console.log(`weather.json: ${Object.keys(forecasts).length} of ${slugs.length} schools (${paid.length} paid).`);
     const carried = Object.keys(out).length - Object.keys(forecasts).length;
     if (carried) console.log(`  · ${carried} kept from an earlier run.`);
   }
