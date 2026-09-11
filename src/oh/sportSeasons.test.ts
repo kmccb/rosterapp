@@ -63,12 +63,6 @@ describe('sport seasons', () => {
   });
 
   it('names the run a two-season sport reaches next, over the year end', () => {
-    // Tennis is the one sport in two runs — girls' in autumn, boys' in spring.
-    // In June it is between them and the next one is August.
-    expect(seasonNote('tennis', new Date('2026-06-15T12:00:00'))).toBe('Starts in August');
-    // In November the next run is the following March, which means walking
-    // through December and out the other side of the year.
-    expect(seasonNote('tennis', new Date('2026-11-15T12:00:00'))).toBe('Starts in March');
     // The same wrap from December itself, where every remaining month of the
     // year is behind the reader.
     expect(seasonNote('golf', new Date('2026-12-15T12:00:00'))).toBe('Starts in August');
@@ -77,6 +71,38 @@ describe('sport seasons', () => {
 
   it('knows every sport it has a calendar for', () => {
     expect(knownSports()).toContain('football');
-    expect(knownSports()).toHaveLength(16);
+    expect(knownSports()).toHaveLength(17);
+  });
+
+  it('reads a gendered name by the sport behind it', () => {
+    expect(inSeason('boys basketball', 12)).toBe(true);
+    expect(inSeason('girls basketball', 9)).toBe(false);
+    expect(inSeason('Girls Soccer', 9)).toBe(true);
+    expect(seasonNote('boys basketball', new Date('2026-09-15T12:00:00'))).toBe('Starts in November');
+  });
+
+  it('knows girls play tennis in the autumn and boys in the spring', () => {
+    expect(inSeason('girls tennis', 9)).toBe(true);
+    expect(inSeason('girls tennis', 4)).toBe(false);
+    expect(inSeason('boys tennis', 4)).toBe(true);
+    expect(inSeason('boys tennis', 9)).toBe(false);
+    expect(seasonNote('girls tennis', new Date('2026-06-15T12:00:00'))).toBe('Starts in August');
+    expect(seasonNote('boys tennis', new Date('2026-11-15T12:00:00'))).toBe('Starts in March');
+    // Bare tennis is nobody's season now; the seller says which. Unknown means
+    // always in season, the charity every unlisted sport gets.
+    expect(seasonNote('tennis', new Date('2026-06-15T12:00:00'))).toBe('In season');
+  });
+
+  it('sorts a gendered pair like the sport behind it', () => {
+    const november = new Date('2026-11-15T12:00:00');
+    // Football is also in season in November, so it joins the two basketball
+    // entries in the live group, alphabetical throughout; baseball alone is
+    // out of season.
+    expect(sortSportsForNow(['football', 'girls basketball', 'boys basketball', 'baseball'], november))
+      .toEqual(['boys basketball', 'football', 'girls basketball', 'baseball']);
+  });
+
+  it('labels a gendered name word by word', () => {
+    expect(sportLabel('girls soccer')).toBe('Girls Soccer');
   });
 });

@@ -15,8 +15,10 @@ const MONTHS: Record<string, number[]> = {
   soccer: [8, 9, 10, 11],
   'cross country': [8, 9, 10],
   golf: [8, 9, 10],
-  // Girls' tennis is autumn, boys' is spring; one entry covers the pair.
-  tennis: [3, 4, 5, 8, 9, 10],
+  // Two sports on the calendar, not one: girls' is autumn, boys' is spring. A
+  // bare "tennis" is nobody's season, so the seller types which one.
+  'girls tennis': [8, 9, 10],
+  'boys tennis': [3, 4, 5],
   cheer: [8, 9, 10, 11, 12, 1, 2],
   basketball: [11, 12, 1, 2, 3],
   wrestling: [11, 12, 1, 2, 3],
@@ -40,9 +42,24 @@ const MONTH_NAMES = [
 
 const norm = (sport: string): string => sport.trim().toLowerCase();
 
+/**
+ * The calendar for a sport, however the school names it.
+ *
+ * A school that sells basketball to both boys and girls stores two sports,
+ * "boys basketball" and "girls basketball", and they share one calendar. So
+ * the full name is tried first — which is how the two tennis seasons stay
+ * apart — and then the name with its gender word taken off.
+ */
+const GENDER = /^(boys|girls|coed) /;
+
+const monthsFor = (sport: string): number[] | undefined => {
+  const key = norm(sport);
+  return MONTHS[key] ?? MONTHS[key.replace(GENDER, '')];
+};
+
 /** Month is 1–12. A sport the table doesn't know is always in season. */
 export const inSeason = (sport: string, month: number): boolean => {
-  const months = MONTHS[norm(sport)];
+  const months = monthsFor(sport);
   return months ? months.includes(month) : true;
 };
 
@@ -60,7 +77,9 @@ export const inSeason = (sport: string, month: number): boolean => {
 export const seasonNote = (sport: string, now: Date): string => {
   const month = now.getMonth() + 1;
   if (inSeason(sport, month)) return 'In season';
-  const months = MONTHS[norm(sport)];
+  // Non-null: inSeason above returned false, which only happens when the
+  // table knows this sport's months.
+  const months = monthsFor(sport)!;
   for (let step = 1; step <= 12; step += 1) {
     const next = ((month + step - 1) % 12) + 1;
     if (months.includes(next)) return `Starts in ${MONTH_NAMES[next - 1]}`;

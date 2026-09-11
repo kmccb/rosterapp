@@ -203,10 +203,17 @@ const GLYPHS: Record<string, ReactNode> = {
  * suite runs in node with no DOM: the thing worth pinning is that every sport
  * the season table knows resolves to a drawing, and that resolution must not
  * depend on anything being rendered to check.
+ *
+ * The key a sport draws by: its own, or the sport behind a gender word —
+ * "boys golf" draws golf's mark — or the fallback. Exported so the test can
+ * hold the set to the season table without rendering anything.
  */
 export const glyphFor = (sport: string): string => {
   const key = sport.trim().toLowerCase();
-  return Object.prototype.hasOwnProperty.call(GLYPHS, key) ? key : 'generic';
+  const has = (k: string) => Object.prototype.hasOwnProperty.call(GLYPHS, k);
+  if (has(key)) return key;
+  const bare = key.replace(/^(boys|girls|coed) /, '');
+  return has(bare) ? bare : 'generic';
 };
 
 /**
