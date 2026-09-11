@@ -473,8 +473,8 @@ if (phase === 'pre') {
 
       /*
        * "Keep the previous file" needs a previous file, and on the server there
-       * isn't one: deploy.yml and refresh.yml both start from a fresh
-       * actions/checkout and league.json is not tracked in git, so a
+       * isn't one: every Cloudflare Pages build starts from a fresh clone
+       * and league.json is not tracked in git, so a
        * disk-only check is false every single time in the one environment
        * that matters — and the tab vanishes instead of going stale.
        *
