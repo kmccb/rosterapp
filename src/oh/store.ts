@@ -10,7 +10,7 @@
 
 import type { School, SchoolSeason } from '../ohio/stateModel';
 import type { Weather } from '../schedule/weather';
-import { demoSeason, demoWeather, isDemo } from './demo';
+import { isDemo } from './demo';
 import type { LeagueRow } from './leagueTable';
 
 const CHOSEN = 'oh.school';
@@ -180,17 +180,8 @@ export async function loadIndex(): Promise<School[]> {
 }
 
 export async function loadSeason(slug: string): Promise<SchoolSeason> {
-  /*
-   * The demo page answers out of its own committed file — its school and every
-   * member of its fictional conference, so the League tab folds out of baked
-   * results exactly as it folds out of the directory's. Only that page takes
-   * this branch, and only for a slug the file actually carries: anything else
-   * falls through to the fetch below, untouched.
-   */
-  if (isDemo()) {
-    const baked = await demoSeason(slug);
-    if (baked) return baked;
-  }
+  // The demo page takes no branch here: its slug is Poland's real one, so the
+  // season it reads — and every conference member's — is the directory's own.
 
   try {
     const res = await fetch(`/oh/data/${slug}.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -242,11 +233,6 @@ const isFixtureWeather = (v: unknown): v is FixtureWeather => {
 
 /** Network first, then whatever was kept — the same rule as the season. */
 export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
-  // The demo's forecast is baked beside its fixtures, and the jar is left
-  // alone: nothing a prospect looks at should survive into the next school
-  // they look at.
-  if (isDemo()) return demoWeather(slug);
-
   try {
     const res = await fetch(`/oh/weather.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
