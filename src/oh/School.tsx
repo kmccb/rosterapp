@@ -4,6 +4,7 @@ import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
+import { landingTab, type LandingFixture } from './landing';
 import { LookupTab, TeamTab } from './RosterTabs';
 import {
   keptSchoolSports,
@@ -40,6 +41,10 @@ const fixtureDate = (g: SchoolGame): { day: string; month: string } => {
   };
 };
 
+/** Today as the phone reads it, in the shape every fixture date is in. */
+const localDate = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 /**
  * A pasted schedule, in the season list's own clothes.
  *
@@ -50,13 +55,20 @@ const fixtureDate = (g: SchoolGame): { day: string; month: string } => {
  * a scraper. The only thing missing is the opponent's town, which a pasted
  * row never carries.
  *
- * A drawn game renders as an L: ties are near-nonexistent in these sports
- * and the chip has two states, so a third would be a lot of machinery for a
- * row nobody will ever see.
+ * A played row with no score pasted keeps its time in the result column, the
+ * way a fixture card does — a blank would read as a row that lost its
+ * result. A drawn game renders as an L: ties are near-nonexistent in these
+ * sports and the chip has two states.
  */
 const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
-  const played = rows.filter((r) => r.score).sort((a, b) => b.date.localeCompare(a.date));
-  const coming = rows.filter((r) => !r.score).sort((a, b) => a.date.localeCompare(b.date));
+  // Split on the calendar, not on whether a score was pasted. Nobody pastes
+  // scores for a golf invitational, and a meet run last month must not sit
+  // under "Coming up" for the rest of the season. Football's list splits on
+  // results because the directory posts them weekly; a pasted list has no
+  // such promise behind it.
+  const today = localDate(new Date());
+  const played = rows.filter((r) => r.date < today).sort((a, b) => b.date.localeCompare(a.date));
+  const coming = rows.filter((r) => r.date >= today).sort((a, b) => a.date.localeCompare(b.date));
   const stack = (date: string) => {
     const d = new Date(`${date}T12:00:00`);
     return {
@@ -96,7 +108,7 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
           <div className="group-head">Played</div>
           {played.map((r, i) => {
             const { day, month } = stack(r.date);
-            const won = r.score!.us > r.score!.them;
+            const score = r.score;
             return (
               <div className="fixture is-played" key={`${r.date}-${r.opponent}-${i}`}>
                 <div className="fixture-row">
@@ -108,8 +120,16 @@ const PastedSchedule = ({ rows }: { rows: ScheduleRow[] }) => {
                     <span className="fixture-ha">{r.home ? 'vs' : 'at'}</span> {r.opponent}
                   </span>
                   <span className="fixture-result">
-                    <span className={`form-chip ${won ? 'won' : 'lost'}`}>{won ? 'W' : 'L'}</span>{' '}
-                    {r.score!.us}–{r.score!.them}
+                    {score ? (
+                      <>
+                        <span className={`form-chip ${score.us > score.them ? 'won' : 'lost'}`}>
+                          {score.us > score.them ? 'W' : 'L'}
+                        </span>{' '}
+                        {score.us}–{score.them}
+                      </>
+                    ) : (
+                      r.time ?? ''
+                    )}
                   </span>
                 </div>
               </div>
@@ -369,7 +389,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // A roster failure — no signal, no live roster, whatever — must never
     // block the season above it. That's the one thing every school gets.
     setRoster(null);
-    setTab('lookup');
+    // A placeholder until the landing rule below has something to read; the
+    // tab bar is not drawn until the roster lands, so nobody sees it.
+    setTab('schedule');
     // Football is asked for even when the live list is unknown, because that
     // is exactly what the page did before the hub existed. A known-empty list
     // is a different answer: this school sells nothing, so nothing is fetched.
@@ -402,6 +424,24 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // Nothing to wait for: no sport chosen, or one this school doesn't sell.
     setRosterFetch('done');
   }, [slug, sport, liveSports]);
+
+  /*
+   * Where the sport opens: the keypad during a game, the schedule otherwise.
+   *
+   * Decided once the pieces it reads have settled — the roster, and for
+   * football the season, since football's fixtures are the directory's. Every
+   * dependency here changes only on entering a sport (or a school), never on
+   * a tab tap, so a reader who has moved to Team is not dragged back.
+   */
+  useEffect(() => {
+    if (sport === null || rosterFetch !== 'done') return;
+    if (sport === 'football' && season === null) return;
+    const fixtures: LandingFixture[] =
+      sport === 'football'
+        ? (season?.games ?? []).map((g) => ({ date: g.date, time: g.kickoff }))
+        : (roster?.schedule ?? []);
+    setTab(landingTab(fixtures, roster?.players.length ?? 0, new Date()));
+  }, [sport, rosterFetch, season, roster]);
 
   // What to paint the page in: the sport's own row wins field by field and the
   // school's identity fills in the rest. The rule itself lives in rosterStore,
@@ -593,15 +633,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   /*
    * One quiet line saying what this is.
    *
-   * A prospect looking at Springfield Local has to be able to tell at a glance
-   * that the players are invented, or the first thing they will ask is why
-   * their own roster is wrong. It sits in the footer in the muted voice the
-   * rest of the small print uses — the pitch is that this looks like a real
-   * page, and a banner across the screen would spend the pitch to make the
-   * point.
+   * A prospect looking at Poland Seminary has to be able to tell at a glance
+   * that the players are invented while the schedules are not, or the first
+   * thing they will ask is why their own roster is wrong. It sits in the
+   * footer in the muted voice the rest of the small print uses — the pitch
+   * is that this looks like a real page, and a banner across the screen
+   * would spend the pitch to make the point.
    */
   const demoNote = isDemo() ? (
-    <p className="oh-demo-note">Sample data — a demo of your school’s page</p>
+    <p className="oh-demo-note">Sample rosters — the schedules are real</p>
   ) : null;
 
   const footer = (
