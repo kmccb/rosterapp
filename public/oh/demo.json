@@ -1,1055 +1,484 @@
 {
-  "slug": "springfield-local-demo",
+  "slug": "poland-seminary-poland",
   "season": 2026,
-  "generatedOn": "2026-08-25",
+  "generatedOn": "2026-09-11",
   "school": {
-    "slug": "springfield-local-demo",
-    "name": "Springfield Local",
-    "city": "Springfield"
+    "slug": "poland-seminary-poland",
+    "name": "Poland Seminary",
+    "city": "Poland"
   },
   "colors": {
-    "ground": "#2f1466",
-    "accent": "#f5b63d"
+    "ground": "#04043a",
+    "accent": "#4fbaf7"
   },
-  "logo": "data:image/png;base64,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",
+  "logo": "data:image/jpeg;base64,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",
+  "league": {
+    "name": "Northeast 8",
+    "members": [
+      "canfield-canfield",
+      "hubbard-hubbard",
+      "south-range-canfield",
+      "niles-mckinley-niles",
+      "girard-girard",
+      "lakeview-cortland",
+      "struthers-struthers"
+    ]
+  },
   "sportNames": [
     "football",
     "volleyball",
-    "soccer",
-    "basketball",
-    "wrestling",
-    "baseball"
+    "girls tennis",
+    "girls soccer",
+    "cross country",
+    "boys basketball",
+    "girls basketball",
+    "girls golf",
+    "baseball",
+    "boys soccer",
+    "boys golf"
   ],
-  "league": {
-    "name": "Riverbend Athletic Conference",
-    "members": [
-      "ashcombe-demo",
-      "bellhaven-demo",
-      "cedar-ridge-demo",
-      "elmbrook-demo",
-      "marlow-central-demo"
-    ]
-  },
-  "seasons": {
-    "springfield-local-demo": {
-      "school": {
-        "slug": "springfield-local-demo",
-        "name": "Springfield Local",
-        "city": "Springfield"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 14,
-            "them": 21,
-            "won": false
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 31,
-            "them": 10,
-            "won": true
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Ashcombe",
-          "opponentCity": "Ashcombe",
-          "opponentSlug": "ashcombe-demo",
-          "result": {
-            "us": 28,
-            "them": 14,
-            "won": true
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Bellhaven",
-          "opponentCity": "Bellhaven",
-          "opponentSlug": "bellhaven-demo",
-          "result": {
-            "us": 17,
-            "them": 24,
-            "won": false
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Cedar Ridge",
-          "opponentCity": "Cedar Ridge",
-          "opponentSlug": "cedar-ridge-demo",
-          "result": {
-            "us": 35,
-            "them": 7,
-            "won": true
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Elmbrook",
-          "opponentCity": "Elmbrook",
-          "opponentSlug": "elmbrook-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Marlow Central",
-          "opponentCity": "Marlow",
-          "opponentSlug": "marlow-central-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 3,
-        "lost": 2,
-        "played": 5
-      }
-    },
-    "ashcombe-demo": {
-      "school": {
-        "slug": "ashcombe-demo",
-        "name": "Ashcombe",
-        "city": "Ashcombe"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 24,
-            "them": 7,
-            "won": true
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 10,
-            "them": 27,
-            "won": false
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Springfield Local",
-          "opponentCity": "Springfield",
-          "opponentSlug": "springfield-local-demo",
-          "result": {
-            "us": 14,
-            "them": 28,
-            "won": false
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Cedar Ridge",
-          "opponentCity": "Cedar Ridge",
-          "opponentSlug": "cedar-ridge-demo",
-          "result": {
-            "us": 13,
-            "them": 35,
-            "won": false
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Marlow Central",
-          "opponentCity": "Marlow",
-          "opponentSlug": "marlow-central-demo",
-          "result": {
-            "us": 22,
-            "them": 30,
-            "won": false
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Bellhaven",
-          "opponentCity": "Bellhaven",
-          "opponentSlug": "bellhaven-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Elmbrook",
-          "opponentCity": "Elmbrook",
-          "opponentSlug": "elmbrook-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 1,
-        "lost": 4,
-        "played": 5
-      }
-    },
-    "bellhaven-demo": {
-      "school": {
-        "slug": "bellhaven-demo",
-        "name": "Bellhaven",
-        "city": "Bellhaven"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 42,
-            "them": 14,
-            "won": true
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 21,
-            "them": 13,
-            "won": true
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Marlow Central",
-          "opponentCity": "Marlow",
-          "opponentSlug": "marlow-central-demo",
-          "result": {
-            "us": 21,
-            "them": 20,
-            "won": true
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Springfield Local",
-          "opponentCity": "Springfield",
-          "opponentSlug": "springfield-local-demo",
-          "result": {
-            "us": 24,
-            "them": 17,
-            "won": true
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Elmbrook",
-          "opponentCity": "Elmbrook",
-          "opponentSlug": "elmbrook-demo",
-          "result": {
-            "us": 17,
-            "them": 14,
-            "won": true
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Ashcombe",
-          "opponentCity": "Ashcombe",
-          "opponentSlug": "ashcombe-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Cedar Ridge",
-          "opponentCity": "Cedar Ridge",
-          "opponentSlug": "cedar-ridge-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 5,
-        "lost": 0,
-        "played": 5
-      }
-    },
-    "cedar-ridge-demo": {
-      "school": {
-        "slug": "cedar-ridge-demo",
-        "name": "Cedar Ridge",
-        "city": "Cedar Ridge"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 6,
-            "them": 28,
-            "won": false
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 20,
-            "them": 17,
-            "won": true
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Elmbrook",
-          "opponentCity": "Elmbrook",
-          "opponentSlug": "elmbrook-demo",
-          "result": {
-            "us": 7,
-            "them": 24,
-            "won": false
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Ashcombe",
-          "opponentCity": "Ashcombe",
-          "opponentSlug": "ashcombe-demo",
-          "result": {
-            "us": 35,
-            "them": 13,
-            "won": true
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Springfield Local",
-          "opponentCity": "Springfield",
-          "opponentSlug": "springfield-local-demo",
-          "result": {
-            "us": 7,
-            "them": 35,
-            "won": false
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Marlow Central",
-          "opponentCity": "Marlow",
-          "opponentSlug": "marlow-central-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Bellhaven",
-          "opponentCity": "Bellhaven",
-          "opponentSlug": "bellhaven-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 2,
-        "lost": 3,
-        "played": 5
-      }
-    },
-    "elmbrook-demo": {
-      "school": {
-        "slug": "elmbrook-demo",
-        "name": "Elmbrook",
-        "city": "Elmbrook"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 35,
-            "them": 28,
-            "won": true
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 14,
-            "them": 9,
-            "won": true
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Cedar Ridge",
-          "opponentCity": "Cedar Ridge",
-          "opponentSlug": "cedar-ridge-demo",
-          "result": {
-            "us": 24,
-            "them": 7,
-            "won": true
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Marlow Central",
-          "opponentCity": "Marlow",
-          "opponentSlug": "marlow-central-demo",
-          "result": {
-            "us": 28,
-            "them": 21,
-            "won": true
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Bellhaven",
-          "opponentCity": "Bellhaven",
-          "opponentSlug": "bellhaven-demo",
-          "result": {
-            "us": 14,
-            "them": 17,
-            "won": false
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Springfield Local",
-          "opponentCity": "Springfield",
-          "opponentSlug": "springfield-local-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Ashcombe",
-          "opponentCity": "Ashcombe",
-          "opponentSlug": "ashcombe-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 4,
-        "lost": 1,
-        "played": 5
-      }
-    },
-    "marlow-central-demo": {
-      "school": {
-        "slug": "marlow-central-demo",
-        "name": "Marlow Central",
-        "city": "Marlow"
-      },
-      "games": [
-        {
-          "week": 1,
-          "date": "2026-07-24",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Harmony Ridge",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 13,
-            "them": 34,
-            "won": false
-          }
-        },
-        {
-          "week": 2,
-          "date": "2026-07-31",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Twin Lakes",
-          "opponentCity": "",
-          "opponentSlug": null,
-          "result": {
-            "us": 7,
-            "them": 24,
-            "won": false
-          }
-        },
-        {
-          "week": 3,
-          "date": "2026-08-07",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Bellhaven",
-          "opponentCity": "Bellhaven",
-          "opponentSlug": "bellhaven-demo",
-          "result": {
-            "us": 20,
-            "them": 21,
-            "won": false
-          }
-        },
-        {
-          "week": 4,
-          "date": "2026-08-14",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Elmbrook",
-          "opponentCity": "Elmbrook",
-          "opponentSlug": "elmbrook-demo",
-          "result": {
-            "us": 21,
-            "them": 28,
-            "won": false
-          }
-        },
-        {
-          "week": 5,
-          "date": "2026-08-21",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Ashcombe",
-          "opponentCity": "Ashcombe",
-          "opponentSlug": "ashcombe-demo",
-          "result": {
-            "us": 30,
-            "them": 22,
-            "won": true
-          }
-        },
-        {
-          "week": 6,
-          "date": "2026-08-28",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Cedar Ridge",
-          "opponentCity": "Cedar Ridge",
-          "opponentSlug": "cedar-ridge-demo"
-        },
-        {
-          "week": 7,
-          "date": "2026-09-04",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Springfield Local",
-          "opponentCity": "Springfield",
-          "opponentSlug": "springfield-local-demo"
-        },
-        {
-          "week": 8,
-          "date": "2026-09-11",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Stonebridge Central",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 9,
-          "date": "2026-09-18",
-          "kickoff": "7:00 PM",
-          "home": true,
-          "opponent": "Kirkwood Prep",
-          "opponentCity": "",
-          "opponentSlug": null
-        },
-        {
-          "week": 10,
-          "date": "2026-09-25",
-          "kickoff": "7:00 PM",
-          "home": false,
-          "opponent": "Pinecrest Academy",
-          "opponentCity": "",
-          "opponentSlug": null
-        }
-      ],
-      "record": {
-        "won": 1,
-        "lost": 4,
-        "played": 5
-      }
-    }
-  },
   "sports": {
     "football": {
       "players": [
         {
           "id": "football-1",
           "number": "1",
-          "firstName": "Cole",
-          "lastName": "Brennan",
-          "position": "QB",
+          "firstName": "Ian",
+          "lastName": "Lyle",
+          "position": "OL",
           "side": "O",
-          "heightIn": 74,
-          "weightLb": 190,
-          "grade": "Sr"
-        },
-        {
-          "id": "football-2",
-          "number": "2",
-          "firstName": "Marcus",
-          "lastName": "Ely",
-          "position": "WR/CB",
-          "side": "",
-          "heightIn": 70,
-          "weightLb": 165,
-          "grade": "Jr"
+          "grade": "Sr",
+          "heightIn": 76,
+          "weightLb": 195
         },
         {
           "id": "football-3",
           "number": "3",
-          "firstName": "Devin",
-          "lastName": "Raker",
-          "position": "RB",
-          "side": "O",
-          "heightIn": 69,
-          "weightLb": 180,
-          "grade": "Sr"
-        },
-        {
-          "id": "football-4",
-          "number": "4",
-          "firstName": "Isaiah",
-          "lastName": "Tarrant",
+          "firstName": "Quinn",
+          "lastName": "Stroud",
           "position": "WR",
           "side": "O",
+          "grade": "So",
           "heightIn": 73,
-          "weightLb": 170,
-          "grade": "So"
+          "weightLb": 230
         },
         {
-          "id": "football-5",
-          "number": "5",
-          "firstName": "Owen",
-          "lastName": "Castellano",
-          "position": "K",
-          "side": "ST",
-          "heightIn": 68,
-          "weightLb": 155,
-          "grade": "Jr"
+          "id": "football-6",
+          "number": "6",
+          "firstName": "Nolan",
+          "lastName": "Naylor",
+          "position": "QB",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 73,
+          "weightLb": 242
         },
         {
           "id": "football-7",
           "number": "7",
-          "firstName": "Nate",
-          "lastName": "Whitcomb",
-          "position": "QB/S",
-          "side": "",
-          "heightIn": 71,
-          "weightLb": 175,
-          "grade": "So"
+          "firstName": "Tyler",
+          "lastName": "Wakefield",
+          "position": "DL",
+          "side": "D",
+          "grade": "So",
+          "heightIn": 66,
+          "weightLb": 233
+        },
+        {
+          "id": "football-8",
+          "number": "8",
+          "firstName": "Ian",
+          "lastName": "Lockhart",
+          "position": "CB",
+          "side": "D",
+          "grade": "Fr",
+          "heightIn": 70,
+          "weightLb": 264
         },
         {
           "id": "football-9",
           "number": "9",
-          "firstName": "Jalen",
-          "lastName": "Prewitt",
-          "position": "WR",
-          "side": "O",
-          "heightIn": 72,
-          "weightLb": 172,
-          "grade": "Sr"
-        },
-        {
-          "id": "football-11",
-          "number": "11",
-          "firstName": "Tyler",
-          "lastName": "Nordquist",
+          "firstName": "Gavin",
+          "lastName": "Underhill",
           "position": "LB",
           "side": "D",
-          "heightIn": 71,
-          "weightLb": 205,
-          "grade": "Jr"
+          "grade": "Fr",
+          "heightIn": 67,
+          "weightLb": 217
         },
         {
-          "id": "football-12",
-          "number": "12",
-          "firstName": "Aidan",
-          "lastName": "Foss",
-          "position": "S",
-          "side": "D",
-          "heightIn": 70,
-          "weightLb": 178,
-          "grade": "Sr"
-        },
-        {
-          "id": "football-15",
-          "number": "15",
-          "firstName": "Reece",
-          "lastName": "Kimball",
-          "position": "RB",
+          "id": "football-23",
+          "number": "23",
+          "firstName": "Liam",
+          "lastName": "Vance",
+          "position": "QB",
           "side": "O",
-          "heightIn": 68,
-          "weightLb": 168,
-          "grade": "So"
+          "grade": "So",
+          "heightIn": 72,
+          "weightLb": 215
         },
         {
-          "id": "football-20",
-          "number": "20",
-          "firstName": "Malachi",
-          "lastName": "Deering",
+          "id": "football-25",
+          "number": "25",
+          "firstName": "Reid",
+          "lastName": "Iverson",
           "position": "CB",
           "side": "D",
-          "heightIn": 69,
-          "weightLb": 160,
-          "grade": "Jr"
-        },
-        {
-          "id": "football-22",
-          "number": "22",
-          "firstName": "Griffin",
-          "lastName": "Doyle",
-          "position": "LB",
-          "side": "D",
+          "grade": "So",
           "heightIn": 72,
-          "weightLb": 210,
-          "grade": "Sr"
+          "weightLb": 168
         },
         {
-          "id": "football-24",
-          "number": "24",
-          "firstName": "Elias",
-          "lastName": "Mowry",
-          "position": "RB/LB",
-          "side": "",
-          "heightIn": 70,
-          "weightLb": 195,
-          "grade": "Jr"
-        },
-        {
-          "id": "football-33",
-          "number": "33",
+          "id": "football-27",
+          "number": "27",
           "firstName": "Sam",
-          "lastName": "Reddick",
-          "position": "FB",
+          "lastName": "Fenwick",
+          "position": "WR",
           "side": "O",
+          "grade": "Sr",
+          "heightIn": 67,
+          "weightLb": 210
+        },
+        {
+          "id": "football-28",
+          "number": "28",
+          "firstName": "Owen",
+          "lastName": "Hollis",
+          "position": "DL",
+          "side": "D",
+          "grade": "Sr",
           "heightIn": 71,
-          "weightLb": 215,
-          "grade": "Sr"
+          "weightLb": 194
+        },
+        {
+          "id": "football-29",
+          "number": "29",
+          "firstName": "Kai",
+          "lastName": "Ellery",
+          "position": "OL",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 74,
+          "weightLb": 211
+        },
+        {
+          "id": "football-30",
+          "number": "30",
+          "firstName": "Caleb",
+          "lastName": "Ashby",
+          "position": "QB/S",
+          "side": "",
+          "grade": "Jr",
+          "heightIn": 66,
+          "weightLb": 221
+        },
+        {
+          "id": "football-32",
+          "number": "32",
+          "firstName": "Drew",
+          "lastName": "Oakes",
+          "position": "K",
+          "side": "ST",
+          "grade": "Sr",
+          "heightIn": 68,
+          "weightLb": 277
+        },
+        {
+          "id": "football-35",
+          "number": "35",
+          "firstName": "Mason",
+          "lastName": "Whitaker",
+          "position": "WR/CB",
+          "side": "",
+          "grade": "So",
+          "heightIn": 77,
+          "weightLb": 183
+        },
+        {
+          "id": "football-38",
+          "number": "38",
+          "firstName": "Hayden",
+          "lastName": "Garner",
+          "position": "S",
+          "side": "D",
+          "grade": "Jr",
+          "heightIn": 71,
+          "weightLb": 263
+        },
+        {
+          "id": "football-39",
+          "number": "39",
+          "firstName": "Owen",
+          "lastName": "Jarvis",
+          "position": "OL",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 66,
+          "weightLb": 179
         },
         {
           "id": "football-44",
           "number": "44",
-          "firstName": "Bennett",
-          "lastName": "Hoyle",
+          "firstName": "Aiden",
+          "lastName": "Tilden",
+          "position": "K",
+          "side": "ST",
+          "grade": "Sr",
+          "heightIn": 77,
+          "weightLb": 260
+        },
+        {
+          "id": "football-50",
+          "number": "50",
+          "firstName": "Nolan",
+          "lastName": "Thorne",
           "position": "LB",
           "side": "D",
-          "heightIn": 73,
-          "weightLb": 200,
-          "grade": "So"
+          "grade": "Sr",
+          "heightIn": 69,
+          "weightLb": 181
         },
         {
-          "id": "football-52",
-          "number": "52",
-          "firstName": "Dominic",
-          "lastName": "Vasquez",
-          "position": "C",
-          "side": "O",
-          "heightIn": 73,
-          "weightLb": 255,
-          "grade": "Sr"
-        },
-        {
-          "id": "football-55",
-          "number": "55",
-          "firstName": "Kade",
-          "lastName": "Sorensen",
-          "position": "OL",
-          "side": "O",
-          "heightIn": 74,
-          "weightLb": 262,
-          "grade": "Jr"
+          "id": "football-53",
+          "number": "53",
+          "firstName": "Ian",
+          "lastName": "Barlow",
+          "position": "DL",
+          "side": "D",
+          "grade": "So",
+          "heightIn": 70,
+          "weightLb": 154
         },
         {
           "id": "football-58",
           "number": "58",
-          "firstName": "Trevor",
-          "lastName": "Lindquist",
+          "firstName": "Kai",
+          "lastName": "Rowan",
           "position": "DL",
           "side": "D",
-          "heightIn": 74,
-          "weightLb": 248,
-          "grade": "Sr"
+          "grade": "So",
+          "heightIn": 71,
+          "weightLb": 216
         },
         {
-          "id": "football-66",
-          "number": "66",
-          "firstName": "Andre",
-          "lastName": "Bellamy",
+          "id": "football-59",
+          "number": "59",
+          "firstName": "Finn",
+          "lastName": "Greer",
+          "position": "CB",
+          "side": "D",
+          "grade": "Fr",
+          "heightIn": 66,
+          "weightLb": 275
+        },
+        {
+          "id": "football-61",
+          "number": "61",
+          "firstName": "Ian",
+          "lastName": "Merritt",
+          "position": "RB/LB",
+          "side": "",
+          "grade": "So",
+          "heightIn": 74,
+          "weightLb": 271
+        },
+        {
+          "id": "football-62",
+          "number": "62",
+          "firstName": "Tyler",
+          "lastName": "Sutton",
+          "position": "WR",
+          "side": "O",
+          "grade": "So",
+          "heightIn": 77,
+          "weightLb": 169
+        },
+        {
+          "id": "football-65",
+          "number": "65",
+          "firstName": "Reid",
+          "lastName": "Denholm",
+          "position": "DL",
+          "side": "D",
+          "grade": "Jr",
+          "heightIn": 67,
+          "weightLb": 238
+        },
+        {
+          "id": "football-68",
+          "number": "68",
+          "firstName": "Tyler",
+          "lastName": "Corwin",
           "position": "OL",
           "side": "O",
-          "heightIn": 72,
-          "weightLb": 270,
-          "grade": "So"
+          "grade": "Sr",
+          "heightIn": 69,
+          "weightLb": 170
         },
         {
           "id": "football-71",
           "number": "71",
-          "firstName": "Josiah",
-          "lastName": "Trent",
-          "position": "DT",
+          "firstName": "Ben",
+          "lastName": "Pruett",
+          "position": "WR",
+          "side": "O",
+          "grade": "Sr",
+          "heightIn": 77,
+          "weightLb": 202
+        },
+        {
+          "id": "football-74",
+          "number": "74",
+          "firstName": "Jake",
+          "lastName": "Yates",
+          "position": "CB",
           "side": "D",
-          "heightIn": 75,
-          "weightLb": 285,
-          "grade": "Sr"
+          "grade": "So",
+          "heightIn": 76,
+          "weightLb": 189
+        },
+        {
+          "id": "football-76",
+          "number": "76",
+          "firstName": "Ian",
+          "lastName": "Keaton",
+          "position": "RB/LB",
+          "side": "",
+          "grade": "Jr",
+          "heightIn": 77,
+          "weightLb": 279
         },
         {
           "id": "football-77",
           "number": "77",
-          "firstName": "Micah",
-          "lastName": "Ordonez",
-          "position": "OT",
+          "firstName": "Nolan",
+          "lastName": "Marlow",
+          "position": "DL",
+          "side": "D",
+          "grade": "Sr",
+          "heightIn": 72,
+          "weightLb": 208
+        },
+        {
+          "id": "football-78",
+          "number": "78",
+          "firstName": "Sam",
+          "lastName": "Fairbanks",
+          "position": "CB",
+          "side": "D",
+          "grade": "Jr",
+          "heightIn": 75,
+          "weightLb": 271
+        },
+        {
+          "id": "football-80",
+          "number": "80",
+          "firstName": "Tyler",
+          "lastName": "Dawson",
+          "position": "TE",
           "side": "O",
+          "grade": "So",
+          "heightIn": 70,
+          "weightLb": 273
+        },
+        {
+          "id": "football-81",
+          "number": "81",
+          "firstName": "Drew",
+          "lastName": "Pemberton",
+          "position": "CB",
+          "side": "D",
+          "grade": "Sr",
           "heightIn": 76,
-          "weightLb": 278,
-          "grade": "Jr"
+          "weightLb": 226
+        },
+        {
+          "id": "football-85",
+          "number": "85",
+          "firstName": "Aiden",
+          "lastName": "Carver",
+          "position": "QB/S",
+          "side": "",
+          "grade": "Sr",
+          "heightIn": 67,
+          "weightLb": 237
         },
         {
           "id": "football-88",
           "number": "88",
-          "firstName": "Levi",
-          "lastName": "Ashford",
+          "firstName": "Hayden",
+          "lastName": "Radley",
+          "position": "OL",
+          "side": "O",
+          "grade": "Fr",
+          "heightIn": 66,
+          "weightLb": 269
+        },
+        {
+          "id": "football-90",
+          "number": "90",
+          "firstName": "Ian",
+          "lastName": "Kendrick",
+          "position": "P",
+          "side": "ST",
+          "grade": "Fr",
+          "heightIn": 75,
+          "weightLb": 241
+        },
+        {
+          "id": "football-91",
+          "number": "91",
+          "firstName": "Nolan",
+          "lastName": "Everly",
+          "position": "WR",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 73,
+          "weightLb": 176
+        },
+        {
+          "id": "football-92",
+          "number": "92",
+          "firstName": "Ian",
+          "lastName": "Holloway",
           "position": "TE",
           "side": "O",
+          "grade": "So",
+          "heightIn": 70,
+          "weightLb": 190
+        },
+        {
+          "id": "football-95",
+          "number": "95",
+          "firstName": "Owen",
+          "lastName": "Norwood",
+          "position": "WR",
+          "side": "O",
+          "grade": "So",
           "heightIn": 75,
-          "weightLb": 220,
-          "grade": "Jr"
+          "weightLb": 222
+        },
+        {
+          "id": "football-97",
+          "number": "97",
+          "firstName": "Eli",
+          "lastName": "Quimby",
+          "position": "WR",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 67,
+          "weightLb": 220
+        },
+        {
+          "id": "football-99",
+          "number": "99",
+          "firstName": "Drew",
+          "lastName": "Bexley",
+          "position": "WR",
+          "side": "O",
+          "grade": "Jr",
+          "heightIn": 67,
+          "weightLb": 159
         }
       ],
       "schedule": null
@@ -1057,341 +486,158 @@
     "volleyball": {
       "players": [
         {
-          "id": "volleyball-1",
-          "number": "1",
-          "firstName": "Harper",
-          "lastName": "Quinlan",
-          "position": "OH",
+          "id": "volleyball-4",
+          "number": "4",
+          "firstName": "Hannah",
+          "lastName": "Corwin",
+          "position": "S",
           "side": "",
           "grade": "Sr"
-        },
-        {
-          "id": "volleyball-3",
-          "number": "3",
-          "firstName": "Nadia",
-          "lastName": "Fontaine",
-          "position": "Setter",
-          "side": "",
-          "grade": "Jr"
         },
         {
           "id": "volleyball-5",
           "number": "5",
-          "firstName": "Elise",
-          "lastName": "Vandermeer",
-          "position": "MB",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "volleyball-6",
-          "number": "6",
-          "firstName": "Camille",
-          "lastName": "Rourke",
-          "position": "L",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "volleyball-7",
-          "number": "7",
-          "firstName": "Marisol",
-          "lastName": "Ibarra",
-          "position": "OH",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "volleyball-9",
-          "number": "9",
-          "firstName": "Tessa",
-          "lastName": "Bramwell",
-          "position": "RS",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "volleyball-10",
-          "number": "10",
-          "firstName": "Priya",
-          "lastName": "Raghavan",
-          "position": "Setter",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "volleyball-12",
-          "number": "12",
-          "firstName": "June",
-          "lastName": "Okafor",
-          "position": "MB",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "volleyball-14",
-          "number": "14",
-          "firstName": "Delaney",
-          "lastName": "Voss",
-          "position": "OH",
+          "firstName": "Kate",
+          "lastName": "Oakes",
+          "position": "S",
           "side": "",
           "grade": "Fr"
         },
         {
-          "id": "volleyball-16",
-          "number": "16",
-          "firstName": "Sloane",
-          "lastName": "Petrakis",
-          "position": "DS",
+          "id": "volleyball-7",
+          "number": "7",
+          "firstName": "Delaney",
+          "lastName": "Marlow",
+          "position": "OH",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "volleyball-8",
+          "number": "8",
+          "firstName": "Zoe",
+          "lastName": "Bexley",
+          "position": "MB",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "volleyball-9",
+          "number": "9",
+          "firstName": "Hannah",
+          "lastName": "Carver",
+          "position": "S",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "volleyball-10",
+          "number": "10",
+          "firstName": "Olivia",
+          "lastName": "Garner",
+          "position": "L",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "volleyball-11",
+          "number": "11",
+          "firstName": "Jenna",
+          "lastName": "Hollis",
+          "position": "OPP",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "volleyball-14",
+          "number": "14",
+          "firstName": "Zoe",
+          "lastName": "Vance",
+          "position": "S",
           "side": "",
           "grade": "So"
         },
         {
           "id": "volleyball-18",
           "number": "18",
-          "firstName": "Amara",
-          "lastName": "Whitfield",
-          "position": "MB",
+          "firstName": "Sadie",
+          "lastName": "Holloway",
+          "position": "DS",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "volleyball-19",
+          "number": "19",
+          "firstName": "Bella",
+          "lastName": "Sutton",
+          "position": "OPP",
           "side": "",
           "grade": "Sr"
         },
         {
-          "id": "volleyball-21",
-          "number": "21",
-          "firstName": "Ruby",
-          "lastName": "Castellano",
+          "id": "volleyball-20",
+          "number": "20",
+          "firstName": "Chloe",
+          "lastName": "Norwood",
+          "position": "OH",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "volleyball-22",
+          "number": "22",
+          "firstName": "Delaney",
+          "lastName": "Keaton",
           "position": "L",
           "side": "",
           "grade": "Fr"
+        },
+        {
+          "id": "volleyball-23",
+          "number": "23",
+          "firstName": "Delaney",
+          "lastName": "Everly",
+          "position": "DS",
+          "side": "",
+          "grade": "Sr"
         }
       ],
       "schedule": [
         {
-          "date": "2026-08-11",
-          "opponent": "Ashcombe",
-          "home": true,
-          "time": "6:30 PM",
+          "date": "2026-08-10",
+          "opponent": "Springfield Local",
+          "home": false,
+          "time": "4:30 PM",
           "score": {
             "us": 3,
             "them": 1
           }
         },
         {
-          "date": "2026-08-18",
-          "opponent": "Bellhaven",
+          "date": "2026-08-15",
+          "opponent": "Canfield",
           "home": false,
-          "time": "6:30 PM",
+          "time": "4:00 PM",
           "score": {
-            "us": 1,
+            "us": 0,
             "them": 3
           }
         },
         {
-          "date": "2026-08-29",
-          "opponent": "Cedar Ridge",
+          "date": "2026-08-24",
+          "opponent": "Campbell Memorial",
           "home": true,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-08-31",
-          "opponent": "Elmbrook",
-          "home": false,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-09-05",
-          "opponent": "Marlow Central",
-          "home": true,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-09-07",
-          "opponent": "Ashcombe",
-          "home": false,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-09-12",
-          "opponent": "Bellhaven",
-          "home": true,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-09-14",
-          "opponent": "Cedar Ridge",
-          "home": false,
-          "time": "6:30 PM"
-        },
-        {
-          "date": "2026-09-19",
-          "opponent": "Elmbrook",
-          "home": true,
-          "time": "6:30 PM"
-        }
-      ]
-    },
-    "soccer": {
-      "players": [
-        {
-          "id": "soccer-1",
-          "number": "1",
-          "firstName": "Diego",
-          "lastName": "Mendoza",
-          "position": "GK",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "soccer-2",
-          "number": "2",
-          "firstName": "Finn",
-          "lastName": "Halloran",
-          "position": "D",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "soccer-3",
-          "number": "3",
-          "firstName": "Oscar",
-          "lastName": "Delacroix",
-          "position": "D",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "soccer-4",
-          "number": "4",
-          "firstName": "Kwame",
-          "lastName": "Adeyemi",
-          "position": "D",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "soccer-5",
-          "number": "5",
-          "firstName": "Tomas",
-          "lastName": "Rivas",
-          "position": "M",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "soccer-6",
-          "number": "6",
-          "firstName": "Henry",
-          "lastName": "Pell",
-          "position": "M",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "soccer-7",
-          "number": "7",
-          "firstName": "Luca",
-          "lastName": "Bertani",
-          "position": "F",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "soccer-8",
-          "number": "8",
-          "firstName": "Arturo",
-          "lastName": "Salcedo",
-          "position": "M",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "soccer-9",
-          "number": "9",
-          "firstName": "Emeka",
-          "lastName": "Nwosu",
-          "position": "F",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "soccer-10",
-          "number": "10",
-          "firstName": "Ravi",
-          "lastName": "Chandran",
-          "position": "M",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "soccer-11",
-          "number": "11",
-          "firstName": "Jonas",
-          "lastName": "Wiese",
-          "position": "F",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "soccer-12",
-          "number": "12",
-          "firstName": "Callum",
-          "lastName": "Roth",
-          "position": "D",
-          "side": "",
-          "grade": "Fr"
-        },
-        {
-          "id": "soccer-14",
-          "number": "14",
-          "firstName": "Yusuf",
-          "lastName": "Demir",
-          "position": "M",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "soccer-15",
-          "number": "15",
-          "firstName": "Peter",
-          "lastName": "Lindgren",
-          "position": "D",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "soccer-17",
-          "number": "17",
-          "firstName": "Mateo",
-          "lastName": "Vargas",
-          "position": "F",
-          "side": "",
-          "grade": "Fr"
-        },
-        {
-          "id": "soccer-21",
-          "number": "21",
-          "firstName": "Anders",
-          "lastName": "Blom",
-          "position": "GK",
-          "side": "",
-          "grade": "So"
-        }
-      ],
-      "schedule": [
-        {
-          "date": "2026-08-09",
-          "opponent": "Kirkwood Prep",
-          "home": false,
           "time": "7:00 PM",
           "score": {
-            "us": 2,
-            "them": 1
+            "us": 3,
+            "them": 2
           }
         },
         {
-          "date": "2026-08-13",
-          "opponent": "Ashcombe",
-          "home": true,
+          "date": "2026-08-25",
+          "opponent": "Lakeview",
+          "home": false,
           "time": "7:00 PM",
           "score": {
             "us": 0,
@@ -1399,8 +645,18 @@
           }
         },
         {
-          "date": "2026-08-19",
-          "opponent": "Bellhaven",
+          "date": "2026-08-27",
+          "opponent": "South Range",
+          "home": true,
+          "time": "7:00 PM",
+          "score": {
+            "us": 3,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-08-31",
+          "opponent": "Howland",
           "home": false,
           "time": "7:00 PM",
           "score": {
@@ -1409,564 +665,2542 @@
           }
         },
         {
-          "date": "2026-08-30",
-          "opponent": "Cedar Ridge",
+          "date": "2026-09-01",
+          "opponent": "Girard",
           "home": true,
-          "time": "7:00 PM"
+          "time": "7:00 PM",
+          "score": {
+            "us": 0,
+            "them": 3
+          }
         },
         {
           "date": "2026-09-03",
-          "opponent": "Elmbrook",
+          "opponent": "Hubbard",
           "home": false,
-          "time": "11:00 AM"
+          "time": "7:00 PM",
+          "score": {
+            "us": 1,
+            "them": 3
+          }
         },
         {
-          "date": "2026-09-06",
-          "opponent": "Marlow Central",
+          "date": "2026-09-08",
+          "opponent": "Boardman",
           "home": true,
-          "time": "7:00 PM"
+          "time": "7:00 PM",
+          "score": {
+            "us": 1,
+            "them": 3
+          }
         },
         {
           "date": "2026-09-10",
-          "opponent": "Harmony Ridge",
-          "home": false,
-          "time": "11:00 AM"
+          "opponent": "Struthers",
+          "home": true,
+          "time": "7:00 PM",
+          "score": {
+            "us": 1,
+            "them": 3
+          }
         },
         {
-          "date": "2026-09-13",
-          "opponent": "Stonebridge Central",
+          "date": "2026-09-14",
+          "opponent": "United",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-15",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-17",
+          "opponent": "Lakeview",
           "home": true,
           "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-21",
+          "opponent": "Canfield",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-22",
+          "opponent": "South Range",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-24",
+          "opponent": "Girard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-28",
+          "opponent": "Champion",
+          "home": false,
+          "time": "6:45 PM"
+        },
+        {
+          "date": "2026-09-29",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-05",
+          "opponent": "Springfield",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-06",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-08",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-10",
+          "opponent": "Columbiana",
+          "home": false,
+          "time": "11:30 AM"
         }
       ]
     },
-    "basketball": {
+    "girls tennis": {
       "players": [
         {
-          "id": "basketball-3",
-          "number": "3",
-          "firstName": "Cole",
-          "lastName": "Brennan",
-          "position": "Guard",
+          "id": "girls-tennis-1",
+          "number": "1",
+          "firstName": "Ava",
+          "lastName": "Lyle",
+          "position": "",
           "side": "",
-          "heightIn": 74,
-          "grade": "Sr"
-        },
-        {
-          "id": "basketball-4",
-          "number": "4",
-          "firstName": "Simon",
-          "lastName": "Reyes",
-          "position": "Guard",
-          "side": "",
-          "heightIn": 70,
           "grade": "Jr"
         },
         {
-          "id": "basketball-5",
-          "number": "5",
-          "firstName": "Reece",
-          "lastName": "Kimball",
-          "position": "Guard",
-          "side": "",
-          "heightIn": 68,
-          "grade": "So"
-        },
-        {
-          "id": "basketball-11",
-          "number": "11",
-          "firstName": "Julian",
-          "lastName": "Marsh",
-          "position": "Guard",
-          "side": "",
-          "heightIn": 72,
-          "grade": "Sr"
-        },
-        {
-          "id": "basketball-12",
-          "number": "12",
-          "firstName": "Owen",
-          "lastName": "Castellano",
-          "position": "Guard",
-          "side": "",
-          "heightIn": 68,
-          "grade": "Jr"
-        },
-        {
-          "id": "basketball-14",
-          "number": "14",
-          "firstName": "Isaiah",
-          "lastName": "Tarrant",
-          "position": "Forward",
-          "side": "",
-          "heightIn": 73,
-          "grade": "So"
-        },
-        {
-          "id": "basketball-20",
-          "number": "20",
-          "firstName": "Ethan",
-          "lastName": "Kowal",
-          "position": "Forward",
-          "side": "",
-          "heightIn": 75,
-          "grade": "Jr"
-        },
-        {
-          "id": "basketball-21",
-          "number": "21",
-          "firstName": "Dante",
-          "lastName": "Alvarado",
-          "position": "Forward",
-          "side": "",
-          "heightIn": 76,
-          "grade": "Sr"
-        },
-        {
-          "id": "basketball-23",
-          "number": "23",
-          "firstName": "Bennett",
-          "lastName": "Hoyle",
-          "position": "Forward",
-          "side": "",
-          "heightIn": 73,
-          "grade": "So"
-        },
-        {
-          "id": "basketball-32",
-          "number": "32",
-          "firstName": "Nico",
-          "lastName": "Ferraro",
-          "position": "Center",
-          "side": "",
-          "heightIn": 79,
-          "grade": "Sr"
-        },
-        {
-          "id": "basketball-40",
-          "number": "40",
-          "firstName": "Brady",
-          "lastName": "Kellerman",
-          "position": "Forward",
-          "side": "",
-          "heightIn": 74,
-          "grade": "Jr"
-        },
-        {
-          "id": "basketball-44",
-          "number": "44",
-          "firstName": "Xander",
-          "lastName": "Pruitt",
-          "position": "Center",
-          "side": "",
-          "heightIn": 78,
-          "grade": "So"
-        }
-      ],
-      "schedule": [
-        {
-          "date": "2026-11-27",
-          "opponent": "Kirkwood Prep",
-          "home": true,
-          "time": "7:30 PM"
-        },
-        {
-          "date": "2026-12-04",
-          "opponent": "Ashcombe",
-          "home": false,
-          "time": "7:30 PM"
-        },
-        {
-          "date": "2026-12-11",
-          "opponent": "Bellhaven",
-          "home": true,
-          "time": "7:30 PM"
-        },
-        {
-          "date": "2026-12-19",
-          "opponent": "Harmony Ridge",
-          "home": false,
-          "time": "2:00 PM"
-        },
-        {
-          "date": "2027-01-02",
-          "opponent": "Cedar Ridge",
-          "home": true,
-          "time": "7:30 PM"
-        },
-        {
-          "date": "2027-01-08",
-          "opponent": "Elmbrook",
-          "home": false,
-          "time": "7:30 PM"
-        },
-        {
-          "date": "2027-01-15",
-          "opponent": "Marlow Central",
-          "home": true,
-          "time": "7:30 PM"
-        }
-      ]
-    },
-    "wrestling": {
-      "players": [
-        {
-          "id": "wrestling-106",
-          "number": "106",
-          "firstName": "Eli",
-          "lastName": "Sandoval",
-          "position": "106 lb",
+          "id": "girls-tennis-2",
+          "number": "2",
+          "firstName": "Ella",
+          "lastName": "Abbott",
+          "position": "",
           "side": "",
           "grade": "Fr"
         },
         {
-          "id": "wrestling-113",
-          "number": "113",
-          "firstName": "Brandt",
-          "lastName": "McHugh",
-          "position": "113 lb",
+          "id": "girls-tennis-3",
+          "number": "3",
+          "firstName": "Ella",
+          "lastName": "Radley",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-tennis-4",
+          "number": "4",
+          "firstName": "Maya",
+          "lastName": "Garner",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-tennis-13",
+          "number": "13",
+          "firstName": "Tessa",
+          "lastName": "Naylor",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-tennis-14",
+          "number": "14",
+          "firstName": "Paige",
+          "lastName": "Lockhart",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-tennis-15",
+          "number": "15",
+          "firstName": "Faith",
+          "lastName": "Ellery",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-tennis-17",
+          "number": "17",
+          "firstName": "Chloe",
+          "lastName": "Pruett",
+          "position": "",
           "side": "",
           "grade": "So"
         },
         {
-          "id": "wrestling-120",
-          "number": "120",
-          "firstName": "Corbin",
-          "lastName": "Ashby",
-          "position": "120 lb",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "wrestling-126",
-          "number": "126",
-          "firstName": "Rafael",
-          "lastName": "Ocampo",
-          "position": "126 lb",
+          "id": "girls-tennis-19",
+          "number": "19",
+          "firstName": "Kate",
+          "lastName": "Yates",
+          "position": "",
           "side": "",
           "grade": "So"
         },
         {
-          "id": "wrestling-132",
-          "number": "132",
-          "firstName": "Weston",
-          "lastName": "Kraig",
-          "position": "132 lb",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "wrestling-138",
-          "number": "138",
-          "firstName": "Micah",
-          "lastName": "Ordonez",
-          "position": "138 lb",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "wrestling-144",
-          "number": "144",
-          "firstName": "Dmitri",
-          "lastName": "Volkov",
-          "position": "144 lb",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "wrestling-150",
-          "number": "150",
-          "firstName": "Isaac",
-          "lastName": "Ferrand",
-          "position": "150 lb",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "wrestling-157",
-          "number": "157",
-          "firstName": "Tobias",
-          "lastName": "Lane",
-          "position": "157 lb",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "wrestling-165",
-          "number": "165",
-          "firstName": "Kade",
-          "lastName": "Sorensen",
-          "position": "165 lb",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "wrestling-175",
-          "number": "175",
-          "firstName": "Josiah",
-          "lastName": "Trent",
-          "position": "175 lb",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "wrestling-190",
-          "number": "190",
-          "firstName": "Trevor",
-          "lastName": "Lindquist",
-          "position": "190 lb",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "wrestling-215",
-          "number": "215",
-          "firstName": "Andre",
-          "lastName": "Bellamy",
-          "position": "215 lb",
+          "id": "girls-tennis-27",
+          "number": "27",
+          "firstName": "Kate",
+          "lastName": "Ingram",
+          "position": "",
           "side": "",
           "grade": "So"
         },
         {
-          "id": "wrestling-285",
-          "number": "285",
-          "firstName": "Marcus",
-          "lastName": "Delahunt",
-          "position": "285 lb",
+          "id": "girls-tennis-29",
+          "number": "29",
+          "firstName": "Chloe",
+          "lastName": "Barlow",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-tennis-30",
+          "number": "30",
+          "firstName": "Ella",
+          "lastName": "Carver",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-tennis-31",
+          "number": "31",
+          "firstName": "Lila",
+          "lastName": "Holloway",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-tennis-32",
+          "number": "32",
+          "firstName": "Bella",
+          "lastName": "Kendrick",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-tennis-39",
+          "number": "39",
+          "firstName": "Kate",
+          "lastName": "Sutton",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-tennis-40",
+          "number": "40",
+          "firstName": "Grace",
+          "lastName": "Norwood",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-08-07",
+          "opponent": "Austintown Fitch",
+          "home": false,
+          "time": "11:00 AM"
+        },
+        {
+          "date": "2026-08-10",
+          "opponent": "Ursuline",
+          "home": false,
+          "time": "6:00 PM"
+        },
+        {
+          "date": "2026-08-13",
+          "opponent": "Liberty",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-17",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-18",
+          "opponent": "Ursuline",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-19",
+          "opponent": "Girard",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-25",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-31",
+          "opponent": "Austintown Fitch",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-01",
+          "opponent": "Liberty",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-02",
+          "opponent": "Canfield",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-09",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-14",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-15",
+          "opponent": "Salem",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-16",
+          "opponent": "Lakeview",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-17",
+          "opponent": "Boardman",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-21",
+          "opponent": "Girard",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-22",
+          "opponent": "Boardman",
+          "home": true,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-23",
+          "opponent": "Struthers",
+          "home": true,
+          "time": "4:00 PM"
+        }
+      ]
+    },
+    "girls soccer": {
+      "players": [
+        {
+          "id": "girls-soccer-0",
+          "number": "0",
+          "firstName": "Maya",
+          "lastName": "Marlow",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-2",
+          "number": "2",
+          "firstName": "Olivia",
+          "lastName": "Lyle",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-soccer-3",
+          "number": "3",
+          "firstName": "Isla",
+          "lastName": "Keaton",
+          "position": "D",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-soccer-4",
+          "number": "4",
+          "firstName": "Paige",
+          "lastName": "Quimby",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-5",
+          "number": "5",
+          "firstName": "Grace",
+          "lastName": "Denholm",
+          "position": "GK",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-soccer-7",
+          "number": "7",
+          "firstName": "Ella",
+          "lastName": "Norwood",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-soccer-8",
+          "number": "8",
+          "firstName": "Hannah",
+          "lastName": "Sutton",
+          "position": "M",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-9",
+          "number": "9",
+          "firstName": "Ava",
+          "lastName": "Pemberton",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-soccer-11",
+          "number": "11",
+          "firstName": "Lila",
+          "lastName": "Ellery",
+          "position": "D",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-soccer-13",
+          "number": "13",
+          "firstName": "Sadie",
+          "lastName": "Naylor",
+          "position": "D",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-soccer-14",
+          "number": "14",
+          "firstName": "Isla",
+          "lastName": "Whitaker",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-15",
+          "number": "15",
+          "firstName": "Paige",
+          "lastName": "Dawson",
+          "position": "M",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-soccer-17",
+          "number": "17",
+          "firstName": "Paige",
+          "lastName": "Yates",
+          "position": "F",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-18",
+          "number": "18",
+          "firstName": "Chloe",
+          "lastName": "Thorne",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-19",
+          "number": "19",
+          "firstName": "Delaney",
+          "lastName": "Abbott",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-soccer-23",
+          "number": "23",
+          "firstName": "Bella",
+          "lastName": "Merritt",
+          "position": "M",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-soccer-24",
+          "number": "24",
+          "firstName": "Jenna",
+          "lastName": "Greer",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-soccer-25",
+          "number": "25",
+          "firstName": "Ava",
+          "lastName": "Holloway",
+          "position": "F",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-soccer-27",
+          "number": "27",
+          "firstName": "Zoe",
+          "lastName": "Everly",
+          "position": "F",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-soccer-30",
+          "number": "30",
+          "firstName": "Grace",
+          "lastName": "Oakes",
+          "position": "D",
           "side": "",
           "grade": "Sr"
         }
       ],
       "schedule": [
         {
-          "date": "2026-11-28",
-          "opponent": "Stonebridge Invitational",
+          "date": "2026-08-06",
+          "opponent": "Springfield Local",
           "home": false,
-          "time": "9:00 AM"
+          "time": "6:30 PM",
+          "score": {
+            "us": 4,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-08-07",
+          "opponent": "John F Kennedy",
+          "home": true,
+          "time": "6:00 PM",
+          "score": {
+            "us": 1,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-08-13",
+          "opponent": "Austintown Fitch",
+          "home": false,
+          "time": "6:30 PM",
+          "score": {
+            "us": 0,
+            "them": 1
+          }
+        },
+        {
+          "date": "2026-08-17",
+          "opponent": "Howland",
+          "home": false,
+          "time": "7:00 PM",
+          "score": {
+            "us": 1,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-08-20",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "7:00 PM",
+          "score": {
+            "us": 3,
+            "them": 4
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "7:00 PM",
+          "score": {
+            "us": 2,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "opponent": "Struthers",
+          "home": true,
+          "time": "7:00 PM",
+          "score": {
+            "us": 4,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-09-01",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "7:00 PM",
+          "score": {
+            "us": 0,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-09-02",
+          "opponent": "Canfield",
+          "home": true,
+          "time": "6:00 PM",
+          "score": {
+            "us": 0,
+            "them": 1
+          }
+        },
+        {
+          "date": "2026-09-10",
+          "opponent": "South Range",
+          "home": true,
+          "time": "7:00 PM",
+          "score": {
+            "us": 4,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-09-14",
+          "opponent": "Girard",
+          "home": false,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-09-17",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-09-21",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-24",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-09-26",
+          "opponent": "West Branch",
+          "home": false,
+          "time": "12:00 PM"
+        },
+        {
+          "date": "2026-09-28",
+          "opponent": "Lakeview",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-01",
+          "opponent": "St. Vincent-St. Mary",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-05",
+          "opponent": "South Range",
+          "home": false,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-10-07",
+          "opponent": "Girard",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-10-17",
+          "opponent": "Boardman",
+          "home": true,
+          "time": "12:30 PM"
+        }
+      ]
+    },
+    "cross country": {
+      "players": [
+        {
+          "id": "cross-country-2",
+          "number": "2",
+          "firstName": "Kate",
+          "lastName": "Naylor",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "cross-country-7",
+          "number": "7",
+          "firstName": "Aiden",
+          "lastName": "Lockhart",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "cross-country-13",
+          "number": "13",
+          "firstName": "Reid",
+          "lastName": "Everly",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "cross-country-17",
+          "number": "17",
+          "firstName": "Eli",
+          "lastName": "Pruett",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "cross-country-21",
+          "number": "21",
+          "firstName": "Hayden",
+          "lastName": "Wakefield",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "cross-country-23",
+          "number": "23",
+          "firstName": "Hannah",
+          "lastName": "Fairbanks",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "cross-country-26",
+          "number": "26",
+          "firstName": "Isla",
+          "lastName": "Kendrick",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "cross-country-27",
+          "number": "27",
+          "firstName": "Isla",
+          "lastName": "Stroud",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "cross-country-28",
+          "number": "28",
+          "firstName": "Jake",
+          "lastName": "Fenwick",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "cross-country-29",
+          "number": "29",
+          "firstName": "Quinn",
+          "lastName": "Quimby",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "cross-country-30",
+          "number": "30",
+          "firstName": "Gavin",
+          "lastName": "Greer",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "cross-country-32",
+          "number": "32",
+          "firstName": "Maya",
+          "lastName": "Pemberton",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "cross-country-33",
+          "number": "33",
+          "firstName": "Reid",
+          "lastName": "Iverson",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "cross-country-35",
+          "number": "35",
+          "firstName": "Maya",
+          "lastName": "Barlow",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "cross-country-38",
+          "number": "38",
+          "firstName": "Kai",
+          "lastName": "Sutton",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "cross-country-39",
+          "number": "39",
+          "firstName": "Gavin",
+          "lastName": "Abbott",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-08-29",
+          "opponent": "Salem Early Bird Invite",
+          "home": false,
+          "time": "10:30 AM"
+        },
+        {
+          "date": "2026-09-01",
+          "opponent": "Poland Seminary",
+          "home": true,
+          "time": "4:45 PM"
+        },
+        {
+          "date": "2026-09-05",
+          "opponent": "\"The List Race\"",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-09-08",
+          "opponent": "Poland Township Park",
+          "home": true,
+          "time": "4:45 PM"
+        },
+        {
+          "date": "2026-09-12",
+          "opponent": "Streetsboro Invitational",
+          "home": false,
+          "time": "11:00 AM"
+        },
+        {
+          "date": "2026-09-15",
+          "opponent": "Columbiana",
+          "home": false,
+          "time": "4:45 PM"
+        },
+        {
+          "date": "2026-09-22",
+          "opponent": "Suburban Championships",
+          "home": false,
+          "time": "4:45 PM"
+        },
+        {
+          "date": "2026-09-26",
+          "opponent": "Sharpsville Invitational",
+          "home": false,
+          "time": "9:15 AM"
+        },
+        {
+          "date": "2026-09-30",
+          "opponent": "Mahoning County Meet",
+          "home": false,
+          "time": "4:45 PM"
+        },
+        {
+          "date": "2026-10-03",
+          "opponent": "Zombie Run",
+          "home": false,
+          "time": "6:00 PM"
+        },
+        {
+          "date": "2026-10-10",
+          "opponent": "Legends Invite",
+          "home": false,
+          "time": "11:00 AM"
+        },
+        {
+          "date": "2026-10-17",
+          "opponent": "Northeast 8 Cross Country Championship",
+          "home": true,
+          "time": "10:00 AM"
+        },
+        {
+          "date": "2026-10-24",
+          "opponent": "District Championship",
+          "home": false,
+          "time": "11:50 AM"
+        },
+        {
+          "date": "2026-10-31",
+          "opponent": "Regional Championship",
+          "home": false,
+          "time": "11:50 AM"
+        },
+        {
+          "date": "2026-11-07",
+          "opponent": "State Championship",
+          "home": false,
+          "time": "11:50 AM"
+        }
+      ]
+    },
+    "boys basketball": {
+      "players": [
+        {
+          "id": "boys-basketball-0",
+          "number": "0",
+          "firstName": "Liam",
+          "lastName": "Marlow",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-basketball-3",
+          "number": "3",
+          "firstName": "Drew",
+          "lastName": "Iverson",
+          "position": "G",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-basketball-4",
+          "number": "4",
+          "firstName": "Gavin",
+          "lastName": "Oakes",
+          "position": "C",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-basketball-9",
+          "number": "9",
+          "firstName": "Ian",
+          "lastName": "Vance",
+          "position": "F",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-basketball-11",
+          "number": "11",
+          "firstName": "Parker",
+          "lastName": "Ingram",
+          "position": "F",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-basketball-14",
+          "number": "14",
+          "firstName": "Caleb",
+          "lastName": "Fenwick",
+          "position": "G",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-basketball-17",
+          "number": "17",
+          "firstName": "Kai",
+          "lastName": "Keaton",
+          "position": "C",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-basketball-19",
+          "number": "19",
+          "firstName": "Nolan",
+          "lastName": "Lockhart",
+          "position": "G",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-basketball-21",
+          "number": "21",
+          "firstName": "Mason",
+          "lastName": "Everly",
+          "position": "C",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-basketball-35",
+          "number": "35",
+          "firstName": "Liam",
+          "lastName": "Quimby",
+          "position": "C",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-basketball-47",
+          "number": "47",
+          "firstName": "Eli",
+          "lastName": "Dawson",
+          "position": "G",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-basketball-50",
+          "number": "50",
+          "firstName": "Nolan",
+          "lastName": "Underhill",
+          "position": "F",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-basketball-53",
+          "number": "53",
+          "firstName": "Ian",
+          "lastName": "Sutton",
+          "position": "F",
+          "side": "",
+          "grade": "Sr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-12-04",
+          "opponent": "Austintown Fitch",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-08",
+          "opponent": "Boardman",
+          "home": false,
+          "time": "7:00 PM"
         },
         {
           "date": "2026-12-12",
-          "opponent": "Ashcombe",
+          "opponent": "United Way (vs Neshannock)",
           "home": true,
-          "time": "6:00 PM"
+          "time": "5:15 PM"
         },
         {
-          "date": "2027-01-02",
-          "opponent": "Pinecrest Academy",
+          "date": "2026-12-15",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-18",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-22",
+          "opponent": "Canfield",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-29",
+          "opponent": "Campbell Memorial",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-05",
+          "opponent": "Girard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-08",
+          "opponent": "Struthers",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-09",
+          "opponent": "Springfield",
+          "home": false,
+          "time": "1:30 PM"
+        },
+        {
+          "date": "2027-01-12",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-15",
+          "opponent": "South Range",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-19",
+          "opponent": "Lakeview",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-22",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-23",
+          "opponent": "West Branch",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-29",
+          "opponent": "Girard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-02",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-05",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-09",
+          "opponent": "Salem",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-12",
+          "opponent": "South Range",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-16",
+          "opponent": "Canfield",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-19",
+          "opponent": "Howland",
+          "home": true,
+          "time": "7:00 PM"
+        }
+      ]
+    },
+    "girls basketball": {
+      "players": [
+        {
+          "id": "girls-basketball-4",
+          "number": "4",
+          "firstName": "Reese",
+          "lastName": "Whitaker",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-basketball-5",
+          "number": "5",
+          "firstName": "Nora",
+          "lastName": "Pemberton",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-basketball-8",
+          "number": "8",
+          "firstName": "Tessa",
+          "lastName": "Ingram",
+          "position": "F",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-basketball-10",
+          "number": "10",
+          "firstName": "Bella",
+          "lastName": "Lyle",
+          "position": "F",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-basketball-13",
+          "number": "13",
+          "firstName": "Grace",
+          "lastName": "Norwood",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-basketball-15",
+          "number": "15",
+          "firstName": "Isla",
+          "lastName": "Lockhart",
+          "position": "G",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-basketball-20",
+          "number": "20",
+          "firstName": "Sadie",
+          "lastName": "Quimby",
+          "position": "G",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-basketball-23",
+          "number": "23",
+          "firstName": "Bella",
+          "lastName": "Merritt",
+          "position": "F",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-basketball-34",
+          "number": "34",
+          "firstName": "Bella",
+          "lastName": "Dawson",
+          "position": "C",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-basketball-35",
+          "number": "35",
+          "firstName": "Grace",
+          "lastName": "Denholm",
+          "position": "F",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-basketball-38",
+          "number": "38",
+          "firstName": "Grace",
+          "lastName": "Bexley",
+          "position": "G",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-basketball-44",
+          "number": "44",
+          "firstName": "Isla",
+          "lastName": "Fenwick",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-basketball-53",
+          "number": "53",
+          "firstName": "Chloe",
+          "lastName": "Iverson",
+          "position": "G",
+          "side": "",
+          "grade": "Jr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-11-23",
+          "opponent": "Labrae",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-11-30",
+          "opponent": "Canfield",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-03",
+          "opponent": "Struthers",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-05",
+          "opponent": "Boardman",
+          "home": false,
+          "time": "1:30 PM"
+        },
+        {
+          "date": "2026-12-07",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-10",
+          "opponent": "South Range",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-12",
+          "opponent": "United Way (vs Fitch)",
+          "home": true,
+          "time": "12:00 PM"
+        },
+        {
+          "date": "2026-12-14",
+          "opponent": "Lakeview",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-17",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-21",
+          "opponent": "Crestview (Columbiana)",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-12-28",
+          "opponent": "Springfield",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-04",
+          "opponent": "Girard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-07",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-11",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-14",
+          "opponent": "South Range",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-16",
+          "opponent": "James A Garfield",
+          "home": false,
+          "time": "1:30 PM"
+        },
+        {
+          "date": "2027-01-21",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-01-25",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-01",
+          "opponent": "Girard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-04",
+          "opponent": "Salem",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-08",
+          "opponent": "Cardinal Mooney",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2027-02-10",
+          "opponent": "West Branch",
+          "home": true,
+          "time": "7:00 PM"
+        }
+      ]
+    },
+    "girls golf": {
+      "players": [
+        {
+          "id": "girls-golf-2",
+          "number": "2",
+          "firstName": "Faith",
+          "lastName": "Whitaker",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-golf-3",
+          "number": "3",
+          "firstName": "Bella",
+          "lastName": "Stroud",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-golf-5",
+          "number": "5",
+          "firstName": "Ava",
+          "lastName": "Yates",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-golf-6",
+          "number": "6",
+          "firstName": "Bella",
+          "lastName": "Holloway",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-golf-10",
+          "number": "10",
+          "firstName": "Lila",
+          "lastName": "Denholm",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-golf-13",
+          "number": "13",
+          "firstName": "Nora",
+          "lastName": "Vance",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-golf-16",
+          "number": "16",
+          "firstName": "Kate",
+          "lastName": "Merritt",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-golf-17",
+          "number": "17",
+          "firstName": "Chloe",
+          "lastName": "Garner",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-golf-20",
+          "number": "20",
+          "firstName": "Reese",
+          "lastName": "Marlow",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-golf-23",
+          "number": "23",
+          "firstName": "Chloe",
+          "lastName": "Everly",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-golf-27",
+          "number": "27",
+          "firstName": "Delaney",
+          "lastName": "Quimby",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-golf-29",
+          "number": "29",
+          "firstName": "Maya",
+          "lastName": "Ingram",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "girls-golf-32",
+          "number": "32",
+          "firstName": "Sadie",
+          "lastName": "Lyle",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "girls-golf-34",
+          "number": "34",
+          "firstName": "Ava",
+          "lastName": "Corwin",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "girls-golf-35",
+          "number": "35",
+          "firstName": "Kate",
+          "lastName": "Kendrick",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "girls-golf-36",
+          "number": "36",
+          "firstName": "Isla",
+          "lastName": "Fenwick",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-07-28",
+          "opponent": "Columbiana",
+          "home": true,
+          "time": "7:00 AM"
+        },
+        {
+          "date": "2026-07-30",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "1:00 PM"
+        },
+        {
+          "date": "2026-08-03",
+          "opponent": "South Range",
+          "home": false,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-04",
+          "opponent": "Tiger Invitational",
           "home": false,
           "time": "9:00 AM"
         },
         {
-          "date": "2027-01-14",
-          "opponent": "Bellhaven",
+          "date": "2026-08-06",
+          "opponent": "Lakeview",
           "home": true,
-          "time": "6:00 PM"
+          "time": "8:00 AM"
         },
         {
-          "date": "2027-01-30",
-          "opponent": "Riverbend Conference Meet",
+          "date": "2026-08-12",
+          "opponent": "Girard, Niles McKinley",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-13",
+          "opponent": "Boardman",
           "home": false,
-          "time": "10:00 AM"
+          "time": "12:00 PM"
+        },
+        {
+          "date": "2026-08-17",
+          "opponent": "Hubbard, South Range",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-19",
+          "opponent": "South Range Tournament",
+          "home": false,
+          "time": "9:00 AM"
+        },
+        {
+          "date": "2026-08-20",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "3:30 PM"
+        },
+        {
+          "date": "2026-08-24",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-09-08",
+          "opponent": "Northeast 8 Golf Championship",
+          "home": false,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-09-14",
+          "opponent": "Terlesky Tournament",
+          "home": false,
+          "time": "11:30 AM"
         }
       ]
     },
     "baseball": {
       "players": [
         {
-          "id": "baseball-2",
-          "number": "2",
-          "firstName": "Nate",
-          "lastName": "Whitcomb",
-          "position": "Shortstop",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "baseball-4",
-          "number": "4",
-          "firstName": "Reece",
-          "lastName": "Kimball",
-          "position": "2B",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "baseball-6",
-          "number": "6",
-          "firstName": "Devin",
-          "lastName": "Raker",
-          "position": "OF",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "baseball-7",
-          "number": "7",
-          "firstName": "Cole",
-          "lastName": "Brennan",
-          "position": "Pitcher/1B",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "baseball-8",
-          "number": "8",
-          "firstName": "Griffin",
-          "lastName": "Doyle",
-          "position": "Catcher",
-          "side": "",
-          "grade": "Sr"
-        },
-        {
-          "id": "baseball-9",
-          "number": "9",
-          "firstName": "Emmett",
-          "lastName": "Braddock",
-          "position": "OF",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "baseball-10",
-          "number": "10",
-          "firstName": "Gus",
-          "lastName": "Thorne",
-          "position": "3B",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "baseball-12",
-          "number": "12",
-          "firstName": "Rowan",
-          "lastName": "Pike",
-          "position": "Pitcher",
-          "side": "",
-          "grade": "So"
-        },
-        {
-          "id": "baseball-14",
-          "number": "14",
-          "firstName": "Silas",
-          "lastName": "Merrick",
-          "position": "OF",
+          "id": "baseball-1",
+          "number": "1",
+          "firstName": "Sam",
+          "lastName": "Keaton",
+          "position": "1B",
           "side": "",
           "grade": "Fr"
         },
         {
-          "id": "baseball-16",
-          "number": "16",
-          "firstName": "Tobias",
-          "lastName": "Lane",
-          "position": "1B",
+          "id": "baseball-6",
+          "number": "6",
+          "firstName": "Hayden",
+          "lastName": "Merritt",
+          "position": "SS",
           "side": "",
-          "grade": "Jr"
+          "grade": "So"
         },
         {
-          "id": "baseball-18",
-          "number": "18",
-          "firstName": "Cash",
-          "lastName": "Delaney",
-          "position": "Pitcher",
+          "id": "baseball-8",
+          "number": "8",
+          "firstName": "Gavin",
+          "lastName": "Fairbanks",
+          "position": "3B",
           "side": "",
           "grade": "Sr"
         },
         {
-          "id": "baseball-21",
-          "number": "21",
-          "firstName": "Hugo",
-          "lastName": "Barrett",
-          "position": "Catcher",
+          "id": "baseball-10",
+          "number": "10",
+          "firstName": "Owen",
+          "lastName": "Iverson",
+          "position": "1B",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "baseball-13",
+          "number": "13",
+          "firstName": "Tyler",
+          "lastName": "Jarvis",
+          "position": "P",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "baseball-15",
+          "number": "15",
+          "firstName": "Caleb",
+          "lastName": "Holloway",
+          "position": "2B",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "baseball-18",
+          "number": "18",
+          "firstName": "Ian",
+          "lastName": "Carver",
+          "position": "OF",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "baseball-19",
+          "number": "19",
+          "firstName": "Jake",
+          "lastName": "Denholm",
+          "position": "P",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "baseball-20",
+          "number": "20",
+          "firstName": "Reid",
+          "lastName": "Corwin",
+          "position": "3B",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "baseball-23",
+          "number": "23",
+          "firstName": "Reid",
+          "lastName": "Rowan",
+          "position": "2B",
           "side": "",
           "grade": "So"
         },
         {
           "id": "baseball-24",
           "number": "24",
-          "firstName": "Wyatt",
-          "lastName": "Coburn",
-          "position": "2B/Shortstop",
-          "side": "",
-          "grade": "Jr"
-        },
-        {
-          "id": "baseball-27",
-          "number": "27",
-          "firstName": "Jonah",
-          "lastName": "Reeves",
+          "firstName": "Aiden",
+          "lastName": "Pruett",
           "position": "OF",
           "side": "",
           "grade": "Sr"
         },
         {
+          "id": "baseball-28",
+          "number": "28",
+          "firstName": "Kai",
+          "lastName": "Abbott",
+          "position": "P",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
           "id": "baseball-31",
           "number": "31",
-          "firstName": "Milo",
-          "lastName": "Standish",
-          "position": "Pitcher",
+          "firstName": "Jake",
+          "lastName": "Tilden",
+          "position": "3B",
           "side": "",
-          "grade": "Fr"
+          "grade": "Jr"
+        },
+        {
+          "id": "baseball-32",
+          "number": "32",
+          "firstName": "Tyler",
+          "lastName": "Naylor",
+          "position": "P",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "baseball-34",
+          "number": "34",
+          "firstName": "Reid",
+          "lastName": "Barlow",
+          "position": "3B",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "baseball-36",
+          "number": "36",
+          "firstName": "Liam",
+          "lastName": "Sutton",
+          "position": "3B",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "baseball-38",
+          "number": "38",
+          "firstName": "Liam",
+          "lastName": "Whitaker",
+          "position": "OF",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "baseball-40",
+          "number": "40",
+          "firstName": "Liam",
+          "lastName": "Fenwick",
+          "position": "OF",
+          "side": "",
+          "grade": "Sr"
         }
       ],
       "schedule": [
         {
-          "date": "2027-03-30",
-          "opponent": "Kirkwood Prep",
-          "home": true,
+          "date": "2027-03-24",
+          "opponent": "Mohawk",
+          "home": false,
           "time": "4:30 PM"
         },
         {
           "date": "2027-04-02",
-          "opponent": "Ashcombe",
-          "home": false,
-          "time": "4:30 PM"
-        },
-        {
-          "date": "2027-04-09",
-          "opponent": "Bellhaven",
+          "opponent": "Springfield Local",
           "home": true,
-          "time": "4:30 PM"
+          "time": "5:00 PM"
         },
         {
-          "date": "2027-04-16",
-          "opponent": "Cedar Ridge",
+          "date": "2027-04-07",
+          "opponent": "Ursuline",
           "home": false,
-          "time": "4:30 PM"
+          "time": "5:00 PM"
         },
         {
-          "date": "2027-04-21",
-          "opponent": "Elmbrook",
+          "date": "2027-04-08",
+          "opponent": "Howland",
           "home": true,
-          "time": "4:30 PM"
+          "time": "5:00 PM"
         },
         {
-          "date": "2027-04-27",
-          "opponent": "Marlow Central",
-          "home": false,
-          "time": "4:30 PM"
-        },
-        {
-          "date": "2027-05-04",
-          "opponent": "Harmony Ridge",
+          "date": "2027-04-10",
+          "opponent": "Mineral Ridge",
           "home": true,
+          "time": "12:00 PM"
+        },
+        {
+          "date": "2027-04-15",
+          "opponent": "Boardman",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2027-04-22",
+          "opponent": "Canfield",
+          "home": false,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2027-05-14",
+          "opponent": "Salem",
+          "home": false,
+          "time": "7:00 PM"
+        }
+      ]
+    },
+    "boys soccer": {
+      "players": [
+        {
+          "id": "boys-soccer-0",
+          "number": "0",
+          "firstName": "Tyler",
+          "lastName": "Ingram",
+          "position": "M",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-soccer-3",
+          "number": "3",
+          "firstName": "Jake",
+          "lastName": "Naylor",
+          "position": "M",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-soccer-4",
+          "number": "4",
+          "firstName": "Reid",
+          "lastName": "Holloway",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-soccer-5",
+          "number": "5",
+          "firstName": "Ben",
+          "lastName": "Whitaker",
+          "position": "M",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-soccer-7",
+          "number": "7",
+          "firstName": "Liam",
+          "lastName": "Thorne",
+          "position": "M",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-12",
+          "number": "12",
+          "firstName": "Kai",
+          "lastName": "Radley",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-13",
+          "number": "13",
+          "firstName": "Nolan",
+          "lastName": "Greer",
+          "position": "F",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-14",
+          "number": "14",
+          "firstName": "Parker",
+          "lastName": "Wakefield",
+          "position": "GK",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-15",
+          "number": "15",
+          "firstName": "Nolan",
+          "lastName": "Rowan",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-17",
+          "number": "17",
+          "firstName": "Gavin",
+          "lastName": "Lyle",
+          "position": "GK",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-18",
+          "number": "18",
+          "firstName": "Gavin",
+          "lastName": "Keaton",
+          "position": "F",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-19",
+          "number": "19",
+          "firstName": "Gavin",
+          "lastName": "Lockhart",
+          "position": "F",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-soccer-20",
+          "number": "20",
+          "firstName": "Reid",
+          "lastName": "Vance",
+          "position": "M",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-22",
+          "number": "22",
+          "firstName": "Mason",
+          "lastName": "Stroud",
+          "position": "M",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-24",
+          "number": "24",
+          "firstName": "Owen",
+          "lastName": "Fenwick",
+          "position": "D",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-25",
+          "number": "25",
+          "firstName": "Liam",
+          "lastName": "Norwood",
+          "position": "D",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-soccer-26",
+          "number": "26",
+          "firstName": "Kai",
+          "lastName": "Garner",
+          "position": "D",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-soccer-27",
+          "number": "27",
+          "firstName": "Tyler",
+          "lastName": "Jarvis",
+          "position": "M",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-29",
+          "number": "29",
+          "firstName": "Gavin",
+          "lastName": "Everly",
+          "position": "M",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-soccer-30",
+          "number": "30",
+          "firstName": "Finn",
+          "lastName": "Sutton",
+          "position": "M",
+          "side": "",
+          "grade": "Jr"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-08-06",
+          "opponent": "Louisville",
+          "home": true,
+          "time": "7:00 PM",
+          "score": {
+            "us": 0,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-08-08",
+          "opponent": "Howland",
+          "home": false,
+          "time": "11:00 AM",
+          "score": {
+            "us": 3,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-08-12",
+          "opponent": "Chagrin Falls",
+          "home": false,
+          "time": "7:00 PM",
+          "score": {
+            "us": 3,
+            "them": 1
+          }
+        },
+        {
+          "date": "2026-08-15",
+          "opponent": "Marlington",
+          "home": false,
+          "time": "1:00 PM",
+          "score": {
+            "us": 2,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-08-18",
+          "opponent": "Boardman",
+          "home": false,
+          "time": "7:15 PM",
+          "score": {
+            "us": 3,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-08-20",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "5:00 PM",
+          "score": {
+            "us": 1,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "opponent": "Niles McKinley",
+          "home": false,
+          "time": "5:00 PM",
+          "score": {
+            "us": 1,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "opponent": "Crestview (Columbiana)",
+          "home": true,
+          "time": "5:00 PM",
+          "score": {
+            "us": 2,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-09-01",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "5:00 PM",
+          "score": {
+            "us": 2,
+            "them": 0
+          }
+        },
+        {
+          "date": "2026-09-03",
+          "opponent": "Canfield",
+          "home": false,
+          "time": "7:15 PM",
+          "score": {
+            "us": 3,
+            "them": 2
+          }
+        },
+        {
+          "date": "2026-09-10",
+          "opponent": "South Range",
+          "home": true,
+          "time": "5:00 PM",
+          "score": {
+            "us": 4,
+            "them": 3
+          }
+        },
+        {
+          "date": "2026-09-14",
+          "opponent": "Girard",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-17",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-21",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-09-24",
+          "opponent": "Salem",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-09-28",
+          "opponent": "Lakeview",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-10-01",
+          "opponent": "Champion",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-10-05",
+          "opponent": "South Range",
+          "home": false,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-07",
+          "opponent": "Girard",
+          "home": true,
+          "time": "7:00 PM"
+        },
+        {
+          "date": "2026-10-13",
+          "opponent": "West Branch",
+          "home": true,
+          "time": "7:00 PM"
+        }
+      ]
+    },
+    "boys golf": {
+      "players": [
+        {
+          "id": "boys-golf-1",
+          "number": "1",
+          "firstName": "Liam",
+          "lastName": "Norwood",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-2",
+          "number": "2",
+          "firstName": "Parker",
+          "lastName": "Bexley",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-4",
+          "number": "4",
+          "firstName": "Quinn",
+          "lastName": "Yates",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-6",
+          "number": "6",
+          "firstName": "Finn",
+          "lastName": "Sutton",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-golf-10",
+          "number": "10",
+          "firstName": "Sam",
+          "lastName": "Holloway",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-12",
+          "number": "12",
+          "firstName": "Jake",
+          "lastName": "Corwin",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-16",
+          "number": "16",
+          "firstName": "Aiden",
+          "lastName": "Barlow",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-golf-17",
+          "number": "17",
+          "firstName": "Tyler",
+          "lastName": "Dawson",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-golf-20",
+          "number": "20",
+          "firstName": "Eli",
+          "lastName": "Pemberton",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-24",
+          "number": "24",
+          "firstName": "Parker",
+          "lastName": "Abbott",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-golf-25",
+          "number": "25",
+          "firstName": "Tyler",
+          "lastName": "Ashby",
+          "position": "",
+          "side": "",
+          "grade": "Fr"
+        },
+        {
+          "id": "boys-golf-28",
+          "number": "28",
+          "firstName": "Hayden",
+          "lastName": "Lockhart",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-golf-30",
+          "number": "30",
+          "firstName": "Hayden",
+          "lastName": "Fairbanks",
+          "position": "",
+          "side": "",
+          "grade": "Sr"
+        },
+        {
+          "id": "boys-golf-33",
+          "number": "33",
+          "firstName": "Kai",
+          "lastName": "Tilden",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        },
+        {
+          "id": "boys-golf-34",
+          "number": "34",
+          "firstName": "Quinn",
+          "lastName": "Radley",
+          "position": "",
+          "side": "",
+          "grade": "Jr"
+        },
+        {
+          "id": "boys-golf-35",
+          "number": "35",
+          "firstName": "Aiden",
+          "lastName": "Garner",
+          "position": "",
+          "side": "",
+          "grade": "So"
+        }
+      ],
+      "schedule": [
+        {
+          "date": "2026-08-03",
+          "opponent": "Girard",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-04",
+          "opponent": "Lakeview",
+          "home": false,
+          "time": "9:00 AM"
+        },
+        {
+          "date": "2026-08-05",
+          "opponent": "Brookfield Invitational",
+          "home": false,
+          "time": "8:30 AM"
+        },
+        {
+          "date": "2026-08-06",
+          "opponent": "Yank Heisler Invitational",
+          "home": false,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-07",
+          "opponent": "Joe Eaton Golf Invitational",
+          "home": false,
+          "time": "12:10 PM"
+        },
+        {
+          "date": "2026-08-10",
+          "opponent": "Columbiana",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-11",
+          "opponent": "NE Ohio Invitational",
+          "home": false,
+          "time": "8:15 AM"
+        },
+        {
+          "date": "2026-08-13",
+          "opponent": "Canfield",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-14",
+          "opponent": "Shenango",
+          "home": false,
+          "time": "11:00 AM"
+        },
+        {
+          "date": "2026-08-17",
+          "opponent": "Hubbard",
+          "home": false,
+          "time": "1:00 PM"
+        },
+        {
+          "date": "2026-08-18",
+          "opponent": "Niles McKinley",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-20",
+          "opponent": "South Range",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-24",
+          "opponent": "Hubbard",
+          "home": true,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-08-26",
+          "opponent": "Girard",
+          "home": false,
           "time": "4:30 PM"
         },
         {
-          "date": "2027-05-08",
-          "opponent": "Twin Lakes",
+          "date": "2026-08-27",
+          "opponent": "Niles McKinley",
           "home": false,
-          "time": "4:30 PM"
+          "time": "4:00 PM"
+        },
+        {
+          "date": "2026-08-30",
+          "opponent": "OPEN Senior Night",
+          "home": true,
+          "time": "5:00 PM"
+        },
+        {
+          "date": "2026-09-01",
+          "opponent": "Struthers",
+          "home": false,
+          "time": "6:00 PM"
+        },
+        {
+          "date": "2026-09-03",
+          "opponent": "Columbiana",
+          "home": false,
+          "time": "3:15 PM"
+        },
+        {
+          "date": "2026-09-09",
+          "opponent": "NorthEast 8 Championship",
+          "home": false,
+          "time": "8:00 AM"
+        },
+        {
+          "date": "2026-09-13",
+          "opponent": "Kiely Cup",
+          "home": false,
+          "time": "1:00 PM"
+        },
+        {
+          "date": "2026-09-14",
+          "opponent": "Kiely Cup",
+          "home": false,
+          "time": "9:00 AM"
         }
       ]
     }
-  },
-  "weather": {
-    "date": "2026-08-28",
-    "code": 2,
-    "tempF": 63,
-    "precipChance": 20,
-    "windMph": 9,
-    "day": false,
-    "at": "2026-08-28T19:00"
   }
 }

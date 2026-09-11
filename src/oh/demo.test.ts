@@ -272,3 +272,82 @@ describe('a file that is not what it should be', () => {
     await expect(loadDemo()).resolves.toBeNull();
   });
 });
+
+/*
+ * The committed file itself. public/oh/demo.json is written by a hand-run
+ * script and read by the store, so a regeneration that changes its shape
+ * fails here rather than on a prospect's phone.
+ */
+describe('the committed file', () => {
+  const DEMO_FILE = new URL('../../public/oh/demo.json', import.meta.url);
+  const committed = () => JSON.parse(readFileSync(DEMO_FILE, 'utf8')) as Record<string, unknown>;
+
+  it('reads as the demo, for Poland, with football first', async () => {
+    const { loadDemo, DEMO_SLUG } = await load(committed());
+    const demo = await loadDemo();
+    expect(demo).not.toBeNull();
+    expect(demo!.slug).toBe(DEMO_SLUG);
+    expect(demo!.school.name).toBe('Poland Seminary');
+    expect(demo!.sportNames[0]).toBe('football');
+    expect(demo!.sportNames.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('carries a squad for every sport, and pasted fixtures for every sport but football', async () => {
+    const { loadDemo } = await load(committed());
+    const demo = (await loadDemo())!;
+    for (const name of demo.sportNames) {
+      const entry = demo.sports[name];
+      expect(entry.players.length, name).toBeGreaterThan(0);
+      const numbers = entry.players.map((p) => p.number);
+      expect(new Set(numbers).size, `${name} numbers`).toBe(numbers.length);
+      if (name === 'football') expect(entry.schedule).toBeNull();
+      else expect(entry.schedule!.length, name).toBeGreaterThan(0);
+    }
+  });
+
+  it('scores only what has been played, and only where a score means something', async () => {
+    const { loadDemo } = await load(committed());
+    const demo = (await loadDemo())!;
+    const generatedOn = committed().generatedOn as string;
+    for (const name of demo.sportNames) {
+      for (const row of demo.sports[name].schedule ?? []) {
+        if (row.score) {
+          expect(['volleyball', 'boys soccer', 'girls soccer'], `${name} ${row.date}`).toContain(name);
+          expect(row.date < generatedOn, `${name} ${row.date} scored ahead of time`).toBe(true);
+          expect(row.score.us, `${name} ${row.date} drawn`).not.toBe(row.score.them);
+        }
+      }
+    }
+  });
+
+  it('names the conference by the seven league games in the directory', async () => {
+    const { loadDemo } = await load(committed());
+    const demo = (await loadDemo())!;
+    const league = demo.league as { name: string; members: string[] };
+    expect(league.name).toBe('Northeast 8');
+    expect(league.members).toHaveLength(7);
+    const seasonFile = new URL('../../public/oh/data/poland-seminary-poland.json', import.meta.url);
+    const games = (JSON.parse(readFileSync(seasonFile, 'utf8')) as { games: { week: number; opponentSlug: string }[] }).games;
+    expect(league.members).toEqual(games.filter((g) => g.week >= 4 && g.week <= 10).map((g) => g.opponentSlug));
+  });
+
+  it('passes the store’s own colour and badge checks', async () => {
+    await load(committed());
+    const { DEMO_SLUG } = await import('./demo');
+    const rosterStore = await import('./rosterStore');
+    const identity = await rosterStore.loadSchoolSports(DEMO_SLUG);
+    expect(identity!.colors).toEqual({ ground: '#04043a', accent: '#4fbaf7' });
+    expect(identity!.logo).toMatch(/^data:image\/jpeg;base64,/);
+  });
+
+  it('names only sports the hub can draw and place in a season', async () => {
+    const { knownSports } = await import('./sportSeasons');
+    const { glyphFor } = await import('./SportGlyph');
+    const known = new Set(knownSports());
+    for (const name of committed().sportNames as string[]) {
+      const bare = name.replace(/^(boys|girls|coed) /, '');
+      expect(known.has(name) || known.has(bare), name).toBe(true);
+      expect(glyphFor(name), name).not.toBe('generic');
+    }
+  });
+});
