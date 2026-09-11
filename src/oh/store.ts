@@ -96,7 +96,10 @@ export const forget = (): void => localStorage.removeItem(CHOSEN);
  * exists to open on, and a seller who tapped Volleyball to show a prospect
  * would otherwise hand the next prospect a volleyball roster. It would also
  * leave a key behind for ever: choose()'s sweep evicts the school a reader
- * was following, and nobody follows the demo.
+ * was following, and nobody follows the demo. Because the demo's slug is
+ * Poland's own real one, rememberLeagueTable below checks the same guard —
+ * otherwise a phone that had followed Poland on /oh/ before opening the demo
+ * would let the demo overwrite Poland's own kept league table.
  */
 export const chosenSport = (slug: string): string | null => {
   if (isDemo()) return null;
@@ -150,6 +153,7 @@ export const keptLeagueTable = (slug: string, members: string): LeagueRow[] | nu
 };
 
 export const rememberLeagueTable = (slug: string, members: string, rows: LeagueRow[]): void => {
+  if (isDemo()) return;
   if (slug !== chosenSlug()) return;
   try {
     localStorage.setItem(LEAGUE(slug), JSON.stringify({ members, rows }));

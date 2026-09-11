@@ -23,8 +23,8 @@
       asserts to the letter — so a demo at /demo would mean editing the one
       alarm this repo has. Inside /oh/ it needs neither changed.
     -->
-    <!-- Without this, body::before falls back to /badge.jpg — Poland's badge —
-         and this page would wear another team's wallpaper. -->
+    <!-- The paid page dresses itself through applyLook; without this override,
+         the root app's own wallpaper would otherwise sit behind it. -->
     <style>
       :root {
         --wallpaper: none;

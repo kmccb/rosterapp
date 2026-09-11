@@ -87,7 +87,11 @@ try {
   let demoSlug = null;
   try {
     const demo = await read(demoFile);
-    if (typeof demo.slug === 'string' && demo.slug) demoSlug = demo.slug;
+    if (typeof demo.slug === 'string' && demo.slug) {
+      demoSlug = demo.slug;
+    } else {
+      console.log('  · demo file has no slug to forecast for.');
+    }
   } catch {
     console.log('  · no demo file to forecast for.');
   }

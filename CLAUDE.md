@@ -76,7 +76,7 @@ not a config bug — wait for the next cron. Consequences:
 
 ## Tests and CI
 
-- `npx vitest run` — 375 tests / 25 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 448 tests / 29 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main

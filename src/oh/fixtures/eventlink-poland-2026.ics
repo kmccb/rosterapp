@@ -4,8 +4,7 @@ PRODID:+//schooldatebooks/eventlink//NONSGML v2.0//EN
 CALSCALE:GREGORIAN
 X-APPLE-LANGUAGE:en
 X-APPLE-REGION:US
-X-WR-CALNAME:Tom's Eventlink Subscriptions
-ID:Tom%27s+Eventlink+Subscriptions@api.eventlink.com
+X-WR-CALNAME:Poland Seminary athletics
 BEGIN:VTIMEZONE
 TZID:America/New_York
 BEGIN:STANDARD

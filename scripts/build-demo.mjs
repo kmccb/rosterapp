@@ -20,8 +20,10 @@
  * turns — the athletic office enters winter and spring schedules as they are
  * set, and a re-run picks up the new sports. Scores on played volleyball and
  * soccer rows are invented, seeded from the row, so a re-run on the same feed
- * writes the same file. Set DEMO_TODAY=2026-11-01 to see what it writes on a
- * day of your choosing.
+ * on the same day writes the same file — a later run scores whatever has been
+ * played in between, so the file moves day to day even when the feed does
+ * not. Set DEMO_TODAY=2026-11-01 to see what it writes on a day of your
+ * choosing.
  *
  * THE FEED URL IS A SECRET. It is a personal subscription token and the repo is
  * public. It lives in .env.local as EVENTLINK_ICS_URL and nowhere else. Without
@@ -93,19 +95,24 @@ const readEnv = () => {
     readFileSync(file, 'utf8')
       .split('\n')
       .filter((l) => l.includes('=') && !l.trim().startsWith('#'))
-      .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+      .map((l) => [
+        l.slice(0, l.indexOf('=')).trim(),
+        // A value pasted with surrounding quotes ("like this") is a common
+        // .env slip; strip them rather than hand a quoted string to fetch().
+        l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, ''),
+      ]),
   );
 };
 
 let ics;
+let fetched = false;
 const url = readEnv().EVENTLINK_ICS_URL;
 if (url) {
   const res = await fetch(url);
   if (!res.ok) fail(`the feed answered ${res.status}.`);
   ics = await res.text();
   if (!ics.includes('BEGIN:VCALENDAR')) fail('the feed did not answer with a calendar.');
-  writeFileSync(fixture, ics);
-  console.log(`fetched the feed; refreshed ${fixture}`);
+  fetched = true;
 } else if (existsSync(fixture)) {
   ics = readFileSync(fixture, 'utf8');
   console.log('no EVENTLINK_ICS_URL in .env.local; reading the committed capture');
@@ -116,6 +123,24 @@ if (url) {
 const sports = parseEventlink(ics, SEASON);
 if (sports.length < 10) fail(`only ${sports.length} sports came out of the feed; it has changed shape.`);
 if (sports[0].sport !== 'football') fail('football is not on the calendar.');
+
+/*
+ * Only now — once the feed has proven it still has football and at least ten
+ * sports on it — does a fresh fetch get to overwrite the committed capture.
+ * Writing straight after the fetch, before these guards ran, meant a feed that
+ * had changed shape clobbered the last known-good fixture on its way to
+ * failing the run.
+ */
+if (fetched) {
+  // The calendar's header carries the subscriber's own name — X-WR-CALNAME,
+  // and an ID line naming them again — and the parser reads neither. Scrub
+  // both before this becomes a committed file with someone's name in it.
+  const scrubbed = ics
+    .replace(/^X-WR-CALNAME:.*$/m, 'X-WR-CALNAME:Poland Seminary athletics')
+    .replace(/^ID:.*\r?\n/m, '');
+  writeFileSync(fixture, scrubbed);
+  console.log(`fetched the feed; refreshed ${fixture}`);
+}
 
 // ------------------------------------------------------------------- today
 

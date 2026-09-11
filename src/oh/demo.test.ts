@@ -237,6 +237,27 @@ describe('the store, in demo mode', () => {
     jar[`oh.sport.${DEMO_SLUG}`] = 'basketball';
     expect(store.chosenSport(DEMO_SLUG)).toBeNull();
   });
+
+  it('refuses to remember a league table, even for a phone that followed Poland before opening the demo', async () => {
+    await load(body());
+    const { DEMO_SLUG, store } = await stores();
+    // A phone that follows Poland on /oh/ has oh.school set to Poland's real
+    // slug already — the same slug the demo uses — so without the isDemo()
+    // guard this write would look exactly like the followed school saving its
+    // own table.
+    const jar: Record<string, string> = { 'oh.school': DEMO_SLUG };
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => jar[k] ?? null,
+      setItem: (k: string, v: string) => {
+        jar[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete jar[k];
+      },
+    });
+    store.rememberLeagueTable(DEMO_SLUG, 'members', []);
+    expect(Object.keys(jar).some((k) => k.startsWith('oh.league.'))).toBe(false);
+  });
 });
 
 describe('a file that is not what it should be', () => {

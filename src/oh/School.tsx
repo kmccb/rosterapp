@@ -791,8 +791,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
    * which is the right answer — the schedule is exactly today's screen, and a
    * school with no forecast shows no forecast rather than an empty space where
    * one goes.
+   *
+   * `roster` gates it too, not just the date match. The forecast is a paid
+   * feature, and the demo shares Poland's real slug — so the line
+   * `paid-weather.mjs` writes into weather.json for the demo is not enough on
+   * its own to keep the forecast off Poland's real, free page. A page with no
+   * roster draws no forecast. (In the demo, football's roster is the invented
+   * one, so the demo keeps its forecast.)
    */
-  const forecastOn = weather ? coming.findIndex((g) => g.date === weather.date) : -1;
+  const forecastOn = weather && roster ? coming.findIndex((g) => g.date === weather.date) : -1;
 
   const schedule = (
     <>
