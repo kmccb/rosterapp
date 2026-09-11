@@ -121,6 +121,15 @@ paid football pages fetched server-side into `public/oh/weather.json` for the sl
 until it is, the League tab and school-wide crest/colors have no live data to draw on, and panel
 saves are broken in the push→apply window.
 
+**The demo is Poland (2026-09-11):** `/oh/demo/` is Poland Seminary with every varsity sport on
+its real Eventlink calendar (`scripts/build-demo.mjs` → `public/oh/demo.json`, parser in
+`src/oh/eventlink.ts` pinned to `src/oh/fixtures/eventlink-poland-2026.ics`). Rosters invented,
+footer says so; football/standings/weather read the real directory files because the demo slug is
+Poland's real one. Feed URL is `EVENTLINK_ICS_URL` in `.env.local`, never committed. Sport pages
+land on Schedule, or Lookup during a game (`src/oh/landing.ts`). Gendered sport names (`boys
+basketball`, `girls tennis`) are understood by the season table and glyphs; bare `tennis` is no
+longer a season. Pasted schedules split Played/Coming up by date, not by score.
+
 **Open items, in priority order:**
 1. **Apply migration 0007** — push → deploy green → apply in the dashboard SQL editor → apply
    a second time (apply-twice gate) → `node scripts/verify-school-roster.mjs` (7 checks, and
@@ -136,9 +145,13 @@ saves are broken in the push→apply window.
    refused) and the second-non-admin-account check — listed in going-live.md.
 5. **Email Joe Eitel** — still unsent. Two tabs and the whole directory now depend on his
    hobby site; a courtesy note converts silent breakage into a heads-up.
-6. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
+6. **Eventlink is a scrapeable multi-sport schedule source.** The demo reads Poland's feed; a
+   paying school that shares its Eventlink subscription URL could have every sport's schedule
+   automated instead of concierge-pasted. Not built — needs a per-school URL in the panel and a
+   refresh job. Changes the phase 3 picture.
+7. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
    mid-season roster-change texts become a burden.
-7. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
+8. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
    member list from the panel); what's left is the **Region standings** tab, which needs the
    school→team-id mapping (blocked on ~90 team-page captures, deliberately deferred), and
    multi-sport schedules for non-football sports beyond the concierge-pasted rows 0006 already

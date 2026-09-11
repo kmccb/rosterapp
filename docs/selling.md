@@ -13,30 +13,28 @@ change it here, and quote whatever it says.
 https://roster.scottforge.ai/oh/demo/ — open it on a phone and hand it over.
 No login, no setup, nothing to explain first.
 
-It is Springfield Local, a school that does not exist, in colors and a crest
-that are its own. Six sports across all three seasons, so whatever month you
-are selling in, some bands read "In season" and the rest say when they come
-back. Every sport opens the way a paying school's does: keypad, roster,
-schedule. Football also carries scores, a forecast at kickoff and a
-standings table for a conference of five more invented schools.
+It is Poland Seminary, in its own colors and crest, with every varsity sport
+on its real calendar — read off the school's Eventlink feed, so the opponents,
+dates and times are the ones on the school's own site. Whatever month you are
+selling in, some tiles read "In season" and the rest say when they come back.
+Football carries real scores, the NE8 standings and a forecast at kickoff,
+straight from the directory. Each sport opens on its schedule, and on the
+keypad while a game is on.
 
-The school is fictional on purpose. The demo used to be invented players on
-Strasburg-Franklin's real page, which is fine as a smoke test and not fine
-as the thing shown to strangers. A quiet line in the footer says it is
-sample data, so nobody mistakes the squad for their own.
+The rosters are invented. The root app's roster travels by share code and the
+demo asks the database for nothing, so a quiet line in the footer says
+"Sample rosters — the schedules are real." Scores on played volleyball and
+soccer rows are invented too; meets are left unscored.
 
 It works with no signal once loaded, and it asks the database for nothing —
 so it is safe to show on a school's guest wifi, in a car park, anywhere.
 
-**Maintenance:** the page carries its own dates forward as it ages, so what
-has been played and what is coming always split at today without anyone
-touching it. What does drift is the calendar — the season travels with the
-dates, so about six months on the football fixtures are reading January to
-March under a tile that says "Starts in August". So run
-`node scripts/build-demo.mjs` and commit `public/oh/demo.json` **twice a
-year**, near the start of the autumn and again around February. It refuses
-to write a season that would argue with itself, and prints the dates it
-wrote.
+**Maintenance:** the calendar is a snapshot. When the athletic office enters
+a new season's schedules, or changes one, run `node scripts/build-demo.mjs`
+and commit `public/oh/demo.json` together with the refreshed capture at
+`src/oh/fixtures/eventlink-poland-2026.ics`. The script reads the feed URL
+from `EVENTLINK_ICS_URL` in `.env.local` — a personal subscription token that
+must never be committed — and without it rebuilds from the committed capture.
 
 ## Activate a school (the whole job, ~3 minutes)
 
@@ -85,6 +83,12 @@ columns) — the parser preview shows what it read before you publish. Once a
 school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. Pricing for the
 all-sports package isn't set yet.
+
+Name the gender for basketball, soccer, golf, tennis, wrestling and lacrosse —
+"girls basketball", "boys tennis" — so the hub draws two tiles for a school
+that fields both and puts each in its own season. Tennis in particular has to
+say: girls play in the autumn, boys in the spring, and a bare "tennis" is
+nobody's season.
 
 ### The conference
 
