@@ -271,6 +271,25 @@ A tab the reader has already tapped is never overridden: the rule runs only on s
   Schedule with invented scores on played rows and none on future rows; a cross country tile
   shows meet names unscored; the Team tab on football filters by side; Lookup finds a number.
 
+## 7. The pasted schedule splits by date
+
+Found while planning: `PastedSchedule` in `School.tsx` files a row under "Played" only when it
+carries a score. With meets left unscored, every cross country and golf event already run would
+sit under "Coming up" for the rest of the season. So a pasted schedule now splits on the
+calendar — rows dated before today (the phone's local date) are played, the rest are coming — and
+a played row with no score shows its time in the result column where the chip would go. Football's
+list keeps splitting on results, because the directory posts them weekly. This helps every real
+paid school too: a seller rarely pastes scores mid-season.
+
+## What the feed holds today
+
+The 2026-09-11 capture yields **eleven** varsity sports for 2026-27 — football, volleyball, boys
+and girls soccer, boys and girls golf, cross country, girls tennis, boys and girls basketball,
+baseball — because the athletic office enters winter and spring schedules as they are set. The
+generator refuses below ten. Wrestling, swimming, boys tennis, lacrosse, softball and track appear
+when their schedules are entered and the generator is re-run; nothing in the code assumes the
+count. Copy should say "every varsity sport", never a number.
+
 ## Out of scope
 
 - Refreshing the feed from CI (needs the token as a secret; a follow-up).
