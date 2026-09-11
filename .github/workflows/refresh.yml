@@ -57,3 +57,18 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Cloudflare Pages builds straight from the repo, so a push reaches it with
+  # no help — but this workflow never pushes. A rebuild with nothing changed in
+  # git is its whole point, and a deploy hook is how Cloudflare is asked for
+  # one: its build runs the same fetches the job above does, on its own
+  # machine. It stands apart from that job rather than after it, because
+  # neither host's refresh should wait on, or fail with, the other's. Until
+  # the secret exists the step skips, so nothing here can break a run.
+  cloudflare:
+    runs-on: ubuntu-latest
+    env:
+      HOOK: ${{ secrets.CF_PAGES_DEPLOY_HOOK }}
+    steps:
+      - if: env.HOOK != ''
+        run: curl -fsS -X POST "$HOOK" -o /dev/null
