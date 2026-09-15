@@ -648,10 +648,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     <p className="oh-demo-note">Sample rosters — the schedules are real</p>
   ) : null;
 
-  const footer = (
+  /*
+   * The demo keeps neither way out. "Follow a different school" would hand a
+   * prospect the directory mid-pitch, and the privacy notice is the real
+   * site's promise about the real site — on a page that asks the database
+   * for nothing there is nothing for it to say. The sample-rosters line is
+   * the only small print the demo carries.
+   */
+  const waysOut = isDemo() ? null : (
     <>
-      {demoNote}
-
       <button type="button" className="fixture-row is-plain" onClick={onChange}>
         <span className="fixture-team">Follow a different school</span>
       </button>
@@ -661,6 +666,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
           <a href="/oh/?privacy">What this site knows, and doesn&rsquo;t</a>
         </span>
       </p>
+    </>
+  );
+
+  const footer = (
+    <>
+      {demoNote}
+      {waysOut}
     </>
   );
 
@@ -765,14 +777,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
         {demoNote}
 
-        <div className="oh-hub-foot">
-          <button type="button" className="oh-hub-change" onClick={onChange}>
-            Follow a different school
-          </button>
-          <a className="oh-hub-privacy" href="/oh/?privacy">
-            Privacy
-          </a>
-        </div>
+        {/* The same rule as the sport page's footer: the demo has no way out
+            and no privacy notice, only the sample-rosters line above. */}
+        {!isDemo() && (
+          <div className="oh-hub-foot">
+            <button type="button" className="oh-hub-change" onClick={onChange}>
+              Follow a different school
+            </button>
+            <a className="oh-hub-privacy" href="/oh/?privacy">
+              Privacy
+            </a>
+          </div>
+        )}
       </div>
     );
   }
