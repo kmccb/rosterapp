@@ -4,7 +4,7 @@
  * wrong can be pinned in a test rather than argued about on a phone.
  */
 
-import type { School } from '../ohio/stateModel';
+import type { School, SchoolGame, SchoolSeason } from '../ohio/stateModel';
 
 const MAX_MATCHES = 15;
 
@@ -42,3 +42,41 @@ export function searchSchools(schools: School[], query: string): School[] {
     .slice(0, MAX_MATCHES)
     .map((m) => m.school);
 }
+
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/*
+ * The directory's date is already the Eastern calendar day. Building a Date
+ * from it in UTC and reading UTC parts back keeps a phone west of Ohio from
+ * printing Thursday for a Friday game.
+ */
+const shortDate = (iso: string): string => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const at = new Date(Date.UTC(y, m - 1, d));
+  return `${DAYS[at.getUTCDay()]} ${MONTHS[m - 1]} ${d}`;
+};
+
+const score = (game: SchoolGame): string => {
+  const r = game.result;
+  if (!r) return game.kickoff || '';
+  const mark = r.us === r.them ? 'T' : r.won ? 'W' : 'L';
+  return `${mark} ${r.us}–${r.them}`;
+};
+
+export function describeGame(game: SchoolGame): {
+  week: string;
+  date: string;
+  opponent: string;
+  result: string;
+} {
+  return {
+    week: `Wk ${game.week}`,
+    date: shortDate(game.date),
+    opponent: `${game.home ? 'vs' : 'at'} ${game.opponent}`,
+    result: score(game),
+  };
+}
+
+export const recordOf = (season: SchoolSeason): string =>
+  `${season.record.won}–${season.record.lost}`;

@@ -1,5 +1,11 @@
-import { searchSchools } from './schools';
-import type { School } from '../ohio/stateModel';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { describeGame, recordOf, searchSchools } from './schools';
+import type { School, SchoolGame, SchoolSeason } from '../ohio/stateModel';
+
+const poland: SchoolSeason = JSON.parse(
+  readFileSync(fileURLToPath(new URL('./fixtures/directory-poland-2026.json', import.meta.url)), 'utf8'),
+);
 
 const s = (name: string, city: string): School => ({
   slug: `${name}-${city}`.toLowerCase().replace(/\s+/g, '-'),
@@ -66,5 +72,61 @@ describe('searchSchools', () => {
 
   it('collapses runs of spaces in the query', () => {
     expect(searchSchools(SCHOOLS, 'poland   seminary').map((x) => x.name)).toEqual(['Poland Seminary']);
+  });
+});
+
+describe('describeGame', () => {
+  it("reads a home loss off Poland's real file", () => {
+    const g = poland.games[0];
+    expect(describeGame(g)).toEqual({
+      week: 'Wk 1',
+      date: 'Fri Aug 21',
+      opponent: 'vs Salem',
+      result: 'L 17–21',
+    });
+  });
+
+  it('says "at" for an away game and puts our score first either way', () => {
+    const g: SchoolGame = {
+      week: 3, date: '2026-09-04', kickoff: '7pm', home: false,
+      opponent: 'Struthers', opponentCity: 'Struthers', opponentSlug: 'struthers-struthers',
+      result: { us: 28, them: 14, won: true },
+    };
+    expect(describeGame(g).opponent).toBe('at Struthers');
+    expect(describeGame(g).result).toBe('W 28–14');
+  });
+
+  it('calls a level score a tie', () => {
+    const g: SchoolGame = {
+      week: 5, date: '2026-09-18', kickoff: '', home: true,
+      opponent: 'Canfield', opponentCity: 'Canfield', opponentSlug: 'canfield-canfield',
+      result: { us: 14, them: 14, won: false },
+    };
+    expect(describeGame(g).result).toBe('T 14–14');
+  });
+
+  it('shows the kickoff for a game not yet played, and nothing if there is no kickoff', () => {
+    const last = poland.games[poland.games.length - 1];
+    expect(last.result).toBeUndefined();
+    expect(describeGame(last).result).toBe(last.kickoff);
+    expect(describeGame({ ...last, kickoff: '' }).result).toBe('');
+  });
+
+  it("names the weekday from the date alone, whatever the machine's time zone", () => {
+    // 2026-08-21 is a Friday; a UTC-vs-local slip would print Thursday.
+    const g: SchoolGame = {
+      week: 1, date: '2026-08-21', kickoff: '7pm', home: true,
+      opponent: 'Salem', opponentCity: 'Salem', opponentSlug: 'salem-salem',
+    };
+    expect(describeGame(g).date).toBe('Fri Aug 21');
+    expect(describeGame({ ...g, date: '2026-10-31' }).date).toBe('Sat Oct 31');
+    expect(describeGame({ ...g, date: '2026-01-01' }).date).toBe('Thu Jan 1');
+  });
+});
+
+describe('recordOf', () => {
+  it('prints won–lost with an en dash', () => {
+    expect(recordOf(poland)).toBe(`${poland.record.won}–${poland.record.lost}`);
+    expect(recordOf({ ...poland, record: { won: 0, lost: 0, played: 0 } })).toBe('0–0');
   });
 });
