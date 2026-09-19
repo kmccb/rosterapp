@@ -37,21 +37,67 @@ const field = (body: string, key: string): string => {
 };
 
 /** `20260821T230000Z` or `20260821` -> ISO date and, when given, a kickoff. */
-const parseStamp = (raw: string): { date: string; kickoff?: string } | null => {
+/**
+ * How far ahead of UTC a named zone is at a given instant, in milliseconds.
+ *
+ * Read from the runtime's own timezone database rather than the feed's
+ * VTIMEZONE block, so the daylight-saving rules stay right without parsing them
+ * out of the calendar by hand.
+ */
+const zoneOffsetMs = (atMs: number, timeZone: string): number => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+    .formatToParts(new Date(atMs))
+    .reduce<Record<string, string>>((acc, p) => ((acc[p.type] = p.value), acc), {});
+  const asUtc = Date.UTC(
+    +parts.year,
+    +parts.month - 1,
+    +parts.day,
+    +parts.hour,
+    +parts.minute,
+    +parts.second,
+  );
+  return asUtc - atMs;
+};
+
+/**
+ * `20260821T230000Z`, `20260821T190000` with a TZID, or a bare `20260821`,
+ * turned into an ISO date and — when a time is given — the kickoff in UTC.
+ *
+ * Two feeds, two conventions. ScheduleStar stamped UTC with a trailing Z;
+ * EventLink stamps the wall-clock time and names the zone in a TZID parameter.
+ * A zoned stamp is unambiguous, so its date is exactly the one printed. A Z
+ * stamp's date is taken locally, because a 7pm Friday kickoff in Ohio is
+ * Saturday 00:00 UTC and a schedule that calls Friday's game Saturday is wrong
+ * to everyone reading it.
+ */
+const parseStamp = (
+  raw: string,
+  tzid?: string,
+): { date: string; kickoff?: string } | null => {
   const m = raw.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/);
   if (!m) return null;
   const [, y, mo, d, hh, mm, ss, z] = m;
   if (!hh) return { date: `${y}-${mo}-${d}` };
 
-  const iso = `${y}-${mo}-${d}T${hh}:${mm}:${ss}${z ? 'Z' : ''}`;
-  const when = new Date(iso);
+  if (tzid && !z) {
+    const wall = Date.UTC(+y, +mo - 1, +d, +hh, +mm, +ss);
+    const utc = wall - zoneOffsetMs(wall, tzid);
+    if (Number.isNaN(utc)) return { date: `${y}-${mo}-${d}` };
+    return { date: `${y}-${mo}-${d}`, kickoff: new Date(utc).toISOString() };
+  }
+
+  const when = new Date(`${y}-${mo}-${d}T${hh}:${mm}:${ss}${z ? 'Z' : ''}`);
   if (Number.isNaN(when.getTime())) return { date: `${y}-${mo}-${d}` };
 
-  /*
-   * The calendar date is taken locally, not from the UTC stamp. A 7pm Friday
-   * kickoff in Ohio is Saturday 00:00 UTC, and a schedule that calls Friday's
-   * game Saturday is wrong to everyone reading it.
-   */
   const local = new Date(when.getTime() - when.getTimezoneOffset() * 60000);
   return { date: local.toISOString().slice(0, 10), kickoff: when.toISOString() };
 };
@@ -130,20 +176,84 @@ const parseScore = (text: string, weAreHome: boolean): Game['result'] | undefine
 
 export type ParsedSchedule = { games: Game[]; teamName: string };
 
-export function parseIcal(text: string, aliases: OpponentAliases = {}): ParsedSchedule {
+/*
+ * EventLink names varsity football "Football (Boys V) - Opponent" for a home
+ * game and "... @ Opponent" for an away one — no pipes, no "vs", the opponent
+ * spelled as a full school name. JV and freshman read "(Boys JV)"/"(Boys F)"
+ * and fall away here, which is what we want.
+ */
+const EVENTLINK_FOOTBALL = /^Football \(Boys V\)\s*([-@])\s*(.+?)\s*$/;
+
+/** The football season a date sits in: an Aug–Jul year, named by its August. */
+const seasonOf = (isoDate: string): number => {
+  const [y, m] = isoDate.split('-').map(Number);
+  return m >= 8 ? y : y - 1;
+};
+
+/**
+ * A team's season, read from whichever iCal feed the school publishes.
+ *
+ * Two providers are handled from the one envelope. ScheduleStar sent a
+ * football-only feed keyed "Team vs Team | Sport | Home"; EventLink sends the
+ * whole school — every sport, every level, seasons deep — so its events are
+ * filtered down to this season's varsity football before anything else looks at
+ * them. `now` is only consulted for that filter, and defaults to the clock.
+ */
+export function parseIcal(
+  text: string,
+  aliases: OpponentAliases = {},
+  now: Date = new Date(),
+): ParsedSchedule {
   const unfolded = unfold(text);
   const chunks = unfolded.split('BEGIN:VEVENT').slice(1);
+  const thisSeason = seasonOf(now.toISOString().slice(0, 10));
 
   const games: Game[] = [];
   const names = new Map<string, number>();
+  const venues = new Map<string, number>();
 
   for (const chunk of chunks) {
     const body = chunk.split('END:VEVENT')[0];
     const summary = field(body, 'SUMMARY');
     if (!summary) continue;
 
-    const when = parseStamp(field(body, 'DTSTART'));
+    // DTSTART carries the zone in a parameter (";TZID=America/New_York") that
+    // field() would drop, so it is read off the raw line.
+    const dt = body.match(/^DTSTART([^:\r\n]*):(.+)$/m);
+    if (!dt) continue;
+    const tzid = dt[1].match(/TZID=([^;:]+)/)?.[1];
+    const when = parseStamp(dt[2].trim(), tzid);
     if (!when) continue;
+
+    const el = summary.match(EVENTLINK_FOOTBALL);
+    if (el) {
+      const [, sep, opponentRaw] = el;
+
+      // The whole school is in this feed; a real fixture names a school. This
+      // drops the banquet and the generic playoff placeholder, which carry no
+      // opponent worth keeping.
+      if (!/\b(high\s+school|hs|academy|college)\b/i.test(opponentRaw)) continue;
+      // Seasons run deep in the feed; only the one in play is wanted.
+      if (seasonOf(when.date) !== thisSeason) continue;
+
+      const home = sep === '-';
+      const location = field(body, 'LOCATION');
+      if (home && location) venues.set(location, (venues.get(location) ?? 0) + 1);
+
+      const description = field(body, 'DESCRIPTION');
+      games.push({
+        ...when,
+        ...canonicalOpponent(opponentRaw, aliases),
+        home,
+        occasion: description || undefined,
+        scrimmage: false,
+      });
+      continue;
+    }
+
+    // ScheduleStar: only its pipe-delimited summaries, so an EventLink event of
+    // another sport ("Volleyball (Girls V) @ …") can't be read as a fixture.
+    if (!summary.includes('|')) continue;
 
     // "Poland Seminary vs Salem Jr/Sr High School | Boys Varsity Football | Home (Homecoming) - ..."
     const [matchup = '', , venueRaw = ''] = summary.split('|').map((s) => s.trim());
@@ -172,8 +282,19 @@ export function parseIcal(text: string, aliases: OpponentAliases = {}): ParsedSc
 
   games.sort((a, b) => a.date.localeCompare(b.date));
 
-  // Whichever side of the fixture is always us.
-  const teamName = [...names].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+  // A game before the season opener is a scrimmage. ScheduleStar tagged those
+  // "(Scrimmage)" in the summary; EventLink doesn't, but the school tags the
+  // opener, and anything earlier is preseason. No opener tagged, nothing marked.
+  const opener = games.find((g) => /season opener/i.test(g.occasion ?? ''));
+  if (opener) {
+    for (const g of games) if (g.date < opener.date) g.scrimmage = true;
+  }
+
+  // Whichever side of the fixture is always us (ScheduleStar), or failing that
+  // the ground the home games are played at (EventLink's LOCATION).
+  const fromMatchups = [...names].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const homeVenue = [...venues].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const teamName = fromMatchups ?? (homeVenue ? tidyOpponent(homeVenue) : '');
   return { games, teamName };
 }
 

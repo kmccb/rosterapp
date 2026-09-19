@@ -95,6 +95,105 @@ describe('parseIcal', () => {
   });
 });
 
+/*
+ * EventLink is what Poland's feed became for 2026. It publishes the whole
+ * school — every sport and level, seasons deep — with a plainer SUMMARY and a
+ * zoned DTSTART, so the parser has more to filter and a timezone to honour.
+ */
+const EVENTLINK = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:+//schooldatebooks/eventlink//NONSGML v2.0//EN
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20260821T190000
+SUMMARY:Football (Boys V) - Salem High School
+LOCATION:Poland Seminary High School
+DESCRIPTION:Season Opener\\n
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20260807T100000
+SUMMARY:Football (Boys V) - Streetsboro High School
+LOCATION:Poland Seminary High School
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20260904T190000
+SUMMARY:Football (Boys V) @ Field High School
+LOCATION:Field High School
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261009T190000
+SUMMARY:Football (Boys V) - Girard Sr High School
+LOCATION:Poland Seminary High School
+DESCRIPTION:Football/ Cheer Senior Night\\n
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20251017T190000
+SUMMARY:Football (Boys V) - Lakeview High School
+LOCATION:Poland Seminary High School
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261002T190000
+SUMMARY:Football (Boys JV) @ Niles McKinley High School
+LOCATION:Niles McKinley High School
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20260813T183000
+SUMMARY:Volleyball (Girls V) @ Springfield Local High School
+LOCATION:Springfield Local High School
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/New_York:20261210T180000
+SUMMARY:Football (Boys V) - Embassy Football Banquet
+LOCATION:Poland Seminary High School
+END:VEVENT
+END:VCALENDAR`;
+
+describe('parseIcal — EventLink feed', () => {
+  const now = new Date('2026-09-19T12:00:00Z');
+  const aliases = { girardsr: 'Girard', nilesmckinley: 'Niles McKinley' };
+  const { games, teamName } = parseIcal(EVENTLINK, aliases, now);
+  const on = (date: string) => games.find((g) => g.date === date);
+
+  it('keeps this season, varsity football, real fixtures only', () => {
+    // Salem, Streetsboro, Field, Girard — not last season's Lakeview, not the
+    // JV game, not volleyball, not the banquet (no opponent school).
+    expect(games.map((g) => g.opponent)).toEqual(['Streetsboro', 'Salem', 'Field', 'Girard']);
+  });
+
+  it('reads home and away off the separator', () => {
+    expect(on('2026-08-21')?.home).toBe(true); // " - " home
+    expect(on('2026-09-04')?.home).toBe(false); // " @ " away
+  });
+
+  it('names the team from its own ground', () => {
+    expect(teamName).toBe('Poland Seminary');
+  });
+
+  it('converts a zoned kickoff to the right UTC instant', () => {
+    // 7pm in Ohio in October is 23:00 UTC (EDT, -4).
+    expect(on('2026-10-09')?.kickoff).toBe('2026-10-09T23:00:00.000Z');
+  });
+
+  it('carries the school name through an alias to the record-book key', () => {
+    expect(on('2026-10-09')?.opponentKey).toBe(opponentKey('Girard'));
+  });
+
+  it('takes the occasion from the description', () => {
+    expect(on('2026-08-21')?.occasion).toBe('Season Opener');
+  });
+
+  it('marks anything before the opener as a scrimmage', () => {
+    expect(on('2026-08-07')?.scrimmage).toBe(true); // Streetsboro, preseason
+    expect(on('2026-08-21')?.scrimmage).toBe(false); // Salem, the opener
+  });
+
+  it('rolls over to the new season once August comes round', () => {
+    // Same feed a year on: only the 2027 games would remain, and 2026's drop
+    // off the way 2025's do here.
+    const lastYear = parseIcal(EVENTLINK, aliases, new Date('2025-10-01T12:00:00Z'));
+    expect(lastYear.games.map((g) => g.opponent)).toEqual(['Lakeview']);
+  });
+});
+
 describe('tidyOpponent', () => {
   it('strips the school furniture but keeps the name', () => {
     expect(tidyOpponent('Salem Jr/Sr High School')).toBe('Salem');
