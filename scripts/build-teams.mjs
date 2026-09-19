@@ -372,10 +372,31 @@ async function writeSchedule(team, out) {
     const res = await fetch(team.schedule, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const { games, teamName } = parseIcal(await res.text(), aliases);
+
+    /*
+     * A feed that fetched fine but parsed to no games is the shape a provider
+     * change takes — the URL still answers, but with a calendar this parser no
+     * longer recognises. Blank beats nothing said, so if a working schedule was
+     * built before, keep it: stale is a smaller lie than empty, and the warning
+     * is what gets the feed looked at. (A genuinely empty preseason feed with no
+     * prior build still writes through, so a new team is not stuck.)
+     */
+    const scheduleFile = join(out, 'schedule.json');
+    if (!games.some((g) => !g.scrimmage) && existsSync(scheduleFile)) {
+      const prev = JSON.parse(await readFile(scheduleFile, 'utf8'));
+      if (prev.games?.some((g) => !g.scrimmage)) {
+        console.warn(
+          `  ! ${team.slug}: the schedule feed parsed to no games — keeping the last good ` +
+            `schedule. The feed's format may have changed.`,
+        );
+        return true;
+      }
+    }
+
     const weather = await forecastFor(team, games);
 
     await writeFile(
-      join(out, 'schedule.json'),
+      scheduleFile,
       JSON.stringify({ games, history, teamName, weather, fetched: new Date().toISOString() }),
     );
 
