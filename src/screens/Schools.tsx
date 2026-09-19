@@ -64,7 +64,6 @@ export function Schools({ query, onQuery, slug, onSlug }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    setIndexFailed(false);
     loadIndex()
       .then((list) => !cancelled && setSchools(list))
       .catch(() => !cancelled && setIndexFailed(true));
@@ -109,7 +108,7 @@ export function Schools({ query, onQuery, slug, onSlug }: Props) {
             {season.games.map((g) => {
               const row = describeGame(g);
               return (
-                <div className="lg-game" key={`${g.week}-${g.date}`}>
+                <div className="lg-game" key={`${g.week}-${g.date}-${g.opponent}`}>
                   <span className="lg-side">
                     {row.week} · {row.date} ·{' '}
                     {g.opponentSlug ? (
@@ -146,14 +145,18 @@ export function Schools({ query, onQuery, slug, onSlug }: Props) {
           onChange={(e) => onQuery(e.target.value)}
           placeholder="School or town"
           aria-label="Find a school"
-          disabled={!schools}
         />
       </div>
-      {matches.map((s) => (
-        <button type="button" className="row" key={s.slug} onClick={() => onSlug(s.slug)}>
-          {s.name} · {s.city}
-        </button>
-      ))}
+      {!schools && !indexFailed && <p className="empty-text">Loading…</p>}
+      {matches.length > 0 && (
+        <div className="rows">
+          {matches.map((s) => (
+            <button type="button" className="row" key={s.slug} onClick={() => onSlug(s.slug)}>
+              {s.name} · {s.city}
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 }

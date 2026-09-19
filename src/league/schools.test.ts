@@ -130,3 +130,16 @@ describe('recordOf', () => {
     expect(recordOf({ ...poland, record: { won: 0, lost: 0, played: 0 } })).toBe('0–0');
   });
 });
+
+describe('against the published index', () => {
+  // The root app now depends on this file's shape (Schools.tsx fetches it directly),
+  // so this is the only test in the suite that reads the real committed file rather
+  // than a pinned fixture — a change to its shape should fail here, not on a phone.
+  it('finds Poland in the real directory index', () => {
+    const index = JSON.parse(
+      readFileSync(fileURLToPath(new URL('../../public/oh/index.json', import.meta.url)), 'utf8'),
+    );
+    expect(searchSchools(index.schools, 'poland')[0].slug).toBe('poland-seminary-poland');
+    expect(index.schools.length).toBeGreaterThan(700);
+  });
+});

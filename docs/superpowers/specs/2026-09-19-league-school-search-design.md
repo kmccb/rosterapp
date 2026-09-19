@@ -28,7 +28,8 @@ is Poland. YSU and Victory Christian share the bundle and see nothing new.
 **Search.** A search box in the roster's existing search styling, placeholder "School or town".
 Nothing is listed until two characters have been typed. Matching is case-insensitive against the
 school's name and its city. Results are ordered: name starts with the query, then city starts
-with the query, then either contains it; ties alphabetical by name; at most fifteen shown. Each
+with the query, then name contains it, then city contains it; ties alphabetical by name; at most
+fifteen shown. Each
 match reads `Poland Seminary · Poland`.
 
 **A school's season.** Tapping a match replaces the list with:
@@ -118,8 +119,10 @@ This is a deliberate root-app change and follows the procedure in CLAUDE.md:
    stays at 32.
 4. Recompute the nine hashes with the guard's own `normalise` and `withoutTeams`, write them to
    `scripts/untouched-baseline.json`, and re-run `node scripts/check-untouched.mjs` green.
-5. The baseline change lands in the same commit as the feature, so no commit on main fails its
-   own build.
+5. The branch merges to main as a single squashed commit carrying the feature and the
+   re-recorded baseline together, so no commit on main ever fails its own build. On the branch
+   itself the baseline is its own commit, and intermediate branch commits are expected to fail
+   the guard.
 6. After the Cloudflare build is green: on a phone with a signal, open League → Schools, find a
    school, open it, tap an opponent. Then airplane mode, leave and re-enter Schools, and read
    the "needs a signal" sentence.
