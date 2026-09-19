@@ -304,7 +304,15 @@ describe('the calendar, weeks after it was written', () => {
     const { loadDemo, shiftToNow } = await load(committed());
     const demo = await loadDemo();
 
-    for (const when of ['2026-09-14', '2027-01-02', '2027-06-30', '2029-03-05']) {
+    // Targets relative to the real clock, always ahead of it. loadDemo has
+    // already carried the file to today, and the shim never drags a demo
+    // backwards (a clock behind the file is left alone, by design), so a target
+    // in the past is a case production can't reach. Fixed future dates stood in
+    // for these once and rotted the day the clock passed the nearest one.
+    const ahead = (days: number) =>
+      new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+
+    for (const when of [ahead(3), ahead(113), ahead(292), ahead(905)]) {
       const moved = shiftToNow(demo!, day(when));
       for (const [date, scored] of everyDate(moved)) {
         if (scored) expect(date < when, `${when}: ${date} has a score`).toBe(true);
