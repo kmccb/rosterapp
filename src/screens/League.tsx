@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { RegionTable } from '../league/leagueParse';
 import { byWeek, type LeagueGame, type Standing } from '../league/leagueModel';
+import { Schools } from './Schools';
 
 /**
  * What the build wrote. The row and table shapes are the parser's, imported
@@ -29,7 +30,11 @@ type League = {
 export function League({ base }: { base: string }) {
   const [league, setLeague] = useState<League | null>(null);
   const [failed, setFailed] = useState(false);
-  const [view, setView] = useState<'league' | 'region'>('league');
+  const [view, setView] = useState<'league' | 'region' | 'schools'>('league');
+  // Held here rather than in Schools so a look at the Region and back lands
+  // on the same school with the same thing typed.
+  const [schoolQuery, setSchoolQuery] = useState('');
+  const [schoolSlug, setSchoolSlug] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +79,9 @@ export function League({ base }: { base: string }) {
           <button type="button" aria-pressed={view === 'region'} onClick={() => setView('region')}>
             Region
           </button>
+          <button type="button" aria-pressed={view === 'schools'} onClick={() => setView('schools')}>
+            Schools
+          </button>
         </div>
       </div>
 
@@ -110,6 +118,15 @@ export function League({ base }: { base: string }) {
             </tbody>
           </table>
         </>
+      )}
+
+      {view === 'schools' && (
+        <Schools
+          query={schoolQuery}
+          onQuery={setSchoolQuery}
+          slug={schoolSlug}
+          onSlug={setSchoolSlug}
+        />
       )}
 
       {view === 'region' && (
