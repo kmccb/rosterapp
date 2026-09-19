@@ -26,6 +26,13 @@ not a config bug — wait for the next cron. Consequences:
   `src/theme`, `src/App.tsx`. Pure modules are fine (`src/types`, `src/parse/*`,
   `src/components/Keypad`, `src/ohio/*`). `src/oh/look.ts` deliberately DUPLICATES
   `src/theme/theme.ts`'s color math for this reason.
+- A **deliberate** root-app change is the one time the baseline is re-recorded (last done
+  2026-09-19: the Stats importer now defaults to This season). Prove it first: normalise the
+  live page and the new `dist/index.html` the guard's way (`\r` stripped, beacon token blanked)
+  and diff them — the only line allowed to differ is the `<script src="/assets/index-*.js">`
+  tag. Then recompute the nine hashes with the guard's own `normalise`/`withoutTeams`, write
+  them to the baseline, and re-run `node scripts/check-untouched.mjs`. The precache count must
+  not move. Anything else in that diff is a regression, not a re-record.
 
 ## Data sources
 

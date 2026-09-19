@@ -18,7 +18,7 @@ const BUCKETS: Array<{ id: SeasonBucket; label: string }> = [
 ];
 
 export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: Props) {
-  const [bucket, setBucket] = useState<SeasonBucket>('previous');
+  const [bucket, setBucket] = useState<SeasonBucket>('current');
   const [label, setLabel] = useState('');
   const [text, setText] = useState('');
   const [report, setReport] = useState<MatchReport | null>(null);
