@@ -35,10 +35,23 @@ const KEY = () => scopedKey('rosterapp.stats.v1');
 
 type Stored = { schema: 1; stats: StatsStore };
 
+const isGame = (v: unknown): v is GameStats => {
+  if (typeof v !== 'object' || v === null) return false;
+  const g = v as Record<string, unknown>;
+  return typeof g.date === 'string' && typeof g.opponent === 'string' && typeof g.byPlayer === 'object' && g.byPlayer !== null;
+};
+
 const isSeason = (v: unknown): v is SeasonStats => {
   if (typeof v !== 'object' || v === null) return false;
   const s = v as Record<string, unknown>;
   return typeof s.label === 'string' && typeof s.byPlayer === 'object' && s.byPlayer !== null;
+};
+
+/** A season as stored, with a games field only if every game in it is well-formed. */
+const tidySeason = (s: SeasonStats): SeasonStats => {
+  const { games, ...rest } = s as SeasonStats & { games?: unknown };
+  if (Array.isArray(games) && games.every(isGame)) return { ...rest, games };
+  return rest;
 };
 
 /** Anything unreadable reads as "no stats", exactly like the roster does. */
@@ -50,8 +63,8 @@ export const loadStats = (): StatsStore => {
     const stats = parsed?.stats;
     if (!stats || typeof stats !== 'object') return {};
     const out: StatsStore = {};
-    if (isSeason(stats.previous)) out.previous = stats.previous;
-    if (isSeason(stats.current)) out.current = stats.current;
+    if (isSeason(stats.previous)) out.previous = tidySeason(stats.previous);
+    if (isSeason(stats.current)) out.current = tidySeason(stats.current);
     return out;
   } catch {
     return {};
@@ -74,7 +87,8 @@ export const putSeason = (
   byPlayer: Record<string, PlayerStats>,
 ): StatsStore => {
   const next: StatsStore = { ...loadStats() };
-  next[bucket] = { label, byPlayer, updatedAt: new Date().toISOString() };
+  const games = next[bucket]?.games;
+  next[bucket] = { label, byPlayer, updatedAt: new Date().toISOString(), ...(games ? { games } : {}) };
   saveStats(next);
   return next;
 };
@@ -87,3 +101,30 @@ export const clearSeason = (bucket: SeasonBucket): StatsStore => {
 };
 
 export const clearStats = (): void => localStorage.removeItem(KEY());
+
+const byDate = (a: GameStats, b: GameStats): number => a.date.localeCompare(b.date);
+
+/** Files one game under This season; a game on the same date is replaced, not doubled. */
+export const putGame = (
+  date: string,
+  opponent: string,
+  byPlayer: Record<string, PlayerStats>,
+): StatsStore => {
+  const next: StatsStore = { ...loadStats() };
+  const current: SeasonStats = next.current ?? { label: 'This season', byPlayer: {}, updatedAt: '' };
+  const games = (current.games ?? []).filter((g) => g.date !== date);
+  games.push({ date, opponent, byPlayer });
+  games.sort(byDate);
+  next.current = { ...current, games, updatedAt: new Date().toISOString() };
+  saveStats(next);
+  return next;
+};
+
+export const removeGame = (date: string): StatsStore => {
+  const next: StatsStore = { ...loadStats() };
+  if (!next.current?.games) return next;
+  const games = next.current.games.filter((g) => g.date !== date);
+  next.current = { ...next.current, games, updatedAt: new Date().toISOString() };
+  saveStats(next);
+  return next;
+};
