@@ -100,7 +100,7 @@ type SeasonStats = { label: string; byPlayer: Record<string, PlayerStats>; updat
 | Passing | Comp/Att, Yds, TD, Int, Long, 2PT | `cmp`, `att` (split on `/`), `yds`, `td`, `int`, `lng` |
 | Rushing | Att, Yds, TD, Long, Fum, 2PT | `carries`, `yds`, `td`, `lng`, `fum` |
 | Receiving | Rec, Yds, TD, Long, Fum, 2PT | `rec`, `yds`, `td`, `lng`, `fum` |
-| Defense | as printed on the game page; the exact header is captured in the fixture and mapped by the same squashed-heading rule the season parser uses | the season parser's names: `tackles`, `solo`, `assist`, `sacks`, `tfl`, `safety`, `int`, `intRetYds`, `ff`, `fumRec`, `fumRetYds`, `defTd` |
+| Defense | (blank), Tk, Ast, Sck, TFL, Sfty, Int, Fum, Blks, TD — the header's first cell is empty, so the table is recognised by shape | `tackles`, `assist`, `sacks`, `tfl`, `safety`, `int`, `fum`, `blocks`, `defTd`. Hudl's per-game `Fum` does not say forced or recovered, so it is kept as its own `fum` rather than guessed into the season sheet's `ff` or `fumRec`; `Blks` likewise stays `blocks`. Neither is printed by the card. |
 | Kicking | FG, %, PAT, Pts | `fgMade`, `xpMade`, `pts` (attempts are not printed per game) |
 | Punting | Num, Avg, In 20, Long | `punts`, `ydsPerPunt`, `in20`, `lng`; `yds` = round(avg × num) |
 | Kickoff Returns / Punt Returns | Ret, Avg, TD, Long | `returns`, `td`, `lng`; `yds` = round(avg × ret) |
