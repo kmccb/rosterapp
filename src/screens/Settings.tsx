@@ -125,7 +125,7 @@ export function Settings({
           </label>
           <textarea
             id="export"
-            className="input textarea"
+            className="input"
             readOnly
             rows={6}
             value={toCsv(roster)}
