@@ -68,7 +68,7 @@ export function TeamStats({ roster, stats, player, onPlayer }: Props) {
               ‹ Back
             </button>
           </p>
-          <div className="group-head">#{open.number} {fullName(open)}</div>
+          <div className="group-head"><strong style={{ color: 'var(--text)' }}>#{open.number} {fullName(open)}</strong></div>
 
           {(season?.games ?? []).map((g) => {
             const lines = summarise(g.byPlayer[player as string]);
@@ -116,7 +116,7 @@ export function TeamStats({ roster, stats, player, onPlayer }: Props) {
         ) : (
           blocks.map((b) => (
             <div key={b.category}>
-              <div className="group-head">{b.label}</div>
+              <div className="group-head"><strong style={{ color: 'var(--text)' }}>{b.label}</strong></div>
               <div className="rows">
                 {b.rows.map((r) => (
                   <button type="button" className="row" key={r.key} onClick={() => onPlayer(r.key)}>
