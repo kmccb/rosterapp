@@ -433,6 +433,7 @@ export default function App() {
             onSaved={setStats}
             onBack={() => setTab('roster')}
             onGoToSettings={() => setTab('settings')}
+            base={teamBase()}
           />
         )}
         {tab === 'settings' && (

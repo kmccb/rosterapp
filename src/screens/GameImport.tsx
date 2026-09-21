@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { Game } from '../schedule/icalParse';
+import { gameOptions } from '../stats/gameOptions';
 import { parseGameStats } from '../stats/gameParse';
 import { gameLabel } from '../stats/leaders';
 import { matchStats, type MatchReport } from '../stats/statsMatch';
@@ -10,6 +12,15 @@ type Props = {
   roster: Roster;
   stats: StatsStore;
   onSaved: (next: StatsStore) => void;
+  /** Where this team's files live; the schedule is read from it. */
+  base: string;
+};
+
+/** Today as the schedule writes dates, in this phone's own calendar. */
+const todayIso = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
 /*
@@ -17,8 +28,16 @@ type Props = {
  * so pasting Friday's game again on Saturday morning replaces it rather than
  * doubling every number. Removing one is a tap with no confirm: putting it
  * back is one paste.
+ *
+ * The game is picked from the schedule the app already carries rather than
+ * typed, and the form opens on the game most likely just played. Typing only
+ * comes back when the schedule can't be read at all, so the form never
+ * dead-ends on a phone with no signal and no precached copy.
  */
-export function GameImport({ roster, stats, onSaved }: Props) {
+export function GameImport({ roster, stats, onSaved, base }: Props) {
+  const [schedule, setSchedule] = useState<Game[] | null>(null);
+  const [scheduleFailed, setScheduleFailed] = useState(false);
+  const [picked, setPicked] = useState('');
   const [opponent, setOpponent] = useState('');
   const [date, setDate] = useState('');
   const [text, setText] = useState('');
@@ -29,10 +48,53 @@ export function GameImport({ roster, stats, onSaved }: Props) {
 
   const games = stats.current?.games ?? [];
 
+  useEffect(() => {
+    let cancelled = false;
+
+    // Network first, precache second — the same two tries the Schedule tab
+    // makes, for the same reason: the worker's copy is a launch behind.
+    const load = async (): Promise<Game[]> => {
+      try {
+        const fresh = await fetch(`${base}schedule.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (fresh.ok) return ((await fresh.json()) as { games?: Game[] }).games ?? [];
+      } catch {
+        // No signal, which is the normal case at a ground.
+      }
+      const cached = await fetch(`${base}schedule.json`);
+      if (!cached.ok) throw new Error(String(cached.status));
+      return ((await cached.json()) as { games?: Game[] }).games ?? [];
+    };
+
+    load()
+      .then((list) => !cancelled && setSchedule(list))
+      .catch(() => !cancelled && setScheduleFailed(true));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [base]);
+
+  const pastedDates = useMemo(() => new Set(games.map((g) => g.date)), [games]);
+  const { options, suggested } = useMemo(
+    () => gameOptions(schedule ?? [], pastedDates, todayIso()),
+    [schedule, pastedDates],
+  );
+  const chosen = options.find((o) => o.date === picked) ?? null;
+
+  // The suggestion is a starting point, not a leash: it fills the box once,
+  // when the schedule lands, and after that the pick is the person's.
+  useEffect(() => {
+    if (suggested && !picked) setPicked(suggested);
+  }, [suggested, picked]);
+
+  const fromSchedule = options.length > 0;
+  const gameDate = fromSchedule ? chosen?.date ?? '' : date;
+  const gameOpponent = fromSchedule ? chosen?.opponent ?? '' : opponent.trim();
+
   const read = () => {
     setSaved('');
-    if (!opponent.trim() || !date) {
-      setError('Say who the game was against and when.');
+    if (!gameOpponent || !gameDate) {
+      setError(fromSchedule ? 'Pick which game this is.' : 'Say who the game was against and when.');
       return;
     }
     const { rows, categories: found } = parseGameStats(text);
@@ -55,9 +117,9 @@ export function GameImport({ roster, stats, onSaved }: Props) {
   const save = () => {
     if (!report) return;
     try {
-      const next = putGame(date, opponent.trim(), report.byPlayer);
+      const next = putGame(gameDate, gameOpponent, report.byPlayer);
       onSaved(next);
-      setSaved(`Saved ${gameLabel(date, opponent.trim())}.`);
+      setSaved(`Saved ${gameLabel(gameDate, gameOpponent)}.`);
       setReport(null);
       setText('');
       setOpponent('');
@@ -82,34 +144,63 @@ export function GameImport({ roster, stats, onSaved }: Props) {
         kept — Hudl prints them first.
       </p>
 
-      <label className="label" htmlFor="game-opponent">
-        Opponent
-      </label>
-      <input
-        id="game-opponent"
-        className="input"
-        value={opponent}
-        onChange={(e) => setOpponent(e.target.value)}
-        placeholder="Salem"
-      />
+      {fromSchedule ? (
+        <>
+          <label className="label" htmlFor="game-pick">
+            Which game
+          </label>
+          <select
+            id="game-pick"
+            className="input"
+            value={picked}
+            onChange={(e) => {
+              setPicked(e.target.value);
+              setReport(null);
+              setSaved('');
+            }}
+          >
+            {options.map((o) => (
+              <option key={o.date} value={o.date}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </>
+      ) : (
+        <>
+          {!scheduleFailed && schedule === null && (
+            <p className="hint">Reading the schedule…</p>
+          )}
+          <label className="label" htmlFor="game-opponent">
+            Opponent
+          </label>
+          <input
+            id="game-opponent"
+            className="input"
+            value={opponent}
+            onChange={(e) => setOpponent(e.target.value)}
+            placeholder="Salem"
+          />
 
-      <label className="label" htmlFor="game-date">
-        Date
-      </label>
-      <input
-        id="game-date"
-        className="input"
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+          <label className="label" htmlFor="game-date">
+            Date
+          </label>
+          <input
+            id="game-date"
+            className="input"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </>
+      )}
 
       <label className="label" htmlFor="game-paste">
         Paste the game
       </label>
       <textarea
         id="game-paste"
-        className="input textarea"
+        className="input"
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={8}

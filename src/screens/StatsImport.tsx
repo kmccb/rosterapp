@@ -11,6 +11,8 @@ type Props = {
   onSaved: (next: StatsStore) => void;
   onBack: () => void;
   onGoToSettings: () => void;
+  /** Where this team's files live; the One game form reads the schedule from it. */
+  base: string;
 };
 
 const BUCKETS: Array<{ id: SeasonBucket; label: string }> = [
@@ -18,7 +20,7 @@ const BUCKETS: Array<{ id: SeasonBucket; label: string }> = [
   { id: 'current', label: 'This season' },
 ];
 
-export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: Props) {
+export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings, base }: Props) {
   const [bucket, setBucket] = useState<SeasonBucket>('current');
   const [label, setLabel] = useState('');
   const [text, setText] = useState('');
@@ -134,7 +136,7 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
       )}
 
       {bucket === 'current' && mode === 'game' ? (
-        <GameImport roster={roster} stats={stats} onSaved={onSaved} />
+        <GameImport roster={roster} stats={stats} onSaved={onSaved} base={base} />
       ) : (
         <>
           {existing && Object.keys(existing.byPlayer).length > 0 && (
@@ -162,7 +164,7 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
       </label>
       <textarea
         id="stats-paste"
-        className="input textarea"
+        className="input"
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={8}
