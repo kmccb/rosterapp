@@ -406,7 +406,7 @@ export function Import({
       </p>
       <textarea
         id="paste"
-        className="input textarea"
+        className="input"
         value={text}
         onChange={(e) => {
           setText(e.target.value);

@@ -166,11 +166,12 @@ export function GameImport({ roster, stats, onSaved, base }: Props) {
             ))}
           </select>
         </>
+      ) : schedule === null && !scheduleFailed ? (
+        // Not the typed fields yet: anything typed here would vanish the
+        // moment the schedule arrived and the picker took over.
+        <p className="hint">Reading the schedule…</p>
       ) : (
         <>
-          {!scheduleFailed && schedule === null && (
-            <p className="hint">Reading the schedule…</p>
-          )}
           <label className="label" htmlFor="game-opponent">
             Opponent
           </label>
