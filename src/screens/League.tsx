@@ -91,7 +91,7 @@ export function League({ base }: { base: string }) {
               the scores; the table is the thing you scroll to afterwards. */}
           {weeks.map((w) => (
             <div key={w.week}>
-              <div className="group-head">Week {w.week} · {w.label}</div>
+              <div className="group-head"><strong>Week {w.week} · {w.label}</strong></div>
               {w.games.map((g) => (
                 <div className={`lg-game${g.isLeagueGame ? '' : ' is-outside'}`} key={`${g.date}-${g.home}-${g.away}`}>
                   <span className="lg-side">{g.away}</span>
