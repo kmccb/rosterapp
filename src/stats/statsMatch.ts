@@ -24,9 +24,13 @@ const tidy = (s: string): string =>
 /**
  * "D. Xipolitas" -> D + Xipolitas. Also copes with "Xipolitas, D." and a plain
  * "Dominic Xipolitas", which is what a hand-typed table tends to look like.
+ *
+ * A nickname in parentheses — Hudl prints the kicker as "S. (Salvi) Carramusa"
+ * on the season page and every game page — is dropped before anything is
+ * split, or the surname would read as "(Salvi)Carramusa" and never match.
  */
 export const parsePrintedName = (raw: string): PrintedName => {
-  const text = raw.trim().replace(/\s+/g, ' ');
+  const text = raw.replace(/\([^)]*\)/g, ' ').trim().replace(/\s+/g, ' ');
   if (!text) return { initial: '', last: '' };
 
   if (text.includes(',')) {

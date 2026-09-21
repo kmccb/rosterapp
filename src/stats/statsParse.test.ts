@@ -169,6 +169,12 @@ describe('parsePrintedName', () => {
   it('handles a surname on its own', () => {
     expect(parsePrintedName('Komara')).toEqual({ initial: '', last: 'komara' });
   });
+
+  it('ignores a nickname in parentheses, which Hudl prints for the kicker', () => {
+    expect(parsePrintedName('S. (Salvi) Carramusa')).toEqual({ initial: 's', last: 'carramusa' });
+    expect(parsePrintedName('Salvatore (Salvi) Carramusa')).toEqual({ initial: 's', last: 'carramusa' });
+    expect(parsePrintedName('Carramusa (Salvi), S.')).toEqual({ initial: 's', last: 'carramusa' });
+  });
 });
 
 describe('matchName', () => {
