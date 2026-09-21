@@ -12,11 +12,21 @@ import { scopedKey } from '../scope';
 
 export type SeasonBucket = 'previous' | 'current';
 
-export type SeasonStats = {
-  label: string;
+/** One game, pasted from Hudl's game page. `date` is YYYY-MM-DD; `opponent` is as typed. */
+export type GameStats = {
+  date: string;
+  opponent: string;
   /** playerKey -> category -> values. */
   byPlayer: Record<string, PlayerStats>;
+};
+
+export type SeasonStats = {
+  label: string;
+  /** playerKey -> category -> values. The whole-season paste; ignored while games exist. */
+  byPlayer: Record<string, PlayerStats>;
   updatedAt: string;
+  /** Kept sorted by date. When present, the season's numbers are the sum of these. */
+  games?: GameStats[];
 };
 
 export type StatsStore = Partial<Record<SeasonBucket, SeasonStats>>;
