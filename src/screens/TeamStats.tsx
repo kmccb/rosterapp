@@ -99,6 +99,14 @@ export function TeamStats({ roster, stats, player, onPlayer }: Props) {
               <span className="lg-score">{l.parts.join(' · ')}</span>
             </div>
           ))}
+          {(season?.games ?? []).length === 0 && (
+            // A season paste has no weeks in it. Say so, or a bare Season block
+            // reads as the weeks having gone missing.
+            <p className="empty-text">
+              Weeks appear once games are pasted one at a time — Setup → Stats → This season → One
+              game. A whole-season paste holds only the totals.
+            </p>
+          )}
         </>
       )}
 
