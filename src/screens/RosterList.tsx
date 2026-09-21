@@ -3,6 +3,7 @@ import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey } from '../parse/rosterParse';
 import { inArea, positionsForArea, positionsOf, sidesOf } from '../roster/filters';
+import { playerKey } from '../stats/statsMatch';
 import type { StatsStore } from '../stats/statsStore';
 import { fullName, type Player, type Roster, type Side } from '../types';
 
@@ -61,7 +62,15 @@ const summarise = (area: Side | null, position: string | null, search: string, n
 };
 
 /** The reverse lookup: "what number is Jake?", now narrowable by area and position. */
-export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsStore }) {
+export function RosterList({
+  roster,
+  stats,
+  onWeekByWeek,
+}: {
+  roster: Roster;
+  stats?: StatsStore;
+  onWeekByWeek?: (key: string) => void;
+}) {
   const [search, setSearch] = useState('');
   const [area, setArea] = useState<Side | null>(null);
   const [position, setPosition] = useState<string | null>(null);
@@ -137,7 +146,12 @@ export function RosterList({ roster, stats }: { roster: Roster; stats?: StatsSto
   if (selected) {
     return (
       <div className="screen">
-        <PlayerCard player={selected} onBack={() => setSelected(null)} stats={stats} />
+        <PlayerCard
+          player={selected}
+          onBack={() => setSelected(null)}
+          stats={stats}
+          onWeekByWeek={onWeekByWeek ? () => onWeekByWeek(playerKey(selected)) : undefined}
+        />
       </div>
     );
   }

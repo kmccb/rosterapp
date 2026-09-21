@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { seasonTotals } from '../stats/seasonTotals';
 import { categoriesAcross, summarise } from '../stats/statsFormat';
 import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, formatWeight, fullName, SIDE_LABEL, type Player } from '../types';
 
-type Props = { player: Player; onBack?: () => void; stats?: StatsStore };
+type Props = { player: Player; onBack?: () => void; stats?: StatsStore; onWeekByWeek?: () => void };
 
 type Stat = { label: string; value: string };
 
@@ -51,7 +52,7 @@ const headlineFirst = (lines: Stat[], position: string): Stat[] => {
 const HEADLINE_COUNT = 4;
 
 /** The answer to "who is #7" — sized to be read at arm's length in the stands. */
-export function PlayerCard({ player, onBack, stats }: Props) {
+export function PlayerCard({ player, onBack, stats, onWeekByWeek }: Props) {
   const meta = [
     player.position,
     player.side ? SIDE_LABEL[player.side] : '',
@@ -61,8 +62,9 @@ export function PlayerCard({ player, onBack, stats }: Props) {
   const body = [formatHeight(player.heightIn), formatWeight(player.weightLb)].filter(Boolean);
 
   const key = playerKey(player);
-  const previous = stats?.previous?.byPlayer[key];
-  const current = stats?.current?.byPlayer[key];
+  // Games win when a season has any pasted; the whole-season paste stands otherwise.
+  const previous = seasonTotals(stats?.previous)[key];
+  const current = seasonTotals(stats?.current)[key];
 
   /*
    * With stats to show, the number stops being the headline and becomes a
@@ -158,6 +160,15 @@ export function PlayerCard({ player, onBack, stats }: Props) {
         previousLabel={stats?.previous?.label ?? 'Last season'}
         currentLabel={stats?.current?.label ?? 'This season'}
       />
+
+      {/* The Stats tab only ever shows this season's weeks, so the link needs current stats. */}
+      {onWeekByWeek && current && (
+        <p className="filter-line">
+          <button type="button" className="link-btn" onClick={onWeekByWeek}>
+            Week by week
+          </button>
+        </p>
+      )}
     </div>
   );
 }

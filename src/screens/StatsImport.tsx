@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { GameImport } from './GameImport';
 import { matchStats, type MatchReport } from '../stats/statsMatch';
 import { CATEGORY_LABEL, parseStats } from '../stats/statsParse';
 import { putSeason, type SeasonBucket, type StatsStore } from '../stats/statsStore';
@@ -25,6 +26,8 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
   const [categories, setCategories] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState('');
+  // Under This season a game can be pasted on its own; last season is totals only.
+  const [mode, setMode] = useState<'season' | 'game'>('season');
 
   const existing = stats[bucket];
 
@@ -86,9 +89,9 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
 
       <h2 className="section">Stats</h2>
       <p className="hint">
-        On Hudl, open the season stats page, select the tables and copy. Paste the lot in one go —
-        passing, rushing, defense and the rest together. Players are matched by name, so a change of
-        jersey number doesn’t matter.
+        On Hudl, open the season stats page, select the tables and copy — or, under This season,
+        paste one game at a time from the Game Stats page. Players are matched by name, so a change
+        of jersey number doesn’t matter.
       </p>
 
       <label className="label">Which season</label>
@@ -109,12 +112,38 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
           </button>
         ))}
       </div>
-      {existing && (
-        <p className="hint">
-          Already holding {Object.keys(existing.byPlayer).length} players as “{existing.label}”.
-          Saving replaces them.
-        </p>
+      {bucket === 'current' && (
+        <div className="chips" role="group" aria-label="What to paste">
+          <button
+            type="button"
+            className={`chip${mode === 'season' ? ' active' : ''}`}
+            aria-pressed={mode === 'season'}
+            onClick={() => { setMode('season'); setReport(null); setSaved(''); }}
+          >
+            Whole season
+          </button>
+          <button
+            type="button"
+            className={`chip${mode === 'game' ? ' active' : ''}`}
+            aria-pressed={mode === 'game'}
+            onClick={() => { setMode('game'); setReport(null); setSaved(''); }}
+          >
+            One game
+          </button>
+        </div>
       )}
+
+      {bucket === 'current' && mode === 'game' ? (
+        <GameImport roster={roster} stats={stats} onSaved={onSaved} />
+      ) : (
+        <>
+          {existing && Object.keys(existing.byPlayer).length > 0 && (
+            <p className="hint">
+              Already holding {Object.keys(existing.byPlayer).length} players as “{existing.label}”.
+              Saving replaces them.
+              {(existing.games?.length ?? 0) > 0 && ' While games are in, the games are what the app shows.'}
+            </p>
+          )}
 
       <label className="label" htmlFor="season-label">
         Call it
@@ -197,6 +226,8 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
             Read the stats
           </button>
         </div>
+      )}
+        </>
       )}
     </div>
   );

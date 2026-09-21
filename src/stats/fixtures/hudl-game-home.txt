@@ -1,0 +1,75 @@
+Offense
+Passing	Comp/Att	Yds	TD	Int	Long	2PT
+#1 D. Xipolitas	6/11	83	1	1	30	-
+Rushing	Att	Yds	TD	Long	Fum	2PT
+#1 D. Xipolitas	14	44	-	16	-	-
+#5 C. Jones	13	23	1	12	-	-
+#12 C. Scott	1	10	-	10	-	-
+#10 A. Sattarelle	2	5	-	4	-	-
+#14 B. Gensler	1	4	-	4	-	-
+Receiving	Rec	Yds	TD	Long	Fum	2PT
+#12 C. Scott	1	30	-	30	-	-
+#80 M. Purins	2	20	-	13	-	-
+#8 G. Seifert	1	13	1	13	-	-
+#5 C. Jones	1	11	-	11	-	-
+#3 C. Reda	1	9	-	9	-	-
+Passing	Comp/Att	Yds	TD	Int	Long	2PT
+#2 B. Bezon	6/6	29	-	-	9	-
+#4 B. Milhoan	2/5	17	-	-	12	-
+#5 M. Eckman	1/1	5	-	-	5	-
+J. Mayhew	0/1	-	-	1	-	-
+Rushing	Att	Yds	TD	Long	Fum	2PT
+#3 B. Kana	12	75	-	15	-	-
+#33	14	71	2	19	-	-
+#32	11	53	1	11	-	-
+#4 B. Milhoan	1	3	-	3	-	-
+#22 M. Ellis	1	2	-	2	-	-
+Receiving	Rec	Yds	TD	Long	Fum	2PT
+#51 L. Mayhew	2	12	-	8	-	-
+#14 O. Davidson-Chuck	1	12	-	12	-	-
+J. Mayhew	1	9	-	9	-	-
+#13 T. Evancho	1	5	-	5	-	-
+#1 D. Steele	1	5	-	5	-	-
+#7 T. Steves	1	5	-	5	-	-
+A. Miller	2	3	-	2	-	-
+Defense
+	Tk	Ast	Sck	TFL	Sfty	Int	Fum	Blks	TD
+#28 P. Zoumis	12	2	-	-	-	1	-	-	-
+#5 C. Jones	7	-	-	-	-	-	-	-	-
+#4 D. Delluomo	4	1	1	-	-	-	-	-	-
+#14 B. Gensler	4	1	-	-	-	-	-	-	-
+#6 C. Ankeles	3	-	-	-	-	-	-	-	-
+#20 A. Perry	2	-	-	-	-	-	-	-	-
+#26 T. Mihas	2	-	-	-	-	-	-	-	-
+#51 C. Holtzman	2	-	-	-	-	-	-	-	-
+#80 M. Purins	2	-	-	-	-	-	-	-	-
+#1 D. Xipolitas	1	-	-	-	-	-	-	-	-
+#21 N. Nittoli	1	-	-	-	-	-	-	-	-
+#32 W. Hurdley	1	-	-	-	-	-	-	-	-
+#42 N. Sosnosky	1	-	-	-	-	-	-	-	-
+#71 N. Minehart	-	1	-	-	-	-	-	-	-
+	Tk	Ast	Sck	TFL	Sfty	Int	Fum	Blks	TD
+Rest of team	-	-	-	-	-	1	-	-	-
+Special Teams
+Kickoff Returns	Ret	Avg	TD	Long
+#12 C. Scott	2	60	-	60
+#5 C. Jones	1	18	-	18
+#10 A. Sattarelle	1	6	-	6
+Punt Returns	Ret	Avg	TD	Long
+#10 A. Sattarelle	-	-	-	-
+Kicking	FG	%	PAT	Pts
+#81 S. (Salvi) Carramusa	1	100.0 %	2	5
+Kickoff	Num	Yrds	Long	TB
+#81 S. (Salvi) Carramusa	4	-	-	-
+Punting	Num	Avg	In 20	Long
+#1 D. Xipolitas	4	34	-	40
+Kickoff Returns	Ret	Avg	TD	Long
+Rest of team	4	0	-	-
+Punt Returns	Ret	Avg	TD	Long
+Rest of team	4	0	-	-
+Kicking	FG	%	PAT	Pts
+Rest of team	-	-	3	3
+Kickoff	Num	Yrds	Long	TB
+Rest of team	4	-	-	-
+Punting	Num	Avg	In 20	Long
+Rest of team	2	0	-	-
