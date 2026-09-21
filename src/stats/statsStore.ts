@@ -47,11 +47,26 @@ const isSeason = (v: unknown): v is SeasonStats => {
   return typeof s.label === 'string' && typeof s.byPlayer === 'object' && s.byPlayer !== null;
 };
 
-/** A season as stored, with a games field only if every game in it is well-formed. */
+/**
+ * A season as stored, keeping only the well-formed games. One corrupt entry
+ * used to drop the whole list — and the next save would write that loss back
+ * — so a bad game is dropped on its own and the good ones stay; `games` is
+ * omitted entirely once none remain, rather than kept as an empty list.
+ */
 const tidySeason = (s: SeasonStats): SeasonStats => {
   const { games, ...rest } = s as SeasonStats & { games?: unknown };
-  if (Array.isArray(games) && games.every(isGame)) return { ...rest, games };
-  return rest;
+  const kept = Array.isArray(games) ? games.filter(isGame) : [];
+  return kept.length ? { ...rest, games: kept } : rest;
+};
+
+/** Applies the same season/game rules `loadStats` uses to stats already in memory. */
+export const tidyStore = (stats: unknown): StatsStore => {
+  if (!stats || typeof stats !== 'object') return {};
+  const s = stats as Partial<Record<SeasonBucket, unknown>>;
+  const out: StatsStore = {};
+  if (isSeason(s.previous)) out.previous = tidySeason(s.previous);
+  if (isSeason(s.current)) out.current = tidySeason(s.current);
+  return out;
 };
 
 /** Anything unreadable reads as "no stats", exactly like the roster does. */
@@ -60,12 +75,7 @@ export const loadStats = (): StatsStore => {
     const raw = localStorage.getItem(KEY());
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Partial<Stored>;
-    const stats = parsed?.stats;
-    if (!stats || typeof stats !== 'object') return {};
-    const out: StatsStore = {};
-    if (isSeason(stats.previous)) out.previous = tidySeason(stats.previous);
-    if (isSeason(stats.current)) out.current = tidySeason(stats.current);
-    return out;
+    return tidyStore(parsed?.stats);
   } catch {
     return {};
   }

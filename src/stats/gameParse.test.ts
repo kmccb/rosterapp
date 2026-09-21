@@ -92,8 +92,16 @@ describe('parseGameStats', () => {
     expect(find(rows, 'defense', 'A. Sattarelle')?.values).toEqual({ tackles: 1, assist: 2, int: 1 });
     expect(find(rows, 'defense', 'N. Nittoli')?.values).toEqual({ tackles: 1, fum: 1 });
     expect(find(rows, 'puntReturn', 'N. Nittoli')?.values).toEqual({ returns: 1, ydsPerReturn: 3, yds: 3, lng: 3 });
+    expect(find(rows, 'punting', 'D. Xipolitas')?.values).toEqual({ punts: 1, ydsPerPunt: 25, in20: 1, yds: 25, lng: 25 });
     expect(find(rows, 'kicking', 'S. (Salvi) Carramusa')?.values).toEqual({ fgMade: 1, xpMade: 3, pts: 6 });
     expect(rows.map((r) => r.name)).not.toContain('L. Goodrich');
+  });
+
+  it('still reads Defense when the paste lost the leading tab on its header row', () => {
+    const spaced = HOME.replace(/^\tTk/gm, 'Tk');
+    const { rows } = parseGameStats(spaced);
+    expect(find(rows, 'defense', 'P. Zoumis')?.values).toEqual({ tackles: 12, assist: 2, int: 1 });
+    expect(rows.filter((r) => r.category === 'defense')).toHaveLength(14);
   });
 
   it('copes with a paste that lost its tabs to plain text', () => {

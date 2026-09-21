@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { GameStats } from './statsStore';
 
 (globalThis as unknown as { window: unknown }).window = { location: { pathname: '/' } };
 
@@ -63,5 +64,14 @@ describe('games in the store', () => {
     raw.stats.current.games = 'nope';
     memory.set([...memory.keys()][0], JSON.stringify(raw));
     expect(loadStats().current?.games).toBeUndefined();
+  });
+
+  it('keeps the well-formed games and drops only the bad one', () => {
+    const good: GameStats = { date: '2026-08-21', opponent: 'Salem', byPlayer: {} };
+    putSeason('current', '2026', {});
+    const raw = JSON.parse(memory.values().next().value as string);
+    raw.stats.current.games = [good, { bad: true }];
+    memory.set([...memory.keys()][0], JSON.stringify(raw));
+    expect(loadStats().current?.games).toEqual([good]);
   });
 });

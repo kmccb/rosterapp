@@ -161,7 +161,8 @@ export function PlayerCard({ player, onBack, stats, onWeekByWeek }: Props) {
         currentLabel={stats?.current?.label ?? 'This season'}
       />
 
-      {onWeekByWeek && (current || previous) && (
+      {/* The Stats tab only ever shows this season's weeks, so the link needs current stats. */}
+      {onWeekByWeek && current && (
         <p className="filter-line">
           <button type="button" className="link-btn" onClick={onWeekByWeek}>
             Week by week

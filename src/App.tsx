@@ -15,7 +15,7 @@ import {
   takeCodeFromUrl,
   type FetchedRoster,
 } from './share/share';
-import { loadStats, saveStats, type StatsStore } from './stats/statsStore';
+import { loadStats, saveStats, tidyStore, type StatsStore } from './stats/statsStore';
 import { applyTheme, bakedTeam, initialTheme, saveTheme, teamBase, type Theme } from './theme/theme';
 import { CodeEntry } from './screens/CodeEntry';
 import { Import, type ImportMeta } from './screens/Import';
@@ -140,9 +140,10 @@ export default function App() {
       // Only overwrite local stats when the share actually carried some. An
       // older publish, or one from a phone that never pasted any, must not
       // wipe what's already here.
-      if (Object.keys(found.stats).length > 0) {
-        saveStats(found.stats);
-        setStats(found.stats);
+      const tidied = tidyStore(found.stats);
+      if (Object.keys(tidied).length > 0) {
+        saveStats(tidied);
+        setStats(tidied);
       }
       /*
        * The badge travels with a share so a team with no page of its own still
@@ -331,9 +332,12 @@ export default function App() {
         rememberSource(meta.sourceCode);
         releaseShareKeyUnless(meta.sourceCode);
       }
-      if (meta?.stats && Object.keys(meta.stats).length > 0) {
-        saveStats(meta.stats);
-        setStats(meta.stats);
+      if (meta?.stats) {
+        const tidied = tidyStore(meta.stats);
+        if (Object.keys(tidied).length > 0) {
+          saveStats(tidied);
+          setStats(tidied);
+        }
       }
     },
     [persist, roster],
@@ -365,7 +369,7 @@ export default function App() {
               key={t.id}
               type="button"
               className={`tab${tab === t.id ? ' active' : ''}`}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); if (t.id !== 'teamStats') setStatsPlayer(null); }}
               aria-current={tab === t.id ? 'page' : undefined}
             >
               {t.label}

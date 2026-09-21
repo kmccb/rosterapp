@@ -137,7 +137,7 @@ export function StatsImport({ roster, stats, onSaved, onBack, onGoToSettings }: 
         <GameImport roster={roster} stats={stats} onSaved={onSaved} />
       ) : (
         <>
-          {existing && (
+          {existing && Object.keys(existing.byPlayer).length > 0 && (
             <p className="hint">
               Already holding {Object.keys(existing.byPlayer).length} players as “{existing.label}”.
               Saving replaces them.

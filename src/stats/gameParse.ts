@@ -75,8 +75,11 @@ const splitName = (cell: string): { number: string; name: string } => {
   return { number: '', name: cell.trim() };
 };
 
+// The first cell is normally blank, but a paste that lost its leading tab
+// shifts "Tk" into it — so this is Defense whenever both signature columns
+// show up, not only when the first cell is empty.
 const isDefenseHeader = (squashed: string[]): boolean =>
-  squashed[0] === '' && squashed.includes('tk') && squashed.includes('ast');
+  squashed.includes('tk') && squashed.includes('ast');
 
 const categoryOfHeader = (squashed: string[]): StatCategory | null => {
   if (isDefenseHeader(squashed)) return 'defense';
@@ -124,6 +127,11 @@ export function parseGameStats(input: string): { rows: ParsedStatRow[]; categori
       category = headerCategory;
       const map = COLUMNS[category];
       columns = squashed.map((h) => map[h] ?? '');
+      // Defense's header normally starts with the blank cell that keeps every
+      // row's data columns lined up with the header's. A paste that lost the
+      // leading tab eats that cell instead of just emptying it, which would
+      // shift every value one column early — so it's put back here.
+      if (headerCategory === 'defense' && squashed[0] !== '') columns = ['', ...columns];
       continue;
     }
 

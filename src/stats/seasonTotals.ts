@@ -12,6 +12,8 @@
 import type { PlayerStats } from './statsMatch';
 import type { SeasonStats } from './statsStore';
 
+// Also names a few fields the game parser never emits — season-sheet-only
+// counts — so a season summed some day from that page's shape adds the same way.
 const COUNTED = new Set([
   'yds', 'td', 'cmp', 'att', 'int', 'carries', 'rec', 'fum', 'tackles', 'solo', 'assist',
   'sacks', 'tfl', 'safety', 'intRetYds', 'ff', 'fumRec', 'fumRetYds', 'defTd', 'blocks',

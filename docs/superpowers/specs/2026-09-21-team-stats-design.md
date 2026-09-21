@@ -106,7 +106,9 @@ type SeasonStats = { label: string; byPlayer: Record<string, PlayerStats>; updat
 | Kickoff Returns / Punt Returns | Ret, Avg, TD, Long | `returns`, `td`, `lng`; `yds` = round(avg × ret) |
 
 `2PT` and `%` are ignored. A dash is no value, as in the season parser. A row whose name cell
-is only a number (`#33`, an opponent with no name) or `Rest of team` is dropped.
+is only a number (`#33`, an opponent with no name) or `Rest of team` is dropped. Hudl prints
+punt and return averages as whole numbers, so yards recovered from them can differ from Hudl's
+own season page by a few yards over a season; that is the source, not the parser.
 
 **Totals are computed, never stored.** `seasonTotals(season)`:
 
@@ -114,8 +116,9 @@ is only a number (`#33`, an opponent with no name) or `Rest of team` is dropped.
   (`yds`, `td`, `cmp`, `att`, `int`, `carries`, `rec`, `fum`, `tackles`, `solo`, `assist`,
   `sacks`, `tfl`, `safety`, `intRetYds`, `ff`, `fumRec`, `fumRetYds`, `defTd`, `fgMade`,
   `fgAtt`, `xpMade`, `xpAtt`, `pts`, `punts`, `in20`, `returns`), take
-  the max of `lng`, and recompute `ydsPerCarry`, `ydsPerRec`, `ydsPerPunt`, `cmpPct` from the
-  sums. A field absent in one game does not zero the sum. `rating` is not carried.
+  the max of `lng`, and recompute `ydsPerCarry`, `ydsPerRec`, `ydsPerPunt`, `ydsPerReturn`,
+  `ydsPerAtt`, `cmpPct` from the sums. A field absent in one game does not zero the sum.
+  `rating` is not carried.
 - Otherwise: `byPlayer` as pasted.
 
 Leaders, the side lists, the Season block and the player card all read from this function.
@@ -154,8 +157,8 @@ report. Calls `parseGameStats`, `matchStats`, `putGame`, `removeGame`.
 and renders `GameImport` for the second; its own logic is unchanged.
 
 **`src/screens/TeamStats.tsx`** — the tab. State: segment, chosen player key. Renders Leaders,
-a side list, or the player's weeks. Props: `roster`, `stats`, and an optional initial player key
-from the card's link.
+a side list, or the player's weeks. Props: `roster`, `stats`, and the open player's key with its
+setter, both held by App so the card's link can set them.
 
 **`src/App.tsx`** — the `teamStats` tab, gated as above; the card's "Week by week" callback sets
 the tab and the initial key. `PlayerCard.tsx` gains the link, rendered only when a callback is

@@ -78,7 +78,8 @@ export function GameImport({ roster, stats, onSaved }: Props) {
     <>
       <p className="hint">
         On Hudl’s Game Stats page, pick the game, then select from the “Offense” heading down
-        through “Special Teams” and copy. Both teams come along; only Poland’s tables are kept.
+        through “Special Teams” and copy. Both teams come along; only your team’s tables are
+        kept — Hudl prints them first.
       </p>
 
       <label className="label" htmlFor="game-opponent">
