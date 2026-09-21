@@ -4,7 +4,7 @@ import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import type { StatsStore } from '../stats/statsStore';
 import { formatHeight, formatWeight, fullName, SIDE_LABEL, type Player } from '../types';
 
-type Props = { player: Player; onBack?: () => void; stats?: StatsStore };
+type Props = { player: Player; onBack?: () => void; stats?: StatsStore; onWeekByWeek?: () => void };
 
 type Stat = { label: string; value: string };
 
@@ -51,7 +51,7 @@ const headlineFirst = (lines: Stat[], position: string): Stat[] => {
 const HEADLINE_COUNT = 4;
 
 /** The answer to "who is #7" — sized to be read at arm's length in the stands. */
-export function PlayerCard({ player, onBack, stats }: Props) {
+export function PlayerCard({ player, onBack, stats, onWeekByWeek }: Props) {
   const meta = [
     player.position,
     player.side ? SIDE_LABEL[player.side] : '',
@@ -158,6 +158,14 @@ export function PlayerCard({ player, onBack, stats }: Props) {
         previousLabel={stats?.previous?.label ?? 'Last season'}
         currentLabel={stats?.current?.label ?? 'This season'}
       />
+
+      {onWeekByWeek && (current || previous) && (
+        <p className="filter-line">
+          <button type="button" className="link-btn" onClick={onWeekByWeek}>
+            Week by week
+          </button>
+        </p>
+      )}
     </div>
   );
 }

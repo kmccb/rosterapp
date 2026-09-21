@@ -3,6 +3,7 @@ import { Keypad } from '../components/Keypad';
 import { PlayerCard } from '../components/PlayerCard';
 import { PlayerRow } from '../components/PlayerRow';
 import { numberKey, numberMatches } from '../parse/rosterParse';
+import { playerKey } from '../stats/statsMatch';
 import type { StatsStore } from '../stats/statsStore';
 import { bakedTeam } from '../theme/theme';
 import type { Player, Roster } from '../types';
@@ -37,9 +38,10 @@ type Props = {
   baked?: boolean;
   restoring?: boolean;
   stats?: StatsStore;
+  onWeekByWeek?: (key: string) => void;
 };
 
-export function Lookup({ roster, onGoToCode, restoring = false, baked = false, stats }: Props) {
+export function Lookup({ roster, onGoToCode, restoring = false, baked = false, stats, onWeekByWeek }: Props) {
   const [query, setQuery] = useState('');
   const [pinned, setPinned] = useState<Player | null>(null);
   const school = bakedTeam()?.school || roster.teamName || 'team';
@@ -134,6 +136,7 @@ export function Lookup({ roster, onGoToCode, restoring = false, baked = false, s
             player={featured}
             onBack={pinned && matches.length > 1 ? () => setPinned(null) : undefined}
             stats={stats}
+            onWeekByWeek={onWeekByWeek ? () => onWeekByWeek(playerKey(featured)) : undefined}
           />
         ) : query ? (
           matches.length > 0 ? (

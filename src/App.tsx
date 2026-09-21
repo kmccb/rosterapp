@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchShared,
   forgetSource,
@@ -26,6 +26,7 @@ import { RosterList } from './screens/RosterList';
 import { Schedule } from './screens/Schedule';
 import { SeasonStats } from './screens/SeasonStats';
 import { Settings } from './screens/Settings';
+import { TeamStats } from './screens/TeamStats';
 import { clearRoster, loadRoster, saveRoster } from './storage';
 import { emptyRoster, type Player, type Roster } from './types';
 
@@ -38,7 +39,8 @@ type Tab =
   | 'code'
   | 'roster'
   | 'settings'
-  | 'stats';
+  | 'stats'
+  | 'teamStats';
 
 /*
  * Only the two screens a spectator uses are on the tab bar. Setting a roster up
@@ -91,6 +93,27 @@ export default function App() {
   /** A code from a share link that needs reviewing before it replaces anything. */
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsStore>(() => loadStats());
+
+  // Which player's weeks the Stats tab has open; the card's link sets it from another tab.
+  const [statsPlayer, setStatsPlayer] = useState<string | null>(null);
+
+  // The tab exists only once something has been pasted for this season, and never
+  // beside a baked Stats tab (YSU's), which would put two "Stats" on one bar.
+  const hasTeamStats =
+    !bakedTeam()?.seasons &&
+    Boolean(stats.current) &&
+    ((stats.current?.games?.length ?? 0) > 0 || Object.keys(stats.current?.byPlayer ?? {}).length > 0);
+
+  const tabs = useMemo(() => {
+    if (!hasTeamStats) return TABS;
+    const entry = { id: 'teamStats' as Tab, label: 'Stats' };
+    const at = TABS.findIndex((t) => t.id === 'league');
+    return at === -1 ? [...TABS, entry] : [...TABS.slice(0, at), entry, ...TABS.slice(at)];
+  }, [hasTeamStats]);
+
+  useEffect(() => {
+    if (tab === 'teamStats' && !hasTeamStats) setTab('lookup');
+  }, [tab, hasTeamStats]);
   const [theme, setTheme] = useState<Theme | null>(() => initialTheme());
 
   // Paint the team's colours on before anything renders in the default ones.
@@ -337,7 +360,7 @@ export default function App() {
           {roster.teamName || bakedTeam()?.name || 'Roster Lookup'}
         </h1>
         <nav className="tabs" aria-label="Sections">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
@@ -359,9 +382,16 @@ export default function App() {
             baked={BAKED_ROSTER}
             restoring={restoring}
             stats={stats}
+            onWeekByWeek={hasTeamStats ? (key) => { setStatsPlayer(key); setTab('teamStats'); } : undefined}
           />
         )}
-        {tab === 'team' && <RosterList roster={roster} stats={stats} />}
+        {tab === 'team' && (
+          <RosterList
+            roster={roster}
+            stats={stats}
+            onWeekByWeek={hasTeamStats ? (key) => { setStatsPlayer(key); setTab('teamStats'); } : undefined}
+          />
+        )}
         {tab === 'code' && (
           <CodeEntry
             initialCode={pendingCode ?? undefined}
@@ -380,6 +410,9 @@ export default function App() {
         {tab === 'schedule' && <Schedule base={teamBase()} />}
         {tab === 'seasons' && <SeasonStats base={teamBase()} />}
         {tab === 'league' && <League base={teamBase()} />}
+        {tab === 'teamStats' && (
+          <TeamStats roster={roster} stats={stats} player={statsPlayer} onPlayer={setStatsPlayer} />
+        )}
         {tab === 'roster' && (
           <Import
             roster={roster}
