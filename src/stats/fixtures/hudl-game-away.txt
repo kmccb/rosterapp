@@ -1,0 +1,67 @@
+Offense
+Passing	Comp/Att	Yds	TD	Int	Long	2PT
+#1 D. Xipolitas	3/6	33	-	-	12	-
+#10 A. Sattarelle	0/1	-	-	-	-	-
+Rushing	Att	Yds	TD	Long	Fum	2PT
+#5 C. Jones	26	163	1	51	-	-
+#1 D. Xipolitas	14	123	1	59	-	-
+#10 A. Sattarelle	6	21	1	10	-	-
+Receiving	Rec	Yds	TD	Long	Fum	2PT
+#21 N. Nittoli	2	21	-	12	-	-
+#8 G. Seifert	1	12	-	12	-	-
+Passing	Comp/Att	Yds	TD	Int	Long	2PT
+Rest of team	7/9	105	1	-	51	-
+Rushing	Att	Yds	TD	Long	Fum	2PT
+#35	4	22	-	13	-	-
+#13 J. Pannunzio	3	7	1	4	-	-
+Rest of team	9	50	-	13	-	-
+Receiving	Rec	Yds	TD	Long	Fum	2PT
+#19	1	51	1	51	-	-
+#35	2	14	-	10	-	-
+Rest of team	4	40	-	15	-	-
+Defense
+	Tk	Ast	Sck	TFL	Sfty	Int	Fum	Blks	TD
+#5 C. Jones	10	4	-	-	-	-	-	-	-
+#28 P. Zoumis	6	4	-	-	-	-	-	-	-
+#14 B. Gensler	5	1	-	-	-	-	-	-	-
+#8 G. Seifert	4	-	-	1	-	-	-	-	-
+#53 G. Shaffer	3	-	-	-	-	-	-	-	-
+#12 C. Scott	2	-	-	-	-	-	-	-	-
+#20 A. Perry	2	-	-	-	-	-	-	-	-
+#80 M. Purins	2	-	2	-	-	-	-	-	-
+#1 D. Xipolitas	1	-	-	-	-	-	-	-	-
+#21 N. Nittoli	1	-	-	-	-	-	1	-	-
+#10 A. Sattarelle	1	2	-	-	-	1	-	-	-
+#71 N. Minehart	-	1	-	-	-	-	-	-	-
+	Tk	Ast	Sck	TFL	Sfty	Int	Fum	Blks	TD
+#35	1	-	-	-	-	-	-	-	-
+#4	1	-	-	-	-	-	-	-	-
+#83	1	-	-	-	-	-	-	-	-
+#66	1	-	-	-	-	-	-	-	-
+#56	1	-	-	-	-	-	-	-	-
+#23	1	-	-	-	-	-	-	-	-
+#1	1	-	-	-	-	-	-	-	-
+#36 L. Hash	-	1	-	-	-	-	-	-	-
+Rest of team	20	3	-	3	-	-	-	-	-
+Special Teams
+Kickoff Returns	Ret	Avg	TD	Long
+#5 C. Jones	1	25	-	25
+Punt Returns	Ret	Avg	TD	Long
+#21 N. Nittoli	1	3	-	3
+Kicking	FG	%	PAT	Pts
+#81 S. (Salvi) Carramusa	1	100.0 %	3	6
+Kickoff	Num	Yrds	Long	TB
+#81 S. (Salvi) Carramusa	5	280	60	3
+Punting	Num	Avg	In 20	Long
+#1 D. Xipolitas	1	25	1	25
+Kickoff Returns	Ret	Avg	TD	Long
+Rest of team	2	7	-	14
+Punt Returns	Ret	Avg	TD	Long
+No Punt Returns
+Kicking	FG	%	PAT	Pts
+#21 L. Goodrich	-	-	2	2
+Rest of team	-	-	0	-
+Kickoff	Num	Yrds	Long	TB
+#21 L. Goodrich	2	115	60	1
+Punting	Num	Avg	In 20	Long
+#21 L. Goodrich	2	35	-	37
