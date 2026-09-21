@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { seasonTotals } from '../stats/seasonTotals';
 import { categoriesAcross, summarise } from '../stats/statsFormat';
 import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import type { StatsStore } from '../stats/statsStore';
@@ -61,8 +62,9 @@ export function PlayerCard({ player, onBack, stats, onWeekByWeek }: Props) {
   const body = [formatHeight(player.heightIn), formatWeight(player.weightLb)].filter(Boolean);
 
   const key = playerKey(player);
-  const previous = stats?.previous?.byPlayer[key];
-  const current = stats?.current?.byPlayer[key];
+  // Games win when a season has any pasted; the whole-season paste stands otherwise.
+  const previous = seasonTotals(stats?.previous)[key];
+  const current = seasonTotals(stats?.current)[key];
 
   /*
    * With stats to show, the number stops being the headline and becomes a
