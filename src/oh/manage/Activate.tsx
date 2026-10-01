@@ -107,6 +107,36 @@ export function scheduleArg(rows: ScheduleRow[], cleared: boolean): ScheduleRow[
 }
 
 /**
+ * The roster half of the save, with a linked source folded in: once a Google
+ * Sheet owns the roster its paste box is hidden, but `pasted` and `players`
+ * are still state — a paste from before the link, or one left over from an
+ * aborted edit, would otherwise ride along on the next Save and silently
+ * overwrite whatever the sheet last synced. A linked roster always keeps
+ * what's stored, the same null the renewal case already relies on.
+ */
+export function rosterSaveArg(players: Player[], linked: boolean): Player[] | null {
+  if (linked) return null;
+  return players.length ? players : null;
+}
+
+/**
+ * scheduleArg's twin for a linked calendar: the schedule section is hidden
+ * while a calendar owns it, but `scheduleCleared` can still be stuck true
+ * from a "Remove schedule" click made before the link, and `schedParsed`
+ * from a paste typed before it. Either would otherwise reach upsertRoster as
+ * `[]` — which the database reads as "wipe" — and erase what the calendar
+ * just synced. Linked always keeps what's stored.
+ */
+export function scheduleSaveArg(
+  rows: ScheduleRow[],
+  cleared: boolean,
+  linked: boolean,
+): ScheduleRow[] | [] | null {
+  if (linked) return null;
+  return scheduleArg(rows, cleared);
+}
+
+/**
  * The conference half of the contract. A league is an object, so it follows
  * themeArg's shape rather than scheduleArg's: a filled form sends the
  * conference, a cleared one sends {} (wipe the stored one), and neither sends
@@ -253,10 +283,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         slug,
         sport: effectiveSport,
         season: existing?.season ?? currentSeasonYear(),
-        players: players.length ? players : null,
+        players: rosterSaveArg(players, linked.roster),
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
-        schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
+        schedule: scheduleSaveArg(schedParsed?.rows ?? [], scheduleCleared, linked.schedule),
         // Gated on the same sport the section is, or a seller who fills the
         // conference in and then switches the Sport select on a new row
         // stores a league nothing will ever render — the fan side draws it
@@ -334,7 +364,16 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                     const file = e.target.files?.[0];
                     // Read into the paste box, so a file gets the same review
                     // table as a paste before anything is saved.
-                    if (file) file.text().then((t) => setPasted(stripBom(t)));
+                    if (file) {
+                      file
+                        .text()
+                        .then((t) => setPasted(stripBom(t)))
+                        .catch((err: Error) => setError(friendlyError(err)));
+                    }
+                    // Clear the input so picking the same file again (after
+                    // fixing it and re-exporting under the same name) fires
+                    // onChange a second time instead of staying silent.
+                    e.target.value = '';
                   }}
                 />
               </label>
@@ -471,7 +510,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
 
           {existing && <Sources row={existing} onLinked={setLinked} />}
           {!existing && (
-            <p className="fixture-sub">Save first — a Google Sheet or calendar can be linked once the activation exists.</p>
+            <p className="fixture-sub">
+              Save first — a Google Sheet{effectiveSport !== 'football' && ' or calendar'} can be linked once the
+              activation exists.
+            </p>
           )}
 
           {/* Football only, for now. The standings are folded out of the

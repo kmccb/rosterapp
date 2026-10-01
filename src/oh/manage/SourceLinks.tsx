@@ -54,6 +54,10 @@ export function Sources({
   return (
     <>
       <SourceBlock
+        // Remounts across a link/unlink: otherwise the input's leftover url,
+        // the stale Check-link preview, and an enabled "Link this …" button
+        // from the old session would sit in front of the fresh paste box.
+        key={links.roster ? 'linked' : 'unlinked'}
         kind="roster"
         sport={row.sport}
         season={row.season}
@@ -69,6 +73,7 @@ export function Sources({
       />
       {row.sport !== 'football' && (
         <SourceBlock
+          key={links.schedule ? 'linked' : 'unlinked'}
           kind="schedule"
           sport={row.sport}
           season={row.season}
