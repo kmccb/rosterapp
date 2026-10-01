@@ -77,7 +77,7 @@ New columns on `school_roster`, never returned by `school_roster_fetch`:
 New functions, same posture as 0004–0007 (security definer, `search_path` pinned, errcode'd
 sentence-voice raises):
 
-- `school_roster_set_sources(p_slug, p_sport, p_roster_url, p_schedule_url, p_schedule_filter)` —
+- `school_roster_set_sources(p_slug, p_sport, p_season, p_roster_url, p_schedule_url, p_schedule_filter)` —
   `school_admin()` only. Null means unlink. Roster links must match
   `^https://docs\.google\.com/spreadsheets/`; calendar links must be `https://` (a `webcal://`
   link is rewritten to `https://` by the panel before saving). Football rows refuse a calendar.
@@ -85,7 +85,7 @@ sentence-voice raises):
 - `school_roster_sync_targets()` — returns `slug, sport, roster_source_url, schedule_source_url,
   schedule_source_filter, sync_state, player_count, has_schedule` for every row with a link.
   Granted to `service_role` only.
-- `school_roster_sync_apply(p_slug, p_sport, p_players, p_schedule, p_sync_state)` — writes
+- `school_roster_sync_apply(p_slug, p_sport, p_season, p_players, p_schedule, p_sync_state)` — writes
   `players` (when `p_players` is not null), `schedule` (when `p_schedule` is not null), and
   `sync_state`, and nothing else. Runs `school_roster_check_players` on players. Granted to
   `service_role` only.
@@ -121,29 +121,38 @@ Two more entry points on the same function, called from the panel with the admin
 Both verify the caller is the admin by calling an admin-only function with the caller's JWT
 before doing anything.
 
-All parsing and checking is pure code under `src/`, pinned by tests. The function is a thin
-Deno wrapper. **The plan settles first** whether `supabase functions deploy` bundles relative
-imports from `src/`; if not, a script copies the pure modules into
-`supabase/functions/_shared/` and a test fails if the copies drift from `src/`.
+All parsing and checking is pure code under `src/sync/`, pinned by tests. The function is a thin
+Deno wrapper. Deno cannot resolve this repo's extensionless imports, so `src/sync/core.ts` is
+bundled by Vite (library mode, `vite.sync.config.ts`) into one committed file,
+`supabase/functions/sync-sources/lib/core.js`, and a test rebuilds it in memory and fails if
+the committed copy is stale.
+
+The function is deployed with `--no-verify-jwt` and does its own auth, so it works whichever
+kind of Supabase API key the project uses: the cron call carries an `x-cron-secret` header
+matching a function secret; a panel call carries the seller's session, which the function proves
+by calling a new `school_admin_check()` with it.
+
+Every function that names a row takes `p_season` too — the table's key is
+`(school_slug, sport, season)`.
 
 ### Rosters: CSV and Sheets
 
-- `src/parse/csv.ts` — a real CSV splitter: quoted fields, `""` escapes, commas and newlines
-  inside quotes, a leading BOM, CRLF. (`splitLine` in `rosterParse.ts` does not handle quotes, so
-  `"Smith, Jr."` would split today.) Its rows feed the existing column detection in
-  `parseRoster`, so a sheet is read the way a paste is.
-- `src/oh/rosterCheck.ts` — `checkRoster(result, previousCount) → {ok, players, warnings} |
-  {ok: false, reason}`. **Refused:** no players; a duplicate jersey number (`numberKey`); a row
-  without both number and name; more than 300 rows; or, on automatic sync only, fewer than half
-  of `previousCount` (a cleared sheet or the wrong tab published). **Warned, not refused:** an
-  unreadable optional field (height, weight, grade, position) is dropped for that player and
-  listed.
-- **CSV file** in the panel is a one-time import: file → `csv.ts` → the existing review table →
+- **No new CSV splitter.** `parseRoster` already splits comma rows with a quote-aware splitter
+  (`splitQuoted`), so `"Smith, Jr."` survives. What a sheet export adds is a leading BOM, empty
+  `,,,,` rows and a title row above the header; `checkRoster` strips those before parsing. A
+  newline inside a quoted cell is not supported (a roster has none).
+- `src/sync/rosterCheck.ts` — `checkRoster(text, previousCount) → {ok, players, warnings} |
+  {ok: false, reason}`. **Refused:** no players; a row without both number and name; more than
+  300 rows; or fewer than half of `previousCount` when there was one (a cleared sheet or the
+  wrong tab published). **Warned, not refused:** a duplicate jersey number — `Player` allows it
+  on purpose (two players can share a number) — and an unreadable optional field (height,
+  weight), which is dropped for that player. Warnings show in Check link; they never email.
+- **CSV file** in the panel is a one-time import: file → BOM stripped → the paste box → the existing review table →
   save through `school_roster_upsert` as a paste is saved today. Only the Sheet syncs.
 
 ### Schedules: calendars
 
-- `src/oh/icalSchedule.ts` — `calendarToSchedule(text, {filter, seasonYear, schoolName}) →
+- `src/sync/calendar.ts` — `calendarToSchedule(text, {filter, seasonYear, schoolName}) →
   {ok, rows, skipped} | {ok: false, reason}`. Reuses `src/schedule/icalParse.ts`'s unfolding and
   date handling where it fits. Per event: date and start time in Eastern; "vs X" → home, "at X" /
   "@ X" → away; opponent tidied with `tidyOpponent`. The filter is applied first, against
@@ -160,18 +169,22 @@ imports from `src/`; if not, a script copies the pure modules into
 
 ## 5. Alerts
 
-- `src/oh/syncAlert.ts` — pure: `nextState(prev: SyncState, result, now) → {state, email: null |
+- `src/sync/alert.ts` — pure: `nextState(prev: SyncState, result, now) → {state, email: null |
   'problem' | 'recovered'}`. Email on the first failure; email again only if the reason changes;
   email on recovery; nothing while the same problem persists.
 - Sent through Resend (free tier) from `alerts@scottforge.ai` (Resend's DNS records added once
   to the Cloudflare zone). The API key and the seller's address are Edge Function secrets, never
   in the repo.
-- Problem email: *“Springfield volleyball roster: sync refused — two players are #12. Fans still
-  see the roster from 4:15 PM.”* plus a link to `/oh/?manage`. Recovery: *“Springfield
+- Problem email: *“springfield-new-middletown volleyball roster: sync refused — a row is missing
+  a number or a name. Fans still see the roster from Sep 30, 4:15 PM.”* plus a link to
+  `/oh/?manage`. Recovery: *“Springfield
   volleyball roster is syncing again.”*
 - A failed email send is logged and does not mark `alerted`, so the next run tries again.
 
 ## Panel
+
+Sources are set on a saved activation (the functions need the row to exist). A sheet-first
+activation is: save it unpublished, link the sheet, publish once it has synced.
 
 - **Roster, per sport:** Paste | CSV file | Google Sheet. Choosing Sheet takes the published-CSV
   link and offers **Check link** (the dry run, shown in the existing review table, or the
@@ -179,7 +192,7 @@ imports from `src/`; if not, a script copies the pure modules into
   read-only roster, “From Google Sheet · synced 6 min ago”, **Sync now**, **Unlink**.
 - **Schedule, non-football sports:** Paste | Calendar link (+ optional filter), same
   Check / Link / Sync now / Unlink flow.
-- **School list:** a marker per row with an open problem, e.g. “⚠ Volleyball roster: two #12s,
+- **School list:** a marker per row with an open problem, e.g. “⚠ Volleyball roster: a row is missing a number or a name,
   since Tue 6:40 PM”.
 - A short how-to under the Sheet field: File → Share → Publish to web → the roster tab → CSV.
 
@@ -187,12 +200,12 @@ imports from `src/`; if not, a script copies the pure modules into
 
 Env-free, `./supa` mocked, as always.
 
-- `csv.ts`: quotes, embedded commas and newlines, BOM, CRLF, a saved real published-sheet CSV.
-- `rosterCheck.ts`: each refusal and each warning.
-- `icalSchedule.ts`: the ScheduleStar and Eventlink fixtures (filter on and off), cancelled
+- `rosterCheck.ts`: BOM, blank `,,,,` rows, a title row, quoted `"Smith, Jr."`, a saved published-sheet CSV.
+- `rosterCheck.ts`: each refusal and each warning (duplicates warn, never refuse).
+- `calendar.ts`: the ScheduleStar and Eventlink fixtures (filter on and off), cancelled
   events, the school-year window, home/away, the half-unreadable refusal; Springfield's capture
   once it exists.
-- `syncAlert.ts`: every transition, including a failed send.
+- `alert.ts`: every transition, including a failed send.
 - `?school=`: known slug chooses and renders; unknown slug shows the directory.
 - Panel helpers: the set-sources arguments, read-only while linked.
 - `scripts/verify-school-roster.mjs`: anon cannot call `set_sources`, `sync_targets` or
