@@ -1,3 +1,4 @@
+
 import { emailFor, nextSide, stamp } from './alert';
 import type { SideState } from './types';
 
@@ -31,7 +32,7 @@ describe('nextSide', () => {
     expect(nextSide(failing, { kind: 'problem', reason: 'r' }, T2)).toEqual({ state: failing, email: null });
   });
 
-  it('tries again when the last email didn\'t go out', () => {
+  it('tries again when the last email didn’t go out', () => {
     const unsent: SideState = { ...healthy, problem: 'r', problem_since: T1, alerted: false };
     expect(nextSide(unsent, { kind: 'problem', reason: 'r' }, T2).email).toEqual({ kind: 'problem', reason: 'r' });
   });
@@ -63,10 +64,10 @@ describe('emailFor', () => {
 
   it('says what was refused and what fans still see', () => {
     const state: SideState = { ...healthy, problem: 'r', problem_since: T1 };
-    expect(emailFor(t, 'roster', { kind: 'problem', reason: 'a row is missing a number or a name ("Mia")' }, state)).toEqual({
+    expect(emailFor(t, 'roster', { kind: 'problem', reason: 'a row is missing a number or a name (“Mia”)' }, state)).toEqual({
       subject: 'Sync refused: springfield-new-middletown volleyball roster',
       text:
-        'springfield-new-middletown volleyball roster: sync refused — a row is missing a number or a name ("Mia").\n\n' +
+        'springfield-new-middletown volleyball roster: sync refused — a row is missing a number or a name (“Mia”).\n\n' +
         'Fans still see the roster from Sep 30, 4:15 PM.\n\n' +
         'https://roster.scottforge.ai/oh/?manage',
     });
@@ -86,3 +87,4 @@ describe('emailFor', () => {
     });
   });
 });
+
