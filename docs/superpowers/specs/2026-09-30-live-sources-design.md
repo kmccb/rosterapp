@@ -85,10 +85,12 @@ sentence-voice raises):
 - `school_roster_sync_targets()` — returns `slug, sport, roster_source_url, schedule_source_url,
   schedule_source_filter, sync_state, player_count, has_schedule` for every row with a link.
   Granted to `service_role` only.
-- `school_roster_sync_apply(p_slug, p_sport, p_season, p_players, p_schedule, p_sync_state)` — writes
-  `players` (when `p_players` is not null), `schedule` (when `p_schedule` is not null), and
-  `sync_state`, and nothing else. Runs `school_roster_check_players` on players. Granted to
-  `service_role` only.
+- `school_roster_sync_apply(p_slug, p_sport, p_season, p_roster_url, p_schedule_url,
+  p_schedule_filter, p_players, p_schedule, p_sync_state)` — the three links are the ones the job
+  read. Each half (`players` + `sync_state.roster`; `schedule` + `sync_state.schedule`) lands only
+  if its stored link still equals what the job read, so a run in flight can't undo a link the
+  seller just changed or removed. `sync_state` is merged per side, never replaced. Writes nothing
+  else. Runs `school_roster_check_players` on players. Granted to `service_role` only.
 - `school_roster_list` additionally returns `roster_source_url`, `schedule_source_url`,
   `schedule_source_filter` and `sync_state` (admin-only already). It returns `setof jsonb`, so
   the new keys go in its `jsonb_build_object` and its signature does not move.
