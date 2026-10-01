@@ -74,6 +74,9 @@ async function fetchText(url: string) {
       headers: { 'User-Agent': 'roster.scottforge.ai sync' },
     });
     if (!res.ok) return { ok: false as const, reason: `HTTP ${res.status}` };
+    // A redirect can hop from an https link to a plain http one; the scheme
+    // check up front only covers the URL we were given, not where it ended up.
+    if (!/^https:\/\//i.test(res.url)) return { ok: false as const, reason: 'redirected to a non-https address' };
     const reader = res.body?.getReader();
     if (!reader) return { ok: false as const, reason: 'an empty answer' };
     const chunks: Uint8Array[] = [];
@@ -112,40 +115,75 @@ async function sendEmail(subject: string, text: string): Promise<boolean> {
     console.log('email not configured; would have sent:', subject);
     return false;
   }
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: ALERT_FROM, to: [ALERT_TO], subject, text }),
-  });
-  if (!res.ok) console.error('resend', res.status, await res.text());
-  return res.ok;
+  // A network failure to Resend must not throw out of this function: a
+  // caller that fires it mid-runOne (after the state is already saved) would
+  // otherwise lose the write it just made, over an email that's allowed to
+  // just not go out this run.
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: ALERT_FROM, to: [ALERT_TO], subject, text }),
+    });
+    if (!res.ok) console.error('resend', res.status, await res.text());
+    return res.ok;
+  } catch (e) {
+    console.error('resend request failed', e);
+    return false;
+  }
 }
 
 async function runOne(t: any) {
   const result = await syncTarget(t, fetchText, new Date().toISOString());
+  const links = {
+    p_slug: t.slug,
+    p_sport: t.sport,
+    p_season: t.season,
+    // The links this run read. The database drops either half if the
+    // seller changed or unlinked it while the run was in flight.
+    p_roster_url: t.roster_source_url,
+    p_schedule_url: t.schedule_source_url,
+    p_schedule_filter: t.schedule_source_filter,
+  };
+
+  // Write before we alert: result.state here already has alerted: false for
+  // every pending problem (that's what makes it pending — emailFor/nextSide
+  // only emit a "problem" email when the prior alerted was false). If this
+  // apply throws, nothing has been emailed yet and the caller's catch takes
+  // over — a refused write never fires an email for data that was never
+  // actually saved.
+  await rpc(
+    'school_roster_sync_apply',
+    { ...links, p_players: result.players, p_schedule: result.schedule, p_sync_state: result.state },
+    serviceHeaders(),
+  );
+
+  const alertedSides: Array<'roster' | 'schedule'> = [];
   for (const { side, email } of result.emails) {
     const sideState = result.state[side as 'roster' | 'schedule']!;
     const { subject, text } = emailFor(t, side, email, sideState);
     const sent = await sendEmail(subject, text);
-    if (sent && email.kind === 'problem') result.state[side as 'roster' | 'schedule'] = { ...sideState, alerted: true };
+    if (sent && email.kind === 'problem') {
+      result.state[side as 'roster' | 'schedule'] = { ...sideState, alerted: true };
+      alertedSides.push(side as 'roster' | 'schedule');
+    }
   }
-  await rpc(
-    'school_roster_sync_apply',
-    {
-      p_slug: t.slug,
-      p_sport: t.sport,
-      p_season: t.season,
-      // The links this run read. The database drops either half if the
-      // seller changed or unlinked it while the run was in flight.
-      p_roster_url: t.roster_source_url,
-      p_schedule_url: t.schedule_source_url,
-      p_schedule_filter: t.schedule_source_filter,
-      p_players: result.players,
-      p_schedule: result.schedule,
-      p_sync_state: result.state,
-    },
-    serviceHeaders(),
-  );
+
+  // A second, data-free write just to record which problem emails actually
+  // went out — p_players/p_schedule null leave players and schedule alone
+  // (0008's sync_apply only touches a side when its payload is non-null),
+  // and sync_state merges per matching side, so this can't disturb the side
+  // that didn't just get an email. Without it, a run that emailed fine would
+  // still re-email the same problem every fifteen minutes, since the only
+  // place "alerted" gets set to true was never written back.
+  if (alertedSides.length > 0) {
+    await rpc(
+      'school_roster_sync_apply',
+      { ...links, p_players: null, p_schedule: null, p_sync_state: result.state },
+      serviceHeaders(),
+    );
+  }
+
   return result.state;
 }
 
@@ -178,20 +216,27 @@ Deno.serve(async (req) => {
 
   if (body.action === 'check') {
     if (body.kind !== 'roster' && body.kind !== 'schedule') return json({ error: 'kind must be roster or schedule' }, 400, origin);
-    const preview = await previewSource(
-      { kind: body.kind, url: String(body.url ?? ''), filter: body.filter ?? null, season: Number(body.season) },
-      fetchText,
-    );
-    return json(preview, 200, origin);
+    try {
+      const preview = await previewSource(
+        { kind: body.kind, url: String(body.url ?? ''), filter: body.filter ?? null, season: Number(body.season) },
+        fetchText,
+      );
+      return json(preview, 200, origin);
+    } catch (e) {
+      return json({ error: `The check failed: ${(e as Error).message}` }, 500, origin);
+    }
   }
 
   if (body.action === 'sync') {
-    const targets = (await rpc('school_roster_sync_targets', {}, serviceHeaders())) ?? [];
-    const t = targets.find(
-      (x: any) => x.slug === body.slug && x.sport === body.sport && x.season === Number(body.season),
-    );
-    if (!t) return json({ error: 'That activation has no linked sheet or calendar.' }, 404, origin);
+    // Wraps the targets lookup too, not just runOne: a thrown error from
+    // either one must still come back as json({error}) with CORS headers,
+    // or the panel sees an opaque failed fetch instead of a message.
     try {
+      const targets = (await rpc('school_roster_sync_targets', {}, serviceHeaders())) ?? [];
+      const t = targets.find(
+        (x: any) => x.slug === body.slug && x.sport === body.sport && x.season === Number(body.season),
+      );
+      if (!t) return json({ error: 'That activation has no linked sheet or calendar.' }, 404, origin);
       return json({ state: await runOne(t) }, 200, origin);
     } catch (e) {
       return json({ error: `The database refused the sync: ${(e as Error).message}` }, 500, origin);
