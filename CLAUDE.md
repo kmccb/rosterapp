@@ -51,26 +51,43 @@ not a config bug — wait for the next cron. Consequences:
   → triggers deploy. `refresh.yml` (every 6h) POSTs a Cloudflare deploy hook (`CF_PAGES_DEPLOY_HOOK`
   secret) — a rebuild of the same commit that re-fetches Poland's schedule/league/weather.
   All deploys are **fail-closed** behind the guard.
+- **Linked sheets and calendars** (new in 0008) — a roster can come from a coach's Google Sheet
+  and a non-football schedule from a calendar, instead of a one-time paste. The `sync-sources`
+  Edge Function runs every 15 minutes via pg_cron, reading pure code in `src/sync/` that
+  `npm run build:sync` bundles into a committed `supabase/functions/sync-sources/lib/core.js`
+  (a test fails if that file goes stale). A refused sync writes nothing — fans never see a
+  broken sheet — and the seller is alerted by Resend.
 
-## Supabase (migrations 0001–0006 APPLIED in production; 0007 WRITTEN, NOT applied)
+## Short addresses
+
+`public/_redirects` holds the printed-QR-code addresses (`/oh/<short-name>`, both slash forms).
+Every one lives under `/oh/`, because Poland's service worker answers any other path with
+Poland's own page — a short address outside that prefix would never reach the directory at all.
+
+## Supabase (migrations 0001–0007 APPLIED in production; 0008 WRITTEN, NOT applied)
 
 - Posture everywhere: RLS on with **zero policies**, table grants revoked, access only via
   security-definer functions, `search_path` pinned, errcode'd raises in sentence voice.
 - **Share codes** (`shared_roster`, 0001–0003): coach publishes → code + edit token. Serves
   the root app. Untouchable.
-- **Paid tier** (`school_roster`, `school_account`, 0004–0007): admin-only writes
+- **Paid tier** (`school_roster`, `school_account`, 0004–0008): admin-only writes
   (`school_admin()` checks `is_admin`), public reads only via `school_roster_fetch(slug, sport)`
   gated on `published AND paid_through >= today` (Eastern). Renewal contract: `p_players`/`p_theme`/
   `p_schedule`/`p_league` **null = keep stored, `'{}'`/`'[]'` = clear (theme/schedule/league),
-  object/array = set**; `p_colors` has NO keep — always send it. `school_roster_upsert` is 11
-  params now (`p_league` is the 8th). `school_roster_sports(slug)` (0007, written, NOT yet
-  applied to production) no longer answers a bare array — it answers the school's identity,
+  object/array = set**; `p_colors` has NO keep — always send it. `school_roster_upsert` is still
+  11 params (`p_league` is the 8th). `school_roster_sports(slug)` answers the school's identity,
   `{sports, colors, theme}`, choosing colors and crest per-field from the best published-and-paid
   row (football preferred, then most recently updated), so a crest uploaded on any sport paints
-  the whole school, hub included. The `league jsonb` column (also 0007) carries
-  `{name, members: [slug, …]}`, the conference the seller typed in at activation — the one fact a
-  conference table can't get from the directory. Still five `school_*` grants: fetch, sports,
-  upsert, delete, list — only upsert's signature moved.
+  the whole school, hub included. The `league jsonb` column carries `{name, members: [slug, …]}`,
+  the conference the seller typed in at activation — the one fact a conference table can't get
+  from the directory. **0008** (written, not applied) adds `roster_source_url`,
+  `schedule_source_url`, `schedule_source_filter`, and `sync_state` to `school_roster`, plus four
+  functions: `school_admin_check` and `school_roster_set_sources` (authenticated, admin-only —
+  the panel's Link/Unlink), and `school_roster_sync_targets`/`school_roster_sync_apply`
+  (service_role only — the sync job's read and its one write). It's additive only: the upsert
+  signature doesn't move, so unlike 0005–0007 there's no window where the panel's saves break.
+  Seven `school_*` grants to authenticated/anon now (fetch, sports, upsert, delete, list,
+  admin_check, set_sources) plus two to service_role (sync_targets, sync_apply).
 - **Migration conventions:** new numbered file; schema-wide
   `revoke execute on all functions` then **re-grant every live function by exact signature**
   (a miss silently kills a live feature); signature changes drop BOTH old and new signatures
@@ -78,13 +95,14 @@ not a config bug — wait for the next cron. Consequences:
   `notify pgrst, 'reload schema'`. Applied by hand in the dashboard SQL editor.
 - **Signature-changing migrations have a deploy ordering** (see `docs/going-live.md`):
   push → deploy green → apply migration. The panel's saves break in the window; fan pages never do.
-- Verify with `node scripts/verify-school-roster.mjs` (7 checks, needs `.env.local`). Since 0007
-  the sports check expects the identity object, so it fails against a database that only has 0006
-  applied — that's the runbook telling the truth, not a bug.
+- Verify with `node scripts/verify-school-roster.mjs` (11 checks, 12 with `VERIFY_SLUG` set in
+  `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
+  against a database that only has 0006 applied; the four 0008 door checks fail the same way
+  against a database that doesn't have 0008 yet — that's the runbook telling the truth, not a bug.
 
 ## Tests and CI
 
-- `npx vitest run` — 489 tests / 32 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 580 tests / 42 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
@@ -98,13 +116,14 @@ not a config bug — wait for the next cron. Consequences:
 ## Ops documents
 
 - `docs/selling.md` — the seller's runbook (activate a school in ~3 min; price lives here).
-- `docs/going-live.md` — first-time checklist + v2 (crest/tabs), v3 (all-sports), and v4
-  (identity/league) verification, each with its own deploy ordering. **The original 17-item
-  0004 sweep has never been run end-to-end** — partial coverage exists (verify script 7/7,
-  share-code smoke, theme contract partially).
+- `docs/going-live.md` — first-time checklist + v2 (crest/tabs), v3 (all-sports), v4
+  (identity/league), and v5 (live sources) verification, each with its own deploy ordering (v5
+  has none — 0008 is additive). **The original 17-item 0004 sweep has never been run
+  end-to-end** — partial coverage exists (verify script, share-code smoke, theme contract
+  partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
-## Where things stand (2026-08-24, end of session)
+## Where things stand (2026-09-30, end of session)
 
 **Hosting moved 2026-09-11:** GitHub Pages → Cloudflare Pages, same domain (the `scottforge.ai`
 zone is on Cloudflare; `roster` is a proxied CNAME to `rosterapp-7zt.pages.dev`). Verified
@@ -112,28 +131,27 @@ byte-identical pages, service-worker update on an existing install, Supabase and
 the real domain. GitHub Pages retired; its repo *variables* are now dead config.
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
-(tabs, full theming, crest upload), the all-sports hub (0006), migration 0006 applied and
-verified, share-code system proven alive post-migrations, security script 7/7.
+(tabs, full theming, crest upload), the all-sports hub, identity and league (0004–0007 applied
+and verified), share-code system proven alive post-migrations, security script 7/7. The demo on
+`main` at `/oh/demo/` is the fictional `springfield-local-demo` — a `poland-demo` branch that put
+Poland itself on its real Eventlink calendar was explored but never merged.
 
-**Shipped, pending migration:** Poland parity for the paid `/oh/` page — the root app's shell
-(pinned header, scrolling body, keypad pinned to the bottom on Lookup, measured flush at
-375x812), Poland's Team-tab filters (search, All/Offense/Defense/Special, position chips, count
-+ Clear, reusing `src/roster/filters.ts`, degrading to a bare search box for sports with no
-positions), the school's colors and crest applied school-wide including the hub, a League tab on
-paid football pages with conference standings computed from the committed directory data (no
-scraping, no team-id mapping — just a member list typed in at activation), and kickoff weather on
-paid football pages fetched server-side into `public/oh/weather.json` for the slugs listed in
-`paid-schools.json`, using coordinates from `public/oh/geo.json` (716 of 717 schools;
-`coventry-coventry-twp` unplaceable). Migration 0007 (identity-shaped `school_roster_sports`, the
-`league` column, 11-param upsert) is written and tested but **not yet applied to production** —
-until it is, the League tab and school-wide crest/colors have no live data to draw on, and panel
-saves are broken in the push→apply window.
+**Shipped, pending migration:** live sources — a roster that stays current from a coach's Google
+Sheet, a non-football schedule that stays current from a calendar, the `sync-sources` Edge
+Function that checks both every 15 minutes and alerts the seller by Resend when one is refused,
+and the panel UI to link, check, and unlink them. Migration 0008 is written and tested but **not
+yet applied to production** — until it is, `school_roster_set_sources` and the sync job's two
+functions don't exist in the database, so the panel's Link/Check link/Sync now controls have
+nothing to call. Unlike 0005–0007, 0008 is additive only — the upsert signature doesn't move, so
+there's no deploy-ordering window where the panel's existing saves break.
 
 **Open items, in priority order:**
-1. **Apply migration 0007** — push → deploy green → apply in the dashboard SQL editor → apply
-   a second time (apply-twice gate) → `node scripts/verify-school-roster.mjs` (7 checks, and
-   expect the sports check to fail until 0007 is applied). Full ordering is in
-   docs/going-live.md's v4 section.
+1. **Apply migration 0008** — paste `supabase/migrations/0008_live_sources.sql` into the
+   dashboard SQL editor, run it, run it again (apply-twice gate), then
+   `node scripts/verify-school-roster.mjs` (expect 11 ok lines, 12 with `VERIFY_SLUG`). Then
+   stand up Resend, deploy the `sync-sources` function, and schedule it with
+   `supabase/cron/sync-sources.sql` — full ordering, including the rehearsal that has to happen
+   before any real school's sheet is linked, is in docs/going-live.md's v5 section.
 2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
    published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
    or replace with a real roster. The seller's admin session expires hourly — re-sign-in
@@ -149,8 +167,9 @@ saves are broken in the push→apply window.
 7. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
    member list from the panel); what's left is the **Region standings** tab, which needs the
    school→team-id mapping (blocked on ~90 team-page captures, deliberately deferred), and
-   multi-sport schedules for non-football sports beyond the concierge-pasted rows 0006 already
-   covers — a ScheduleStar uuid per sport would automate those later, same as football's.
+   multi-sport schedules for non-football sports beyond what live sources and the concierge-pasted
+   rows now cover — a ScheduleStar uuid per sport would automate the rest later, same as
+   football's.
 
 ## Conventions
 

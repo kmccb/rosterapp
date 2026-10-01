@@ -226,3 +226,76 @@ whose football row has neither, then load the school's hub. The crest and
 colors should be there. This is the case the old single-winning-row design
 would have gotten wrong, and no automated check reaches it without a
 database to seed.
+
+## v5: live sources
+
+A roster can now come from a coach's Google Sheet, and a non-football
+schedule from a calendar — both kept current by a job that runs every
+fifteen minutes, instead of a one-time paste. Nothing here reorders the
+earlier sections; work through them first on a fresh database.
+
+1. **Short address (already live if Task 1 shipped first).**
+   `https://roster.scottforge.ai/oh/springfield` lands on Springfield on a
+   phone with Poland installed and on one without. Adding a school is one
+   line in `public/_redirects`, both slash forms; `src/oh/redirects.test.ts`
+   holds it to the directory.
+
+2. **Migration 0008.** Additive; no deploy ordering. Paste
+   `supabase/migrations/0008_live_sources.sql` into the dashboard SQL
+   editor, run it, run it again (apply-twice gate), then
+   `node scripts/verify-school-roster.mjs` — expect 11 ok lines (12 with
+   `VERIFY_SLUG` set in `.env.local`).
+
+3. **Resend.** Create the account; add the domain `scottforge.ai`; add the
+   DNS records Resend lists to the Cloudflare zone (DNS only, not proxied);
+   wait for "Verified"; create an API key with sending access only.
+
+4. **The function.** With the Supabase CLI logged in and linked to the
+   project:
+   ```bash
+   npm run build:sync
+   npx supabase secrets set CRON_SECRET=<long random string> RESEND_API_KEY=<key> ALERT_TO=<seller address> ALERT_FROM="Roster alerts <alerts@scottforge.ai>"
+   npx supabase functions deploy sync-sources --no-verify-jwt
+   ```
+   `npm run build:sync` bundles the pure code in `src/sync/` into the
+   committed `supabase/functions/sync-sources/lib/core.js` that `index.ts`
+   imports — a test fails if that file is stale, so a deploy that skips the
+   build ships old logic, not a build error.
+
+5. **The schedule.** Database → Extensions: enable `pg_cron` and `pg_net`.
+   Fill in and run `supabase/cron/sync-sources.sql`. After 15 minutes,
+   `select * from cron.job_run_details order by start_time desc limit 5;`
+   shows a `succeeded` run, and the function's logs show `{"synced":0,
+   "failed":0}` (no links yet).
+
+6. **Push the panel** (merge the branch; Pages deploys). The signed-in
+   panel UI for this — the CSV picker, Link/Check link/Sync now/Unlink, and
+   the ⚠ line in the school list — has never been seen rendered before this
+   point. Open `/oh/?manage` at phone width and look at it before trusting
+   the rehearsal below to tell you anything.
+
+7. **Rehearsal** — on a throwaway activation (an unpublished row on a
+   school nobody follows), with a throwaway Google Sheet and a calendar:
+   - Link the sheet with Check link first; Link; the roster appears,
+     "synced just now".
+   - Put a blank name in a row: within 15 minutes one email, "Sync
+     refused…"; the panel's school list shows ⚠; the stored roster is
+     unchanged.
+   - Wait one more run: no second email.
+   - Fix the row: one "Syncing again" email.
+   - Unpublish the sheet: one email naming "a web page, not a sheet".
+   - Repeat link/break/fix with a calendar link and a filter on a
+     non-football sport.
+   - Unlink both; the last synced roster and schedule stay. Delete the row.
+
+8. **What this costs if it breaks.** Fans never see a broken sheet: a
+   refused sync writes nothing. The job writes data first, then sends any
+   email, then records "emailed" in a second small write — if Resend is
+   down, the data still synced and the email is simply retried next run.
+   At roughly six slow sources in one sweep, the sweep's 120-second pg_net
+   timeout can cut it short before reaching the rest — always the same
+   schools, since the sweep runs in alphabetical order. The fix then is to
+   raise the timeout in `supabase/cron/sync-sources.sql` or split the sweep
+   across more than one scheduled call. If the job stops altogether (cron
+   unscheduled, function deleted), links simply stop updating — the page
+   keeps the last good data and the panel's "synced N ago" grows.
