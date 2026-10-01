@@ -53,6 +53,7 @@ function emailFor(t, side, email, state) {
 var tidyOpponent = (raw) => raw.replace(/\((?:scrimmage|jamboree)\)/gi, "").replace(/\b(jr\.?\/sr\.?|senior|junior)\b/gi, "").replace(/\b(high\s+school|high|school|hs)\b/gi, "").replace(/\s{2,}/g, " ").replace(/[\s,\-–]+$/, "").trim();
 //#endregion
 //#region src/sync/calendar.ts
+var DB_SCHEDULE_ROW_LIMIT = 100;
 var unfold = (text) => text.replace(/\r?\n[ \t]/g, "");
 var field = (body, key) => {
 	const m = body.match(new RegExp(`^${key}[^:\\r\\n]*:(.*)$`, "m"));
@@ -156,6 +157,10 @@ function calendarToSchedule(text, opts) {
 	if (skipped * 2 > considered) return {
 		ok: false,
 		reason: `${skipped} of ${considered} events don’t name an opponent`
+	};
+	if (rows.length > DB_SCHEDULE_ROW_LIMIT) return {
+		ok: false,
+		reason: `the calendar has ${rows.length} games this season — more than one team’s; add or narrow the filter`
 	};
 	rows.sort((a, b) => a.date.localeCompare(b.date));
 	return {

@@ -79,6 +79,13 @@ describe('calendarToSchedule on the Eventlink capture', () => {
       reason: 'no 2026–27 events match “Curling (Boys V)” — check the filter',
     });
   });
+
+  it('refuses a whole-school calendar with no filter — too many rows for one team’s schedule', () => {
+    expect(calendarToSchedule(eventlink, { filter: null, seasonYear: 2026 })).toEqual({
+      ok: false,
+      reason: 'the calendar has 268 games this season — more than one team’s; add or narrow the filter',
+    });
+  });
 });
 
 describe('calendarToSchedule rules', () => {

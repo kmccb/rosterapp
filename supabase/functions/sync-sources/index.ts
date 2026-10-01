@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
   const origin = req.headers.get('Origin');
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
-  const body = await req.json().catch(() => ({}));
+  const body = (await req.json().catch(() => null)) ?? {};
 
   if (body.action === 'cron') {
     if (!CRON_SECRET || req.headers.get('x-cron-secret') !== CRON_SECRET) {

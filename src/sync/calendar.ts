@@ -15,6 +15,12 @@ export type ScheduleVerdict =
   | { ok: true; rows: ScheduleRow[]; skipped: number }
   | { ok: false; reason: string };
 
+// school_roster_check_schedule (supabase/migrations/0006_all_sports.sql) refuses a
+// schedule over 100 rows. A whole-school calendar linked with no filter sails past
+// that silently here — it reads fine, Check link passes, Link saves, and every
+// 15-minute sync then throws inside sync_apply. Refuse it at the source instead.
+const DB_SCHEDULE_ROW_LIMIT = 100;
+
 const unfold = (text: string): string => text.replace(/\r?\n[ \t]/g, '');
 
 const field = (body: string, key: string): string => {
@@ -134,6 +140,12 @@ export function calendarToSchedule(
   }
   if (skipped * 2 > considered) {
     return { ok: false, reason: `${skipped} of ${considered} events don’t name an opponent` };
+  }
+  if (rows.length > DB_SCHEDULE_ROW_LIMIT) {
+    return {
+      ok: false,
+      reason: `the calendar has ${rows.length} games this season — more than one team’s; add or narrow the filter`,
+    };
   }
 
   rows.sort((a, b) => a.date.localeCompare(b.date));
