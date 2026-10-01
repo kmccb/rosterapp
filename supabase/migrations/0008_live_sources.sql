@@ -56,6 +56,12 @@ set search_path = public, pg_temp
 as $$
 declare
   v_filter text := nullif(btrim(coalesce(p_schedule_filter, '')), '');
+  -- What actually lands in the column: null whenever there is no calendar
+  -- link, regardless of what a filter field happened to hold. Comparing
+  -- history against this instead of the raw v_filter means saving a filter
+  -- with no calendar set can't look like a changed schedule link and wipe
+  -- history that was never touched.
+  v_effective_filter text := case when p_schedule_url is null then null else v_filter end;
 begin
   if not public.school_admin() then
     raise exception 'this account is not the seller''s and may not touch the paid tier'
@@ -80,10 +86,10 @@ begin
     sync_state = (sync_state
       - (case when roster_source_url is distinct from p_roster_url then 'roster' else '' end))
       - (case when schedule_source_url is distinct from p_schedule_url
-                or schedule_source_filter is distinct from v_filter then 'schedule' else '' end),
+                or schedule_source_filter is distinct from v_effective_filter then 'schedule' else '' end),
     roster_source_url      = p_roster_url,
     schedule_source_url    = p_schedule_url,
-    schedule_source_filter = case when p_schedule_url is null then null else v_filter end
+    schedule_source_filter = v_effective_filter
   where school_slug = p_slug and sport = p_sport and season = p_season;
 
   if not found then
@@ -117,13 +123,25 @@ as $$
   order by school_slug, sport, season desc;
 $$;
 
--- The job's only write. It can touch players, schedule and sync_state and
--- nothing else — colors, crest, published, paid-through and league are the
--- seller's. Each half only lands while its link is still set, so a sync that
--- was already running when the seller pressed Unlink can't write over the
--- roster they just took back.
+-- The job's only write. It hands back the links it read (from
+-- sync_targets), not just "a link is set" — a run can still be in flight
+-- when the seller re-points the row from link A to link B, or unlinks it
+-- entirely, and school_roster_set_sources already cleared that side's
+-- history the moment the stored link changed. Without the comparison here,
+-- a late-arriving write from the A run would land players fetched under A
+-- onto a row now pointed at B, and restore A's sync_state — including
+-- "the seller has been emailed" — under B's name. So each half applies only
+-- when the link (and, for the schedule, the filter too) this call was given
+-- still matches what is stored; a half that no longer matches is simply
+-- skipped, leaving the row exactly as set_sources already left it. Sync
+-- state is merged per matching side rather than replaced wholesale, for the
+-- same reason: a side that didn't match keeps whatever set_sources put
+-- there (its cleared history), not this call's stale opinion of it. It can
+-- touch players, schedule and sync_state and nothing else — colors, crest,
+-- published, paid-through and league are the seller's.
 create or replace function public.school_roster_sync_apply(
   p_slug text, p_sport text, p_season integer,
+  p_roster_url text, p_schedule_url text, p_schedule_filter text,
   p_players jsonb, p_schedule jsonb, p_sync_state jsonb
 )
 returns void
@@ -144,15 +162,44 @@ begin
   end if;
 
   update public.school_roster set
-    players    = case when roster_source_url is not null then coalesce(p_players, players) else players end,
-    schedule   = case when schedule_source_url is not null then coalesce(p_schedule, schedule) else schedule end,
-    sync_state = p_sync_state,
+    players    = case
+                   when p_roster_url is not null and roster_source_url = p_roster_url
+                   then coalesce(p_players, players)
+                   else players
+                 end,
+    schedule   = case
+                   when p_schedule_url is not null and schedule_source_url = p_schedule_url
+                     and schedule_source_filter is not distinct from p_schedule_filter
+                   then coalesce(p_schedule, schedule)
+                   else schedule
+                 end,
+    sync_state = sync_state
+      || (case
+            when p_roster_url is not null and roster_source_url = p_roster_url
+              and p_sync_state ? 'roster'
+            then jsonb_build_object('roster', p_sync_state->'roster')
+            else '{}'::jsonb
+          end)
+      || (case
+            when p_schedule_url is not null and schedule_source_url = p_schedule_url
+              and schedule_source_filter is not distinct from p_schedule_filter
+              and p_sync_state ? 'schedule'
+            then jsonb_build_object('schedule', p_sync_state->'schedule')
+            else '{}'::jsonb
+          end),
     updated_at = case
-                   when (p_players is not null and roster_source_url is not null)
-                     or (p_schedule is not null and schedule_source_url is not null)
+                   when (p_players is not null and p_roster_url is not null
+                         and roster_source_url = p_roster_url)
+                     or (p_schedule is not null and p_schedule_url is not null
+                         and schedule_source_url = p_schedule_url
+                         and schedule_source_filter is not distinct from p_schedule_filter)
                    then now() else updated_at
                  end
   where school_slug = p_slug and sport = p_sport and season = p_season;
+
+  if not found then
+    raise exception 'there is no activation for that school, sport and season' using errcode = 'P0002';
+  end if;
 end;
 $$;
 
@@ -208,7 +255,7 @@ grant execute on function public.school_roster_list() to authenticated;
 grant execute on function public.school_admin_check() to authenticated;
 grant execute on function public.school_roster_set_sources(text, text, integer, text, text, text) to authenticated;
 grant execute on function public.school_roster_sync_targets() to service_role;
-grant execute on function public.school_roster_sync_apply(text, text, integer, jsonb, jsonb, jsonb) to service_role;
+grant execute on function public.school_roster_sync_apply(text, text, integer, text, text, text, jsonb, jsonb, jsonb) to service_role;
 
 commit;
 

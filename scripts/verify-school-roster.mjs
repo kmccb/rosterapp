@@ -106,6 +106,7 @@ check('anon cannot read sync targets', refused(anonTargets), JSON.stringify(anon
 
 const anonApply = await rpc('school_roster_sync_apply', {
   p_slug: 'x', p_sport: 'football', p_season: 2026,
+  p_roster_url: null, p_schedule_url: null, p_schedule_filter: null,
   p_players: null, p_schedule: null, p_sync_state: {},
 });
 check('anon cannot apply a sync', refused(anonApply), JSON.stringify(anonApply));
