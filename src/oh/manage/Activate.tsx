@@ -6,6 +6,8 @@ import type { School } from '../../ohio/stateModel';
 import { deriveVars, resizeLogo } from '../look';
 import { parseSchedule, type ScheduleRow } from '../scheduleParse';
 import { deleteRoster, upsertRoster, type RosterRow } from './adminApi';
+import { stripBom } from '../../sync/rosterCheck';
+import { Sources } from './SourceLinks';
 
 /**
  * The parser already builds a full `Player` — id, number, name, position,
@@ -158,6 +160,12 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const [leagueMembers, setLeagueMembers] = useState<string[]>([]);
   const [leagueQuery, setLeagueQuery] = useState('');
   const [leagueCleared, setLeagueCleared] = useState(false);
+  // While a link is set the source owns that half, so its paste box is hidden
+  // and save() sends null for it (keep), exactly as an untouched box does.
+  const [linked, setLinked] = useState({
+    roster: Boolean(existing?.roster_source_url),
+    schedule: Boolean(existing?.schedule_source_url),
+  });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -315,50 +323,73 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
             </label>
           )}
 
-          <textarea
-            className="mg-paste"
-            value={pasted}
-            onChange={(e) => setPasted(e.target.value)}
-            placeholder={
-              existing
-                ? 'Paste to replace the roster, or leave empty to keep it'
-                : 'Paste the roster rows here'
-            }
-            rows={6}
-          />
-
-          {parsed && (
+          {!linked.roster && (
             <>
-              <p className="filter-line">
-                <span>
-                  {players.length} players read
-                  {skipped.length > 0 && ` · ${skipped.length} rows skipped`}
-                </span>
-              </p>
-              {skipped.length > 0 && (
-                <div className="mg-skip">
-                  {skipped.map((s, i) => (
-                    <div className="mg-skip-row" key={i}>
-                      {s.text} — {s.issue}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="mg-review">
-                {players.slice(0, 60).map((p) => (
-                  <div className="mg-review-row" key={p.id}>
-                    <b>#{p.number}</b> {p.firstName} {p.lastName}
-                    <span className="fixture-sub">
-                      {p.position}
-                      {p.grade && ` · ${p.grade}`}
+              <label className="mg-field">
+                Or a CSV file{' '}
+                <input
+                  type="file"
+                  accept=".csv,text/csv,text/plain"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    // Read into the paste box, so a file gets the same review
+                    // table as a paste before anything is saved.
+                    if (file) file.text().then((t) => setPasted(stripBom(t)));
+                  }}
+                />
+              </label>
+              <textarea
+                className="mg-paste"
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder={
+                  existing
+                    ? 'Paste to replace the roster, or leave empty to keep it'
+                    : 'Paste the roster rows here'
+                }
+                rows={6}
+              />
+
+              {parsed && (
+                <>
+                  <p className="filter-line">
+                    <span>
+                      {players.length} players read
+                      {skipped.length > 0 && ` · ${skipped.length} rows skipped`}
                     </span>
+                  </p>
+                  {skipped.length > 0 && (
+                    <div className="mg-skip">
+                      {skipped.map((s, i) => (
+                        <div className="mg-skip-row" key={i}>
+                          {s.text} — {s.issue}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mg-review">
+                    {players.slice(0, 60).map((p) => (
+                      <div className="mg-review-row" key={p.id}>
+                        <b>#{p.number}</b> {p.firstName} {p.lastName}
+                        <span className="fixture-sub">
+                          {p.position}
+                          {p.grade && ` · ${p.grade}`}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </>
           )}
 
-          {effectiveSport !== 'football' && (
+          {linked.roster && (
+            <p className="filter-line">
+              <span>The roster comes from the linked Google Sheet. Edit it there, or unlink it below.</span>
+            </p>
+          )}
+
+          {effectiveSport !== 'football' && !linked.schedule && (
             <>
               <textarea
                 className="mg-paste"
@@ -436,6 +467,11 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                 </button>
               )}
             </>
+          )}
+
+          {existing && <Sources row={existing} onLinked={setLinked} />}
+          {!existing && (
+            <p className="fixture-sub">Save first — a Google Sheet or calendar can be linked once the activation exists.</p>
           )}
 
           {/* Football only, for now. The standings are folded out of the
