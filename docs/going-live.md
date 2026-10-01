@@ -286,14 +286,20 @@ earlier sections; work through them first on a fresh database.
    - Unpublish the sheet: one email naming "a web page, not a sheet".
    - Repeat link/break/fix with a calendar link and a filter on a
      non-football sport.
+   - Link a calendar with no filter on a whole-school calendar; Check link
+     refuses it with “more than one team’s” — the DB’s 100-row schedule
+     limit (`school_roster_check_schedule`, 0006) caught at the source
+     instead of failing silently inside every 15-minute sync.
    - Unlink both; the last synced roster and schedule stay. Delete the row.
 
 8. **What this costs if it breaks.** Fans never see a broken sheet: a
    refused sync writes nothing. The job writes data first, then sends any
    email, then records "emailed" in a second small write — if Resend is
    down, the data still synced and the email is simply retried next run.
-   At roughly six slow sources in one sweep, the sweep's 120-second pg_net
-   timeout can cut it short before reaching the rest — always the same
+   At roughly six slow sources in one sweep, the sweep can get cut short
+   before reaching the rest — two ceilings stack here, not one: pg_net's own
+   120-second timeout, and the Edge Function's wall-clock limit of roughly
+   150 seconds, whichever is hit first. Either way it's always the same
    schools, since the sweep runs in alphabetical order. The fix then is to
    raise the timeout in `supabase/cron/sync-sources.sql` or split the sweep
    across more than one scheduled call. If the job stops altogether (cron

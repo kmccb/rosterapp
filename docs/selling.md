@@ -158,6 +158,11 @@ date when the check arrives.
 removes it entirely. A school's removal request is honored same-day, per the
 privacy page.
 
+A linked sheet or calendar keeps syncing — and can keep emailing you about a
+broken one — whether or not the school is still paying; `paid_through`
+lapsing doesn't stop the 15-minute job. Unlink both at the end of an
+engagement, not just let the date run out.
+
 ## The other tier
 
 "They want their own app like Poland's" — that is the concierge-plus build
