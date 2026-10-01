@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { School } from '../ohio/stateModel';
+import { resolveLink, schoolParam } from './link';
 import { choose, chosenSlug, forget, loadIndex, searchSchools } from './store';
 import { School as SchoolScreen } from './School';
 
@@ -11,19 +12,36 @@ import { School as SchoolScreen } from './School';
  * school stays one tap away, because families follow more than one.
  */
 export function Directory() {
+  // A school link is honoured once. It is taken out of the address bar as soon
+  // as it is read, so "Follow a different school" followed by a reload doesn't
+  // snap the reader back to the school on the sign.
+  const link = useRef(schoolParam(location.search));
   const [schools, setSchools] = useState<School[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [q, setQ] = useState('');
-  const [slug, setSlug] = useState<string | null>(() => chosenSlug());
+  const [slug, setSlug] = useState<string | null>(() => (link.current ? null : chosenSlug()));
 
-  // Only needed for the picker. A school already chosen goes straight to its
-  // own screen, which fetches its season directly — the index would be a
-  // wasted request. Loading resumes the moment "Follow a different school"
-  // clears the choice and slug goes back to null.
+  // Only needed for the picker — or to check a school link against the
+  // directory. A school already chosen goes straight to its own screen, which
+  // fetches its season directly. Loading resumes the moment "Follow a
+  // different school" clears the choice and slug goes back to null.
   useEffect(() => {
     if (slug !== null) return;
     loadIndex()
-      .then(setSchools)
+      .then((list) => {
+        const pending = link.current;
+        link.current = null;
+        if (pending) {
+          history.replaceState(null, '', '/oh/');
+          const target = resolveLink(pending, list, chosenSlug());
+          if (target) {
+            if (target === pending) choose(target);
+            setSlug(target);
+            return;
+          }
+        }
+        setSchools(list);
+      })
       .catch(() => setFailed(true));
   }, [slug]);
 

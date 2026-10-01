@@ -6,6 +6,8 @@ import type { School } from '../../ohio/stateModel';
 import { deriveVars, resizeLogo } from '../look';
 import { parseSchedule, type ScheduleRow } from '../scheduleParse';
 import { deleteRoster, upsertRoster, type RosterRow } from './adminApi';
+import { stripBom } from '../../sync/rosterCheck';
+import { Sources } from './SourceLinks';
 
 /**
  * The parser already builds a full `Player` — id, number, name, position,
@@ -105,6 +107,36 @@ export function scheduleArg(rows: ScheduleRow[], cleared: boolean): ScheduleRow[
 }
 
 /**
+ * The roster half of the save, with a linked source folded in: once a Google
+ * Sheet owns the roster its paste box is hidden, but `pasted` and `players`
+ * are still state — a paste from before the link, or one left over from an
+ * aborted edit, would otherwise ride along on the next Save and silently
+ * overwrite whatever the sheet last synced. A linked roster always keeps
+ * what's stored, the same null the renewal case already relies on.
+ */
+export function rosterSaveArg(players: Player[], linked: boolean): Player[] | null {
+  if (linked) return null;
+  return players.length ? players : null;
+}
+
+/**
+ * scheduleArg's twin for a linked calendar: the schedule section is hidden
+ * while a calendar owns it, but `scheduleCleared` can still be stuck true
+ * from a "Remove schedule" click made before the link, and `schedParsed`
+ * from a paste typed before it. Either would otherwise reach upsertRoster as
+ * `[]` — which the database reads as "wipe" — and erase what the calendar
+ * just synced. Linked always keeps what's stored.
+ */
+export function scheduleSaveArg(
+  rows: ScheduleRow[],
+  cleared: boolean,
+  linked: boolean,
+): ScheduleRow[] | [] | null {
+  if (linked) return null;
+  return scheduleArg(rows, cleared);
+}
+
+/**
  * The conference half of the contract. A league is an object, so it follows
  * themeArg's shape rather than scheduleArg's: a filled form sends the
  * conference, a cleared one sends {} (wipe the stored one), and neither sends
@@ -158,6 +190,12 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   const [leagueMembers, setLeagueMembers] = useState<string[]>([]);
   const [leagueQuery, setLeagueQuery] = useState('');
   const [leagueCleared, setLeagueCleared] = useState(false);
+  // While a link is set the source owns that half, so its paste box is hidden
+  // and save() sends null for it (keep), exactly as an untouched box does.
+  const [linked, setLinked] = useState({
+    roster: Boolean(existing?.roster_source_url),
+    schedule: Boolean(existing?.schedule_source_url),
+  });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -245,10 +283,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
         slug,
         sport: effectiveSport,
         season: existing?.season ?? currentSeasonYear(),
-        players: players.length ? players : null,
+        players: rosterSaveArg(players, linked.roster),
         colors: { ground, accent },
         theme: themeArg(logoData, logoCleared),
-        schedule: scheduleArg(schedParsed?.rows ?? [], scheduleCleared),
+        schedule: scheduleSaveArg(schedParsed?.rows ?? [], scheduleCleared, linked.schedule),
         // Gated on the same sport the section is, or a seller who fills the
         // conference in and then switches the Sport select on a new row
         // stores a league nothing will ever render — the fan side draws it
@@ -315,50 +353,82 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
             </label>
           )}
 
-          <textarea
-            className="mg-paste"
-            value={pasted}
-            onChange={(e) => setPasted(e.target.value)}
-            placeholder={
-              existing
-                ? 'Paste to replace the roster, or leave empty to keep it'
-                : 'Paste the roster rows here'
-            }
-            rows={6}
-          />
-
-          {parsed && (
+          {!linked.roster && (
             <>
-              <p className="filter-line">
-                <span>
-                  {players.length} players read
-                  {skipped.length > 0 && ` · ${skipped.length} rows skipped`}
-                </span>
-              </p>
-              {skipped.length > 0 && (
-                <div className="mg-skip">
-                  {skipped.map((s, i) => (
-                    <div className="mg-skip-row" key={i}>
-                      {s.text} — {s.issue}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="mg-review">
-                {players.slice(0, 60).map((p) => (
-                  <div className="mg-review-row" key={p.id}>
-                    <b>#{p.number}</b> {p.firstName} {p.lastName}
-                    <span className="fixture-sub">
-                      {p.position}
-                      {p.grade && ` · ${p.grade}`}
+              <label className="mg-field">
+                Or a CSV file{' '}
+                <input
+                  type="file"
+                  accept=".csv,text/csv,text/plain"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    // Read into the paste box, so a file gets the same review
+                    // table as a paste before anything is saved.
+                    if (file) {
+                      file
+                        .text()
+                        .then((t) => setPasted(stripBom(t)))
+                        .catch((err: Error) => setError(friendlyError(err)));
+                    }
+                    // Clear the input so picking the same file again (after
+                    // fixing it and re-exporting under the same name) fires
+                    // onChange a second time instead of staying silent.
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              <textarea
+                className="mg-paste"
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder={
+                  existing
+                    ? 'Paste to replace the roster, or leave empty to keep it'
+                    : 'Paste the roster rows here'
+                }
+                rows={6}
+              />
+
+              {parsed && (
+                <>
+                  <p className="filter-line">
+                    <span>
+                      {players.length} players read
+                      {skipped.length > 0 && ` · ${skipped.length} rows skipped`}
                     </span>
+                  </p>
+                  {skipped.length > 0 && (
+                    <div className="mg-skip">
+                      {skipped.map((s, i) => (
+                        <div className="mg-skip-row" key={i}>
+                          {s.text} — {s.issue}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mg-review">
+                    {players.slice(0, 60).map((p) => (
+                      <div className="mg-review-row" key={p.id}>
+                        <b>#{p.number}</b> {p.firstName} {p.lastName}
+                        <span className="fixture-sub">
+                          {p.position}
+                          {p.grade && ` · ${p.grade}`}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </>
           )}
 
-          {effectiveSport !== 'football' && (
+          {linked.roster && (
+            <p className="filter-line">
+              <span>The roster comes from the linked Google Sheet. Edit it there, or unlink it below.</span>
+            </p>
+          )}
+
+          {effectiveSport !== 'football' && !linked.schedule && (
             <>
               <textarea
                 className="mg-paste"
@@ -436,6 +506,14 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
                 </button>
               )}
             </>
+          )}
+
+          {existing && <Sources row={existing} onLinked={setLinked} />}
+          {!existing && (
+            <p className="fixture-sub">
+              Save first — a Google Sheet{effectiveSport !== 'football' && ' or calendar'} can be linked once the
+              activation exists.
+            </p>
           )}
 
           {/* Football only, for now. The standings are folded out of the

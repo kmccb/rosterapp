@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { parseRoster } from '../../parse/rosterParse';
-import { leagueArg, scheduleArg, skippedRows, themeArg, toPlayers } from './Activate';
+import type { Player } from '../../types';
+import {
+  leagueArg,
+  rosterSaveArg,
+  scheduleArg,
+  scheduleSaveArg,
+  skippedRows,
+  themeArg,
+  toPlayers,
+} from './Activate';
 
 describe('toPlayers', () => {
   it('turns a pasted spreadsheet into the app’s players', () => {
@@ -89,6 +98,57 @@ describe('scheduleArg', () => {
 
   it('a paste wins over a stale clear flag', () => {
     expect(scheduleArg([row], true)).toEqual([row]);
+  });
+});
+
+describe('rosterSaveArg', () => {
+  const players: Player[] = [
+    { id: '1', number: '7', firstName: 'Jake', lastName: 'Miller', position: 'QB', side: 'O' },
+  ];
+
+  it('linked always sends null, even with a stale paste still sitting in state', () => {
+    // The paste box is hidden once a sheet is linked, but its last value is
+    // still live state — this is what stops a leftover paste from riding
+    // along on Save and overwriting what the sheet last synced.
+    expect(rosterSaveArg(players, true)).toBeNull();
+  });
+
+  it('linked sends null even with no players at all', () => {
+    expect(rosterSaveArg([], true)).toBeNull();
+  });
+
+  it('unlinked behaves exactly as before: a paste sends the players', () => {
+    expect(rosterSaveArg(players, false)).toEqual(players);
+  });
+
+  it('unlinked with nothing pasted sends null — keep what is stored, the renewal case', () => {
+    expect(rosterSaveArg([], false)).toBeNull();
+  });
+});
+
+describe('scheduleSaveArg', () => {
+  const row = { date: '2026-11-27', opponent: 'Boardman', home: true };
+
+  it('linked always sends null, even with scheduleCleared stuck true from a pre-link "Remove schedule"', () => {
+    // [] means "wipe" to the database — sending it for a linked schedule
+    // would erase what the calendar just synced the moment Save is pressed.
+    expect(scheduleSaveArg([], true, true)).toBeNull();
+  });
+
+  it('linked always sends null, even with a stale paste still sitting in state', () => {
+    expect(scheduleSaveArg([row], false, true)).toBeNull();
+  });
+
+  it('unlinked behaves exactly like scheduleArg: a paste sends the rows', () => {
+    expect(scheduleSaveArg([row], false, false)).toEqual([row]);
+  });
+
+  it('unlinked and cleared sends [] — wipe the stored schedule', () => {
+    expect(scheduleSaveArg([], true, false)).toEqual([]);
+  });
+
+  it('unlinked with neither sends null — keep what is stored', () => {
+    expect(scheduleSaveArg([], false, false)).toBeNull();
   });
 });
 

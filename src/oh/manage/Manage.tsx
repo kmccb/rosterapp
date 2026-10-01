@@ -8,6 +8,7 @@ import {
 } from '../adminAuth';
 import { listRosters, type RosterRow } from './adminApi';
 import { Activate } from './Activate';
+import { rowProblems } from './sources';
 
 /**
  * The seller's side of the paid tier.
@@ -126,6 +127,11 @@ export function Manage() {
                 {r.player_count} players · {state} · paid through {r.paid_through}
                 {r.note && ` · ${r.note}`}
               </span>
+              {rowProblems(r).map((p) => (
+                <span key={p} className="fixture-sub">
+                  {p}
+                </span>
+              ))}
             </span>
           </button>
         );

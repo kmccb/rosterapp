@@ -1,0 +1,4 @@
+# Short addresses for printed QR codes. Every one lives under /oh/: Poland's
+# service worker answers any other path with Poland's own page.
+/oh/springfield   /oh/?school=springfield-new-middletown   302
+/oh/springfield/  /oh/?school=springfield-new-middletown   302

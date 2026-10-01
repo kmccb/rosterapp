@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "icons": "node scripts/build-teams.mjs --pre",
-    "directory": "node scripts/build-directory.mjs"
+    "directory": "node scripts/build-directory.mjs",
+    "build:sync": "vite build --config vite.sync.config.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

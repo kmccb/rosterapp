@@ -42,13 +42,23 @@ wrote.
 
 1. Open https://roster.scottforge.ai/oh/?manage and sign in (email link).
 2. "+ Activate a school" → search the school → paste their roster
-   spreadsheet → check the parsed list reads right.
+   spreadsheet → check the parsed list reads right. Or a CSV file, above
+   the paste box — it fills the paste box the same way and gets the same
+   review.
 3. Pick their two colors. Set paid-through (defaults to Feb 1 after the
    season). Put the payment in the note: "check #1042, J. Smith, boosters".
 4. **Publish.** Their /oh/ page has the keypad that second.
 
 Save unpublished instead if the check hasn't cleared — publishing later is
 the same screen.
+
+### The school's address
+
+Add `/oh/<short-name>` lines to `public/_redirects` (both slash forms) and
+push. Then make the QR code from `https://roster.scottforge.ai/oh/<short-name>`
+— never from `/oh/?school=…`. The printed code has to survive any later
+change to how the page is addressed; the short link redirects to whatever
+the real query is today, and keeps doing that if it ever changes.
 
 ### One more line, in the repo
 
@@ -105,6 +115,31 @@ Pick both at activation if you can. A crest with no colors dresses the
 header but leaves the rest of the page unthemed — the two want to arrive
 together, not one now and the other at renewal.
 
+### Roster from the coach's Google Sheet
+
+Save the activation unpublished first. Ask the coach to publish the roster
+tab (File → Share → Publish to web → the tab → CSV) and send the link. In
+the panel, paste the link, Check link, Link. Publish once it says "synced".
+From then on the coach edits the sheet and the changes are live within 15
+minutes — the roster section of the panel goes read-only for that row, since
+the sheet owns it now.
+
+### Schedule from a calendar (non-football)
+
+Ask for the calendar's iCal/subscribe link from whoever keeps the school's
+schedule. Check link with a filter naming the sport and level the way the
+calendar itself writes it — for Eventlink that reads like
+`Volleyball (Girls V)`. Only promise this for a scheduling system that has a
+passing sample in `src/sync/fixtures/` — today that's ScheduleStar and
+Eventlink; anything else, paste the schedule by hand as before.
+
+### When an email arrives
+
+The reason is in the subject line and the body. Fans still see the last
+good data the whole time — nothing on the fan page breaks while a sync is
+refused. Fix the sheet (or tell the coach what to fix) and the next run
+sends "Syncing again."
+
 ## Mid-season changes
 
 Text arrives: "#7 is now #12." Open the school in the panel, paste the
@@ -122,6 +157,11 @@ date when the check arrives.
 "Save unpublished" hides a roster instantly (row kept). "Delete this roster"
 removes it entirely. A school's removal request is honored same-day, per the
 privacy page.
+
+A linked sheet or calendar keeps syncing — and can keep emailing you about a
+broken one — whether or not the school is still paying; `paid_through`
+lapsing doesn't stop the 15-minute job. Unlink both at the end of an
+engagement, not just let the date run out.
 
 ## The other tier
 
