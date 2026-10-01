@@ -64,7 +64,7 @@ not a config bug — wait for the next cron. Consequences:
 Every one lives under `/oh/`, because Poland's service worker answers any other path with
 Poland's own page — a short address outside that prefix would never reach the directory at all.
 
-## Supabase (migrations 0001–0007 APPLIED in production; 0008 WRITTEN, NOT applied)
+## Supabase (migrations 0001–0008 APPLIED in production)
 
 - Posture everywhere: RLS on with **zero policies**, table grants revoked, access only via
   security-definer functions, `search_path` pinned, errcode'd raises in sentence voice.
@@ -80,7 +80,7 @@ Poland's own page — a short address outside that prefix would never reach the 
   row (football preferred, then most recently updated), so a crest uploaded on any sport paints
   the whole school, hub included. The `league jsonb` column carries `{name, members: [slug, …]}`,
   the conference the seller typed in at activation — the one fact a conference table can't get
-  from the directory. **0008** (written, not applied) adds `roster_source_url`,
+  from the directory. **0008** (applied 2026-10-01, verified 11/11) adds `roster_source_url`,
   `schedule_source_url`, `schedule_source_filter`, and `sync_state` to `school_roster`, plus four
   functions: `school_admin_check` and `school_roster_set_sources` (authenticated, admin-only —
   the panel's Link/Unlink), and `school_roster_sync_targets`/`school_roster_sync_apply`
@@ -136,22 +136,20 @@ and verified), share-code system proven alive post-migrations, security script 7
 `main` at `/oh/demo/` is the fictional `springfield-local-demo` — a `poland-demo` branch that put
 Poland itself on its real Eventlink calendar was explored but never merged.
 
-**Shipped, pending migration:** live sources — a roster that stays current from a coach's Google
-Sheet, a non-football schedule that stays current from a calendar, the `sync-sources` Edge
-Function that checks both every 15 minutes and alerts the seller by Resend when one is refused,
-and the panel UI to link, check, and unlink them. Migration 0008 is written and tested but **not
-yet applied to production** — until it is, `school_roster_set_sources` and the sync job's two
-functions don't exist in the database, so the panel's Link/Check link/Sync now controls have
-nothing to call. Unlike 0005–0007, 0008 is additive only — the upsert signature doesn't move, so
-there's no deploy-ordering window where the panel's existing saves break.
+**Shipped, function not yet deployed:** live sources — a roster that stays current from a
+coach's Google Sheet, a non-football schedule that stays current from a calendar, the
+`sync-sources` Edge Function that checks both every 15 minutes and alerts the seller by Resend
+when one is refused, and the panel UI to link, check, and unlink them. Merged to main
+2026-10-01 (PR #10); `/oh/springfield` is the first short address. Migration 0008 was applied
+twice on 2026-10-01 and the verify script passed 11/11. Until the function is deployed and
+scheduled, the panel's Check link / Sync now controls have nothing to call.
 
 **Open items, in priority order:**
-1. **Apply migration 0008** — paste `supabase/migrations/0008_live_sources.sql` into the
-   dashboard SQL editor, run it, run it again (apply-twice gate), then
-   `node scripts/verify-school-roster.mjs` (expect 11 ok lines, 12 with `VERIFY_SLUG`). Then
-   stand up Resend, deploy the `sync-sources` function, and schedule it with
-   `supabase/cron/sync-sources.sql` — full ordering, including the rehearsal that has to happen
-   before any real school's sheet is linked, is in docs/going-live.md's v5 section.
+1. **Stand up the sync job** — Resend (domain + DNS on Cloudflare), the function's secrets,
+   `npm run build:sync` + `supabase functions deploy sync-sources --no-verify-jwt`, enable
+   pg_cron/pg_net, run `supabase/cron/sync-sources.sql`, then the rehearsal (which is also the
+   first time the new panel screens are seen rendered) — steps 3–7 of docs/going-live.md's v5
+   section, before any real school's sheet is linked.
 2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
    published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
    or replace with a real roster. The seller's admin session expires hourly — re-sign-in
