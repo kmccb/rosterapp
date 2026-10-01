@@ -1952,6 +1952,11 @@ async function runOne(t: any) {
       p_slug: t.slug,
       p_sport: t.sport,
       p_season: t.season,
+      // The links this run read. The database drops either half if the
+      // seller changed or unlinked it while the run was in flight.
+      p_roster_url: t.roster_source_url,
+      p_schedule_url: t.schedule_source_url,
+      p_schedule_filter: t.schedule_source_filter,
       p_players: result.players,
       p_schedule: result.schedule,
       p_sync_state: result.state,
