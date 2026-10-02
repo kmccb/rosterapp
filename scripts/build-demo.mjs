@@ -103,16 +103,65 @@ const [MCDONALD, JACKSON_MILTON, CAMPBELL, MINERAL_RIDGE, LOWELLVILLE, WATERLOO,
 // ------------------------------------------------------------------- crest
 
 /*
- * The crest from the video, sized the way the panel sizes an upload.
+ * The crest from the video, on the school's own ground, sized the way the panel
+ * sizes an upload.
  *
- * src/oh/look.ts's resizeLogo centre-crops whatever the seller picks to a
- * 720-pixel square and re-encodes it as a JPEG at 0.85, and that is the string
- * a real activation stores. Doing the same here means the demo wears exactly
- * what Springfield's own page would wear once the seller uploads this file —
- * the white corners included, which is what an upload of it looks like.
+ * The source PNG is the oval on a white square. Used as it is, that white is
+ * not just a white tile in the header: the crest is also the page's
+ * --wallpaper, drawn behind the hub, and a big white square under the bands
+ * washes all three of them out to tan where the video's are dark. So
+ * everything outside the oval is replaced with the ground color — the badge a
+ * seller would make before uploading, and the one that looks like the video.
+ *
+ * The oval is found rather than assumed: it is the bounding box of everything
+ * that is not near-white, which in this file is the oval's own ring (it does
+ * not fill the canvas — it is a wide ellipse across the middle). The mask is
+ * pulled in by a pixel so the anti-aliased white fringe on the ring's outer
+ * edge goes with the background instead of leaving a pale hairline.
+ *
+ * Then the same treatment src/oh/look.ts's resizeLogo gives a real upload: a
+ * centre-cropped 720-pixel square, re-encoded as a JPEG at 0.85, which is the
+ * string a real activation stores and a type rosterStore's validLogo accepts.
  */
 const WALLPAPER_PX = 720;
-const crestJpeg = await sharp(join(root, 'docs/design/springfield-video/tigers-logo.png'))
+const CREST_SRC = join(root, 'docs/design/springfield-video/tigers-logo.png');
+
+const { data: crestPixels, info: crestInfo } = await sharp(CREST_SRC)
+  .removeAlpha()
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+const oval = { x0: Infinity, x1: -1, y0: Infinity, y1: -1 };
+for (let y = 0; y < crestInfo.height; y += 1) {
+  for (let x = 0; x < crestInfo.width; x += 1) {
+    const i = (y * crestInfo.width + x) * crestInfo.channels;
+    if (crestPixels[i] < 235 || crestPixels[i + 1] < 235 || crestPixels[i + 2] < 235) {
+      oval.x0 = Math.min(oval.x0, x);
+      oval.x1 = Math.max(oval.x1, x);
+      oval.y0 = Math.min(oval.y0, y);
+      oval.y1 = Math.max(oval.y1, y);
+    }
+  }
+}
+if (oval.x1 < 0) throw new Error('the crest has nothing on it but white');
+
+const ovalMask = Buffer.from(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${crestInfo.width}" height="${crestInfo.height}">
+    <ellipse cx="${(oval.x0 + oval.x1 + 1) / 2}" cy="${(oval.y0 + oval.y1 + 1) / 2}"
+             rx="${(oval.x1 - oval.x0 + 1) / 2 - 1}" ry="${(oval.y1 - oval.y0 + 1) / 2 - 1}"
+             fill="#fff"/>
+  </svg>`,
+);
+
+// The oval cut out onto a transparent square (dest-in keeps the crest only
+// where the mask is), then laid on the ground color.
+const crestOnGround = await sharp(CREST_SRC)
+  .ensureAlpha()
+  .composite([{ input: ovalMask, blend: 'dest-in' }])
+  .flatten({ background: GROUND })
+  .png()
+  .toBuffer();
+
+const crestJpeg = await sharp(crestOnGround)
   .resize(WALLPAPER_PX, WALLPAPER_PX, { fit: 'cover', position: 'centre' })
   .jpeg({ quality: 85 })
   .toBuffer();
