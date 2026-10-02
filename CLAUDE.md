@@ -145,8 +145,14 @@ twice on 2026-10-01 and the verify script passed 11/11. Until the function is de
 scheduled, the panel's Check link / Sync now controls have nothing to call.
 
 **Open items, in priority order:**
-1. **Rehearse live sources** (docs/going-live.md v5 step 7) before any real school's sheet is
-   linked — it's also the first time the new panel screens are seen rendered. The sync job is
+1. **Live sources are rehearsed and live (2026-10-02).** On a throwaway Strasburg-Franklin
+   volleyball activation (since deleted): Check link and Link on a published sheet; a blanked
+   name refused at the 12:00 run with exactly one email and a ⚠ line in the school list; no
+   repeat at 12:15; Sync now after the fix cleared it; an unfiltered whole-school calendar
+   refused at Check link (268 games), the filtered one linked with 22; Unlink kept the synced
+   data. The rehearsal found three panel bugs, fixed in PR #11 (stacked layout, per-side keys,
+   Save unpublished with no players). Note: Google keeps serving a trashed sheet's published
+   CSV for a while, so Unlink in the panel is what actually stops a sync. The sync job is
    up as of 2026-10-02: `sync-sources` deployed to project `jkuocstqtveuymfqqlwg` (CLI linked
    via `npx supabase login`), secrets set in the dashboard (RESEND_API_KEY from the existing
    Resend account, where scottforge.ai was already verified; CRON_SECRET; ALERT_TO;
