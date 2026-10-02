@@ -132,9 +132,14 @@ the real domain. GitHub Pages retired; its repo *variables* are now dead config.
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
 (tabs, full theming, crest upload), the all-sports hub, identity and league (0004–0007 applied
-and verified), share-code system proven alive post-migrations, security script 7/7. The demo on
-`main` at `/oh/demo/` is the fictional `springfield-local-demo` — a `poland-demo` branch that put
-Poland itself on its real Eventlink calendar was explored but never merged.
+and verified), share-code system proven alive post-migrations, security script 7/7. The demo at
+`/oh/demo/` is the real Springfield (`springfield-new-middletown`, the first prospect, matching
+the sales video): sample rosters/colors/crest and pasted volleyball/basketball schedules from
+`public/oh/demo.json`, with its real football season, scores and MVAC Scarlet standings read from
+the directory (it was the fictional `springfield-local-demo` before the `springfield-demo` branch).
+It is also in `paid-schools.json` for the kickoff forecast — remove it if they don't buy, and move
+the demo on when the pitch does (selling.md). A `poland-demo` branch that put Poland itself on its
+real Eventlink calendar was explored but never merged.
 
 **Shipped, function not yet deployed:** live sources — a roster that stays current from a
 coach's Google Sheet, a non-football schedule that stays current from a calendar, the

@@ -150,7 +150,10 @@ export const keptLeagueTable = (slug: string, members: string): LeagueRow[] | nu
 };
 
 export const rememberLeagueTable = (slug: string, members: string, rows: LeagueRow[]): void => {
-  if (slug !== chosenSlug()) return;
+  // The demo is a real school's slug, so a reader who follows that school in
+  // the directory would otherwise have the demo writing into their jar. The
+  // demo keeps nothing, the same rule as the sport and the forecast.
+  if (isDemo() || slug !== chosenSlug()) return;
   try {
     localStorage.setItem(LEAGUE(slug), JSON.stringify({ members, rows }));
   } catch {
@@ -181,11 +184,11 @@ export async function loadIndex(): Promise<School[]> {
 
 export async function loadSeason(slug: string): Promise<SchoolSeason> {
   /*
-   * The demo page answers out of its own committed file — its school and every
-   * member of its fictional conference, so the League tab folds out of baked
-   * results exactly as it folds out of the directory's. Only that page takes
-   * this branch, and only for a slug the file actually carries: anything else
-   * falls through to the fetch below, untouched.
+   * The demo page answers out of its own committed file for any season it
+   * bakes. Only that page takes this branch, and only for a slug the file
+   * actually carries: anything else falls through to the fetch below,
+   * untouched — which for the Springfield demo is everything, so its football
+   * and its whole League tab are the directory's real seasons.
    */
   if (isDemo()) {
     const baked = await demoSeason(slug);
@@ -197,8 +200,10 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
     if (res.ok) {
       const season = (await res.json()) as SchoolSeason;
       // Only the followed school is kept. Caching every school browsed would
-      // fill the jar with counties nobody will open again.
-      if (slug === chosenSlug()) {
+      // fill the jar with counties nobody will open again. The demo keeps
+      // nothing: what a prospect looks at must not survive into the next
+      // school they look at, even when it is the school they follow.
+      if (!isDemo() && slug === chosenSlug()) {
         try {
           localStorage.setItem(SEASON(slug), JSON.stringify(season));
         } catch {
@@ -242,10 +247,14 @@ const isFixtureWeather = (v: unknown): v is FixtureWeather => {
 
 /** Network first, then whatever was kept — the same rule as the season. */
 export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
-  // The demo's forecast is baked beside its fixtures, and the jar is left
-  // alone: nothing a prospect looks at should survive into the next school
-  // they look at.
-  if (isDemo()) return demoWeather(slug);
+  // A demo file may bake its forecast beside its fixtures. The Springfield one
+  // doesn't — its football is the directory's, so its forecast is the real one
+  // in weather.json like any paying school's, and it falls through to that.
+  const demo = isDemo();
+  if (demo) {
+    const baked = await demoWeather(slug);
+    if (baked) return baked;
+  }
 
   try {
     const res = await fetch(`/oh/weather.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -255,8 +264,10 @@ export async function loadWeather(slug: string): Promise<FixtureWeather | null> 
       // Only the followed school's copy is kept, as with the season — and an
       // answer of "no forecast for this school" clears it, so a school that
       // stops paying, or whose next game has gone past the forecast's range,
-      // does not keep serving one out of a phone for ever.
-      if (slug === chosenSlug()) {
+      // does not keep serving one out of a phone for ever. The demo leaves the
+      // jar alone: nothing a prospect looks at should survive into the next
+      // school they look at.
+      if (!demo && slug === chosenSlug()) {
         try {
           if (mine) localStorage.setItem(WEATHER(slug), JSON.stringify(mine));
           else localStorage.removeItem(WEATHER(slug));

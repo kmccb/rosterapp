@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { inSeason, knownSports } from './sportSeasons';
 
@@ -20,14 +20,60 @@ import { inSeason, knownSports } from './sportSeasons';
 const DEMO_FILE = new URL('../../public/oh/demo.json', import.meta.url);
 const committed = () => JSON.parse(readFileSync(DEMO_FILE, 'utf8')) as Record<string, unknown>;
 
+const dataFile = (slug: string) => new URL(`../../public/oh/data/${slug}.json`, import.meta.url);
+const directoryIndex = () =>
+  JSON.parse(readFileSync(new URL('../../public/oh/index.json', import.meta.url), 'utf8')) as {
+    schools: Array<{ slug: string; name: string }>;
+  };
+
+/** The conference the seller typed in, by exact directory slug. */
+const MVAC_SCARLET = [
+  'mcdonald-mcdonald',
+  'jackson-milton-north-jackson',
+  'campbell-memorial-campbell',
+  'mineral-ridge-mineral-ridge',
+  'lowellville-lowellville',
+  'waterloo-atwater',
+  'western-reserve-berlin-center',
+];
+
 type Page = { pathname?: string; search?: string };
 
-const load = async (body: unknown, page: Page = {}) => {
+/*
+ * A stand-in for this origin.
+ *
+ * The demo file comes from the body given, and everything the demo does not
+ * bake comes from where the page itself would get it: a season from the
+ * committed directory file on disk, the forecast from whatever `weather` says.
+ * That is the new contract being exercised rather than mocked around — the
+ * school's football and its rivals' are the directory's.
+ */
+const load = async (body: unknown, page: Page = {}, weather: unknown = {}) => {
   vi.resetModules();
   vi.stubGlobal('location', { pathname: page.pathname ?? '/oh/demo/', search: page.search ?? '' });
+  const jar: Record<string, string> = {};
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => jar[k] ?? null,
+    setItem: (k: string, v: string) => {
+      jar[k] = v;
+    },
+    removeItem: (k: string) => {
+      delete jar[k];
+    },
+  });
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () => ({ ok: true, json: async () => body })),
+    vi.fn(async (url: string) => {
+      const path = String(url).split('?')[0];
+      if (path === '/oh/demo.json') return { ok: true, json: async () => body };
+      if (path === '/oh/weather.json') return { ok: true, json: async () => weather };
+      const season = path.match(/^\/oh\/data\/([a-z0-9-]+)\.json$/);
+      if (season && existsSync(dataFile(season[1]))) {
+        const raw = readFileSync(dataFile(season[1]), 'utf8');
+        return { ok: true, json: async () => JSON.parse(raw) };
+      }
+      return { ok: false, json: async () => null };
+    }),
   );
   return import('./demo');
 };
@@ -82,35 +128,33 @@ describe('which page is the demo', () => {
  * Whether the file was written with the autumn on.
  *
  * The generator has two honest outputs and they look nothing alike. Written
- * between August and November it produces a season under way — half played,
- * a record, a standings table. Written between December and July it produces
- * the next autumn as fixtures with **nothing** played, because a season cannot
- * both carry results and sit in months eight to eleven when today is February,
- * and the hub would otherwise print "Starts in August" over a row of January
- * scores.
+ * between August and November it produces a volleyball season under way — half
+ * played, half to come. Written between December and July it produces the
+ * next autumn as fixtures with **nothing** played, because a season cannot both
+ * carry results and sit in months eight to eleven when today is February, and
+ * the hub would otherwise print "Starts in August" over a row of January scores.
  *
  * So "no results anywhere" is a correct file half the year and a broken one the
  * other half, and the tests below have to ask which half before they judge. The
  * day it was written is on the file for exactly this reason.
  */
 const bornInSeason = (): boolean =>
-  inSeason('football', Number((committed() as { generatedOn: string }).generatedOn.slice(5, 7)));
+  inSeason('volleyball', Number((committed() as { generatedOn: string }).generatedOn.slice(5, 7)));
 
 describe('the committed file', () => {
-  it('reads as a demo, with the six sports the hub is sold on', async () => {
+  it('reads as the Springfield demo, with the three sports the video sells', async () => {
     const { loadDemo, DEMO_SLUG } = await load(committed());
     const demo = await loadDemo();
 
     expect(demo).not.toBeNull();
+    expect(DEMO_SLUG).toBe('springfield-new-middletown');
     expect(demo!.slug).toBe(DEMO_SLUG);
-    expect(demo!.sportNames).toEqual([
-      'football',
-      'volleyball',
-      'soccer',
-      'basketball',
-      'wrestling',
-      'baseball',
-    ]);
+    expect(demo!.school).toEqual({
+      slug: DEMO_SLUG,
+      name: 'Springfield',
+      city: 'New Middletown',
+    });
+    expect(demo!.sportNames).toEqual(['football', 'volleyball', 'basketball']);
     // Every sport the hub will draw has a squad behind it, or the tile is a
     // dead tap.
     for (const sport of demo!.sportNames) {
@@ -118,49 +162,125 @@ describe('the committed file', () => {
     }
   });
 
-  it('carries a season for the school and for every conference member', async () => {
-    const { loadDemo, demoSeason, DEMO_SLUG } = await load(committed());
+  it('wears the video’s colors and a crest the database would have accepted', () => {
+    const raw = committed() as { colors: unknown; logo: string };
+    expect(raw.colors).toEqual({ ground: '#0e0c0b', accent: '#f26722' });
+    // A JPEG, because that is what the panel's resizeLogo makes of an upload.
+    expect(raw.logo).toMatch(/^data:image\/jpeg;base64,/);
+    // The theme ceiling in 0005_school_theme.sql: a crest past it is one the
+    // seller could never have stored for a real school.
+    expect(raw.logo.length).toBeLessThan(500_000);
+  });
+
+  /*
+   * The contract that makes the football half real: nothing about it is baked.
+   * A season or a forecast in this file would be served in place of the
+   * directory's, and would be wrong by the next Saturday refresh.
+   */
+  it('bakes no season and no forecast, so football and weather are the directory’s', async () => {
+    const raw = committed();
+    expect(raw.seasons).toBeUndefined();
+    expect(raw.weather).toBeUndefined();
+
+    const { loadDemo, demoSeason, demoWeather, DEMO_SLUG } = await load(committed());
     const demo = await loadDemo();
     const league = demo!.league as { members: string[] };
-
     for (const slug of [DEMO_SLUG, ...league.members]) {
-      const season = await demoSeason(slug);
-      expect(season, slug).not.toBeNull();
-      expect(season!.games.length).toBeGreaterThan(0);
+      expect(await demoSeason(slug), slug).toBeNull();
+    }
+    expect(await demoWeather(DEMO_SLUG)).toBeNull();
+    expect(demo!.sports.football.schedule).toBeNull();
+  });
+
+  /*
+   * Only that the slugs resolve — the same coupling src/oh/redirects.test.ts
+   * keeps. The directory's files are rewritten by a cron job that commits
+   * straight to main with no test step, so anything read out of them here (who
+   * Springfield plays, what a school is called) could turn a refresh red and
+   * block every deploy, Poland's included. Whether Springfield actually meets
+   * every member is build-demo.mjs's self-check, made when the file is written.
+   */
+  it('names MVAC Scarlet by slugs the directory knows', () => {
+    const raw = committed() as { slug: string; league: { name: string; members: string[] } };
+    expect(raw.league.name).toBe('MVAC Scarlet');
+    expect([...raw.league.members].sort()).toEqual([...MVAC_SCARLET].sort());
+
+    const known = new Set(directoryIndex().schools.map((s) => s.slug));
+    for (const slug of [raw.slug, ...raw.league.members]) {
+      expect(known.has(slug), slug).toBe(true);
+      expect(existsSync(dataFile(slug)), slug).toBe(true);
     }
   });
 
-  it('agrees with itself about what the school has played', async () => {
-    const { loadDemo, DEMO_SLUG } = await load(committed());
-    const season = (await loadDemo())!.seasons[DEMO_SLUG];
-    const played = season.games.filter((g) => g.result);
+  /*
+   * The football roster is the video's, name for name, because a prospect who
+   * has just watched #24 break free will type 24.
+   */
+  it('puts the video’s players on the football roster, and no stats on anybody', () => {
+    const raw = committed() as {
+      sports: Record<string, { players: Array<Record<string, unknown>> }>;
+    };
+    const football = raw.sports.football.players;
+    const byNumber = new Map(football.map((p) => [p.number, p]));
 
-    expect(season.record.played).toBe(played.length);
-    expect(season.record.won).toBe(played.filter((g) => g.result!.won).length);
-    expect(season.record.lost).toBe(played.filter((g) => !g.result!.won).length);
-
-    // Only a file written in the autumn owes anybody a record. When it is, a
-    // demo school that wins everything reads as a brochure rather than a
-    // product, so both chips have to be on screen. Out of season 0–0 is the
-    // true answer and the school's own page would say so.
-    if (bornInSeason()) {
-      expect(season.record.won).toBeGreaterThan(0);
-      expect(season.record.lost).toBeGreaterThan(0);
-    } else {
-      expect(season.record.played).toBe(0);
+    expect(byNumber.get('24')).toMatchObject({
+      firstName: 'Marcus',
+      lastName: 'Bell',
+      position: 'RB/LB',
+      grade: 'Sr',
+      heightIn: 71,
+      weightLb: 195,
+    });
+    const named: Array<[string, string, string]> = [
+      ['1', 'Owen', 'Carter'],
+      ['2', 'Jalen', 'Reyes'],
+      ['3', 'Eli', 'Novak'],
+      ['4', 'Drew', 'Halloran'],
+      ['5', 'Kai', 'Mercer'],
+      ['6', 'Sam', 'Whitfield'],
+      ['7', 'Tobias', 'Kerr'],
+      ['10', 'Caleb', 'Ostrowski'],
+      ['11', 'Nate', 'Pryor'],
+      ['12', 'Luke', 'Danner'],
+      ['14', 'Isaac', 'Moreno'],
+      ['15', 'Grant', 'Yoder'],
+    ];
+    for (const [number, firstName, lastName] of named) {
+      expect(byNumber.get(number), number).toMatchObject({ firstName, lastName });
     }
+    // A believable small-school varsity, not a sketch.
+    expect(football.length).toBeGreaterThanOrEqual(25);
+    expect(new Set(football.map((p) => p.number)).size).toBe(football.length);
+
+    // The app has no stats, so the demo must not smuggle any in.
+    for (const [sport, entry] of Object.entries(raw.sports)) {
+      for (const p of entry.players) {
+        expect(Object.keys(p).some((k) => /stat/i.test(k)), `${sport} #${p.number}`).toBe(false);
+      }
+    }
+    expect(raw.sports.volleyball.players.length).toBeGreaterThanOrEqual(10);
+    expect(raw.sports.basketball.players.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('files the forecast on the next fixture, which has not been played', async () => {
-    const { loadDemo, DEMO_SLUG } = await load(committed());
-    const demo = await loadDemo();
-    const games = demo!.seasons[DEMO_SLUG].games;
-    const next = games.find((g) => !g.result);
-
-    // Not merely "some unplayed game": School.tsx draws a forecast on the
-    // fixture naming that same date and on no other, so a forecast pointed at
-    // week nine would silently print nothing.
-    expect(demo!.weather!.date).toBe(next!.date);
+  /*
+   * The conference twice over in both pasted sports. Checked against itself
+   * rather than against the directory's names, for the reason above — the
+   * generator spells them out of index.json when it runs.
+   */
+  it('pastes the whole conference into both schedules, twice', () => {
+    const raw = committed() as {
+      sports: Record<string, { schedule: Array<{ opponent: string }> | null }>;
+    };
+    const volleyball = raw.sports.volleyball.schedule!.map((r) => r.opponent);
+    const conference = new Set(volleyball);
+    expect(conference.size).toBe(MVAC_SCARLET.length);
+    for (const name of conference) {
+      expect(volleyball.filter((o) => o === name), name).toHaveLength(2);
+    }
+    const basketball = raw.sports.basketball.schedule!.map((r) => r.opponent);
+    for (const name of conference) {
+      expect(basketball.filter((o) => o === name), name).toHaveLength(2);
+    }
   });
 
   /*
@@ -168,29 +288,12 @@ describe('the committed file', () => {
    * printed on a day that has been.
    *
    * Checked as an ordering rather than against the clock, deliberately. The
-   * file is static and drifts — five weeks after a generation the last autumn
-   * fixture has gone by with no score on it — and a test that read `new Date()`
-   * would turn that expected drift into a red build. What must never be true,
-   * at any distance from the generation, is a scored game dated after an
-   * unscored one; that is a generator bug rather than staleness.
+   * file is static and drifts, and a test that read `new Date()` would turn
+   * that expected drift into a red build. What must never be true, at any
+   * distance from the generation, is a scored match dated after an unscored
+   * one; that is a generator bug rather than staleness.
    */
-  it('puts every result behind every fixture, in all six seasons', async () => {
-    const { loadDemo } = await load(committed());
-    const demo = await loadDemo();
-
-    for (const [slug, season] of Object.entries(demo!.seasons)) {
-      const scored = season.games.filter((g) => g.result).map((g) => g.date);
-      const ahead = season.games.filter((g) => !g.result).map((g) => g.date);
-      // Results only when the autumn was on — see bornInSeason above. Fixtures
-      // always: a season with nothing to come is not a page worth opening.
-      expect(scored.length > 0, slug).toBe(bornInSeason());
-      expect(ahead.length, slug).toBeGreaterThan(0);
-      // ISO dates sort as strings, so this is the whole comparison.
-      expect(scored.every((s) => ahead.every((a) => s < a)), slug).toBe(true);
-    }
-  });
-
-  it('puts every result behind every fixture in the pasted schedules too', async () => {
+  it('puts every result behind every fixture in the pasted schedules', async () => {
     const { loadDemo } = await load(committed());
     const demo = await loadDemo();
 
@@ -200,6 +303,18 @@ describe('the committed file', () => {
       const ahead = rows.filter((r) => !r.score).map((r) => r.date);
       expect(scored.every((s) => ahead.every((a) => s < a)), sport).toBe(true);
     }
+
+    // Volleyball owes results only when the autumn was on — and then both
+    // kinds, because a school that wins everything reads as a brochure.
+    const volleyball = demo!.sports.volleyball.schedule!;
+    const results = volleyball.filter((r) => r.score);
+    if (bornInSeason()) {
+      expect(results.some((r) => r.score!.us > r.score!.them)).toBe(true);
+      expect(results.some((r) => r.score!.us < r.score!.them)).toBe(true);
+    } else {
+      expect(results).toHaveLength(0);
+    }
+    expect(volleyball.some((r) => !r.score)).toBe(true);
   });
 
   /*
@@ -215,26 +330,18 @@ describe('the committed file', () => {
     // the generator wrote, on the day it wrote it.
     const raw = committed() as unknown as {
       generatedOn: string;
-      seasons: Record<string, { games: Array<{ date: string; result?: unknown }> }>;
       sports: Record<string, { schedule: Array<{ date: string; score?: unknown }> | null }>;
     };
     const month = Number(raw.generatedOn.slice(5, 7));
 
-    const dates: Array<[string, string, boolean]> = [];
-    for (const season of Object.values(raw.seasons)) {
-      for (const g of season.games) dates.push(['football', g.date, !!g.result]);
-    }
     for (const [sport, entry] of Object.entries(raw.sports)) {
-      for (const r of entry.schedule ?? []) dates.push([sport, r.date, !!r.score]);
-    }
-
-    for (const [sport, date, scored] of dates) {
-      if (inSeason(sport, month)) continue;
-      // Out of season on the day it was written, a sport may have no results
-      // and may only be dated inside its own months — the alternative is
-      // "Starts in August" printed over a row of January scores.
-      expect(scored, `${sport} ${date}`).toBe(false);
-      expect(inSeason(sport, Number(date.slice(5, 7))), `${sport} ${date}`).toBe(true);
+      for (const r of entry.schedule ?? []) {
+        if (inSeason(sport, month)) continue;
+        // Out of season on the day it was written, a sport may have no results
+        // and may only be dated inside its own months.
+        expect(!!r.score, `${sport} ${r.date}`).toBe(false);
+        expect(inSeason(sport, Number(r.date.slice(5, 7))), `${sport} ${r.date}`).toBe(true);
+      }
     }
   });
 
@@ -242,7 +349,7 @@ describe('the committed file', () => {
    * The generator is a .mjs script that cannot import this bundle's TypeScript,
    * so it keeps its own copy of the month table and this holds the two
    * together. Read out of the source text rather than imported, because
-   * importing the script runs it — it rasterizes a crest and writes a file.
+   * importing the script runs it — it resizes a crest and writes a file.
    */
   it('keeps the generator’s copy of the month table honest', () => {
     const src = readFileSync(new URL('../../scripts/build-demo.mjs', import.meta.url), 'utf8');
@@ -260,18 +367,6 @@ describe('the committed file', () => {
       }
     }
   });
-
-  it('keeps every rival on the same ten dates as the school', async () => {
-    const { loadDemo, DEMO_SLUG } = await load(committed());
-    const demo = await loadDemo();
-    const ours = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
-
-    // A rival left on an older calendar would still fill its row, and the
-    // standings would quietly stop agreeing with the school's own record.
-    for (const [slug, season] of Object.entries(demo!.seasons)) {
-      expect(season.games.map((g) => g.date), slug).toEqual(ours);
-    }
-  });
 });
 
 /*
@@ -279,162 +374,139 @@ describe('the committed file', () => {
  *
  * The file is committed and then sits still while the world moves, and the
  * screen splits Played from Coming up on whether a game has a score rather than
- * on its date — so without this the demo starts listing last Friday's game as
+ * on its date — so without this the demo starts listing last Tuesday's match as
  * coming up. These are the only tests here that name a day, and they name a
  * made-up one rather than reading the clock.
+ *
+ * The file is read as it was on the day it was written: the clock is set to
+ * `generatedOn` while loadDemo runs, so its own carry-forward is a no-op and
+ * every shift below is measured from the file as committed.
  */
 describe('the calendar, weeks after it was written', () => {
   const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const born = () => (committed() as { generatedOn: string }).generatedOn;
+  const later = (days: number) =>
+    new Date(day(born()).getTime() + days * 86_400_000).toISOString().slice(0, 10);
 
-  const everyDate = (demo: {
-    seasons: Record<string, { games: Array<{ date: string; result?: unknown }> }>;
-    sports: Record<string, { schedule: Array<{ date: string; score?: unknown }> | null }>;
-  }) => {
-    const all: Array<[string, boolean]> = [];
-    for (const season of Object.values(demo.seasons)) {
-      for (const g of season.games) all.push([g.date, !!g.result]);
+  const asWritten = async (body: unknown = committed()) => {
+    const mod = await load(body);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(day(born()));
+    try {
+      return { ...mod, demo: (await mod.loadDemo())! };
+    } finally {
+      vi.useRealTimers();
     }
-    for (const entry of Object.values(demo.sports)) {
-      for (const r of entry.schedule ?? []) all.push([r.date, !!r.score]);
-    }
-    return all;
   };
 
-  it('lands the split on today, however long the file has sat', async () => {
-    const { loadDemo, shiftToNow } = await load(committed());
-    const demo = await loadDemo();
+  type Rows = Array<{ date: string; score?: unknown }>;
+  const rowsOf = (demo: { sports: Record<string, { schedule: Rows | null }> }, sport: string) =>
+    demo.sports[sport].schedule!;
+  const monthOf = (date: string) => Number(date.slice(5, 7));
 
-    // Targets relative to the real clock, always ahead of it. loadDemo has
-    // already carried the file to today, and the shim never drags a demo
-    // backwards (a clock behind the file is left alone, by design), so a target
-    // in the past is a case production can't reach. Fixed future dates stood in
-    // for these once and rotted the day the clock passed the nearest one.
-    const ahead = (days: number) =>
-      new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+  it('leaves a file generated today exactly as it is', async () => {
+    const { demo, shiftToNow, weeksBehind } = await asWritten();
+    expect(weeksBehind(demo, day(born()))).toBe(0);
+    expect(shiftToNow(demo, day(born()))).toBe(demo);
+  });
 
-    for (const when of [ahead(3), ahead(113), ahead(292), ahead(905)]) {
-      const moved = shiftToNow(demo!, day(when));
-      for (const [date, scored] of everyDate(moved)) {
-        if (scored) expect(date < when, `${when}: ${date} has a score`).toBe(true);
-        else expect(date >= when, `${when}: ${date} has no score`).toBe(true);
+  it('lands volleyball’s split on today while its season lasts', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    for (const when of [later(3), later(10)]) {
+      const rows = rowsOf(shiftToNow(demo, day(when)), 'volleyball');
+      for (const r of rows) {
+        if (r.score) expect(r.date < when, `${when}: ${r.date} has a score`).toBe(true);
+        else expect(r.date >= when, `${when}: ${r.date} has no score`).toBe(true);
       }
     }
   });
 
-  it('moves whole weeks, so Friday football stays on a Friday', async () => {
-    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
-    const demo = await loadDemo();
-    const before = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
-    const after = shiftToNow(demo!, day('2027-06-30')).seasons[DEMO_SLUG].games.map((g) => g.date);
+  it('moves a played schedule by whole weeks, so a Tuesday match stays on a Tuesday', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    const before = rowsOf(demo, 'volleyball').map((r) => r.date);
+    const after = rowsOf(shiftToNow(demo, day(later(17))), 'volleyball').map((r) => r.date);
 
     for (let i = 0; i < before.length; i += 1) {
       expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
       const weeks = (day(after[i]).getTime() - day(before[i]).getTime()) / (7 * 86_400_000);
       expect(Number.isInteger(weeks), before[i]).toBe(true);
     }
-  });
-
-  it('moves all six seasons by the same amount, or the standings stop agreeing', async () => {
-    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
-    const demo = await loadDemo();
-    const moved = shiftToNow(demo!, day('2027-06-30'));
-
-    const ours = moved.seasons[DEMO_SLUG].games.map((g) => g.date);
-    for (const [slug, season] of Object.entries(moved.seasons)) {
-      expect(season.games.map((g) => g.date), slug).toEqual(ours);
-    }
-    // The record is a count, so it cannot move — but it still has to agree with
-    // the games after the shift, which is what the League tab reads.
-    const played = moved.seasons[DEMO_SLUG].games.filter((g) => g.result);
-    expect(moved.seasons[DEMO_SLUG].record.played).toBe(played.length);
-    expect(moved.seasons[DEMO_SLUG].record.won).toBe(played.filter((g) => g.result!.won).length);
-  });
-
-  it('carries the forecast along with the fixture it belongs to', async () => {
-    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(committed());
-    const moved = shiftToNow((await loadDemo())!, day('2027-01-02'));
-    const next = moved.seasons[DEMO_SLUG].games.find((g) => !g.result);
-
-    expect(moved.weather!.date).toBe(next!.date);
-    expect(moved.weather!.at.startsWith(next!.date)).toBe(true);
-  });
-
-  it('leaves a file generated today exactly as it is', async () => {
-    const born = (committed() as { generatedOn: string }).generatedOn;
-    const { loadDemo, shiftToNow, weeksBehind } = await load(committed());
-    const demo = await loadDemo();
-
-    // Keyed on the day it was written rather than on its last result, because
-    // a file written out of season has no results to key on.
-    expect(weeksBehind(demo!, day(born))).toBe(0);
-    expect(shiftToNow(demo!, day(born))).toBe(demo);
   });
 
   /*
-   * The other kind of file: written between December and July, when the autumn
-   * has not begun, so the generator writes every game as a fixture and nothing
-   * as a result. It has no last-played day, and hinging on nothing used to mean
-   * never moving — its fixtures would slide into the past one at a time and sit
-   * there under "Coming up", which is the whole fault this is here to prevent.
-   *
-   * Made by stripping the scores off the committed file rather than by shipping
-   * a second one, so it stays honest whichever half of the year the real file
-   * was generated in.
+   * The bug this shape exists to stop: one delta, set by volleyball's results,
+   * applied to basketball too. Four weeks on, basketball opened on Christmas
+   * Day; seven weeks on, in January under a hub saying "In season"; by
+   * December volleyball was printing last week's results under "Starts in
+   * August". Basketball has nothing played, so it stays where the generator
+   * put it, and volleyball never leaves its own months.
    */
-  const scoreless = () => {
-    const raw = committed() as unknown as {
-      seasons: Record<string, { games: Array<Record<string, unknown>> }>;
-      sports: Record<string, { schedule: Array<Record<string, unknown>> | null }>;
-    };
-    for (const season of Object.values(raw.seasons)) {
-      for (const g of season.games) delete g.result;
-    }
-    for (const entry of Object.values(raw.sports)) {
-      for (const r of entry.schedule ?? []) delete r.score;
-    }
-    return raw as unknown as Record<string, unknown>;
-  };
+  it('moves each sport by its own results, and never out of its own months', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    const basketball = rowsOf(demo, 'basketball').map((r) => r.date);
 
-  it('still moves a file with nothing played on it', async () => {
-    const { loadDemo, shiftToNow, weeksBehind } = await load(scoreless());
-    const demo = await loadDemo();
+    for (const when of ['2026-11-05', '2026-11-20', '2026-12-10', '2027-03-01', later(120)]) {
+      const moved = shiftToNow(demo, day(when));
 
-    for (const when of ['2027-03-01', '2027-11-11', '2030-01-20']) {
-      const moved = shiftToNow(demo!, day(when));
-      expect(weeksBehind(demo!, day(when)), when).toBeGreaterThan(0);
-      for (const [date, scored] of everyDate(moved)) {
-        expect(scored, `${when}: ${date}`).toBe(false);
-        expect(date >= when, `${when}: ${date} is behind today`).toBe(true);
+      const hoops = rowsOf(moved, 'basketball').map((r) => r.date);
+      expect(hoops, when).toEqual(basketball);
+      expect(inSeason('basketball', monthOf(hoops[0])), `${when}: opens ${hoops[0]}`).toBe(true);
+
+      for (const r of rowsOf(moved, 'volleyball')) {
+        expect(inSeason('volleyball', monthOf(r.date)), `${when}: ${r.date}`).toBe(true);
       }
     }
   });
 
-  it('moves a scoreless file by whole weeks, all seasons together', async () => {
-    const { loadDemo, shiftToNow, DEMO_SLUG } = await load(scoreless());
-    const demo = await loadDemo();
-    const before = demo!.seasons[DEMO_SLUG].games.map((g) => g.date);
-    const moved = shiftToNow(demo!, day('2027-11-11'));
-    const after = moved.seasons[DEMO_SLUG].games.map((g) => g.date);
+  it('leaves a file with nothing played on it exactly where it was written', async () => {
+    // A file generated out of season is all fixtures, each already dated inside
+    // its sport's months by the generator; moving it could only move it out.
+    const raw = committed() as unknown as {
+      sports: Record<string, { schedule: Array<Record<string, unknown>> | null }>;
+    };
+    for (const entry of Object.values(raw.sports)) {
+      for (const r of entry.schedule ?? []) delete r.score;
+    }
+    const { demo, shiftToNow, weeksBehind } = await asWritten(raw);
 
-    for (let i = 0; i < before.length; i += 1) {
-      const weeks = (day(after[i]).getTime() - day(before[i]).getTime()) / (7 * 86_400_000);
-      expect(Number.isInteger(weeks), before[i]).toBe(true);
-      expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
+    for (const when of ['2027-03-01', '2027-11-11', '2030-01-20']) {
+      expect(weeksBehind(demo, day(when)), when).toBe(0);
+      expect(shiftToNow(demo, day(when)), when).toBe(demo);
     }
-    for (const [slug, season] of Object.entries(moved.seasons)) {
-      expect(season.games.map((g) => g.date), slug).toEqual(after);
-    }
-    expect(moved.weather!.at.startsWith(moved.weather!.date)).toBe(true);
   });
 
-  it('does not drag a scoreless file backwards either', async () => {
-    const { loadDemo, weeksBehind } = await load(scoreless());
-    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
+  it('carries a baked season and its forecast along together', async () => {
+    // Grafted on: the committed file bakes neither, but a file that does must
+    // move them by the same weeks, or the forecast lands beside the wrong game.
+    const base = committed() as { slug: string; generatedOn: string };
+    const played = later(-1);
+    const next = later(7);
+    const body = {
+      ...base,
+      weather: { date: next, code: 2, tempF: 63, precipChance: 20, windMph: 9, day: false, at: `${next}T19:00` },
+      seasons: {
+        [base.slug]: {
+          school: { slug: base.slug, name: 'Springfield', city: 'New Middletown' },
+          games: [
+            { week: 1, date: played, home: true, opponent: 'A', result: { us: 1, them: 0, won: true } },
+            { week: 2, date: next, home: true, opponent: 'B' },
+          ],
+          record: { won: 1, lost: 0, played: 1 },
+        },
+      },
+    };
+    const { demo, shiftToNow } = await asWritten(body);
+    const moved = shiftToNow(demo, day(later(15)));
+    const movedNext = moved.seasons[base.slug].games[1].date;
+
+    expect(movedNext).not.toBe(next);
+    expect(moved.weather!.date).toBe(movedNext);
+    expect(moved.weather!.at.startsWith(movedNext)).toBe(true);
   });
 
   it('never drags a file backwards for a clock that is behind', async () => {
-    const { loadDemo, weeksBehind } = await load(committed());
-    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
+    const { demo, weeksBehind } = await asWritten();
+    expect(weeksBehind(demo, day('2020-01-01'))).toBe(0);
   });
 });
 
@@ -444,7 +516,7 @@ describe('what the store guards ask for', () => {
 
     const football = (await demoRosterBody(DEMO_SLUG, 'football')) as Record<string, unknown>;
     expect(football.league).not.toBeNull();
-    // Football's fixtures come from the season, exactly as a real paid
+    // Football's fixtures come from the directory, exactly as a real paid
     // school's do — there is nothing pasted for it.
     expect(football.schedule).toBeNull();
 
@@ -495,26 +567,53 @@ describe('the store, in demo mode', () => {
     };
   };
 
-  it('serves the roster, the identity and the season out of the baked file', async () => {
+  it('serves the roster and the identity out of the baked file, through the real validators', async () => {
     await load(committed());
-    const { DEMO_SLUG, store, rosterStore } = await stores();
+    const { DEMO_SLUG, rosterStore } = await stores();
 
     const identity = await rosterStore.loadSchoolSports(DEMO_SLUG);
-    expect(identity!.sports).toHaveLength(6);
-    expect(identity!.colors).not.toBeNull();
-    expect(identity!.logo).toMatch(/^data:image\/png;base64,/);
+    expect(identity!.sports).toHaveLength(3);
+    expect(identity!.colors).toEqual({ ground: '#0e0c0b', accent: '#f26722' });
+    expect(identity!.logo).toMatch(/^data:image\/jpeg;base64,/);
 
     const roster = await rosterStore.loadSchoolRoster(DEMO_SLUG, 'volleyball');
     expect(roster!.players).toHaveLength(12);
-    expect(roster!.schedule).toHaveLength(9);
+    expect(roster!.schedule).toHaveLength(14);
     // Only football carries a conference, and this one is volleyball.
     expect(roster!.league).toBeNull();
 
-    const season = await store.loadSeason(DEMO_SLUG);
-    expect(season.school.name).toBe('Springfield Local');
+    const football = await rosterStore.loadSchoolRoster(DEMO_SLUG, 'football');
+    expect(football!.league!.name).toBe('MVAC Scarlet');
+    expect(football!.league!.members).toHaveLength(7);
+  });
 
-    const weather = await store.loadWeather(DEMO_SLUG);
-    expect(weather!.date).toBe(season.games.find((g) => !g.result)!.date);
+  it('reads the season and the forecast from the directory, as a paid page does', async () => {
+    const real = JSON.parse(readFileSync(dataFile('springfield-new-middletown'), 'utf8'));
+    const forecast = {
+      date: '2026-10-09',
+      code: 3,
+      tempF: 60,
+      precipChance: 3,
+      windMph: 7,
+      day: true,
+      at: '2026-10-09T23:00:00.000Z',
+    };
+    await load(committed(), {}, { 'springfield-new-middletown': forecast });
+    const { DEMO_SLUG, store } = await stores();
+    // A reader who follows the real Springfield in the directory and then opens
+    // the demo — the one case where the jar rule below has anything to refuse.
+    localStorage.setItem('oh.school', DEMO_SLUG);
+
+    const season = await store.loadSeason(DEMO_SLUG);
+    expect(season.school.slug).toBe(DEMO_SLUG);
+    expect(season).toEqual(real);
+
+    expect(await store.loadWeather(DEMO_SLUG)).toEqual(forecast);
+    // And leaves nothing behind: a prospect's visit is not a school followed.
+    store.rememberLeagueTable(DEMO_SLUG, 'members', []);
+    for (const jar of ['season', 'weather', 'league']) {
+      expect(localStorage.getItem(`oh.${jar}.${DEMO_SLUG}`), jar).toBeNull();
+    }
   });
 
   it('leaves the kept-identity door where it was: null until the file lands', async () => {
@@ -523,7 +622,7 @@ describe('the store, in demo mode', () => {
 
     expect(rosterStore.keptSchoolSports(DEMO_SLUG)).toBeNull();
     await rosterStore.loadSchoolSports(DEMO_SLUG);
-    expect(rosterStore.keptSchoolSports(DEMO_SLUG)!.sports).toHaveLength(6);
+    expect(rosterStore.keptSchoolSports(DEMO_SLUG)!.sports).toHaveLength(3);
   });
 
   it('refuses to remember a sport, so every prospect gets the hub', async () => {
@@ -553,13 +652,12 @@ describe('the store, in demo mode', () => {
     expect(store.chosenSport(DEMO_SLUG)).toBeNull();
   });
 
-  it('resolves a conference member the same way, so the League tab can count', async () => {
+  it('fills the whole MVAC Scarlet table from the directory, so the League tab draws', async () => {
     await load(committed());
     const { DEMO_SLUG, store, rosterStore } = await stores();
 
     const football = await rosterStore.loadSchoolRoster(DEMO_SLUG, 'football');
     const league = football!.league!;
-    expect(league.members.length).toBeGreaterThanOrEqual(5);
 
     const { leagueTable } = await import('./leagueTable');
     const members = [DEMO_SLUG, ...league.members];
@@ -586,15 +684,10 @@ describe('a file that is not what it should be', () => {
       const c = committed() as { sportNames: string[] };
       return { ...c, sportNames: [...c.sportNames, 'lacrosse'] };
     })()],
-    ['a season with no games', (() => {
-      const c = committed() as { slug: string; seasons: Record<string, unknown> };
-      return { ...c, seasons: { ...c.seasons, [c.slug]: { school: {}, games: null } } };
-    })()],
-    ['no season for the school itself', (() => {
-      const c = committed() as { slug: string; seasons: Record<string, unknown> };
-      const seasons = { ...c.seasons };
-      delete seasons[c.slug];
-      return { ...c, seasons };
+    ['seasons that are not a map of seasons', { ...committed(), seasons: ['nope'] }],
+    ['a baked season with no games', (() => {
+      const c = committed() as { slug: string };
+      return { ...c, seasons: { [c.slug]: { school: {}, games: null } } };
     })()],
   ];
 
