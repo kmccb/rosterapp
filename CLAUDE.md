@@ -123,7 +123,7 @@ Poland's own page — a short address outside that prefix would never reach the 
   partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
-## Where things stand (2026-09-30, end of session)
+## Where things stand (2026-10-02)
 
 **Hosting moved 2026-09-11:** GitHub Pages → Cloudflare Pages, same domain (the `scottforge.ai`
 zone is on Cloudflare; `roster` is a proxied CNAME to `rosterapp-7zt.pages.dev`). Verified
@@ -145,11 +145,15 @@ twice on 2026-10-01 and the verify script passed 11/11. Until the function is de
 scheduled, the panel's Check link / Sync now controls have nothing to call.
 
 **Open items, in priority order:**
-1. **Stand up the sync job** — Resend (domain + DNS on Cloudflare), the function's secrets,
-   `npm run build:sync` + `supabase functions deploy sync-sources --no-verify-jwt`, enable
-   pg_cron/pg_net, run `supabase/cron/sync-sources.sql`, then the rehearsal (which is also the
-   first time the new panel screens are seen rendered) — steps 3–7 of docs/going-live.md's v5
-   section, before any real school's sheet is linked.
+1. **Rehearse live sources** (docs/going-live.md v5 step 7) before any real school's sheet is
+   linked — it's also the first time the new panel screens are seen rendered. The sync job is
+   up as of 2026-10-02: `sync-sources` deployed to project `jkuocstqtveuymfqqlwg` (CLI linked
+   via `npx supabase login`), secrets set in the dashboard (RESEND_API_KEY from the existing
+   Resend account, where scottforge.ai was already verified; CRON_SECRET; ALERT_TO;
+   ALERT_FROM), pg_cron scheduled every 15 minutes, and `net._http_response` shows
+   `200 {"synced":0,"failed":0}` runs. Redeploy after any src/sync change with
+   `npm run build:sync` then
+   `npx supabase functions deploy sync-sources --no-verify-jwt --project-ref jkuocstqtveuymfqqlwg`.
 2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
    published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
    or replace with a real roster. The seller's admin session expires hourly — re-sign-in
