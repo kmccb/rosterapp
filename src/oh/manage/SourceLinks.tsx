@@ -57,7 +57,7 @@ export function Sources({
         // Remounts across a link/unlink: otherwise the input's leftover url,
         // the stale Check-link preview, and an enabled "Link this …" button
         // from the old session would sit in front of the fresh paste box.
-        key={links.roster ? 'linked' : 'unlinked'}
+        key={links.roster ? 'roster-linked' : 'roster-unlinked'}
         kind="roster"
         sport={row.sport}
         season={row.season}
@@ -73,7 +73,7 @@ export function Sources({
       />
       {row.sport !== 'football' && (
         <SourceBlock
-          key={links.schedule ? 'linked' : 'unlinked'}
+          key={links.schedule ? 'schedule-linked' : 'schedule-unlinked'}
           kind="schedule"
           sport={row.sport}
           season={row.season}
@@ -126,7 +126,7 @@ function SourceBlock(props: {
 
   if (props.linked) {
     return (
-      <div className="mg-field">
+      <div className="mg-source">
         <p className="filter-line">
           <span>
             {noun === 'roster' ? 'Roster' : 'Schedule'} from a {source} · {sideLine(props.side, new Date())}
@@ -159,7 +159,7 @@ function SourceBlock(props: {
   const filterValue = filter.trim() || null;
 
   return (
-    <div className="mg-field">
+    <div className="mg-source">
       <p className="filter-line">
         <span>Or link a {source}, and the {noun} keeps itself current</span>
       </p>
