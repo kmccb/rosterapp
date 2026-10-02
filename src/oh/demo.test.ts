@@ -192,21 +192,23 @@ describe('the committed file', () => {
     expect(demo!.sports.football.schedule).toBeNull();
   });
 
-  it('names MVAC Scarlet by real directory slugs that Springfield actually plays', () => {
+  /*
+   * Only that the slugs resolve — the same coupling src/oh/redirects.test.ts
+   * keeps. The directory's files are rewritten by a cron job that commits
+   * straight to main with no test step, so anything read out of them here (who
+   * Springfield plays, what a school is called) could turn a refresh red and
+   * block every deploy, Poland's included. Whether Springfield actually meets
+   * every member is build-demo.mjs's self-check, made when the file is written.
+   */
+  it('names MVAC Scarlet by slugs the directory knows', () => {
     const raw = committed() as { slug: string; league: { name: string; members: string[] } };
     expect(raw.league.name).toBe('MVAC Scarlet');
     expect([...raw.league.members].sort()).toEqual([...MVAC_SCARLET].sort());
 
     const known = new Set(directoryIndex().schools.map((s) => s.slug));
-    const ours = JSON.parse(readFileSync(dataFile(raw.slug), 'utf8')) as {
-      games: Array<{ opponentSlug: string | null }>;
-    };
-    for (const slug of raw.league.members) {
+    for (const slug of [raw.slug, ...raw.league.members]) {
       expect(known.has(slug), slug).toBe(true);
       expect(existsSync(dataFile(slug)), slug).toBe(true);
-      // A member Springfield never meets would sit in the table at 0–0
-      // against the school being sold to.
-      expect(ours.games.some((g) => g.opponentSlug === slug), slug).toBe(true);
     }
   });
 
@@ -260,15 +262,24 @@ describe('the committed file', () => {
     expect(raw.sports.basketball.players.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('pastes schedules against the real conference’s names', () => {
+  /*
+   * The conference twice over in both pasted sports. Checked against itself
+   * rather than against the directory's names, for the reason above — the
+   * generator spells them out of index.json when it runs.
+   */
+  it('pastes the whole conference into both schedules, twice', () => {
     const raw = committed() as {
       sports: Record<string, { schedule: Array<{ opponent: string }> | null }>;
     };
-    const names = new Map(directoryIndex().schools.map((s) => [s.slug, s.name]));
-    const conference = new Set(MVAC_SCARLET.map((slug) => names.get(slug)));
-    for (const sport of ['volleyball', 'basketball']) {
-      const opponents = new Set(raw.sports[sport].schedule!.map((r) => r.opponent));
-      for (const name of conference) expect(opponents.has(name!), `${sport} ${name}`).toBe(true);
+    const volleyball = raw.sports.volleyball.schedule!.map((r) => r.opponent);
+    const conference = new Set(volleyball);
+    expect(conference.size).toBe(MVAC_SCARLET.length);
+    for (const name of conference) {
+      expect(volleyball.filter((o) => o === name), name).toHaveLength(2);
+    }
+    const basketball = raw.sports.basketball.schedule!.map((r) => r.opponent);
+    for (const name of conference) {
+      expect(basketball.filter((o) => o === name), name).toHaveLength(2);
     }
   });
 
@@ -367,56 +378,53 @@ describe('the committed file', () => {
  * coming up. These are the only tests here that name a day, and they name a
  * made-up one rather than reading the clock.
  *
- * The committed file bakes only pasted schedules, but the shim still moves a
- * baked season or forecast if a file carries one, so a couple of tests below
- * graft those on to keep that path honest.
+ * The file is read as it was on the day it was written: the clock is set to
+ * `generatedOn` while loadDemo runs, so its own carry-forward is a no-op and
+ * every shift below is measured from the file as committed.
  */
 describe('the calendar, weeks after it was written', () => {
   const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const born = () => (committed() as { generatedOn: string }).generatedOn;
+  const later = (days: number) =>
+    new Date(day(born()).getTime() + days * 86_400_000).toISOString().slice(0, 10);
 
-  const everyDate = (demo: {
-    seasons?: Record<string, { games: Array<{ date: string; result?: unknown }> }>;
-    sports: Record<string, { schedule: Array<{ date: string; score?: unknown }> | null }>;
-  }) => {
-    const all: Array<[string, boolean]> = [];
-    for (const season of Object.values(demo.seasons ?? {})) {
-      for (const g of season.games) all.push([g.date, !!g.result]);
+  const asWritten = async (body: unknown = committed()) => {
+    const mod = await load(body);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(day(born()));
+    try {
+      return { ...mod, demo: (await mod.loadDemo())! };
+    } finally {
+      vi.useRealTimers();
     }
-    for (const entry of Object.values(demo.sports)) {
-      for (const r of entry.schedule ?? []) all.push([r.date, !!r.score]);
-    }
-    return all;
   };
 
-  const volleyballDates = (demo: {
-    sports: Record<string, { schedule: Array<{ date: string }> | null }>;
-  }) => demo.sports.volleyball.schedule!.map((r) => r.date);
+  type Rows = Array<{ date: string; score?: unknown }>;
+  const rowsOf = (demo: { sports: Record<string, { schedule: Rows | null }> }, sport: string) =>
+    demo.sports[sport].schedule!;
+  const monthOf = (date: string) => Number(date.slice(5, 7));
 
-  it('lands the split on today, however long the file has sat', async () => {
-    const { loadDemo, shiftToNow } = await load(committed());
-    const demo = await loadDemo();
+  it('leaves a file generated today exactly as it is', async () => {
+    const { demo, shiftToNow, weeksBehind } = await asWritten();
+    expect(weeksBehind(demo, day(born()))).toBe(0);
+    expect(shiftToNow(demo, day(born()))).toBe(demo);
+  });
 
-    // Targets relative to the real clock, always ahead of it. loadDemo has
-    // already carried the file to today, and the shim never drags a demo
-    // backwards (a clock behind the file is left alone, by design), so a target
-    // in the past is a case production can't reach.
-    const ahead = (days: number) =>
-      new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
-
-    for (const when of [ahead(3), ahead(113), ahead(292), ahead(905)]) {
-      const moved = shiftToNow(demo!, day(when));
-      for (const [date, scored] of everyDate(moved)) {
-        if (scored) expect(date < when, `${when}: ${date} has a score`).toBe(true);
-        else expect(date >= when, `${when}: ${date} has no score`).toBe(true);
+  it('lands volleyball’s split on today while its season lasts', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    for (const when of [later(3), later(10)]) {
+      const rows = rowsOf(shiftToNow(demo, day(when)), 'volleyball');
+      for (const r of rows) {
+        if (r.score) expect(r.date < when, `${when}: ${r.date} has a score`).toBe(true);
+        else expect(r.date >= when, `${when}: ${r.date} has no score`).toBe(true);
       }
     }
   });
 
-  it('moves whole weeks, so a Tuesday match stays on a Tuesday', async () => {
-    const { loadDemo, shiftToNow } = await load(committed());
-    const demo = await loadDemo();
-    const before = volleyballDates(demo!);
-    const after = volleyballDates(shiftToNow(demo!, day('2027-06-30')));
+  it('moves a played schedule by whole weeks, so a Tuesday match stays on a Tuesday', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    const before = rowsOf(demo, 'volleyball').map((r) => r.date);
+    const after = rowsOf(shiftToNow(demo, day(later(17))), 'volleyball').map((r) => r.date);
 
     for (let i = 0; i < before.length; i += 1) {
       expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
@@ -425,114 +433,80 @@ describe('the calendar, weeks after it was written', () => {
     }
   });
 
-  it('moves every pasted schedule by the same amount', async () => {
-    const { loadDemo, shiftToNow } = await load(committed());
-    const demo = await loadDemo();
-    const moved = shiftToNow(demo!, day('2027-06-30'));
-
-    const deltas = new Set<number>();
-    for (const [sport, entry] of Object.entries(demo!.sports)) {
-      (entry.schedule ?? []).forEach((r, i) => {
-        const after = moved.sports[sport].schedule![i].date;
-        deltas.add(day(after).getTime() - day(r.date).getTime());
-      });
-    }
-    expect(deltas.size).toBe(1);
-  });
-
-  it('carries a baked forecast and a baked season along with the rest', async () => {
-    // Grafted on: the committed file bakes neither, but a file that does must
-    // have them moved by the same weeks as everything else.
-    const base = committed() as { slug: string; sports: { volleyball: { schedule: Array<{ date: string; score?: unknown }> } } };
-    const next = base.sports.volleyball.schedule.find((r) => !r.score)!.date;
-    const body = {
-      ...base,
-      weather: { date: next, code: 2, tempF: 63, precipChance: 20, windMph: 9, day: false, at: `${next}T19:00` },
-      seasons: {
-        [base.slug]: {
-          school: { slug: base.slug, name: 'Springfield', city: 'New Middletown' },
-          games: [{ week: 1, date: next, home: true, opponent: 'Brookfield' }],
-          record: { won: 0, lost: 0, played: 0 },
-        },
-      },
-    };
-    const { loadDemo, shiftToNow } = await load(body);
-    const demo = (await loadDemo())!;
-    const moved = shiftToNow(demo, day('2027-01-02'));
-    const movedNext = moved.sports.volleyball.schedule!.find((r) => !r.score)!.date;
-
-    expect(moved.weather!.date).toBe(movedNext);
-    expect(moved.weather!.at.startsWith(movedNext)).toBe(true);
-    expect(moved.seasons[base.slug].games[0].date).toBe(movedNext);
-  });
-
-  it('leaves a file generated today exactly as it is', async () => {
-    const born = (committed() as { generatedOn: string }).generatedOn;
-    const { loadDemo, shiftToNow, weeksBehind } = await load(committed());
-    const demo = await loadDemo();
-
-    // Keyed on the day it was written rather than on its last result, because
-    // a file written out of season has no results to key on.
-    expect(weeksBehind(demo!, day(born))).toBe(0);
-    expect(shiftToNow(demo!, day(born))).toBe(demo);
-  });
-
   /*
-   * The other kind of file: written between December and July, when the autumn
-   * has not begun, so the generator writes every match as a fixture and nothing
-   * as a result. It has no last-played day, and hinging on nothing used to mean
-   * never moving — its fixtures would slide into the past one at a time and sit
-   * there under "Coming up", which is the whole fault this is here to prevent.
-   *
-   * Made by stripping the scores off the committed file rather than by shipping
-   * a second one, so it stays honest whichever half of the year the real file
-   * was generated in.
+   * The bug this shape exists to stop: one delta, set by volleyball's results,
+   * applied to basketball too. Four weeks on, basketball opened on Christmas
+   * Day; seven weeks on, in January under a hub saying "In season"; by
+   * December volleyball was printing last week's results under "Starts in
+   * August". Basketball has nothing played, so it stays where the generator
+   * put it, and volleyball never leaves its own months.
    */
-  const scoreless = () => {
+  it('moves each sport by its own results, and never out of its own months', async () => {
+    const { demo, shiftToNow } = await asWritten();
+    const basketball = rowsOf(demo, 'basketball').map((r) => r.date);
+
+    for (const when of ['2026-11-05', '2026-11-20', '2026-12-10', '2027-03-01', later(120)]) {
+      const moved = shiftToNow(demo, day(when));
+
+      const hoops = rowsOf(moved, 'basketball').map((r) => r.date);
+      expect(hoops, when).toEqual(basketball);
+      expect(inSeason('basketball', monthOf(hoops[0])), `${when}: opens ${hoops[0]}`).toBe(true);
+
+      for (const r of rowsOf(moved, 'volleyball')) {
+        expect(inSeason('volleyball', monthOf(r.date)), `${when}: ${r.date}`).toBe(true);
+      }
+    }
+  });
+
+  it('leaves a file with nothing played on it exactly where it was written', async () => {
+    // A file generated out of season is all fixtures, each already dated inside
+    // its sport's months by the generator; moving it could only move it out.
     const raw = committed() as unknown as {
       sports: Record<string, { schedule: Array<Record<string, unknown>> | null }>;
     };
     for (const entry of Object.values(raw.sports)) {
       for (const r of entry.schedule ?? []) delete r.score;
     }
-    return raw as unknown as Record<string, unknown>;
-  };
-
-  it('still moves a file with nothing played on it', async () => {
-    const { loadDemo, shiftToNow, weeksBehind } = await load(scoreless());
-    const demo = await loadDemo();
+    const { demo, shiftToNow, weeksBehind } = await asWritten(raw);
 
     for (const when of ['2027-03-01', '2027-11-11', '2030-01-20']) {
-      const moved = shiftToNow(demo!, day(when));
-      expect(weeksBehind(demo!, day(when)), when).toBeGreaterThan(0);
-      for (const [date, scored] of everyDate(moved)) {
-        expect(scored, `${when}: ${date}`).toBe(false);
-        expect(date >= when, `${when}: ${date} is behind today`).toBe(true);
-      }
+      expect(weeksBehind(demo, day(when)), when).toBe(0);
+      expect(shiftToNow(demo, day(when)), when).toBe(demo);
     }
   });
 
-  it('moves a scoreless file by whole weeks', async () => {
-    const { loadDemo, shiftToNow } = await load(scoreless());
-    const demo = await loadDemo();
-    const before = volleyballDates(demo!);
-    const after = volleyballDates(shiftToNow(demo!, day('2027-11-11')));
+  it('carries a baked season and its forecast along together', async () => {
+    // Grafted on: the committed file bakes neither, but a file that does must
+    // move them by the same weeks, or the forecast lands beside the wrong game.
+    const base = committed() as { slug: string; generatedOn: string };
+    const played = later(-1);
+    const next = later(7);
+    const body = {
+      ...base,
+      weather: { date: next, code: 2, tempF: 63, precipChance: 20, windMph: 9, day: false, at: `${next}T19:00` },
+      seasons: {
+        [base.slug]: {
+          school: { slug: base.slug, name: 'Springfield', city: 'New Middletown' },
+          games: [
+            { week: 1, date: played, home: true, opponent: 'A', result: { us: 1, them: 0, won: true } },
+            { week: 2, date: next, home: true, opponent: 'B' },
+          ],
+          record: { won: 1, lost: 0, played: 1 },
+        },
+      },
+    };
+    const { demo, shiftToNow } = await asWritten(body);
+    const moved = shiftToNow(demo, day(later(15)));
+    const movedNext = moved.seasons[base.slug].games[1].date;
 
-    for (let i = 0; i < before.length; i += 1) {
-      const weeks = (day(after[i]).getTime() - day(before[i]).getTime()) / (7 * 86_400_000);
-      expect(Number.isInteger(weeks), before[i]).toBe(true);
-      expect(day(after[i]).getUTCDay(), before[i]).toBe(day(before[i]).getUTCDay());
-    }
-  });
-
-  it('does not drag a scoreless file backwards either', async () => {
-    const { loadDemo, weeksBehind } = await load(scoreless());
-    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
+    expect(movedNext).not.toBe(next);
+    expect(moved.weather!.date).toBe(movedNext);
+    expect(moved.weather!.at.startsWith(movedNext)).toBe(true);
   });
 
   it('never drags a file backwards for a clock that is behind', async () => {
-    const { loadDemo, weeksBehind } = await load(committed());
-    expect(weeksBehind((await loadDemo())!, day('2020-01-01'))).toBe(0);
+    const { demo, weeksBehind } = await asWritten();
+    expect(weeksBehind(demo, day('2020-01-01'))).toBe(0);
   });
 });
 
@@ -631,12 +605,15 @@ describe('the store, in demo mode', () => {
     localStorage.setItem('oh.school', DEMO_SLUG);
 
     const season = await store.loadSeason(DEMO_SLUG);
-    expect(season.school.name).toBe('Springfield');
+    expect(season.school.slug).toBe(DEMO_SLUG);
     expect(season).toEqual(real);
 
     expect(await store.loadWeather(DEMO_SLUG)).toEqual(forecast);
     // And leaves nothing behind: a prospect's visit is not a school followed.
-    expect(localStorage.getItem(`oh.weather.${DEMO_SLUG}`)).toBeNull();
+    store.rememberLeagueTable(DEMO_SLUG, 'members', []);
+    for (const jar of ['season', 'weather', 'league']) {
+      expect(localStorage.getItem(`oh.${jar}.${DEMO_SLUG}`), jar).toBeNull();
+    }
   });
 
   it('leaves the kept-identity door where it was: null until the file lands', async () => {
@@ -691,7 +668,6 @@ describe('the store, in demo mode', () => {
     // to. A demo that cannot fill its own table would ship a broken tab.
     expect(rows).toHaveLength(members.length);
     expect(rows.map((r) => r.slug)).toContain(DEMO_SLUG);
-    expect(rows.find((r) => r.slug === 'western-reserve-berlin-center')!.name).toBe('Western Reserve');
   });
 });
 

@@ -35,12 +35,16 @@
  *
  * WHEN TO RE-RUN. The pasted schedules are anchored to the day the script runs,
  * so that a scored match is always in the past and an unplayed one always
- * ahead. src/oh/demo.ts carries those dates forward by whole weeks when the
- * page loads, so the split between played and coming stays where it was put.
- * What that cannot fix is the calendar itself: about six months on, the
- * volleyball season is reading March to May under a hub saying "Starts in
- * August". So this wants re-running twice a year, near the start of the autumn
- * and again around February, and before any demo that matters.
+ * ahead. src/oh/demo.ts carries a schedule that has results forward by whole
+ * weeks when the page loads, each sport by its own results, so volleyball's
+ * split between played and coming stays where it was put — but only as far as
+ * the end of volleyball's own months. A schedule with nothing played on it
+ * (basketball, until it starts) is never moved: it is already dated inside its
+ * own season, and it slides into the past one fixture at a time once that
+ * season arrives. So this wants re-running twice a year — near the start of
+ * the autumn, and again in December once volleyball is over, when it rewrites
+ * the autumn as next year's fixtures and starts basketball's run from a
+ * fortnight ahead — and before any demo that matters.
  * `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it writes on a
  * day of your choosing. Football needs none of this — it is live.
  */
@@ -182,11 +186,10 @@ const THEME_CEILING = 500_000;
  * to clear today whatever day the script is run on.
  *
  * Thursday because it is a volleyball night, so the last result can sit on the
- * anchor itself. That matters to src/oh/demo.ts, which carries the file forward
- * whenever its last result is more than a week old: a last result the day
- * before a Friday anchor is eight days old on a Friday run, and the page would
- * move the whole file a week on its very first load — basketball included,
- * which is how a Christmas Day fixture appears.
+ * anchor itself. That matters to src/oh/demo.ts, which carries a played
+ * schedule forward whenever its last result is more than a week old: a last
+ * result the day before a Friday anchor is eight days old on a Friday run, and
+ * the page would move volleyball a week on its very first load.
  *
  * Dates are done in UTC. The output is a plain YYYY-MM-DD and the arithmetic is
  * whole days, so the one thing that could go wrong is an hour lost to a clock
@@ -623,10 +626,11 @@ console.log(`  played  ${spread(dated.filter(([, , s]) => s).map(([, d]) => d).s
 console.log(`  ahead   ${spread(dated.filter(([, , s]) => !s).map(([, d]) => d).sort())}`);
 console.log(`  football is ${directorySeason.record.won}–${directorySeason.record.lost} in the directory today, and stays live`);
 /*
- * What the page does with this file from here on: src/oh/demo.ts moves the
- * pasted dates forward by whole weeks at read time, so the split between played
- * and coming stays where it was put. It cannot keep a season in its own months,
- * which is the reason to re-run this twice a year.
+ * What the page does with this file from here on: src/oh/demo.ts moves a
+ * schedule that has results forward by whole weeks at read time, within its own
+ * sport's months, and leaves a schedule with nothing played where it is. Neither
+ * keeps a season current past its own months, which is the reason to re-run
+ * this twice a year.
  */
-console.log('  the page carries the pasted dates forward by whole weeks as it ages;');
-console.log('  re-run about every six months, so each season stays in its own months');
+console.log('  the page carries played schedules forward by whole weeks, within their months;');
+console.log('  re-run near the start of the autumn and again in December');
