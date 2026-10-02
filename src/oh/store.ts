@@ -150,7 +150,10 @@ export const keptLeagueTable = (slug: string, members: string): LeagueRow[] | nu
 };
 
 export const rememberLeagueTable = (slug: string, members: string, rows: LeagueRow[]): void => {
-  if (slug !== chosenSlug()) return;
+  // The demo is a real school's slug, so a reader who follows that school in
+  // the directory would otherwise have the demo writing into their jar. The
+  // demo keeps nothing, the same rule as the sport and the forecast.
+  if (isDemo() || slug !== chosenSlug()) return;
   try {
     localStorage.setItem(LEAGUE(slug), JSON.stringify({ members, rows }));
   } catch {
@@ -197,8 +200,10 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
     if (res.ok) {
       const season = (await res.json()) as SchoolSeason;
       // Only the followed school is kept. Caching every school browsed would
-      // fill the jar with counties nobody will open again.
-      if (slug === chosenSlug()) {
+      // fill the jar with counties nobody will open again. The demo keeps
+      // nothing: what a prospect looks at must not survive into the next
+      // school they look at, even when it is the school they follow.
+      if (!isDemo() && slug === chosenSlug()) {
         try {
           localStorage.setItem(SEASON(slug), JSON.stringify(season));
         } catch {
