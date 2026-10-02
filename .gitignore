@@ -21,3 +21,6 @@ public/league.json
 
 # Subagent-driven development scratch: ledgers, briefs and review packages.
 .superpowers/
+
+# The Supabase CLI's local cache (names the linked project).
+supabase/.temp/

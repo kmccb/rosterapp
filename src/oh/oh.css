@@ -226,6 +226,23 @@
   font-size: 14px;
 }
 
+/* A linked sheet or calendar: a stack of status, link, buttons and preview,
+   not one row of label and control like .mg-field — on that, a full CSV
+   link and a 60-row preview squeezed side by side into a single line. */
+.mg-source {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mg-source .fixture-sub {
+  overflow-wrap: anywhere;
+}
+
 .mg-logo {
   display: flex;
   align-items: center;

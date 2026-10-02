@@ -264,6 +264,10 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
   // Editing an existing school keeps its roster unless a new paste replaces
   // it: a save with no paste sends null and the database keeps what it has.
   // That is the renewal flow — new date, new note, roster untouched.
+  // Publishing a new activation needs somebody on it, and the database
+  // refuses an empty published roster anyway. Saving it unpublished doesn't:
+  // that is how a roster that will come from the coach's Google Sheet starts,
+  // because a sheet can only be linked to an activation that already exists.
   const canSave = Boolean(slug) && (players.length > 0 || Boolean(existing));
 
   const save = async (published: boolean) => {
@@ -681,7 +685,7 @@ export function Activate({ existing, onDone }: { existing: RosterRow | null; onD
             onClick={() => save(true)}>
             <span className="fixture-team">Publish</span>
           </button>
-          <button type="button" className="fixture-row is-plain" disabled={busy || !canSave}
+          <button type="button" className="fixture-row is-plain" disabled={busy || !slug}
             onClick={() => save(false)}>
             <span className="fixture-team">Save unpublished</span>
           </button>
