@@ -13,30 +13,55 @@ change it here, and quote whatever it says.
 https://roster.scottforge.ai/oh/demo/ — open it on a phone and hand it over.
 No login, no setup, nothing to explain first.
 
-It is Springfield Local, a school that does not exist, in colors and a crest
-that are its own. Six sports across all three seasons, so whatever month you
-are selling in, some bands read "In season" and the rest say when they come
-back. Every sport opens the way a paying school's does: keypad, roster,
-schedule. Football also carries scores, a forecast at kickoff and a
-standings table for a conference of five more invented schools.
+It is the **real** Springfield (New Middletown), the school the sales video
+was made for, as its page would look the day it signed up. Black and orange,
+the tiger crest, and three sports — Football, Volleyball, Basketball — each
+opening the way a paying school's does: keypad, roster, schedule.
 
-The school is fictional on purpose. The demo used to be invented players on
-Strasburg-Franklin's real page, which is fine as a smoke test and not fine
-as the thing shown to strangers. A quiet line in the footer says it is
-sample data, so nobody mistakes the squad for their own.
+What is sample and what is real:
 
-It works with no signal once loaded, and it asks the database for nothing —
-so it is safe to show on a school's guest wifi, in a car park, anywhere.
+- **Sample:** the rosters (football starts from the video's players, #24
+  Marcus Bell included), the colors and crest (what the seller would upload),
+  and the volleyball and basketball schedules (what the seller would paste),
+  played against the real MVAC Scarlet schools. No player stats — the app has
+  none, so the demo shows none, whatever the video shows.
+- **Real:** the football schedule, scores and the MVAC Scarlet standings on
+  the League tab. They come from the directory, exactly as a paying school's
+  do, and stay current with its Saturday and Wednesday refreshes. A quiet line
+  in the footer says so: "Sample rosters — the football schedule, scores and
+  standings are real."
 
-**Maintenance:** the page carries its own dates forward as it ages, so what
-has been played and what is coming always split at today without anyone
-touching it. What does drift is the calendar — the season travels with the
-dates, so about six months on the football fixtures are reading January to
-March under a tile that says "Starts in August". So run
-`node scripts/build-demo.mjs` and commit `public/oh/demo.json` **twice a
-year**, near the start of the autumn and again around February. It refuses
-to write a season that would argue with itself, and prints the dates it
-wrote.
+This deliberately reverses the rule the old demo kept — no invented players on
+a real school's page — for this one prospect, because the strongest thing the
+demo can show an athletic director is their own season, live. The real
+Springfield page at `/oh/springfield` is untouched: the sample rosters only
+ever appear at `/oh/demo/`. **When Springfield buys, or the pitch moves on,**
+move the demo to the next prospect (change the slug, colors, crest, rosters
+and conference in `scripts/build-demo.mjs`) or back to a fictional school —
+don't leave a former prospect's page dressed with invented players.
+
+`springfield-new-middletown` is in `paid-schools.json` so the demo can show
+the real kickoff forecast. That forecast also shows on Springfield's real,
+free page — a free taste of the paid tier. **Take it out of
+`paid-schools.json` if they don't buy.**
+
+It needs a signal. The rosters and schedules for the other sports are baked
+into the page, and it asks the database for nothing, but the football season,
+the League tab and the forecast are fetched from the directory like any
+school's. On a school's guest wifi that is fine; in a car park with no bars,
+football will not load.
+
+**Maintenance:** football looks after itself. For the pasted sports, the page
+carries a schedule that has results (volleyball, in the autumn) forward by
+whole weeks as it ages, so what has been played and what is coming split at
+today — but only until that sport's own months run out. A schedule with
+nothing played on it (basketball, before November) is never moved; it is
+already dated inside its own season. So run `node scripts/build-demo.mjs` and
+commit `public/oh/demo.json` **twice a year**: near the start of the autumn,
+and again in December once volleyball is over (it rewrites the autumn as next
+year's fixtures and starts basketball from a fortnight ahead). It refuses to
+write a season that would argue with itself or a conference Springfield
+doesn't actually play, and prints the dates it wrote.
 
 ## Activate a school (the whole job, ~3 minutes)
 
