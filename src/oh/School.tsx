@@ -607,10 +607,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     </p>
   ) : null;
 
-  const footer = (
+  /*
+   * The demo is shown to one school as if it were their page, so it drops the
+   * directory's ways out — following another school, the privacy notice — and
+   * keeps only the line saying what is sample. A real school's page keeps both.
+   */
+  const footer = isDemo() ? (
+    demoNote
+  ) : (
     <>
-      {demoNote}
-
       <button type="button" className="fixture-row is-plain" onClick={onChange}>
         <span className="fixture-team">Follow a different school</span>
       </button>
@@ -724,14 +729,16 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
         {demoNote}
 
-        <div className="oh-hub-foot">
-          <button type="button" className="oh-hub-change" onClick={onChange}>
-            Follow a different school
-          </button>
-          <a className="oh-hub-privacy" href="/oh/?privacy">
-            Privacy
-          </a>
-        </div>
+        {!isDemo() && (
+          <div className="oh-hub-foot">
+            <button type="button" className="oh-hub-change" onClick={onChange}>
+              Follow a different school
+            </button>
+            <a className="oh-hub-privacy" href="/oh/?privacy">
+              Privacy
+            </a>
+          </div>
+        )}
       </div>
     );
   }
@@ -942,17 +949,21 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                 ) : (
                   <p className="empty-text">No schedule added yet for {sportLabel(sport)}.</p>
                 )}
-                <p className="filter-line">
-                  <span>
-                    <a
-                      href={`mailto:tom@scottforge.ai?subject=${encodeURIComponent(
-                        `An app of our own — ${season.school.name}`,
-                      )}`}
-                    >
-                      Want your own installable app, like Poland&rsquo;s?
-                    </a>
-                  </span>
-                </p>
+                {/* An upsell naming another school's app has no place on a
+                    page a prospect is being shown as their own. */}
+                {!isDemo() && (
+                  <p className="filter-line">
+                    <span>
+                      <a
+                        href={`mailto:tom@scottforge.ai?subject=${encodeURIComponent(
+                          `An app of our own — ${season.school.name}`,
+                        )}`}
+                      >
+                        Want your own installable app, like Poland&rsquo;s?
+                      </a>
+                    </span>
+                  </p>
+                )}
               </>
             )}
 
