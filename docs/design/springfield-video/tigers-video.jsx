@@ -38,10 +38,8 @@ const ROSTER = [
 ];
 
 const PLAYERS = {
-  '2': { n: '2', name: 'Jalen Reyes', pos: 'QB/DB', yr: 'Sophomore', ht: '6\'1"', wt: '185 lb',
-    stats: [['Passing', '96 yds · 1 TD · 9 att', '—'], ['Rushing', '38 yds · 12 car', '—'], ['Defense', '11 tkl', '—']] },
-  '24': { n: '24', name: 'Marcus Bell', pos: 'RB/LB', yr: 'Senior', ht: '5\'11"', wt: '195 lb',
-    stats: [['Rushing', '812 yds · 9 TD · 141 car · 5.8 avg', '64 yds'], ['Receiving', '143 yds · 11 rec', '—'], ['Defense', '38 tkl', '4 tkl']] },
+  '2': { n: '2', name: 'Jalen Reyes', pos: 'QB/DB', yr: 'Sophomore', ht: '6\'1"', wt: '185 lb' },
+  '24': { n: '24', name: 'Marcus Bell', pos: 'RB/LB', yr: 'Senior', ht: '5\'11"', wt: '195 lb' },
 };
 
 const GAMES = [
@@ -210,22 +208,6 @@ function PlayerCard({ p, t0, T, accent }) {
         </div>
       </div>
       <div style={{ marginTop: 40, borderTop: `2px solid ${C.line}` }} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr', padding: '26px 0 18px' }}>
-        <div />
-        <div style={{ font: `700 28px/1 ${FONT}`, letterSpacing: '0.1em', color: C.head }}>LAST SEASON</div>
-        <div style={{ font: `700 28px/1 ${FONT}`, letterSpacing: '0.1em', color: C.head }}>THIS SEASON</div>
-      </div>
-      {p.stats.map((row, i) => (
-        <div key={row[0]} style={{
-          display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr', alignItems: 'center', gap: 12,
-          padding: '22px 0', borderTop: `2px solid ${C.line}`,
-          opacity: MOTION.enter(t0 + 0.24 + i * 0.11, 0.45)(T),
-        }}>
-          <div style={{ font: `600 34px/1.2 ${FONT}`, color: C.muted }}>{row[0]}</div>
-          <div style={{ font: `400 34px/1.3 ${FONT}`, color: '#fff' }}>{row[1]}</div>
-          <div style={{ font: `400 34px/1.3 ${FONT}`, color: C.dim }}>{row[2]}</div>
-        </div>
-      ))}
     </div>
   );
 }
@@ -366,27 +348,15 @@ const CONF = [
   ['Springfield', '3–0', '3–0'], ['McDonald', '3–0', '2–1'], ['Jackson-Milton', '2–1', '2–1'], ['Campbell Memorial', '2–1', '1–2'],
   ['Mineral Ridge', '1–2', '1–2'], ['Lowellville', '1–2', '0–3'], ['Waterloo', '0–3', '1–2'], ['Western Reserve', '0–3', '0–3'],
 ];
-const REGION = [
-  ['1', 'Mogadore', '3–0', '9.40'], ['2', 'Springfield', '3–0', '8.85'], ['3', 'Wickliffe', '3–0', '8.10'],
-  ['4', 'McDonald', '2–1', '6.95'], ['5', 'Cuyahoga Hts.', '2–1', '6.40'], ['6', 'Garfield', '2–1', '5.90'],
-  ['7', 'Jackson-Milton', '2–1', '5.35'], ['8', 'Mineral Ridge', '1–2', '3.80'],
-];
-
-function LeaguePane({ T, t0, flipAt, accent, team }) {
-  const flip = MOTION.glide(flipAt, 0.45)(T);
-  const conf = 1 - flip, reg = flip;
+/* The app's League tab is the conference alone — scores and standings — so
+   the video shows exactly that: no Region rankings, which the app doesn't have. */
+function LeaguePane({ T, t0, accent }) {
   const me = (n) => n === 'Springfield';
   const rowIn = (i, base) => MOTION.enter(base + i * 0.06, 0.45)(T);
   return (
     <div style={{ padding: '30px 40px 0', position: 'relative', height: '100%' }}>
-      <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', padding: 8, background: 'rgba(42,35,32,0.55)', borderRadius: 20, opacity: MOTION.enter(t0, 0.4)(T) }}>
-        <div style={{ position: 'absolute', top: 8, bottom: 8, left: 8, width: 'calc(50% - 8px)', borderRadius: 14, background: '#fff', transform: `translateX(${flip * 100}%)` }} />
-        {['MVAC Scarlet', 'Region 21'].map((c, i) => (
-          <div key={c} style={{ position: 'relative', height: 92, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            font: `700 40px/1 ${FONT}`, color: (i === 0 ? conf : reg) > 0.5 ? '#0e0c0b' : '#e8ded6' }}>{c}</div>
-        ))}
-      </div>
-      <div style={{ position: 'absolute', left: 40, right: 40, top: 160, opacity: conf, transform: `translateX(${-flip * 80}px)` }}>
+      <div style={{ font: `700 34px/1 ${FONT}`, letterSpacing: '0.14em', color: C.head, padding: '22px 0 8px', opacity: MOTION.enter(t0, 0.4)(T) }}>MVAC SCARLET</div>
+      <div style={{ position: 'absolute', left: 40, right: 40, top: 130 }}>
         <div style={{ font: `700 30px/1 ${FONT}`, letterSpacing: '0.14em', color: C.head, padding: '10px 0 16px' }}>WEEK 3 FINALS</div>
         {SCORES.map((g, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 1fr 70px', alignItems: 'center', gap: 12, padding: '20px 0', borderTop: `2px solid ${C.line}`,
@@ -405,20 +375,6 @@ function LeaguePane({ T, t0, flipAt, accent, team }) {
             background: me(r[0]) ? 'rgba(242,103,34,0.16)' : 'transparent', opacity: rowIn(i, t0 + 0.4),
             font: `${me(r[0]) ? 700 : 400} 36px/1.2 ${FONT}`, color: me(r[0]) ? '#fff' : '#e8ded6' }}>
             <div>{r[0]}</div><div style={{ textAlign: 'right' }}>{r[1]}</div><div style={{ textAlign: 'right', color: C.dim }}>{r[2]}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ position: 'absolute', left: 40, right: 40, top: 160, opacity: reg, transform: `translateX(${(1 - flip) * 80}px)` }}>
-        <div style={{ font: `400 34px/1.45 ${FONT}`, color: C.muted, padding: '10px 0 26px' }}>Division VI, Region 21 — top 16 after week 10 make the playoffs</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 130px 130px', font: `700 28px/1 ${FONT}`, letterSpacing: '0.12em', color: C.head, paddingBottom: 16 }}>
-          <div>#</div><div>SCHOOL</div><div style={{ textAlign: 'right' }}>W–L</div><div style={{ textAlign: 'right' }}>AVG</div>
-        </div>
-        {REGION.map((r, i) => (
-          <div key={r[1]} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 130px 130px', padding: '21px 16px', margin: '0 -16px', borderTop: `2px solid ${C.line}`,
-            background: me(r[1]) ? 'rgba(242,103,34,0.16)' : 'transparent', opacity: MOTION.enter(flipAt + 0.1 + i * 0.05, 0.4)(T),
-            font: `${me(r[1]) ? 700 : 400} 38px/1.2 ${FONT}`, color: me(r[1]) ? '#fff' : '#e8ded6' }}>
-            <div style={{ color: me(r[1]) ? accent : C.dim }}>{r[0]}</div><div>{r[1]}</div>
-            <div style={{ textAlign: 'right' }}>{r[2]}</div><div style={{ textAlign: 'right', color: C.dim }}>{r[3]}</div>
           </div>
         ))}
       </div>
@@ -544,7 +500,7 @@ function Piece(props) {
           <div style={{ ...PANE, opacity: fadeIn(T, CUES.Team - 0.35) }}><TeamPane T={T} t0={CUES.Team - 0.35} accent={accent} /></div>
         </Shot>
         <Shot from={CUES.League - 0.35} to={CUES.Close}>
-          <div style={{ ...PANE, opacity: fadeIn(T, CUES.League - 0.35) }}><LeaguePane T={T} t0={CUES.League - 0.35} flipAt={CUES.League + 1.7} accent={accent} team={team} /></div>
+          <div style={{ ...PANE, opacity: fadeIn(T, CUES.League - 0.35) }}><LeaguePane T={T} t0={CUES.League - 0.35} accent={accent} /></div>
         </Shot>
         <Shot from={CUES.Schedule - 0.35} to={CUES.League - 0.35}>
           <div style={{ ...PANE, opacity: fadeIn(T, CUES.Schedule - 0.35) }}><SchedulePane T={T} t0={CUES.Schedule - 0.35} accent={accent} /></div>
@@ -620,10 +576,10 @@ function Piece(props) {
           items={[
             { at: CUES.Hub + 0.5, until: CUES.Hub + 3.1, text: 'Every sport. One link.' },
             { at: CUES.Lookup + 0.35, until: CUES.Lookup + 1.7, text: 'No sign-in. No install.' },
-            { at: CUES.Player + 0.35, until: CUES.Player + 3.9, text: 'Type the number, get the player.' },
+            { at: CUES.Player + 0.35, until: CUES.Player + 2.4, text: 'Type the number, get the player.' },
             { at: CUES.Team + 0.4, until: CUES.Team + 2.6, text: 'The whole roster, searchable.' },
             { at: CUES.Schedule + 0.4, until: CUES.Schedule + 3.0, text: 'The whole season, game by game.' },
-            { at: CUES.League + 0.35, until: CUES.League + 3.2, text: 'Conference and region, all season.' },
+            { at: CUES.League + 0.35, until: CUES.League + 2.2, text: 'Conference scores and standings.' },
 ]} />
       )}
     </div>
