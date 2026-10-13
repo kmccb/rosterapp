@@ -18,6 +18,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--yes", "http-server", "docs/design/springfield-video", "-p", "4180", "-c-1", "--silent"],
       "port": 4180
+    },
+    {
+      "name": "marketing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", "marketing", "-p", "4190", "-c-1", "--silent"],
+      "port": 4190
     }
   ]
 }
