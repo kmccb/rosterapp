@@ -187,8 +187,7 @@ export async function loadSeason(slug: string): Promise<SchoolSeason> {
    * The demo page answers out of its own committed file for any season it
    * bakes. Only that page takes this branch, and only for a slug the file
    * actually carries: anything else falls through to the fetch below,
-   * untouched — which for the Springfield demo is everything, so its football
-   * and its whole League tab are the directory's real seasons.
+   * untouched.
    */
   if (isDemo()) {
     const baked = await demoSeason(slug);
@@ -247,9 +246,8 @@ const isFixtureWeather = (v: unknown): v is FixtureWeather => {
 
 /** Network first, then whatever was kept — the same rule as the season. */
 export async function loadWeather(slug: string): Promise<FixtureWeather | null> {
-  // A demo file may bake its forecast beside its fixtures. The Springfield one
-  // doesn't — its football is the directory's, so its forecast is the real one
-  // in weather.json like any paying school's, and it falls through to that.
+  // The demo's forecast is baked beside its fixtures. A demo file that bakes
+  // none falls through to the real one.
   const demo = isDemo();
   if (demo) {
     const baked = await demoWeather(slug);

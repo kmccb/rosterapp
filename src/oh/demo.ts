@@ -1,13 +1,12 @@
 /*
  * The demo school.
  *
- * /oh/demo/ is a page a seller can hand a prospect: Springfield (New
- * Middletown), the school the sales video was made for, as it would look the
- * day it signed up. The committed file carries what a paid activation would —
- * colors, crest, sample rosters, pasted volleyball and basketball schedules and
- * the conference — and nothing else. Football's schedule, scores and standings
- * are not in it: the store reads them from the directory, real and current,
- * exactly as it does for a paying school.
+ * /oh/demo/ is a page a seller can hand a prospect, and the page the marketing
+ * site sends strangers to: Harlow Valley, a school that does not exist, as it
+ * would look the day it signed up. The committed file carries everything —
+ * colors, crest, sample rosters, pasted volleyball and basketball schedules,
+ * the conference, and the football seasons of the school and its five invented
+ * rivals — so the page asks the directory and the database for nothing.
  *
  * What matters about this module is what it is *not*: it is not a second copy
  * of the School screen. The demo page mounts the real one, and the four store
@@ -28,9 +27,9 @@ import type { ScheduleRow } from './scheduleParse';
 import type { FixtureWeather } from './store';
 import { inSeason } from './sportSeasons';
 
-/** The one school this page is about — a real directory slug, so that whatever
- * the file does not carry falls through to that school's own directory data. */
-export const DEMO_SLUG = 'springfield-new-middletown';
+/** The one school this page is about. Suffixed so it can never collide with a
+ * real directory slug: the school is invented, and so is its conference. */
+export const DEMO_SLUG = 'harlow-valley-demo';
 
 /** The raw shape of one sport in the file: a squad, and the fixtures somebody
  * would have pasted for it. Football's are null — its fixtures come from the
@@ -49,10 +48,9 @@ export type DemoData = {
   league: unknown;
   sportNames: string[];
   sports: Record<string, DemoSport>;
-  /** Any football season the file bakes in place of the directory's. The
-   * Springfield demo bakes none — its school and every conference member are
-   * read from the directory — so this is usually empty, and a slug missing from
-   * it is the normal case rather than a fault. */
+  /** The football season of the demo school and of every conference member, so
+   * the League tab folds out of baked results the way it folds out of the
+   * directory. */
   seasons: Record<string, SchoolSeason>;
   weather: FixtureWeather | null;
 };
@@ -216,9 +214,8 @@ const asDemo = (v: unknown): DemoData | null => {
  * than a season left where it ended. That is the reason the generator still
  * wants re-running twice a year.
  *
- * Any baked football seasons (the Springfield file has none — its football is
- * the directory's, already today's) move as one block, with the forecast, by
- * the same rule: baked rivals carry the same conference games from the other
+ * The baked football seasons move as one block, with the forecast, by the
+ * same rule: baked rivals carry the same conference games from the other
  * side, and a season shifted by a different number of weeks would put the
  * standings table at odds with the school's own record.
  */
@@ -361,9 +358,8 @@ export function loadDemo(): Promise<DemoData | null> {
 
 // ------------------------------------------------------- what the guards ask
 
-/** A season the file bakes, if it bakes one. Null for anything it does not —
- * for the Springfield demo, everything — which lets the caller go on to the
- * directory as it always has. */
+/** The demo school's season or a conference member's. Null for any other
+ * slug, which lets the caller go on as it always has. */
 export async function demoSeason(slug: string): Promise<SchoolSeason | null> {
   const demo = await loadDemo();
   return demo?.seasons[slug] ?? null;
