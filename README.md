@@ -204,3 +204,33 @@ it. Plain `http://` redirects to `https://`, which matters more than it looks: t
 storage origins, so rosters would vanish depending on which one you arrived at, and service workers
 refuse to register outside a secure context. Because a custom domain serves from the root,
 `vite.config.ts` sets `base: '/'`.
+
+### The marketing site
+
+`marketing/` is a separate Cloudflare Pages project on this same repository,
+served at https://getroster.scottforge.ai. It has no build: Pages publishes
+the folder as it is.
+
+To create it (once, in the Cloudflare dashboard):
+
+1. Workers & Pages → Create → Pages → Connect to Git → this repository.
+2. Project name `getroster`. Production branch `main`.
+3. Framework preset None. Build command empty. Build output directory `.`
+4. Root directory (advanced) `marketing`.
+5. After the first deploy: Settings → Builds → Build watch paths → include
+   `marketing/**`, so the twice-weekly directory commits do not redeploy it.
+6. Custom domains → Set up a domain → `getroster.scottforge.ai`. The zone is
+   already on Cloudflare, so the CNAME is added for you.
+
+It needs no environment variables. The main `rosterapp` project still builds
+on every push; nothing under `marketing/` is in its output, and the guard
+does not look at it.
+
+The phone screenshots in `marketing/img/` are taken from the built demo by
+`scripts/shoot-marketing.mjs`, by hand: build, serve the result with
+`npx vite preview --port 4173`, install `playwright-core` somewhere outside
+the repo, and run the script with `SHOOT_FROM` pointing at that folder
+(`SHOOT_ORIGIN` if the preview is not on `http://localhost:4173`). Its header
+has the exact commands. Re-take them when the demo's look changes.
+`src/marketing/site.test.ts` holds the page to its own links, the prices in
+`docs/selling.md`, and the list of things it must not promise.
