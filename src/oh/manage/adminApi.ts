@@ -27,6 +27,8 @@ export type RosterRow = {
   schedule_source_url?: string | null;
   schedule_source_filter?: string | null;
   sync_state?: SyncState;
+  /** Set by migration 0009; absent from a database that doesn't have it yet. */
+  stats_source_url?: string | null;
 };
 
 const signed = async (): Promise<string> => {
@@ -128,3 +130,21 @@ export const checkSource = (r: { kind: SourceSide; url: string; filter: string |
 
 export const syncNow = (slug: string, sport: string, season: number) =>
   callSync<{ state: SyncState }>({ action: 'sync', slug, sport, season });
+
+/*
+ * Where a sport's season stats come from — today a team's printable MaxPreps
+ * stats page, read by scripts/maxpreps.mjs on a schedule. null clears it, and
+ * the next scheduled run takes the school's stats file down. Migration 0009.
+ */
+export const setStatsSource = async (r: {
+  slug: string;
+  sport: string;
+  season: number;
+  url: string | null;
+}): Promise<void> => {
+  await rpc<null>(
+    'school_roster_set_stats_source',
+    { p_slug: r.slug, p_sport: r.sport, p_season: r.season, p_url: r.url },
+    await signed(),
+  );
+};

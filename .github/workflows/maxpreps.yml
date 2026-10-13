@@ -3,7 +3,8 @@ name: Refresh season stats from MaxPreps
 # A coach enters Friday's stats over the weekend — Springfield's have gone up
 # early on Saturday — and corrects them in the week. So this looks on Saturday,
 # Sunday and Monday mornings and again on Wednesday: four runs, one request per
-# team per run, for the schools in maxpreps-teams.json and nobody else.
+# team per run, for the schools whose stats link is set in the panel or listed
+# in maxpreps-teams.json, and nobody else.
 #
 # It commits to main, and that push is what triggers the deploy. A run that
 # could not read a team's page leaves that team's file alone and fails, so the
@@ -34,7 +35,13 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # The database says which schools have a stats link set in the panel. Both
+      # values are public — they ship in the site's bundle — so they are repo
+      # variables, not secrets. Unset, the script reads maxpreps-teams.json alone.
       - id: fetch
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: node scripts/maxpreps.mjs
 
       # Runs after a failure too: with several teams, one page that would not
@@ -44,7 +51,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/oh/stats/
+          # -A, because a school whose link was cleared or whose season lapsed
+          # has its file taken down, and a removal has to be staged too.
+          # The folder is gone once its last file is, and git refuses a path
+          # that is neither on disk nor tracked.
+          if [ -d public/oh/stats ] || git ls-files --error-unmatch public/oh/stats >/dev/null 2>&1; then
+            git add -A public/oh/stats/
+          fi
           if git diff --staged --quiet; then
             echo "No change in anybody's stats."
             exit 0

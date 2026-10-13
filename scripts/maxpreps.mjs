@@ -8,10 +8,23 @@
  * whatever changed and the push is the deploy, the same route the directory
  * takes.
  *
- * Which teams is maxpreps-teams.json — a school is added there by hand when it
- * signs up and says its stats are on MaxPreps. There is no discovering them:
- * this reads the pages of schools that asked for it, a handful of times a week,
- * and nothing else on the site.
+ * Which teams comes from two places. The database is the usual one: the seller
+ * sets a school's MaxPreps link in the panel, and school_stats_targets (0009)
+ * answers with the links of the rows that are published and paid today. It is
+ * asked with the anon key the site's own bundle ships, and only when
+ * VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are both set. The other is
+ * maxpreps-teams.json, where a school was added by hand before the panel could
+ * do it, and still can be. A team in both is read once, from the database's
+ * link. Either way there is no discovering them: this reads the pages of
+ * schools that asked for it, a handful of times a week, and nothing else on
+ * the site.
+ *
+ * If the database cannot be asked — the call fails, or 0009 has not been
+ * applied yet — the run says so in one line and carries on with the file's
+ * teams. A stats file is removed for being in neither list only on a run
+ * where the database actually answered, and a file team that is off the paid
+ * list keeps its file on a run where the database was there and failed —
+ * the database may be what vouches for it.
  *
  * It never makes things worse. A page that fails to arrive, has lost the tables
  * the parser needs, is missing a category that was published before, or comes
@@ -29,7 +42,7 @@
  *                                        give, once, not ours to keep taking.
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseMaxPrepsRoster, rosterCsv } from '../src/maxpreps/rosterParse.ts';
@@ -38,7 +51,8 @@ import { parseMaxPrepsStats } from '../src/maxpreps/statsParse.ts';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const withRoster = process.argv.includes('--roster');
 
-const teams = JSON.parse(readFileSync(join(root, 'maxpreps-teams.json'), 'utf8')).teams;
+const statsDir = join(root, 'public/oh/stats');
+const fileTeams = JSON.parse(readFileSync(join(root, 'maxpreps-teams.json'), 'utf8')).teams;
 
 /*
  * Stats are part of the paid page, and paid-schools.json is the repo's own list
@@ -70,10 +84,97 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
 
 const failures = [];
 
+/*
+ * The database's teams, or null when it could not be asked. Null and an empty
+ * list are different answers and the difference matters below: an empty list
+ * means nobody has a link set, null means nobody knows.
+ */
+const askDatabase = async () => {
+  const base = process.env.VITE_SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_ANON_KEY;
+  if (!base || !key) return null;
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, '')}/rest/v1/rpc/school_stats_targets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` },
+      body: '{}',
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      const missing = res.status === 404 || text.includes('PGRST202');
+      if (!missing) dbFailed = true;
+      console.log(
+        missing
+          ? `database: school_stats_targets is not there yet (0009 not applied) — reading the file's teams only`
+          : `::warning::database: ${res.status} from school_stats_targets — reading the file's teams only`,
+      );
+      return null;
+    }
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error('the answer was not a list');
+    return rows;
+  } catch (err) {
+    dbFailed = true;
+    console.log(`::warning::database: ${err.message} — reading the file's teams only`);
+    return null;
+  }
+};
+
+/* The database checks this too. Checked again here because what comes back is
+   about to be fetched and to name a file on disk. */
+const isMaxPreps = (value) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname === 'www.maxpreps.com' && !url.username && !url.port;
+  } catch {
+    return false;
+  }
+};
+const plainName = (value) => typeof value === 'string' && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
+
+const keyOf = (team) => `${team.slug} ${team.sport}`;
+
+/*
+ * True when the database was there to ask and did not answer — a timeout, a
+ * 500. That is different from its not having the function yet: on a run like
+ * this a team it normally vouches for arrives by way of the file instead, and
+ * must not have its stats taken down for failing the file's gate.
+ */
+let dbFailed = false;
+const dbRows = await askDatabase();
+const dbTeams = [];
+// Every slug and sport the database named, whether or not its link was usable:
+// a row with a bad link is a row to complain about, not a file to take down.
+const dbNamed = new Set();
+for (const row of dbRows ?? []) {
+  if (!plainName(row?.slug) || !plainName(row?.sport)) {
+    failures.push('database: a stats target with a slug or sport that is not a plain name — skipped');
+    continue;
+  }
+  dbNamed.add(keyOf(row));
+  if (!isMaxPreps(row.stats_source_url)) {
+    failures.push(`${keyOf(row)}: the database's stats link is not an https page on www.maxpreps.com — skipped`);
+    continue;
+  }
+  // The file's roster link, if it has one for this team, still serves --roster.
+  const inFile = fileTeams.find((t) => keyOf(t) === keyOf(row));
+  dbTeams.push({ slug: row.slug, sport: row.sport, stats: row.stats_source_url, roster: inFile?.roster, paidByDatabase: true });
+}
+
+const teams = [...dbTeams, ...fileTeams.filter((t) => !dbNamed.has(keyOf(t)))];
+if (dbRows) console.log(`database: ${dbTeams.length} team${dbTeams.length === 1 ? '' : 's'} with a stats link`);
+
 for (const team of teams) {
   const label = `${team.slug} ${team.sport}`;
 
-  if (!paid.has(team.slug)) {
+  // A team the database named is published and paid by the database's own
+  // reckoning, which is the better authority; the list is the file's gate.
+  if (!team.paidByDatabase && !paid.has(team.slug)) {
+    if (dbFailed) {
+      console.log(`${label}: not in paid-schools.json, and the database could not be asked — skipped, file left as it is`);
+      continue;
+    }
     rmSync(join(root, 'public/oh/stats', `${team.slug}-${team.sport}.json`), { force: true });
     console.log(`${label}: not in paid-schools.json — skipped, and no stats file left up`);
     continue;
@@ -127,6 +228,29 @@ for (const team of teams) {
     } catch (err) {
       failures.push(`${label} roster: ${err.message}`);
     }
+  }
+}
+
+/*
+ * A link cleared in the panel, or a row that has lapsed or been unpublished,
+ * leaves a stats file with nobody behind it. It goes — but only when the
+ * database answered this run. On a run where it did not, a team missing from
+ * its list is not evidence of anything.
+ */
+if (dbRows && existsSync(statsDir)) {
+  const wanted = new Set([...dbNamed, ...fileTeams.map(keyOf)]);
+  for (const name of readdirSync(statsDir).filter((n) => n.endsWith('.json'))) {
+    let kept;
+    try {
+      kept = readJson(join(statsDir, name));
+    } catch {
+      continue;
+    }
+    // Only a file this script wrote, under the name it would have written it.
+    if (!plainName(kept?.slug) || !plainName(kept?.sport) || name !== `${kept.slug}-${kept.sport}.json`) continue;
+    if (wanted.has(keyOf(kept))) continue;
+    rmSync(join(statsDir, name), { force: true });
+    console.log(`${keyOf(kept)}: no stats link in the database or the file — stats file taken down`);
   }
 }
 

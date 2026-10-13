@@ -66,16 +66,22 @@ doesn't actually play, and prints the dates it wrote.
 ## Activate a school (the whole job, ~3 minutes)
 
 1. Open https://roster.scottforge.ai/oh/?manage and sign in (email link).
-2. "+ Activate a school" → search the school → paste their roster
-   spreadsheet → check the parsed list reads right. Or a CSV file, above
-   the paste box — it fills the paste box the same way and gets the same
-   review.
-3. Pick their two colors. Set paid-through (defaults to Feb 1 after the
-   season). Put the payment in the note: "check #1042, J. Smith, boosters".
-4. **Publish.** Their /oh/ page has the keypad that second.
+2. **Activate a school** → search the school → pick it. Its page opens on
+   a first sport card: choose the sport, paste their roster spreadsheet (or
+   **Import a CSV**, which fills the same box and gets the same review) and
+   check the parsed list reads right.
+3. On the same page set **Look** (their two colors and the crest) and
+   **Billing** (paid-through, which defaults to Feb 1 after the season, and
+   the payment in the note: "check #1042, J. Smith, boosters"). For a new
+   school these are saved with the first sport.
+4. **Save and publish** on the sport card. Their /oh/ page has the keypad
+   that second. Save unpublished instead if the check hasn't cleared.
 
-Save unpublished instead if the check hasn't cleared — publishing later is
-the same screen.
+After that, Look and Billing each have their own Save, and write to every
+   sport at once. Renew a year moves the date on.
+
+The school list is the dashboard: one line per school, worst first — a
+refused sheet, then expired, then live, then unpublished.
 
 ### The school's address
 
@@ -166,13 +172,18 @@ player's season. Nobody types anything after setup.
 
 1. On the team's MaxPreps Stats page, the **Print** link at the bottom is the
    address to copy; the Roster page's address is the other one.
-2. Add the school to `maxpreps-teams.json` (slug, `football`, both addresses)
-   and to `paid-schools.json` — a team whose school is not on the paid list is
-   skipped and its stats file taken down. Then `node scripts/maxpreps.mjs
-   --roster`. That writes the stats file under `public/oh/stats/` and a roster
-   CSV under `scripts/data/`, which is not committed.
-3. Give the CSV to the panel's "Or a CSV file" when activating, if the school
-   wants MaxPreps' roster rather than its own sheet. Commit and push.
+2. In the panel, open the school, open Football, and paste the Print address
+   into **Stats** → Set. (Needs migration 0009. Until it is applied, add the
+   school to `maxpreps-teams.json` and `paid-schools.json` instead.) The next
+   scheduled run writes the stats file; to have it at once, run the "Refresh
+   season stats from MaxPreps" workflow by hand.
+3. For MaxPreps' roster as a CSV: add the school to `maxpreps-teams.json` with
+   its stats and roster addresses, and to `paid-schools.json`, and run
+   `node scripts/maxpreps.mjs --roster`. The CSV lands in `scripts/data/`,
+   which is not committed. (Without the `paid-schools.json` line a local run
+   skips the school and removes its local stats file.)
+4. Give the CSV to the sport's **Import a CSV** in the panel, if the school
+   wants MaxPreps' roster rather than its own sheet.
 
 After that `.github/workflows/maxpreps.yml` looks on Saturday, Sunday, Monday
 and Wednesday mornings and commits only when the numbers moved. A run that
@@ -195,20 +206,22 @@ sends "Syncing again."
 
 ## Mid-season changes
 
-Text arrives: "#7 is now #12." Open the school in the panel, paste the
-corrected spreadsheet (it replaces the roster), Publish. Editing only the
-date or note without a new paste keeps the roster as it is.
+Text arrives: "#7 is now #12." Open the school in the panel, open the sport,
+paste the corrected spreadsheet (it replaces the roster), Save. Saving with
+nothing pasted keeps the roster as it is.
 
 ## Renewals
 
 Rosters go dark on their paid-through date on their own. Next July: open the
 panel, every school shows its date; invoice the expiring ones; extend the
-date when the check arrives.
+date when the check arrives — Billing → Renew a year → Save billing moves
+every sport at once.
 
 ## Coming down
 
-"Save unpublished" hides a roster instantly (row kept). "Delete this roster"
-removes it entirely. A school's removal request is honored same-day, per the
+"Unpublish" on a sport hides it instantly (row kept); "Take this school
+down" under Billing unpublishes every sport at once. "Delete this sport"
+removes a sport's roster and schedule entirely. A school's removal request is honored same-day, per the
 privacy page.
 
 A linked sheet or calendar keeps syncing — and can keep emailing you about a

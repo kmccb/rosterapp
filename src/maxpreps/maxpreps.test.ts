@@ -4,7 +4,7 @@ import { sidesOf } from '../roster/filters';
 import { bySide, leaders } from '../stats/leaders';
 import { matchTeamStats } from '../oh/teamStats';
 import type { Player } from '../types';
-import { toPlayers } from '../oh/manage/Activate';
+import { toPlayers } from '../oh/manage/saveArgs';
 import { parseRoster } from '../parse/rosterParse';
 import { parseMaxPrepsRoster, rosterCsv } from './rosterParse';
 import { parseMaxPrepsStats } from './statsParse';
