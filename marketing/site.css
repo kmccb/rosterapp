@@ -21,6 +21,13 @@
   --f-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
   --gutter: clamp(20px, 5vw, 64px);
   --measure: 1120px;
+  /* Side padding that is the gutter on a phone and grows on a wide screen
+     until the content between the paddings is exactly one measure wide. */
+  --side: max(var(--gutter), calc((100% - var(--measure)) / 2));
+}
+
+[id] {
+  scroll-margin-top: 88px;
 }
 
 *,
@@ -176,7 +183,7 @@ strong {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px var(--gutter);
+  padding: 12px var(--side);
   background: rgba(12, 11, 9, 0.82);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -205,24 +212,23 @@ strong {
 }
 .bar .btn {
   margin-left: auto;
-  min-height: 40px;
   padding: 0.6em 0.9em;
 }
 
 /* ------------------------------------------------------------- sections */
 
+/* The column is made by padding on the section, not by a max-width on each
+   child, so no later margin shorthand on a child can knock it off center and
+   the hero, bands and footer all share one left edge. */
 .hero,
 .band,
 .foot {
-  padding-inline: var(--gutter);
-}
-.hero > *,
-.band > * {
-  max-width: var(--measure);
-  margin-inline: auto;
+  padding-inline: var(--side);
 }
 .hero {
   display: grid;
+  /* minmax(0, …) so a wide child cannot stretch the one column past the screen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 48px;
   padding-block: clamp(48px, 9vw, 110px);
 }
@@ -244,6 +250,7 @@ strong {
 .ticks,
 .faq {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   padding: 0;
   list-style: none;
@@ -255,6 +262,7 @@ strong {
 .tabs {
   margin: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 .tabs div {
@@ -414,16 +422,30 @@ strong {
 
 /* ----------------------------------------------------------- with room */
 
+/* Under 480px the bar needs the room for the button, so the byline goes. */
+@media (max-width: 479px) {
+  .by {
+    display: none;
+  }
+  .bar {
+    gap: 10px;
+  }
+  .bar .btn {
+    padding-inline: 0.8em;
+    letter-spacing: 0.08em;
+  }
+}
+
 @media (min-width: 620px) {
   .cards,
   .ticks {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .shots {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .steps {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -433,22 +455,23 @@ strong {
   }
   .bar .btn {
     margin-left: 0;
+    min-height: 40px;
   }
   .hero {
-    grid-template-columns: 1.25fr 0.75fr;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
     align-items: center;
   }
   .two {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cards-3 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .steps {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .faq div {
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     gap: 32px;
   }
 }
