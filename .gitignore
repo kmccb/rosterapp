@@ -24,3 +24,6 @@ public/league.json
 
 # The Supabase CLI's local cache (names the linked project).
 supabase/.temp/
+
+# Rosters pulled by scripts/maxpreps.mjs --roster: a file to hand the panel, not one to publish.
+scripts/data/

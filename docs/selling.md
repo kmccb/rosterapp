@@ -158,6 +158,34 @@ calendar itself writes it — for Eventlink that reads like
 passing sample in `src/sync/fixtures/` — today that's ScheduleStar and
 Eventlink; anything else, paste the schedule by hand as before.
 
+### Season stats from MaxPreps (football)
+
+If the coach keeps stats on MaxPreps, the school's football page gets a Stats
+tab (Leaders, Offense, Defense, Special) and each Lookup hit shows that
+player's season. Nobody types anything after setup.
+
+1. On the team's MaxPreps Stats page, the **Print** link at the bottom is the
+   address to copy; the Roster page's address is the other one.
+2. Add the school to `maxpreps-teams.json` (slug, `football`, both addresses)
+   and to `paid-schools.json` — a team whose school is not on the paid list is
+   skipped and its stats file taken down. Then `node scripts/maxpreps.mjs
+   --roster`. That writes the stats file under `public/oh/stats/` and a roster
+   CSV under `scripts/data/`, which is not committed.
+3. Give the CSV to the panel's "Or a CSV file" when activating, if the school
+   wants MaxPreps' roster rather than its own sheet. Commit and push.
+
+After that `.github/workflows/maxpreps.yml` looks on Saturday, Sunday, Monday
+and Wednesday mornings and commits only when the numbers moved. A run that
+cannot read the page leaves last week's numbers up and fails, and GitHub's
+failed-workflow email is the alert. Stats attach to players by full name, or
+by jersey number when the surname agrees, so a player whose name and number
+both differ from MaxPreps is simply missing from the tab — fix the roster.
+Two players with the same surname and first initial get no stats at all, on
+purpose. When a school comes down, take it out of `paid-schools.json` and the
+next run removes its stats. Tell the AD this is where the numbers
+come from: MaxPreps asks crawlers to stay off its print pages, and this reads
+one a few times a week for his team only, at his say-so.
+
 ### When an email arrives
 
 The reason is in the subject line and the body. Fans still see the last

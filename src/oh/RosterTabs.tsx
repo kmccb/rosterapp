@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Keypad } from '../components/Keypad';
 import { numberKey, numberMatches } from '../parse/rosterParse';
 import { inArea, positionsForArea, positionsOf, sidesOf } from '../roster/filters';
+import { summarise as summariseStats } from '../stats/statsFormat';
+import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import { formatHeight, formatWeight, fullName, type Player, type Side } from '../types';
 
 /**
@@ -56,8 +58,21 @@ const useByNumber = (players: Player[]): Player[] =>
  * practice. It rides inside the scrolling half of the column, above the keys
  * rather than below them: the pad owns the bottom of the screen and there is
  * nothing underneath it to scroll to.
+ *
+ * `stats` is the season so far, for a school that has it: the answer to "who is
+ * number four" is better with "and he has 709 yards" on the end. It prints
+ * under the hit and nowhere else — the Team tab is a list to scan, and forty
+ * rows of numbers would bury the names.
  */
-export function LookupTab({ players, footer }: { players: Player[]; footer?: ReactNode }) {
+export function LookupTab({
+  players,
+  footer,
+  stats,
+}: {
+  players: Player[];
+  footer?: ReactNode;
+  stats?: Record<string, PlayerStats> | null;
+}) {
   const [query, setQuery] = useState('');
   const byNumber = useByNumber(players);
 
@@ -78,7 +93,7 @@ export function LookupTab({ players, footer }: { players: Player[]; footer?: Rea
         {hits.length > 0 && (
           <div className="rows">
             {hits.map((p) => (
-              <Row key={p.id} player={p} />
+              <Row key={p.id} player={p} stats={stats?.[playerKey(p)]} />
             ))}
           </div>
         )}
@@ -342,7 +357,15 @@ export function TeamTab({ players }: { players: Player[] }) {
   );
 }
 
-const Row = ({ player, dense = false }: { player: Player; dense?: boolean }) => {
+const Row = ({
+  player,
+  dense = false,
+  stats,
+}: {
+  player: Player;
+  dense?: boolean;
+  stats?: PlayerStats;
+}) => {
   if (dense) {
     const vitals = [formatHeight(player.heightIn), formatWeight(player.weightLb), player.grade]
       .filter(Boolean)
@@ -370,6 +393,11 @@ const Row = ({ player, dense = false }: { player: Player; dense?: boolean }) => 
       <span className="row-text">
         <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
         {details && <span className="row-details">{details}</span>}
+        {summariseStats(stats).map((l) => (
+          <span className="row-details" key={l.category}>
+            {l.label} · {l.parts.join(' · ')}
+          </span>
+        ))}
       </span>
     </div>
   );

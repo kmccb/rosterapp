@@ -1,0 +1,55 @@
+name: Refresh season stats from MaxPreps
+
+# A coach enters Friday's stats over the weekend — Springfield's have gone up
+# early on Saturday — and corrects them in the week. So this looks on Saturday,
+# Sunday and Monday mornings and again on Wednesday: four runs, one request per
+# team per run, for the schools in maxpreps-teams.json and nobody else.
+#
+# It commits to main, and that push is what triggers the deploy. A run that
+# could not read a team's page leaves that team's file alone and fails, so the
+# email GitHub sends for a failed workflow is the alert.
+on:
+  schedule:
+    - cron: '0 14 * * 6'
+    - cron: '0 14 * * 0'
+    - cron: '0 14 * * 1'
+    - cron: '0 14 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: maxpreps
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - id: fetch
+        run: node scripts/maxpreps.mjs
+
+      # Runs after a failure too: with several teams, one page that would not
+      # load must not hold back the others' numbers.
+      - name: Commit whatever changed
+        if: always() && steps.fetch.outcome != 'skipped'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/oh/stats/
+          if git diff --staged --quiet; then
+            echo "No change in anybody's stats."
+            exit 0
+          fi
+          git commit -m "Season stats, $(date -u +%Y-%m-%d)"
+          # Someone may have pushed to main while this run was fetching.
+          git pull --rebase
+          git push

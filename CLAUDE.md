@@ -57,6 +57,21 @@ not a config bug — wait for the next cron. Consequences:
   `npm run build:sync` bundles into a committed `supabase/functions/sync-sources/lib/core.js`
   (a test fails if that file goes stale). A refused sync writes nothing — fans never see a
   broken sheet — and the seller is alerted by Resend.
+- **MaxPreps** (season stats, football, per school that asks) — `scripts/maxpreps.mjs` reads the
+  printable stats page of each team in `maxpreps-teams.json` and commits
+  `public/oh/stats/<slug>-<sport>.json`; `.github/workflows/maxpreps.yml` runs it Sat/Sun/Mon/Wed
+  14:00 UTC. Parsers are pure, in `src/maxpreps/`, pinned to fixtures; rows come out in
+  `src/stats`' own field names, so the paid page's Stats tab (`src/oh/StatsTab.tsx`) reuses
+  Poland's leader math. A page it cannot read keeps the committed file and fails the run.
+  Only slugs in `paid-schools.json` are fetched; a team off that list has its stats file removed
+  on the next run — the file is static, so that list is its paid gate. Rows are tied to the
+  roster on the page by whole name, then jersey-plus-surname (`matchTeamStats` in
+  `src/oh/teamStats.ts`), never by Poland's surname-and-initial matcher.
+  The roster parser reads positional arrays and checks itself against the page's stated count;
+  `--roster` writes a CSV for the panel into `scripts/data/` (gitignored — the repo is public)
+  and is never scheduled. The fixtures carry no athlete ids and invented names for removed players. MaxPreps' robots.txt disallows
+  `/print` and its terms have not been read — one request per team per run, by the school's
+  say-so, is the whole footprint; keep it that way.
 
 ## Short addresses
 
@@ -102,7 +117,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 580 tests / 42 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 605 tests / 44 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
