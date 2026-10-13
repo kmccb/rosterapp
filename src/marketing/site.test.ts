@@ -89,6 +89,10 @@ describe('the marketing page', () => {
       expect(img, img).toMatch(/\bwidth="\d+"/);
       expect(img, img).toMatch(/\bheight="\d+"/);
     }
+    for (const src of attrs('src')) {
+      expect(existsSync(new URL(`../../marketing/${src}`, import.meta.url)), src).toBe(true);
+    }
+    expect(existsSync(new URL('../../marketing/img/share.png', import.meta.url))).toBe(true);
   });
 
   it('carries no tracker', () => {
