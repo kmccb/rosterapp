@@ -9,6 +9,11 @@
  *   npm i --prefix "$TEMP/shoot" playwright-core       (once)
  *   SHOOT_FROM="$TEMP/shoot" node scripts/shoot-marketing.mjs
  *
+ * SHOOT_ORIGIN overrides the default http://localhost:4173 if the preview is
+ * served elsewhere. Look at the Schedule picture afterwards: its "Coming up"
+ * dates come from the demo's baked calendar, so a picture taken late in a
+ * season can look stale.
+ *
  * playwright-core is not a dependency of this repo on purpose: the guarded
  * build installs from package-lock.json, and a screenshot tool has no business
  * in it. It drives the Edge or Chrome already on the machine.
