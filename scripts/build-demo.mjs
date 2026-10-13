@@ -1,37 +1,28 @@
 /*
  * The demo school, written out as one file.
  *
- * Everything a prospect is shown at /oh/demo/ that a paid activation would
- * carry comes from public/oh/demo.json: the school's colors and crest, three
- * sample rosters, the volleyball and basketball schedules a seller would have
- * pasted, and the conference the seller would have typed in. It is generated
- * rather than hand-typed because the pieces have to agree with one another and
- * with the calendar — a volleyball score dated next week is the single most
- * visible way for this page to look broken.
+ * Everything a prospect is shown at /oh/demo/ comes from public/oh/demo.json:
+ * the school's colors and crest, three sample rosters, a football season for the
+ * school and each of its conference rivals, the volleyball and basketball
+ * schedules a seller would have pasted, the conference the seller would have
+ * typed in, and the kickoff forecast. It is generated rather than hand-typed
+ * because the pieces have to agree with one another and with the calendar — a
+ * volleyball score dated next week is the single most visible way for this page
+ * to look broken.
  *
- * The school is Springfield (New Middletown), the first prospect, and the page
- * is built to match the video made for them: black and orange, the tiger crest,
- * Football / Volleyball / Basketball, #24 Marcus Bell on Lookup and MVAC Scarlet
- * on League. What the file does NOT carry is as deliberate as what it does:
+ * The school is Harlow Valley, invented, and so are its rivals and every player.
+ * The demo was the real Springfield for one pitch, but a public site sends
+ * everyone here, and invented players do not belong on a real school's page in
+ * front of strangers. What the file does NOT carry is as deliberate as what it
+ * does:
  *
- *  - No football season. Springfield is a real school with a real directory
- *    file, public/oh/data/springfield-new-middletown.json, refreshed twice a
- *    week. The demo's football schedule, scores and standings are read from
- *    that file and its conference rivals' files, exactly as a paid page's are —
- *    so the one part of the demo an athletic director can check against what
- *    they know is the part that is true.
- *  - No forecast. The kickoff forecast comes from public/oh/weather.json like
- *    any paying school's, once the school is in paid-schools.json.
- *  - No stats. The video shows a stat block on the Lookup card; the app has no
- *    such thing, and a demo that promises it would be selling something that
- *    does not exist.
- *
- * The rosters are invented (the football one starts from the names the video
- * and its one-pager use), and the footer says so.
+ *  - No stats. The app has no such thing, and a demo that promised it would be
+ *    selling something that does not exist.
  *
  * Run by hand — `node scripts/build-demo.mjs` — then commit public/oh/demo.json.
- * It is not part of `npm run build` and must not become part of it: it resizes
- * a crest through sharp, and the guarded build has no business doing that.
+ * It is not part of `npm run build` and must not become part of it: it
+ * rasterizes a crest through sharp, and the guarded build has no business doing
+ * that.
  *
  * WHEN TO RE-RUN. The pasted schedules are anchored to the day the script runs,
  * so that a scored match is always in the past and an unplayed one always
@@ -46,7 +37,7 @@
  * the autumn as next year's fixtures and starts basketball's run from a
  * fortnight ahead — and before any demo that matters.
  * `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it writes on a
- * day of your choosing. Football needs none of this — it is live.
+ * day of your choosing. Football is baked like the rest and is re-run with it.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -59,117 +50,73 @@ const readJson = (path) => JSON.parse(readFileSync(join(root, path), 'utf8'));
 
 // ------------------------------------------------------------------ identity
 
+const SLUG = 'harlow-valley-demo';
+const NAME = 'Harlow Valley';
+const CITY = 'Harlow';
+
 /*
- * The real directory slug, which is the whole point of the change: with it,
- * every store function that is not answered out of this file — the season, the
- * League tab's member seasons, the forecast — falls through to the same files a
- * paid Springfield page would read.
+ * A deep violet ground with a bright gold on it. look.ts builds the whole page
+ * out of these two by mixing toward white, so a ground with real chroma gives
+ * the hub's bands something to be, where a near-black leaves them all one dark.
  */
-const SLUG = 'springfield-new-middletown';
+const GROUND = '#2f1466';
+const ACCENT = '#f5b63d';
 
 /*
- * The name and town are the directory's, not ours. A paid page draws its
- * header from the directory and so does the demo; a display name typed here
- * would be one more thing that could disagree with the real page.
- */
-const directorySeason = readJson(`public/oh/data/${SLUG}.json`);
-const SCHOOL = directorySeason.school;
-
-/* The video's two colors: its background and its accent. */
-const GROUND = '#0e0c0b';
-const ACCENT = '#f26722';
-
-/*
- * MVAC Scarlet, by exact directory slug. Two Western Reserves exist in Ohio;
- * the one in this conference is Berlin Center's, which is the one Springfield's
- * own schedule links to.
+ * Every school on the demo page is invented, conference rivals included. The
+ * demo was the real Springfield for one pitch; a public site sends everyone
+ * here, and invented players do not belong on a real school's page in front of
+ * strangers. The slugs carry a -demo suffix so none can collide with a real
+ * file in public/oh/data, and the check below refuses to write if one does.
+ *
+ * Not "Springfield Local", the name the first fictional demo used: that is the
+ * real name of a real district.
  */
 const MEMBERS = [
-  'mcdonald-mcdonald',
-  'jackson-milton-north-jackson',
-  'campbell-memorial-campbell',
-  'mineral-ridge-mineral-ridge',
-  'lowellville-lowellville',
-  'waterloo-atwater',
-  'western-reserve-berlin-center',
+  { slug: SLUG, name: NAME, city: CITY },
+  { slug: 'ashcombe-demo', name: 'Ashcombe', city: 'Ashcombe' },
+  { slug: 'bellhaven-demo', name: 'Bellhaven', city: 'Bellhaven' },
+  { slug: 'cedar-ridge-demo', name: 'Cedar Ridge', city: 'Cedar Ridge' },
+  { slug: 'elmbrook-demo', name: 'Elmbrook', city: 'Elmbrook' },
+  { slug: 'marlow-central-demo', name: 'Marlow Central', city: 'Marlow' },
 ];
+const [, ASHCOMBE, BELLHAVEN, CEDAR_RIDGE, ELMBROOK, MARLOW] = MEMBERS.map((m) => m.name);
 
-const LEAGUE = { name: 'MVAC Scarlet', members: MEMBERS };
+const LEAGUE = {
+  name: 'Riverbend Athletic Conference',
+  members: MEMBERS.slice(1).map((m) => m.slug),
+};
 
-/* Names for the pasted schedules, taken from the directory so a volleyball
-   opponent is spelled exactly as the football schedule spells it. */
+/* Read only to prove nothing invented here is somebody real. */
 const index = readJson('public/oh/index.json');
-const directory = new Map((index.schools ?? index).map((s) => [s.slug, s]));
-const nameOf = (slug) => directory.get(slug)?.name ?? slug;
-const [MCDONALD, JACKSON_MILTON, CAMPBELL, MINERAL_RIDGE, LOWELLVILLE, WATERLOO, WESTERN_RESERVE] =
-  MEMBERS.map(nameOf);
+const realSlugs = new Set((index.schools ?? index).map((s) => s.slug));
 
 // ------------------------------------------------------------------- crest
 
-/*
- * The crest from the video, on the school's own ground, sized the way the panel
- * sizes an upload.
+/**
+ * A monogram roundel, rasterized to PNG.
  *
- * The source PNG is the oval on a white square. Used as it is, that white is
- * not just a white tile in the header: the crest is also the page's
- * --wallpaper, drawn behind the hub, and a big white square under the bands
- * washes all three of them out to tan where the video's are dark. So
- * everything outside the oval is replaced with the ground color — the badge a
- * seller would make before uploading, and the one that looks like the video.
- *
- * The oval is found rather than assumed: it is the bounding box of everything
- * that is not near-white, which in this file is the oval's own ring (it does
- * not fill the canvas — it is a wide ellipse across the middle). The mask is
- * pulled in by a pixel so the anti-aliased white fringe on the ring's outer
- * edge goes with the background instead of leaving a pale hairline.
- *
- * Then the same treatment src/oh/look.ts's resizeLogo gives a real upload: a
- * centre-cropped 720-pixel square, re-encoded as a JPEG at 0.85, which is the
- * string a real activation stores and a type rosterStore's validLogo accepts.
+ * PNG rather than SVG because rosterStore.ts's LOGO_DATA_URI accepts only
+ * raster types — the value is substituted into a CSS url(), and the narrow
+ * alphabet is what makes that safe. The letters are paths rather than <text>
+ * so the output does not depend on the fonts of the machine that runs this.
  */
-const WALLPAPER_PX = 720;
-const CREST_SRC = join(root, 'docs/design/springfield-video/tigers-logo.png');
+const crestSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="256" fill="${ACCENT}"/>
+  <circle cx="256" cy="256" r="230" fill="${GROUND}"/>
+  <circle cx="256" cy="256" r="206" fill="none" stroke="${ACCENT}" stroke-width="9"/>
+  <g fill="${ACCENT}">
+    <path d="M117 150 h38 v72 h48 v-72 h38 v212 h-38 v-100 h-48 v100 h-38 z"/>
+    <path d="M257 150 h42 l27 148 l27 -148 h42 l-48 212 h-42 z"/>
+  </g>
+</svg>`;
 
-const { data: crestPixels, info: crestInfo } = await sharp(CREST_SRC)
-  .removeAlpha()
-  .raw()
-  .toBuffer({ resolveWithObject: true });
-const oval = { x0: Infinity, x1: -1, y0: Infinity, y1: -1 };
-for (let y = 0; y < crestInfo.height; y += 1) {
-  for (let x = 0; x < crestInfo.width; x += 1) {
-    const i = (y * crestInfo.width + x) * crestInfo.channels;
-    if (crestPixels[i] < 235 || crestPixels[i + 1] < 235 || crestPixels[i + 2] < 235) {
-      oval.x0 = Math.min(oval.x0, x);
-      oval.x1 = Math.max(oval.x1, x);
-      oval.y0 = Math.min(oval.y0, y);
-      oval.y1 = Math.max(oval.y1, y);
-    }
-  }
-}
-if (oval.x1 < 0) throw new Error('the crest has nothing on it but white');
-
-const ovalMask = Buffer.from(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${crestInfo.width}" height="${crestInfo.height}">
-    <ellipse cx="${(oval.x0 + oval.x1 + 1) / 2}" cy="${(oval.y0 + oval.y1 + 1) / 2}"
-             rx="${(oval.x1 - oval.x0 + 1) / 2 - 1}" ry="${(oval.y1 - oval.y0 + 1) / 2 - 1}"
-             fill="#fff"/>
-  </svg>`,
-);
-
-// The oval cut out onto a transparent square (dest-in keeps the crest only
-// where the mask is), then laid on the ground color.
-const crestOnGround = await sharp(CREST_SRC)
-  .ensureAlpha()
-  .composite([{ input: ovalMask, blend: 'dest-in' }])
-  .flatten({ background: GROUND })
-  .png()
+// Two colors and an edge, so a palette costs nothing and keeps the string
+// small — it is inlined in a committed JSON and again in a CSS custom property.
+const crestPng = await sharp(Buffer.from(crestSvg))
+  .png({ palette: true, colors: 32, compressionLevel: 9 })
   .toBuffer();
-
-const crestJpeg = await sharp(crestOnGround)
-  .resize(WALLPAPER_PX, WALLPAPER_PX, { fit: 'cover', position: 'centre' })
-  .jpeg({ quality: 85 })
-  .toBuffer();
-const LOGO = `data:image/jpeg;base64,${crestJpeg.toString('base64')}`;
+const LOGO = `data:image/png;base64,${crestPng.toString('base64')}`;
 
 /* The database refuses a theme over this many bytes (0005_school_theme.sql),
    so a crest past it is one the seller could never have uploaded. */
@@ -274,6 +221,185 @@ const nextAutumnOpener = () => {
 
 const AUTUMN_OPENER = VOLLEYBALL_LIVE ? null : nextAutumnOpener();
 
+// --------------------------------------------------------------- football
+
+/*
+ * Football hangs off its own day: the most recent Friday that has been.
+ * Volleyball keeps its Thursday above, and src/oh/demo.ts moves each sport by
+ * its own results, so the two anchors never have to agree.
+ */
+const FB_ANCHOR = addDays(TODAY, -((((TODAY.getUTCDay() - 5) + 7) % 7) || 7));
+const FOOTBALL_LIVE = liveNow('football');
+const TOTAL_WEEKS = 10;
+
+/*
+ * How much of the season has been played is read off the real calendar, not
+ * fixed at half.
+ *
+ * src/oh/demo.ts carries a played season forward by whole weeks but never out
+ * of the sport's own months. A season always written half-played in mid-October
+ * ends in mid-November, has two weeks of room, and then sits still with last
+ * week's fixture under "Coming up". Written the way an Ohio season actually
+ * falls — week one on the first Friday from late August — an October file ends
+ * in October and has the whole of November to move in.
+ *
+ * Clamped to 1..9 so there is always a result behind and a fixture ahead while
+ * the hub says "In season".
+ */
+const openerThisYear = (() => {
+  const late = new Date(Date.UTC(TODAY.getUTCFullYear(), 7, 21));
+  return addDays(late, (5 - late.getUTCDay() + 7) % 7);
+})();
+const weeksIn = Math.floor((FB_ANCHOR.getTime() - openerThisYear.getTime()) / (7 * DAY)) + 1;
+const PLAYED_WEEKS = FOOTBALL_LIVE ? Math.min(9, Math.max(1, weeksIn)) : 0;
+
+/** Ten Fridays. In season, the last played week lands on the anchor; out of
+ * it, week one lands on the next autumn's opening Friday and none is played. */
+const WEEKS = Array.from({ length: TOTAL_WEEKS }, (_, i) =>
+  FOOTBALL_LIVE
+    ? iso(addDays(FB_ANCHOR, (i - (PLAYED_WEEKS - 1)) * 7))
+    : iso(addDays(nextAutumnOpener(), i * 7)),
+);
+
+/*
+ * Five rounds, every pair meeting once, in weeks 3 to 7. Written out because
+ * the scores are chosen: a demo where the school being sold to wins everything
+ * reads as a brochure, so Harlow Valley loses one here and two outside.
+ * Indexes are into MEMBERS; `h` is the home side.
+ */
+const ROUNDS = [
+  [{ h: 0, a: 1, hs: 28, as: 14 }, { h: 2, a: 5, hs: 21, as: 20 }, { h: 3, a: 4, hs: 7, as: 24 }],
+  [{ h: 2, a: 0, hs: 24, as: 17 }, { h: 1, a: 3, hs: 13, as: 35 }, { h: 4, a: 5, hs: 28, as: 21 }],
+  [{ h: 0, a: 3, hs: 35, as: 7 }, { h: 4, a: 2, hs: 14, as: 17 }, { h: 5, a: 1, hs: 30, as: 22 }],
+  [{ h: 4, a: 0, hs: 17, as: 27 }, { h: 5, a: 3, hs: 28, as: 14 }, { h: 1, a: 2, hs: 10, as: 31 }],
+  [{ h: 0, a: 5, hs: 24, as: 21 }, { h: 1, a: 4, hs: 14, as: 35 }, { h: 2, a: 3, hs: 38, as: 6 }],
+];
+
+/*
+ * Non-conference weeks — 1, 2, 8, 9 and 10 — against schools with no page.
+ * opponentSlug is null, the shape the real parser gives an opponent that is
+ * not in the directory.
+ */
+const NON_CONFERENCE = {
+  0: [
+    { opponent: 'Kirkwood Prep', home: false, us: 14, them: 21 },
+    { opponent: 'Twin Lakes', home: true, us: 31, them: 10 },
+    { opponent: 'Harmony Ridge', home: true, us: 20, them: 23 },
+    { opponent: 'Pinecrest Academy', home: false, us: 34, them: 12 },
+    { opponent: 'Stonebridge Central', home: true, us: 21, them: 17 },
+  ],
+  1: [
+    { opponent: 'Harmony Ridge', home: true, us: 24, them: 7 },
+    { opponent: 'Stonebridge Central', home: false, us: 10, them: 27 },
+    { opponent: 'Twin Lakes', home: false, us: 13, them: 20 },
+    { opponent: 'Kirkwood Prep', home: true, us: 17, them: 14 },
+    { opponent: 'Pinecrest Academy', home: true, us: 28, them: 21 },
+  ],
+  2: [
+    { opponent: 'Pinecrest Academy', home: true, us: 42, them: 14 },
+    { opponent: 'Kirkwood Prep', home: true, us: 21, them: 13 },
+    { opponent: 'Harmony Ridge', home: false, us: 27, them: 24 },
+    { opponent: 'Stonebridge Central', home: true, us: 14, them: 20 },
+    { opponent: 'Twin Lakes', home: false, us: 35, them: 10 },
+  ],
+  3: [
+    { opponent: 'Twin Lakes', home: false, us: 6, them: 28 },
+    { opponent: 'Harmony Ridge', home: true, us: 20, them: 17 },
+    { opponent: 'Kirkwood Prep', home: false, us: 7, them: 31 },
+    { opponent: 'Pinecrest Academy', home: true, us: 24, them: 22 },
+    { opponent: 'Stonebridge Central', home: false, us: 12, them: 30 },
+  ],
+  4: [
+    { opponent: 'Stonebridge Central', home: true, us: 35, them: 28 },
+    { opponent: 'Pinecrest Academy', home: false, us: 14, them: 9 },
+    { opponent: 'Harmony Ridge', home: true, us: 21, them: 24 },
+    { opponent: 'Twin Lakes', home: true, us: 30, them: 13 },
+    { opponent: 'Kirkwood Prep', home: false, us: 17, them: 20 },
+  ],
+  5: [
+    { opponent: 'Harmony Ridge', home: false, us: 13, them: 34 },
+    { opponent: 'Twin Lakes', home: true, us: 7, them: 24 },
+    { opponent: 'Stonebridge Central', home: false, us: 21, them: 28 },
+    { opponent: 'Kirkwood Prep', home: true, us: 26, them: 19 },
+    { opponent: 'Pinecrest Academy', home: false, us: 16, them: 14 },
+  ],
+};
+const NON_CONFERENCE_WEEKS = [1, 2, 8, 9, 10];
+const KICKOFF = '7:00 PM';
+
+/** Only the first PLAYED_WEEKS weeks carry a result, so one table of scores
+ * serves a file written on any day of the year. */
+const isPlayed = (week) => week <= PLAYED_WEEKS;
+
+/** One school's ten games, folded out of the two tables above. */
+function seasonFor(i) {
+  const games = [];
+  NON_CONFERENCE[i].forEach((g, slot) => {
+    const week = NON_CONFERENCE_WEEKS[slot];
+    games.push({
+      week,
+      date: WEEKS[week - 1],
+      kickoff: KICKOFF,
+      home: g.home,
+      opponent: g.opponent,
+      opponentCity: '',
+      opponentSlug: null,
+      ...(isPlayed(week) ? { result: { us: g.us, them: g.them, won: g.us > g.them } } : {}),
+    });
+  });
+  ROUNDS.forEach((round, r) => {
+    const week = r + 3;
+    for (const game of round) {
+      if (game.h !== i && game.a !== i) continue;
+      const home = game.h === i;
+      const them = MEMBERS[home ? game.a : game.h];
+      const us = home ? game.hs : game.as;
+      const theirs = home ? game.as : game.hs;
+      games.push({
+        week,
+        date: WEEKS[week - 1],
+        kickoff: KICKOFF,
+        home,
+        opponent: them.name,
+        opponentCity: them.city,
+        opponentSlug: them.slug,
+        ...(isPlayed(week) ? { result: { us, them: theirs, won: us > theirs } } : {}),
+      });
+    }
+  });
+  games.sort((a, b) => a.week - b.week);
+
+  const record = { won: 0, lost: 0, played: 0 };
+  for (const g of games) {
+    if (!g.result) continue;
+    record.played += 1;
+    if (g.result.won) record.won += 1;
+    else record.lost += 1;
+  }
+  return { school: MEMBERS[i], games, record };
+}
+
+const seasons = {};
+MEMBERS.forEach((m, i) => {
+  seasons[m.slug] = seasonFor(i);
+});
+
+/*
+ * The forecast for the next fixture, baked like everything else: the demo page
+ * may not ask anybody anything. School.tsx draws a forecast only on the fixture
+ * naming this same day.
+ */
+const NEXT_FIXTURE = WEEKS[PLAYED_WEEKS];
+const weather = {
+  date: NEXT_FIXTURE,
+  code: 2,
+  tempF: 58,
+  precipChance: 20,
+  windMph: 9,
+  day: false,
+  at: `${NEXT_FIXTURE}T19:00`,
+};
+
 const row = (date, opponent, home, time, score) => ({
   date,
   opponent,
@@ -313,10 +439,8 @@ const player = (number, firstName, lastName, position, side, extra = {}) => ({
 const ft = (feet, inches) => feet * 12 + inches;
 
 /*
- * Football starts from the video and its one-pager, name for name: #1 to #7 are
- * the Team tab the video scrolls past, #24 is the Lookup card it opens on, and
- * #10 to #15 are the one-pager's "double digits". The rest are invented, to make
- * a believable small-school varsity — most of it two-way, which is what a
+ * Every name here is invented, to make a believable small-school varsity — most
+ * of it two-way, which is what a
  * thirty-man roster in Division VI looks like. A two-way player's side is left
  * blank, so the Offense and Defense chips both find him.
  */
@@ -340,7 +464,7 @@ const FOOTBALL = [
   player('20', 'Ethan', 'Palmer', 'DB', 'D', { heightIn: ft(5, 10), weightLb: 165, grade: 'Jr' }),
   player('21', 'Mason', 'Kline', 'CB', 'D', { heightIn: ft(5, 9), weightLb: 158, grade: 'So' }),
   player('22', 'Logan', 'Szabo', 'RB/LB', '', { heightIn: ft(5, 11), weightLb: 185, grade: 'Jr' }),
-  player('24', 'Marcus', 'Bell', 'RB/LB', '', { heightIn: ft(5, 11), weightLb: 195, grade: 'Sr' }),
+  player('24', 'Darius', 'Cole', 'RB/LB', '', { heightIn: ft(5, 11), weightLb: 195, grade: 'Sr' }),
   player('33', 'Hunter', 'Mazur', 'FB/LB', '', { heightIn: ft(6, 0), weightLb: 205, grade: 'Sr' }),
   player('44', 'Jacob', 'Wenzel', 'LB', 'D', { heightIn: ft(5, 11), weightLb: 200, grade: 'Jr' }),
   player('50', 'Dominic', 'Russo', 'OL/DL', '', { heightIn: ft(6, 0), weightLb: 245, grade: 'Sr' }),
@@ -401,26 +525,26 @@ const BASKETBALL = [
  * Volleyball: the conference twice over, Tuesdays and Thursdays from late
  * August. In season it is ten matches played and four to come — enough results
  * for a record and enough fixtures for the page to be about something — and
- * Springfield loses three, because a demo where the school being sold to wins
+ * Harlow Valley loses three, because a demo where the school being sold to wins
  * everything reads as a brochure.
  */
 const VB_TIME = '6:30 PM';
 const VOLLEYBALL_SCHEDULE = autumnSchedule(
   [
-    { opponent: LOWELLVILLE, home: true, score: { us: 3, them: 0 } },
-    { opponent: MCDONALD, home: false, score: { us: 1, them: 3 } },
-    { opponent: WATERLOO, home: true, score: { us: 3, them: 1 } },
-    { opponent: MINERAL_RIDGE, home: false, score: { us: 3, them: 2 } },
-    { opponent: CAMPBELL, home: true, score: { us: 3, them: 0 } },
-    { opponent: JACKSON_MILTON, home: false, score: { us: 2, them: 3 } },
-    { opponent: WESTERN_RESERVE, home: true, score: { us: 3, them: 1 } },
-    { opponent: LOWELLVILLE, home: false, score: { us: 3, them: 1 } },
-    { opponent: MCDONALD, home: true, score: { us: 0, them: 3 } },
-    { opponent: WATERLOO, home: false, score: { us: 3, them: 0 } },
-    { opponent: MINERAL_RIDGE, home: true },
-    { opponent: CAMPBELL, home: false },
-    { opponent: JACKSON_MILTON, home: true },
-    { opponent: WESTERN_RESERVE, home: false },
+    { opponent: ASHCOMBE, home: true, score: { us: 3, them: 0 } },
+    { opponent: BELLHAVEN, home: false, score: { us: 1, them: 3 } },
+    { opponent: CEDAR_RIDGE, home: true, score: { us: 3, them: 1 } },
+    { opponent: 'Twin Lakes', home: false, score: { us: 3, them: 2 } },
+    { opponent: ELMBROOK, home: true, score: { us: 3, them: 0 } },
+    { opponent: MARLOW, home: false, score: { us: 2, them: 3 } },
+    { opponent: 'Kirkwood Prep', home: true, score: { us: 3, them: 1 } },
+    { opponent: ASHCOMBE, home: false, score: { us: 3, them: 1 } },
+    { opponent: BELLHAVEN, home: true, score: { us: 0, them: 3 } },
+    { opponent: CEDAR_RIDGE, home: false, score: { us: 3, them: 0 } },
+    { opponent: ELMBROOK, home: false },
+    { opponent: MARLOW, home: true },
+    { opponent: 'Harmony Ridge', home: true },
+    { opponent: 'Pinecrest Academy', home: false },
   ].map((f) => ({ ...f, time: VB_TIME })),
   // Thursdays are 0, -7, … and Tuesdays -2, -9, …; the first fixture is the
   // Tuesday twelve days on, which clears today however old the anchor is.
@@ -439,22 +563,22 @@ const hoops = (n) => iso(addDays(tipOff, n));
 const BB_TIME = '7:30 PM';
 
 const BASKETBALL_SCHEDULE = [
-  row(hoops(0), 'Brookfield', true, BB_TIME),
-  row(hoops(4), LOWELLVILLE, false, BB_TIME),
-  row(hoops(7), MCDONALD, true, BB_TIME),
-  row(hoops(11), WATERLOO, false, BB_TIME),
-  row(hoops(14), MINERAL_RIDGE, true, BB_TIME),
-  row(hoops(21), CAMPBELL, false, BB_TIME),
-  row(hoops(25), 'Lakeview', true, BB_TIME),
-  row(hoops(39), JACKSON_MILTON, true, BB_TIME),
-  row(hoops(42), WESTERN_RESERVE, false, BB_TIME),
-  row(hoops(46), LOWELLVILLE, true, BB_TIME),
-  row(hoops(49), MCDONALD, false, BB_TIME),
-  row(hoops(53), WATERLOO, true, BB_TIME),
-  row(hoops(56), MINERAL_RIDGE, false, BB_TIME),
-  row(hoops(63), CAMPBELL, true, BB_TIME),
-  row(hoops(67), JACKSON_MILTON, false, BB_TIME),
-  row(hoops(70), WESTERN_RESERVE, true, BB_TIME),
+  row(hoops(0), 'Kirkwood Prep', true, BB_TIME),
+  row(hoops(4), ASHCOMBE, false, BB_TIME),
+  row(hoops(7), BELLHAVEN, true, BB_TIME),
+  row(hoops(11), CEDAR_RIDGE, false, BB_TIME),
+  row(hoops(14), ELMBROOK, true, BB_TIME),
+  row(hoops(21), MARLOW, false, BB_TIME),
+  row(hoops(25), 'Twin Lakes', true, BB_TIME),
+  row(hoops(39), 'Harmony Ridge', true, BB_TIME),
+  row(hoops(42), ASHCOMBE, true, BB_TIME),
+  row(hoops(46), BELLHAVEN, false, BB_TIME),
+  row(hoops(49), CEDAR_RIDGE, true, BB_TIME),
+  row(hoops(53), ELMBROOK, false, BB_TIME),
+  row(hoops(56), MARLOW, true, BB_TIME),
+  row(hoops(63), 'Pinecrest Academy', false, BB_TIME),
+  row(hoops(67), 'Stonebridge Central', true, BB_TIME),
+  row(hoops(70), 'Twin Lakes', false, BB_TIME),
 ];
 
 /** Ids have to be unique and stable; nothing reads them but React's keys. */
@@ -462,8 +586,7 @@ const withIds = (sport, players) =>
   players.map((p) => ({ id: `${sport}-${p.number}`, ...p }));
 
 const sports = {
-  // Football's fixtures and scores are the directory's — the same arrangement a
-  // real paid school has, where the directory feeds football and nothing else.
+  // Football's fixtures and scores are in `seasons` above, as a real paid school's are in the directory.
   football: { players: withIds('football', FOOTBALL), schedule: null },
   volleyball: { players: withIds('volleyball', VOLLEYBALL), schedule: VOLLEYBALL_SCHEDULE },
   basketball: { players: withIds('basketball', BASKETBALL), schedule: BASKETBALL_SCHEDULE },
@@ -481,36 +604,53 @@ const demo = {
   // The day this was made, so a test can hold the file to the month table as it
   // stood then rather than as it stands whenever the suite happens to run.
   generatedOn: iso(TODAY),
-  school: SCHOOL,
+  school: { slug: SLUG, name: NAME, city: CITY },
   colors: { ground: GROUND, accent: ACCENT },
   logo: LOGO,
   // The order the hub is handed; sortSportsForNow reorders it by the calendar.
   sportNames: ['football', 'volleyball', 'basketball'],
   league: LEAGUE,
+  seasons,
   sports,
+  weather,
 };
 
 // ------------------------------------------------------------ the self-checks
 
 /*
- * The first thing that must be true: this is the school it says it is, in the
- * conference it says it is in.
+ * The first thing that must be true: every school here is invented and the
+ * season agrees with itself.
  *
- * Football, the standings and the forecast are all read from the directory by
- * slug, so a slug that does not resolve is a demo with an empty League tab. And
- * a member Springfield does not actually play would sit in the table at 0–0
- * against the school being sold to, which reads as a mistake to exactly the
- * people who would know.
+ * A slug that matched a real directory file would put an invented roster on a
+ * real school's page, and a game that one side records as a win and the other
+ * does not mirror would put two different scores in the League table and on the
+ * rival's own schedule.
  */
 const identityFaults = [];
-if (SCHOOL?.slug !== SLUG) identityFaults.push(`${SLUG}'s directory file names ${SCHOOL?.slug}`);
-for (const slug of MEMBERS) {
-  if (!directory.has(slug)) identityFaults.push(`${slug} is not in public/oh/index.json`);
-  if (!existsSync(join(root, `public/oh/data/${slug}.json`))) {
-    identityFaults.push(`${slug} has no public/oh/data file`);
+for (const m of MEMBERS) {
+  if (!m.slug.endsWith('-demo')) identityFaults.push(`${m.slug} does not say it is a demo`);
+  if (realSlugs.has(m.slug)) identityFaults.push(`${m.slug} is a real school in public/oh/index.json`);
+  if (existsSync(join(root, `public/oh/data/${m.slug}.json`))) {
+    identityFaults.push(`${m.slug} has a real public/oh/data file`);
   }
-  if (!directorySeason.games.some((g) => g.opponentSlug === slug)) {
-    identityFaults.push(`${SCHOOL.name}'s schedule never meets ${slug}`);
+}
+for (const m of MEMBERS.slice(1)) {
+  if (!seasons[SLUG].games.some((g) => g.opponentSlug === m.slug)) {
+    identityFaults.push(`${NAME}'s schedule never meets ${m.slug}`);
+  }
+}
+// The same game seen from both sides must be the same game.
+for (const [slug, season] of Object.entries(seasons)) {
+  for (const g of season.games) {
+    if (!g.opponentSlug) continue;
+    const back = seasons[g.opponentSlug].games.find((o) => o.week === g.week);
+    const agrees =
+      back &&
+      back.opponentSlug === slug &&
+      back.date === g.date &&
+      back.home !== g.home &&
+      (g.result ? back.result?.us === g.result.them && back.result?.them === g.result.us : !back.result);
+    if (!agrees) identityFaults.push(`${slug} week ${g.week} disagrees with ${g.opponentSlug}`);
   }
 }
 if (LOGO.length > THEME_CEILING) {
@@ -521,7 +661,7 @@ for (const [sport, s] of Object.entries(sports)) {
 }
 if (identityFaults.length) {
   for (const f of identityFaults) console.error(`  ${f}`);
-  throw new Error('the demo does not describe the school it names');
+  throw new Error('the demo does not describe an invented school that agrees with itself');
 }
 
 /*
@@ -534,6 +674,7 @@ const dated = [];
 for (const [sport, s] of Object.entries(sports)) {
   for (const r of s.schedule ?? []) dated.push([sport, r.date, !!r.score]);
 }
+for (const g of seasons[SLUG].games) dated.push(['football', g.date, !!g.result]);
 
 const wrong = dated.filter(([, date, scored]) =>
   scored ? date >= TODAY_ISO : date < TODAY_ISO,
@@ -614,8 +755,8 @@ const spread = (dates) =>
   dates.length ? `${dates[0]} → ${dates[dates.length - 1]} (${dates.length} games)` : 'none';
 
 console.log(`wrote ${out}`);
-console.log(`  ${SCHOOL.name}, ${SCHOOL.city} (${SLUG}); ${LEAGUE.name}, ${MEMBERS.length} rivals`);
-console.log(`  crest ${kb(crestJpeg.length)} jpeg, ${kb(LOGO.length)} as a data URI`);
+console.log(`  ${NAME}, ${CITY} (${SLUG}); ${LEAGUE.name}, ${LEAGUE.members.length} rivals`);
+console.log(`  crest ${kb(crestPng.length)} png, ${kb(LOGO.length)} as a data URI`);
 for (const [sport, s] of Object.entries(sports)) {
   console.log(`  ${sport}: ${s.players.length} players, ${s.schedule?.length ?? 0} pasted rows`);
 }
@@ -624,7 +765,9 @@ console.log(
 );
 console.log(`  played  ${spread(dated.filter(([, , s]) => s).map(([, d]) => d).sort())}`);
 console.log(`  ahead   ${spread(dated.filter(([, , s]) => !s).map(([, d]) => d).sort())}`);
-console.log(`  football is ${directorySeason.record.won}–${directorySeason.record.lost} in the directory today, and stays live`);
+console.log(
+  `  football: ${PLAYED_WEEKS} of ${TOTAL_WEEKS} played, ${NAME} ${seasons[SLUG].record.won}–${seasons[SLUG].record.lost}, last game ${WEEKS[TOTAL_WEEKS - 1]}`,
+);
 /*
  * What the page does with this file from here on: src/oh/demo.ts moves a
  * schedule that has results forward by whole weeks at read time, within its own
