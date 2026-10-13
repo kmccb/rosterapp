@@ -49,7 +49,10 @@ function StatsSource({ row, onSaved }: { row: RosterRow; onSaved: () => void }) 
     setBusy(true);
     setError(null);
     setStatsSource({ slug: row.school_slug, sport: row.sport, season: row.season, url: next })
-      .then(onSaved)
+      .then(() => {
+        setUrl('');
+        onSaved();
+      })
       .catch((e: unknown) => setError(friendlyError(e)))
       .finally(() => setBusy(false));
   };
@@ -74,7 +77,7 @@ function StatsSource({ row, onSaved }: { row: RosterRow; onSaved: () => void }) 
 
   return (
     <>
-      <p className="mg-state">None. The page has no Stats tab.</p>
+      <p className="mg-state">No link set.</p>
       <div className="mg-inline">
         <input
           className="mg-input"
@@ -124,6 +127,8 @@ export function SportCard({
   taken,
   colors,
   billing,
+  schoolPaidThrough,
+  crest,
   schools,
   open,
   onToggle,
@@ -134,10 +139,14 @@ export function SportCard({
   row: RosterRow | null;
   /** Sports this school already has, which a new card must not offer again. */
   taken: string[];
-  /** The school's colors as last saved; `p_colors` has no "keep", so every save sends them. */
+  /** The school's colors, for a row that has none of its own; `p_colors` has no "keep", so every save sends some. */
   colors: { ground: string; accent: string };
-  /** The school's date and note, for a sport that has no row of its own yet. */
+  /** The school's date and note as they stand on the page, for a sport that has no row of its own yet. */
   billing: { paidThrough: string; note: string };
+  /** The latest date any of the school's sports is stored as paid to. */
+  schoolPaidThrough: string | null;
+  /** The school's crest, when the page has it in hand, for a new sport to start with. */
+  crest: string | null;
   schools: School[];
   open: boolean;
   onToggle: () => void;
@@ -178,7 +187,9 @@ export function SportCard({
     let current = true;
     loadSchoolRoster(row.school_slug, row.sport)
       .then((stored) => {
-        if (!current || leagueTouched.current || !stored?.league) return;
+        // The door answers for the newest live season; an older season's
+        // card must not be handed the newer one's conference to save.
+        if (!current || leagueTouched.current || !stored?.league || stored.season !== row.season) return;
         setLeagueName(stored.league.name);
         setLeagueMembers(stored.league.members);
       })
@@ -214,13 +225,27 @@ export function SportCard({
   const schoolName = (memberSlug: string): string =>
     schools.find((s) => s.slug === memberSlug)?.name ?? memberSlug;
 
-  const paidThrough = row?.paid_through ?? billing.paidThrough;
+  /*
+   * What this save is paid to. A row keeps its own date. The exception is a
+   * sport that has lapsed at a school that has since been renewed: publishing
+   * it means "show this too", so it takes the date the school is paid to
+   * rather than being refused for a date nobody can edit from here.
+   */
+  const paidFor = (published: boolean): string => {
+    if (!row) return billing.paidThrough;
+    const today = todayIso();
+    if (published && row.paid_through < today && schoolPaidThrough && schoolPaidThrough >= today) {
+      return schoolPaidThrough;
+    }
+    return row.paid_through;
+  };
 
   const save = async (published: boolean) => {
     // Publishing past its date would "succeed" and then sit dark — the fetch
     // refuses anything past its date the instant it is asked.
+    const paidThrough = paidFor(published);
     if (published && paidThrough < todayIso()) {
-      setError('Paid through is already in the past, so the page would publish dark. Renew the school first.');
+      setError('Paid through is already in the past, so the page would publish dark. Renew the school under Billing first.');
       return;
     }
     // The database refuses an empty published roster; say it in a sentence here.
@@ -238,9 +263,11 @@ export function SportCard({
         season,
         players: rosterSaveArg(players, linked.roster),
         colors: row?.colors ?? colors,
-        // The crest is the school's. Null keeps this row's copy, and a row
-        // with none borrows the school's on the fan page.
-        theme: null,
+        // The crest is the school's. Null keeps this row's copy. A new sport
+        // starts with the school's when the page has it, because the fan page
+        // only borrows a crest from a row that is live — without a copy of
+        // its own, this sport would lose it the day football came down.
+        theme: row ? null : crest ? { logo: crest } : null,
         schedule: scheduleSaveArg(schedParsed?.rows ?? [], scheduleCleared, linked.schedule),
         // Football only: the fan side draws a conference for nothing else, and
         // invisible dead data is worse than none.
@@ -324,7 +351,7 @@ export function SportCard({
 
       {!row && (
         <Part label="Sport">
-          <select className="mg-input" value={newSport} onChange={(e) => setNewSport(e.target.value)}>
+          <select className="mg-input" aria-label="Sport" value={newSport} onChange={(e) => setNewSport(e.target.value)}>
             {free.map((s) => (
               <option key={s} value={s}>
                 {capital(s)}
@@ -624,7 +651,7 @@ export function SportCard({
   );
 
   return row ? (
-    <Sources row={row} onLinked={setLinked}>
+    <Sources row={row} onLinked={setLinked} onChanged={onSaved}>
       {body}
     </Sources>
   ) : (

@@ -21,8 +21,10 @@
  *
  * If the database cannot be asked — the call fails, or 0009 has not been
  * applied yet — the run says so in one line and carries on with the file's
- * teams, and takes nothing down: a stats file is removed for being in neither
- * list only on a run where the database actually answered.
+ * teams. A stats file is removed for being in neither list only on a run
+ * where the database actually answered, and a file team that is off the paid
+ * list keeps its file on a run where the database was there and failed —
+ * the database may be what vouches for it.
  *
  * It never makes things worse. A page that fails to arrive, has lost the tables
  * the parser needs, is missing a category that was published before, or comes
@@ -101,6 +103,7 @@ const askDatabase = async () => {
     if (!res.ok) {
       const text = await res.text();
       const missing = res.status === 404 || text.includes('PGRST202');
+      if (!missing) dbFailed = true;
       console.log(
         missing
           ? `database: school_stats_targets is not there yet (0009 not applied) — reading the file's teams only`
@@ -112,6 +115,7 @@ const askDatabase = async () => {
     if (!Array.isArray(rows)) throw new Error('the answer was not a list');
     return rows;
   } catch (err) {
+    dbFailed = true;
     console.log(`::warning::database: ${err.message} — reading the file's teams only`);
     return null;
   }
@@ -131,6 +135,13 @@ const plainName = (value) => typeof value === 'string' && /^[a-z0-9]+(-[a-z0-9]+
 
 const keyOf = (team) => `${team.slug} ${team.sport}`;
 
+/*
+ * True when the database was there to ask and did not answer — a timeout, a
+ * 500. That is different from its not having the function yet: on a run like
+ * this a team it normally vouches for arrives by way of the file instead, and
+ * must not have its stats taken down for failing the file's gate.
+ */
+let dbFailed = false;
 const dbRows = await askDatabase();
 const dbTeams = [];
 // Every slug and sport the database named, whether or not its link was usable:
@@ -160,6 +171,10 @@ for (const team of teams) {
   // A team the database named is published and paid by the database's own
   // reckoning, which is the better authority; the list is the file's gate.
   if (!team.paidByDatabase && !paid.has(team.slug)) {
+    if (dbFailed) {
+      console.log(`${label}: not in paid-schools.json, and the database could not be asked — skipped, file left as it is`);
+      continue;
+    }
     rmSync(join(root, 'public/oh/stats', `${team.slug}-${team.sport}.json`), { force: true });
     console.log(`${label}: not in paid-schools.json — skipped, and no stats file left up`);
     continue;

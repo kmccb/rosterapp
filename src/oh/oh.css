@@ -181,6 +181,8 @@
   --mg-warn-bg: #fbefd8;
   --mg-focus: #2c6fd1;
 
+  /* Native parts — the date picker, a select's list — follow this. */
+  color-scheme: light;
   position: fixed;
   inset: 0;
   z-index: 5;
@@ -209,6 +211,8 @@
     --mg-warn: #ecc27a;
     --mg-warn-bg: #3a2c10;
     --mg-focus: #7fb0f5;
+
+    color-scheme: dark;
   }
 }
 
@@ -427,6 +431,10 @@
   background: var(--mg-danger-bg);
   color: var(--mg-danger);
   font-size: 14px;
+}
+
+.mg-banner {
+  margin-bottom: 14px;
 }
 
 .mg-saved {

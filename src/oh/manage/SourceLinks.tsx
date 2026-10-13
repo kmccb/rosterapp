@@ -17,10 +17,19 @@ type Links = { roster: string | null; schedule: string | null; filter: string | 
 export function Sources({
   row,
   onLinked,
+  onChanged,
   children,
 }: {
   row: RosterRow;
   onLinked: (l: { roster: boolean; schedule: boolean }) => void;
+  /**
+   * Told after every link, unlink and sync, so whoever owns `row` can read it
+   * again. This component seeds its links from `row` each time it mounts, and
+   * a card that is closed and reopened mounts it afresh: from a stale row it
+   * would come back believing a link was still unset, and the next save —
+   * which always sends both links — would quietly unlink it.
+   */
+  onChanged: () => void;
   children: (blocks: { roster: ReactNode; schedule: ReactNode | null }) => ReactNode;
 }) {
   const [links, setLinks] = useState<Links>({
@@ -46,11 +55,13 @@ export function Sources({
       schedule: next.schedule === links.schedule && next.filter === links.filter ? s.schedule : undefined,
     }));
     onLinked({ roster: Boolean(next.roster), schedule: Boolean(next.schedule) });
+    onChanged();
   };
 
   const sync = async () => {
     const answer = await syncNow(row.school_slug, row.sport, row.season);
     setState(answer.state);
+    onChanged();
   };
 
   // Handed back as two pieces rather than drawn here: the sheet belongs in the

@@ -67,8 +67,9 @@ not a config bug — wait for the next cron. Consequences:
   14:00 UTC. Parsers are pure, in `src/maxpreps/`, pinned to fixtures; rows come out in
   `src/stats`' own field names, so the paid page's Stats tab (`src/oh/StatsTab.tsx`) reuses
   Poland's leader math. A page it cannot read keeps the committed file and fails the run.
-  Only slugs in `paid-schools.json` are fetched; a team off that list has its stats file removed
-  on the next run — the file is static, so that list is its paid gate. Rows are tied to the
+  A file team is fetched only if its slug is in `paid-schools.json`, and has its stats file removed
+  when it is not; a database team is paid by the database's own reckoning, and a stats file
+  neither source names is swept away — but only on a run where the database answered. Rows are tied to the
   roster on the page by whole name, then jersey-plus-surname (`matchTeamStats` in
   `src/oh/teamStats.ts`), never by Poland's surname-and-initial matcher.
   The roster parser reads positional arrays and checks itself against the page's stated count;
@@ -136,7 +137,9 @@ Poland's own page — a short address outside that prefix would never reach the 
   `paid-weather.mjs` (fail-soft) → `npm run build` (+guard). Env vars live in the Pages project,
   **Production and Preview separately**, plain text — they ship in the bundle by design
   (`NODE_VERSION`=22, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; `VITE_CF_BEACON` empty —
-  the beacon is off). The GitHub repo *variables* of the same names are no longer read by anything.
+  the beacon is off). The GitHub repo *variables* of the same names are read by one thing: `maxpreps.yml`, to ask
+  the database which teams have a stats link (public values; if they are unset the job reads
+  `maxpreps-teams.json` only).
 
 ## Ops documents
 
@@ -153,7 +156,8 @@ Poland's own page — a short address outside that prefix would never reach the 
 **Hosting moved 2026-09-11:** GitHub Pages → Cloudflare Pages, same domain (the `scottforge.ai`
 zone is on Cloudflare; `roster` is a proxied CNAME to `rosterapp-7zt.pages.dev`). Verified
 byte-identical pages, service-worker update on an existing install, Supabase and admin sign-in on
-the real domain. GitHub Pages retired; its repo *variables* are now dead config.
+the real domain. GitHub Pages retired; its repo *variables* were dead config until `maxpreps.yml` began reading
+the two Supabase ones.
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
 (tabs, full theming, crest upload), the all-sports hub, identity and league (0004–0007 applied

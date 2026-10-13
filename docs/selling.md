@@ -70,12 +70,15 @@ doesn't actually play, and prints the dates it wrote.
    a first sport card: choose the sport, paste their roster spreadsheet (or
    **Import a CSV**, which fills the same box and gets the same review) and
    check the parsed list reads right.
-3. **Save and publish.** Their /oh/ page has the keypad that second. Save
-   unpublished instead if the check hasn't cleared.
-4. Now the school's own sections appear. **Look**: their two colors and the
-   crest, once, for every sport. **Billing**: paid-through (defaults to Feb 1
-   after the season; Renew a year moves it on) and the payment in the note:
-   "check #1042, J. Smith, boosters". Each section has its own Save.
+3. On the same page set **Look** (their two colors and the crest) and
+   **Billing** (paid-through, which defaults to Feb 1 after the season, and
+   the payment in the note: "check #1042, J. Smith, boosters"). For a new
+   school these are saved with the first sport.
+4. **Save and publish** on the sport card. Their /oh/ page has the keypad
+   that second. Save unpublished instead if the check hasn't cleared.
+
+After that, Look and Billing each have their own Save, and write to every
+   sport at once. Renew a year moves the date on.
 
 The school list is the dashboard: one line per school, worst first — a
 refused sheet, then expired, then live, then unpublished.
@@ -175,8 +178,10 @@ player's season. Nobody types anything after setup.
    scheduled run writes the stats file; to have it at once, run the "Refresh
    season stats from MaxPreps" workflow by hand.
 3. For MaxPreps' roster as a CSV: add the school to `maxpreps-teams.json` with
-   its roster address and run `node scripts/maxpreps.mjs --roster`. The CSV
-   lands in `scripts/data/`, which is not committed.
+   its stats and roster addresses, and to `paid-schools.json`, and run
+   `node scripts/maxpreps.mjs --roster`. The CSV lands in `scripts/data/`,
+   which is not committed. (Without the `paid-schools.json` line a local run
+   skips the school and removes its local stats file.)
 4. Give the CSV to the sport's **Import a CSV** in the panel, if the school
    wants MaxPreps' roster rather than its own sheet.
 

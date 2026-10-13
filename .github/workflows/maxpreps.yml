@@ -53,7 +53,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # -A, because a school whose link was cleared or whose season lapsed
           # has its file taken down, and a removal has to be staged too.
-          git add -A public/oh/stats/
+          # The folder is gone once its last file is, and git refuses a path
+          # that is neither on disk nor tracked.
+          if [ -d public/oh/stats ] || git ls-files --error-unmatch public/oh/stats >/dev/null 2>&1; then
+            git add -A public/oh/stats/
+          fi
           if git diff --staged --quiet; then
             echo "No change in anybody's stats."
             exit 0

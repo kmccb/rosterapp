@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   clearSession,
   loadSession,
@@ -49,11 +49,19 @@ export function Manage() {
     setSignedIn(Boolean(fromLink || loadSession()));
   }, []);
 
+  // Two re-reads can be in flight at once — a card saved, then Look saved —
+  // and they may answer out of order. Only the one asked for last may land, or
+  // the page would settle on the older picture of the database.
+  const asked = useRef(0);
   const refresh = (): Promise<void> => {
+    const mine = (asked.current += 1);
     setError(null);
     return listRosters()
-      .then(setRows)
+      .then((list) => {
+        if (mine === asked.current) setRows(list);
+      })
       .catch((e: Error) => {
+        if (mine !== asked.current) return;
         if (e.message === 'signed-out') setSignedIn(false);
         else setError(e.message);
       });
@@ -130,6 +138,7 @@ export function Manage() {
         slug={open}
         rows={groups.find((g) => g.slug === open)?.rows ?? []}
         schools={schools}
+        listError={error}
         onRefresh={refresh}
         onBack={() => {
           setOpen(null);
@@ -162,6 +171,9 @@ export function Manage() {
 
         <div className="mg-toolbar">
           <input
+            // Keyed, so switching between finding and activating gives a fresh
+            // box with the cursor in it.
+            key={picking ? 'pick' : 'find'}
             className="mg-input"
             type="search"
             value={query}
@@ -173,6 +185,9 @@ export function Manage() {
           <button
             type="button"
             className={`mg-btn${picking ? '' : ' is-primary'}`}
+            // Not before the list is in: Activate leaves out the schools
+            // already here, and with no list it would offer them as new.
+            disabled={rows === null}
             onClick={() => {
               setPicking(!picking);
               setQuery('');
