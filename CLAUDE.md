@@ -8,7 +8,9 @@ Three products share this repo and one deployment (Cloudflare Pages at https://r
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
 3. **The paid tier** — a school pays (~$200/season, concierge: the seller does everything),
    its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest.
-   Admin panel at `/oh/?manage` (magic-link auth, single admin account). Privacy page at
+   Admin panel at `/oh/?manage` (magic-link auth, single admin account; laptop-first, its own
+   `.mg` styles in `src/oh/oh.css`, one row per school → a school page with Look, a card per
+   sport, and Billing — `src/oh/manage/`). Privacy page at
    `/oh/?privacy`. Routing is by query flag — an unknown path falls back to Poland's root page.
 
 ## The one rule that outranks everything
@@ -58,7 +60,9 @@ not a config bug — wait for the next cron. Consequences:
   (a test fails if that file goes stale). A refused sync writes nothing — fans never see a
   broken sheet — and the seller is alerted by Resend.
 - **MaxPreps** (season stats, football, per school that asks) — `scripts/maxpreps.mjs` reads the
-  printable stats page of each team in `maxpreps-teams.json` and commits
+  printable stats page of each team the database names (`school_stats_targets()`, set per sport
+  in the panel, migration 0009 — **written, NOT yet applied**) plus any in `maxpreps-teams.json`
+  (the fallback until 0009 is in; gated by `paid-schools.json`), and commits
   `public/oh/stats/<slug>-<sport>.json`; `.github/workflows/maxpreps.yml` runs it Sat/Sun/Mon/Wed
   14:00 UTC. Parsers are pure, in `src/maxpreps/`, pinned to fixtures; rows come out in
   `src/stats`' own field names, so the paid page's Stats tab (`src/oh/StatsTab.tsx`) reuses
@@ -110,14 +114,20 @@ Poland's own page — a short address outside that prefix would never reach the 
   `notify pgrst, 'reload schema'`. Applied by hand in the dashboard SQL editor.
 - **Signature-changing migrations have a deploy ordering** (see `docs/going-live.md`):
   push → deploy green → apply migration. The panel's saves break in the window; fan pages never do.
-- Verify with `node scripts/verify-school-roster.mjs` (11 checks, 12 with `VERIFY_SLUG` set in
+- **0009** (`supabase/migrations/0009_stats_source.sql`, written 2026-10-13, **not applied, never
+  run against Postgres**) adds `stats_source_url` to `school_roster`,
+  `school_roster_set_stats_source` (authenticated, admin-only), `school_stats_targets()` (anon —
+  slug, sport and link for published-and-paid rows, nothing else) and one more key on
+  `school_roster_list`. Additive: no deploy ordering. Until it is applied the panel's stats
+  control answers with the database's own error and the job reads the file only.
+- Verify with `node scripts/verify-school-roster.mjs` (13 checks once 0009 is applied, 14 with `VERIFY_SLUG` set in
   `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
   against a database that only has 0006 applied; the four 0008 door checks fail the same way
   against a database that doesn't have 0008 yet — that's the runbook telling the truth, not a bug.
 
 ## Tests and CI
 
-- `npx vitest run` — 605 tests / 44 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 613 tests / 45 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main

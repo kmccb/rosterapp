@@ -305,3 +305,52 @@ earlier sections; work through them first on a fresh database.
    across more than one scheduled call. If the job stops altogether (cron
    unscheduled, function deleted), links simply stop updating — the page
    keeps the last good data and the panel's "synced N ago" grows.
+
+## v6: stats source
+
+A school's MaxPreps stats link is now set in the panel and kept in the
+database, instead of by a commit to `maxpreps-teams.json`. The scheduled
+job (`scripts/maxpreps.mjs`, run by `.github/workflows/maxpreps.yml`) asks
+the database which pages to read, with the anon key the site already ships.
+The file still works, gated by `paid-schools.json` as before; a team in
+both is read once, from the database's link.
+
+There is no deploy ordering. 0009 is additive — no existing function
+changes its parameters or what it returns — and the job is written to run
+before it is applied: until `school_stats_targets` exists, a run logs one
+line saying so and reads the file's teams alone.
+
+1. **Migration 0009.** Paste `supabase/migrations/0009_stats_source.sql`
+   into the dashboard SQL editor, run it, run it again (apply-twice gate),
+   then `node scripts/verify-school-roster.mjs` — expect 13 ok lines (14
+   with `VERIFY_SLUG` set in `.env.local`). The two new ones: anon can read
+   the stats targets and gets only `slug`, `sport` and `stats_source_url`;
+   anon cannot set a stats source.
+
+2. **The repo variables.** GitHub → Settings → Secrets and variables →
+   Actions → Variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+   must both be there with the same values the Pages project has. They are
+   variables, not secrets — both ship in the bundle. With either one
+   missing the job never asks the database and nothing says so, so look.
+
+3. **Set a source in the panel.** Open `/oh/?manage`, pick a published,
+   paid football activation, and give it its MaxPreps printable stats link
+   (`https://www.maxpreps.com/print/team_stats.aspx?…`). Anything that is
+   not https on `www.maxpreps.com` is refused, in a sentence.
+
+4. **Run the workflow by hand.** Actions → "Refresh season stats from
+   MaxPreps" → Run workflow. The log should say `database: 1 team with a
+   stats link`, then the team's row count; the commit it pushes carries
+   `public/oh/stats/<slug>-<sport>.json`, and that push is the deploy.
+
+5. **Clear it and run again** (on a throwaway, or skip this). With the link
+   cleared — or the row unpublished or lapsed — and the school not in
+   `maxpreps-teams.json`, the next run takes the stats file down and
+   commits the removal. That happens only on a run where the database
+   answered: a failed call removes nothing.
+
+**What this costs if it breaks.** If the database cannot be reached the run
+warns and falls back to the file's teams, so a school that exists only in
+the database simply isn't refreshed that run — its committed file stays,
+under its last date. A page that cannot be read still fails the run and
+keeps the committed file, as before.
