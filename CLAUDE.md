@@ -1,15 +1,17 @@
 # rosterapp — working notes for Claude
 
-Three products share this repo and one deployment (Cloudflare Pages at https://roster.scottforge.ai):
+Four things live in this repo; the first three share one deployment (Cloudflare Pages at https://roster.scottforge.ai):
 
 1. **The root PWA** (`/`, `/ysu/`, `/victorychristian/`) — the original "who is #17" app.
    Poland Seminary is the root team; installed on real phones; used offline at games.
 2. **The Ohio directory** (`/oh/`) — every OH school (717), searchable, schedules + scores,
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
-3. **The paid tier** — a school pays (~$200/season, concierge: the seller does everything),
+3. **The paid tier** — a school pays ($400/season for one team, $1,200/year for the whole school, first season free; concierge: the seller does everything),
    its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest.
    Admin panel at `/oh/?manage` (magic-link auth, single admin account). Privacy page at
    `/oh/?privacy`. Routing is by query flag — an unknown path falls back to Poland's root page.
+4. **The marketing site** (`marketing/`, https://getroster.scottforge.ai) — one static page,
+   its own Cloudflare Pages project, no build step. Nothing in it touches the three above.
 
 ## The one rule that outranks everything
 
@@ -132,13 +134,10 @@ the real domain. GitHub Pages retired; its repo *variables* are now dead config.
 
 **Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
 (tabs, full theming, crest upload), the all-sports hub, identity and league (0004–0007 applied
-and verified), share-code system proven alive post-migrations, security script 7/7. The demo at
-`/oh/demo/` is the real Springfield (`springfield-new-middletown`, the first prospect, matching
-the sales video): sample rosters/colors/crest and pasted volleyball/basketball schedules from
-`public/oh/demo.json`, with its real football season, scores and MVAC Scarlet standings read from
-the directory (it was the fictional `springfield-local-demo` before the `springfield-demo` branch).
-It is also in `paid-schools.json` for the kickoff forecast — remove it if they don't buy, and move
-the demo on when the pitch does (selling.md). A `poland-demo` branch that put Poland itself on its
+and verified), share-code system proven alive post-migrations, security script 7/7. The demo at `/oh/demo/` is Harlow Valley (`harlow-valley-demo`), an invented school in an
+invented conference, everything baked into `public/oh/demo.json` — football included — so it
+asks the directory and the database for nothing. It was the real Springfield for one pitch
+(PR #12) and went back to fiction on 2026-10-13 when the public site began pointing at it. A `poland-demo` branch that put Poland itself on its
 real Eventlink calendar was explored but never merged.
 
 **Shipped, function not yet deployed:** live sources — a roster that stays current from a
