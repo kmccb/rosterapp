@@ -5,6 +5,8 @@ import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
+import { StatsTab } from './StatsTab';
+import { loadTeamStats, matchTeamStats, type TeamStats } from './teamStats';
 import {
   keptSchoolSports,
   loadSchoolRoster,
@@ -155,7 +157,7 @@ function Forecast({ weather }: { weather: FixtureWeather }) {
   );
 }
 
-type SchoolTab = 'lookup' | 'team' | 'schedule' | 'league';
+type SchoolTab = 'lookup' | 'team' | 'schedule' | 'stats' | 'league';
 
 const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
@@ -166,6 +168,10 @@ const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
 /** Only a football row with a conference on it gets this fourth tab, so it
  * hangs on the end of the three rather than living among them. */
 const LEAGUE_TAB: { id: SchoolTab; label: string } = { id: 'league', label: 'League' };
+
+/** Only a sport with a stats file whose names are on the roster gets this one.
+ * It sits where Poland's does, after Schedule and before League. */
+const STATS_TAB: { id: SchoolTab; label: string } = { id: 'stats', label: 'Stats' };
 
 /**
  * The frame every state of this page hangs in.
@@ -233,6 +239,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // this the next render is the hub the reader just tapped out of — nothing
   // happens on screen until the network answers.
   const [rosterFetch, setRosterFetch] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   // The table the network built, and the member list it was built for. The key
   // is what stops a re-entry into the tab refetching ten school files, and what
   // stops a previous school's table flashing up under this school's conference
@@ -447,6 +454,37 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
    * seller would make one forgotten tap a way to publish a table the paying
    * school is missing from.
    */
+  // Season stats ride on a roster: they are part of the paid page, and without
+  // names to hang them on there is nothing to print. Asked for once a roster
+  // has landed, and thrown away with it — the flag is the roster effect's, for
+  // the roster effect's reason, since volleyball's answer must not arrive late
+  // onto basketball's page.
+  const hasRoster = roster !== null;
+  useEffect(() => {
+    setTeamStats(null);
+    if (!hasRoster || !sport) return;
+    let current = true;
+    loadTeamStats(slug, sport)
+      .then((s) => {
+        if (current) setTeamStats(s);
+      })
+      .catch(() => {
+        /* no stats is the ordinary case */
+      });
+    return () => {
+      current = false;
+    };
+  }, [slug, sport, hasRoster]);
+
+  // Matched against the roster this page actually has, so a row for somebody
+  // the roster does not carry is left out rather than shown unnamed. Null when
+  // nothing matched: a tab with nobody in it is worse than no tab.
+  const statTotals = useMemo(() => {
+    if (!roster || !teamStats) return null;
+    const byPlayer = matchTeamStats(teamStats.rows, roster.players);
+    return Object.keys(byPlayer).length > 0 ? byPlayer : null;
+  }, [roster, teamStats]);
+
   const conference = sport === 'football' ? (roster?.league ?? null) : null;
   const members = useMemo(
     () => (conference ? [...new Set([slug, ...conference.members])] : []),
@@ -845,7 +883,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
       {roster && (
         <nav className="tabs oh-school-tabs" aria-label="Sections">
-          {(conference ? [...SCHOOL_TABS, LEAGUE_TAB] : SCHOOL_TABS).map((t) => (
+          {[...SCHOOL_TABS, ...(statTotals ? [STATS_TAB] : []), ...(conference ? [LEAGUE_TAB] : [])].map((t) => (
             <button
               key={t.id}
               type="button"
@@ -880,7 +918,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * without first tapping through to another tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} />
+            <LookupTab players={roster.players} footer={footer} stats={statTotals} />
           </div>
         ) : (
           <div className="screen">
@@ -888,6 +926,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
               <div className="oh-roster">
                 <TeamTab players={roster.players} />
               </div>
+            )}
+            {tab === 'stats' && statTotals && teamStats && (
+              <StatsTab
+                players={roster.players}
+                totals={statTotals}
+                updated={teamStats.updated}
+                source={teamStats.source}
+              />
             )}
             {tab === 'league' && conference && (
               <>
