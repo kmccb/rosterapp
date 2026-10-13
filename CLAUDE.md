@@ -11,7 +11,7 @@ Four things live in this repo; the first three share one deployment (Cloudflare 
    Admin panel at `/oh/?manage` (magic-link auth, single admin account). Privacy page at
    `/oh/?privacy`. Routing is by query flag — an unknown path falls back to Poland's root page.
 4. **The marketing site** (`marketing/`, https://getroster.scottforge.ai) — one static page,
-   its own Cloudflare Pages project, no build step. Nothing in it touches the three above.
+   its own Cloudflare Pages project, no build step. Nothing in it touches the three above, except that `src/marketing/site.test.ts` pins the page in the main project's `npm test`.
 
 ## The one rule that outranks everything
 

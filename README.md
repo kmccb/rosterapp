@@ -224,7 +224,7 @@ To create it (once, in the Cloudflare dashboard):
 
 It needs no environment variables. The main `rosterapp` project still builds
 on every push; nothing under `marketing/` is in its output, and the guard
-does not look at it.
+does not look at it. One thing does cross over: `src/marketing/site.test.ts` runs in the main project's `npm test`, so a broken link or a forbidden claim in the page fails the app's deploy until it is fixed, while this project publishes the folder regardless.
 
 The phone screenshots in `marketing/img/` are taken from the built demo by
 `scripts/shoot-marketing.mjs`, by hand: build, serve the result with

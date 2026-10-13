@@ -159,9 +159,9 @@ const asDemo = (v: unknown): DemoData | null => {
     };
   }
 
-  // No seasons at all is the usual file: football comes from the directory.
-  // Seasons that are there, though, are held to the shape — a half-written one
-  // would take the League tab down with it.
+  // A file with no seasons is still accepted and falls through to the directory,
+  // but the committed demo bakes all six. Seasons that are present are held to
+  // the shape, because a half-written one would take the League tab down with it.
   if (v.seasons !== undefined && !isRecord(v.seasons)) return null;
   const seasons: Record<string, SchoolSeason> = {};
   for (const [slug, raw] of Object.entries(v.seasons ?? {})) {

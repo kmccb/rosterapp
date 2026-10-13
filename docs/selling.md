@@ -5,10 +5,12 @@ First time? Work through docs/going-live.md before the first sale.
 The system stores a paid-through date and a note. Everything else — the
 pitch, the invoice, the check — happens between people.
 
-One team is $400 a season. A whole school — every sport and level — is $1,200
+One team is $400 a season. A whole school — every sport — is $1,200
 a year. A district or conference is quoted. A school's first season is free.
 These lines are the one place those numbers live — change them here and on
 the site (`marketing/index.html`) together, and quote whatever they say.
+
+One roster per sport today: the panel has no separate entry for a second level or for boys’ and girls’ teams of the same sport. Say so before a school assumes otherwise.
 
 ## What to show a prospect
 
@@ -32,16 +34,10 @@ quiet line in the footer says it is all sample data.
 It works with no signal once loaded, and it asks the database and the
 directory for nothing — safe on a school's guest wifi or in a car park.
 
-**Maintenance:** the page carries each sport's dates forward by whole weeks as
-it ages, so what has been played and what is coming split at today — but only
-until that sport's own months run out. So run `node scripts/build-demo.mjs`
-and commit `public/oh/demo.json` **twice a year**: near the start of the
-autumn, and again in December once football and volleyball are over. It
-refuses to write a season that would argue with itself, or a school that
-turns out to be real, and prints the dates it wrote.
+**Maintenance:** the page carries a sport that has results on it forward by whole weeks as it ages, so what has been played and what is coming split at today — but only until that sport's own months run out, and a sport with nothing played yet is never moved. The file generated on 2026-10-13 is right until 17 November. So run `node scripts/build-demo.mjs` and commit `public/oh/demo.json` **by 17 November, again on 1 December, and near the start of each autumn** — and look at the page before any demo that matters. From December to August it shows fixtures and no scores, because nothing in an invented autumn has been played yet. It refuses to write a season that would argue with itself, or a school that turns out to be real, and prints the dates it wrote.
 
 After a re-run that changes how the page looks, re-take the site's
-screenshots: `node scripts/shoot-marketing.mjs` (see README, Deploying).
+screenshots: `node scripts/shoot-marketing.mjs` (see README, Deploying). Do not re-take them from a file generated out of season: the pictures are of football, which then has no scores, no forecast and a table of 0–0.
 
 ## Activate a school (the whole job, ~3 minutes)
 

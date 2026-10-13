@@ -28,7 +28,7 @@ describe('the marketing page', () => {
 
   it('has every section its own links point at', () => {
     const ids = new Set(attrs('id'));
-    for (const id of ['what', 'inside', 'setup', 'families', 'cost', 'launch', 'start']) {
+    for (const id of ['what', 'inside', 'setup', 'families', 'cost', 'launch', 'questions', 'start']) {
       expect(ids.has(id), id).toBe(true);
     }
     for (const href of attrs('href').filter((h) => h.startsWith('#'))) {
