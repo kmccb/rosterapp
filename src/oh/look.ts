@@ -19,6 +19,7 @@
  */
 
 import { liftBackdrop } from './backdrop';
+import { bestInk, luminance, mix, readable } from './contrast';
 import { plateColor, type CrestPlate } from './plate';
 
 // The plate rule lives in ./plate so the home-screen icon script can share it.
@@ -44,18 +45,11 @@ const rgba = (hex: string, alpha: number): string => {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 };
 
-/** Moves a hex color a fraction `t` of the way toward another. */
-const mix = (from: string, to: string, t: number): string => {
-  const a = parseInt(from.slice(1), 16);
-  const b = parseInt(to.slice(1), 16);
-  const chan = (shift: number) => {
-    const av = (a >> shift) & 255;
-    const bv = (b >> shift) & 255;
-    return Math.round(av + (bv - av) * t);
-  };
-  const to2 = (v: number) => v.toString(16).padStart(2, '0');
-  return `#${to2(chan(16))}${to2(chan(8))}${to2(chan(0))}`;
-};
+const isHex = (v: string | undefined): v is string => !!v && /^#[0-9a-f]{6}$/i.test(v);
+
+/** The dark offered for ink on an accent fill when the ground itself is too
+ * light to read there — not pure black, which looks like a hole on a phone. */
+const NEAR_BLACK = '#111111';
 
 /**
  * Every CSS custom property applyLook sets and clearLook removes. Kept as one
@@ -68,42 +62,79 @@ export const LOOK_VARS = [
   '--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom', '--crest-plate',
 ] as const;
 
-/**
- * Works out every CSS variable value from the two colors a school's fetch
- * hands over. Pure, so the exact numbers can be pinned in tests rather than
- * eyeballed on a phone.
- */
-export function deriveVars(look: SchoolLook): Record<string, string> {
-  const { ground, accent, logo } = look;
-  const chosenText = look.text && /^#[0-9a-f]{6}$/i.test(look.text) ? look.text : null;
+/** The colors the page's words actually come out in, before and after they are
+ * made readable — what deriveVars paints with, and what the panel's hint reads. */
+type Words = {
+  surface: string;
+  /** The page and a card on it: everything a word can sit on. */
+  grounds: string[];
+  text: string;
+  muted: string;
+  accent: string;
+  chosen: { text: string; muted: string; accent: string };
+};
+
+function words(look: SchoolLook): Words {
+  const { ground, accent } = look;
+  const chosenText = isHex(look.text) ? look.text : null;
 
   // A step up from the ground, the way palette.ts's surface is a step up from
   // its own ground — but built by mixing toward white rather than by a second
   // HSL pass, since this module only has two colors to work with.
   const surface = mix(ground, '#ffffff', 0.16);
+  // Cards are that surface at 72% over the ground, and a word on a card is
+  // read against what that comes out as, not against the surface alone.
+  const grounds = [ground, mix(ground, surface, 0.72)];
+
+  const rawText = chosenText ?? '#ffffff';
+  const text = readable(rawText, grounds);
   // The second voice — a player's details, a heading over a list. Lightened
   // from the accent when the text is white, as it always was; taken from the
   // chosen text when there is one, a third of the way back toward the ground,
   // because a school that picks dark text on a light ground would otherwise
   // get its details in a pale accent nobody could read.
-  const muted = chosenText ? mix(chosenText, ground, 0.35) : mix(accent, '#ffffff', 0.55);
-  const text = chosenText ?? '#ffffff';
-  // No badge to sample for an ink color here, so the ground stands in — the
-  // same dark that reads against white text reads against the accent too,
-  // for every accent this derivation is asked to lighten toward readability.
-  const accentInk = ground;
+  const rawMuted = chosenText ? mix(text, ground, 0.35) : mix(accent, '#ffffff', 0.55);
+
+  return {
+    surface,
+    grounds,
+    text,
+    muted: readable(rawMuted, grounds),
+    accent: readable(accent, grounds),
+    chosen: { text: rawText, muted: rawMuted, accent },
+  };
+}
+
+/**
+ * Works out every CSS variable value from the two colors a school's fetch
+ * hands over. Pure, so the exact numbers can be pinned in tests rather than
+ * eyeballed on a phone.
+ *
+ * The three colors used for words — text, muted and accent — are passed
+ * through readable() against the ground and the card surface, so a school
+ * can choose any colors at all and still be read; colors that already work
+ * come through untouched. The ghost numeral and the hairlines are decoration,
+ * and keep the school's colors as chosen.
+ */
+export function deriveVars(look: SchoolLook): Record<string, string> {
+  const { ground, logo } = look;
+  const w = words(look);
+  // Ink on an accent fill — the active tab, a filled button. The ground was
+  // always the answer and still is when it reads best; an accent the ground
+  // cannot be read on gets near-black or white instead.
+  const accentInk = bestInk(w.accent, [ground, NEAR_BLACK, '#ffffff']);
 
   return {
     '--bg': ground,
     '--chrome': rgba(ground, 0.82),
-    '--surface': rgba(surface, 0.72),
-    '--surface-2': rgba(surface, 0.9),
-    '--line': rgba(muted, 0.24),
-    '--text': text,
-    '--muted': muted,
-    '--accent': accent,
+    '--surface': rgba(w.surface, 0.72),
+    '--surface-2': rgba(w.surface, 0.9),
+    '--line': rgba(w.chosen.muted, 0.24),
+    '--text': w.text,
+    '--muted': w.muted,
+    '--accent': w.accent,
     '--accent-ink': accentInk,
-    '--ghost': rgba(accent, 0.22),
+    '--ghost': rgba(look.accent, 0.22),
     '--wallpaper': logo ? `url("${logo}")` : 'none',
     '--scrim-near': rgba(ground, 0.78),
     '--scrim-far': rgba(ground, 0.93),
@@ -111,6 +142,26 @@ export function deriveVars(look: SchoolLook): Record<string, string> {
     '--scrim-bottom': rgba(ground, 0.88),
     '--crest-plate': plateColor(look),
   };
+}
+
+/**
+ * What the panel says under the color pickers when a color was moved to stay
+ * readable. The second voice is derived rather than picked, and a hint about
+ * a color nobody can choose would only puzzle, so it is left out. The color is never refused: the page shows the adjusted one,
+ * and the seller is told why it looks different from the swatch.
+ */
+export function lookNotes(look: SchoolLook): string[] {
+  const w = words(look);
+  const moved = (label: string, from: string, to: string) =>
+    from.toLowerCase() === to.toLowerCase()
+      ? []
+      : [`${label} ${luminance(to) > luminance(from) ? 'lightened' : 'darkened'} so it reads on the ground`];
+  return [
+    ...moved('Accent', w.chosen.accent, w.accent),
+    // White is the text nobody chose, but a page whose text has turned dark
+    // is the biggest change of all, so it is reported the same.
+    ...moved('Text', w.chosen.text, w.text),
+  ];
 }
 
 const defaultTarget = (): StyleTarget => document.documentElement as unknown as StyleTarget;
