@@ -89,10 +89,12 @@ export function LookupTab({
       {/* Everything above the keys, in one box, because the column needs a
           single part that gives up height — the hits alone cannot be it once
           there is a footer under them. */}
-      <div className="oh-lookup-body" aria-live="polite">
+      <div className="oh-lookup-body">
         {hits.length > 0 ? (
           <>
-            <p className="results-count">
+            {/* Announced on each key; the rows under it are not, or a screen
+                reader would read the whole list again at every tap. */}
+            <p className="results-count" aria-live="polite">
               {hits.length} {hits.length === 1 ? 'player' : 'players'} starting with {query}
             </p>
             <div className="rows">
@@ -104,7 +106,7 @@ export function LookupTab({
         ) : query ? (
           <div className="empty">
             <p className="empty-number">{query}</p>
-            <p className="empty-text">Nobody on the roster wears that.</p>
+            <p className="empty-text" aria-live="polite">Nobody on the roster wears that.</p>
           </div>
         ) : (
           <div className="empty">

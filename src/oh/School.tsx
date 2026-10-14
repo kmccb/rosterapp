@@ -994,7 +994,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   const head = (
     <>
-      {look ? titleLine : <div className="oh-school-head">{nameBlock}</div>}
+      {/* Only a page with a roster gets Poland's line. A paid school's sport
+          with no roster of its own (a volleyball-only school's football page,
+          or a roster that failed to load) is the free single scroll, and the
+          record under the big name is the only place that page shows it. */}
+      {look && roster ? titleLine : <div className="oh-school-head">{nameBlock}</div>}
 
       {back}
 
