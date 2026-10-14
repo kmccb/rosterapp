@@ -8,6 +8,7 @@ import {
   historyJson,
   meetings,
   opponentResolver,
+  outcome,
   parseHistory,
   seasonGames,
 } from './history';
@@ -96,6 +97,16 @@ describe('meetings', () => {
     });
   });
 
+  it('counts a tie as neither a win nor a loss', () => {
+    const tie = parseHistory({
+      ...FILE,
+      games: [...FILE.games, ['2022-10-21', 'mcdonald-mcdonald', 'McDonald', 'home', 14, 14]],
+    });
+    const m = meetings(tie, [], 'mcdonald-mcdonald');
+    expect(m).toMatchObject({ played: 4, won: 2, lost: 1, tied: 1 });
+    expect(m.meetings.map(outcome)).toEqual(['W', 'L', 'W', 'T']);
+  });
+
   it('works with no history file at all', () => {
     expect(meetings(null, thisSeason, 'mcdonald-mcdonald')).toMatchObject({ played: 1, won: 1 });
   });
@@ -117,8 +128,9 @@ describe('meetings', () => {
   it('agrees with Poland’s own headToHead on the same games', () => {
     const all = [...seasonGames(thisSeason), ...historyGames(h)];
     const theirs = headToHead(all, 'lakeview-cortland');
-    const ours = meetings(h, thisSeason, 'lakeview-cortland');
+    const { tied, ...ours } = meetings(h, thisSeason, 'lakeview-cortland');
     expect(ours).toEqual(theirs);
+    expect(tied).toBe(0);
   });
 });
 
@@ -205,5 +217,42 @@ describe('opponentResolver', () => {
 
   it('never resolves an opponent to the school whose history it is', () => {
     expect(resolve('springfield-old-town', 'Springfield', 'springfield-new-middletown')).toBeNull();
+  });
+});
+
+describe('buildHistory, when the school itself was printed under another town', () => {
+  const side = (name: string, city: string, score: number) => ({ name, city, state: 'OH', score });
+  const g = (date: string, away: ReturnType<typeof side>, home: ReturnType<typeof side>): StateGame =>
+    ({ week: 1, date, kickoff: '', away, home });
+
+  const games: StateGame[] = [
+    g('2024-09-06', side('McDonald', 'McDonald', 7), side('Springfield', 'New Middletown', 21)),
+    // The same school, printed under its old town.
+    g('2012-09-07', side('Springfield', 'North Lima', 14), side('McDonald', 'McDonald', 10)),
+    // A different school entirely, whose name the directory shares with another.
+    g('2013-09-06', side('East', 'Old Town', 3), side('McDonald', 'McDonald', 28)),
+  ];
+
+  it('keeps those seasons when the name is the directory’s only one', () => {
+    const h = buildHistory(games, 'springfield-new-middletown', 2011, 2025, [
+      { slug: 'springfield-new-middletown', name: 'Springfield' },
+      { slug: 'mcdonald-mcdonald', name: 'McDonald' },
+    ]);
+    expect(h.games.map((r) => r[0])).toEqual(['2024-09-06', '2012-09-07']);
+    expect(h.games[1]).toEqual(['2012-09-07', 'mcdonald-mcdonald', 'McDonald', 'away', 14, 10]);
+  });
+
+  it('does not borrow another school’s games when the name is shared', () => {
+    const h = buildHistory(games, 'springfield-new-middletown', 2011, 2025, [
+      { slug: 'springfield-new-middletown', name: 'Springfield' },
+      { slug: 'springfield-holland', name: 'Springfield' },
+      { slug: 'mcdonald-mcdonald', name: 'McDonald' },
+    ]);
+    expect(h.games.map((r) => r[0])).toEqual(['2024-09-06']);
+    const east = buildHistory(games, 'east-akron', 2011, 2025, [
+      { slug: 'east-akron', name: 'East' },
+      { slug: 'east-columbus', name: 'East' },
+    ]);
+    expect(east.games).toEqual([]);
   });
 });

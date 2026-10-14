@@ -95,6 +95,20 @@ const asGame = ([date, slug, name, venue, us, them]: HistoryRow): Game => ({
   result: { us, them, won: us > them },
 });
 
+/*
+ * Ohio high-school football has overtime, but the scoreboards still carry the
+ * odd tie (eleven in fifteen years statewide — called for weather, mostly).
+ * Poland's Game says only won or not, so a tie is a game with the same score
+ * on both sides: won is false and it counts as neither a win nor a loss.
+ */
+export type Outcome = 'W' | 'L' | 'T';
+
+export const outcome = (g: Game): Outcome | null =>
+  !g.result ? null : g.result.us === g.result.them ? 'T' : g.result.won ? 'W' : 'L';
+
+/** HeadToHead, plus the ties it has no word for: played = won + lost + tied. */
+export type HeadToHeadRecord = HeadToHead & { tied: number };
+
 /** Every past game, as Games, newest first. */
 export function historyGames(history: SchoolHistory | null): Game[] {
   return history ? history.games.map(asGame) : [];
@@ -123,7 +137,7 @@ export function meetings(
   history: SchoolHistory | null,
   season: SchoolGame[],
   opponentSlug: string,
-): HeadToHead {
+): HeadToHeadRecord {
   const byDate = new Map<string, Game>();
   for (const g of [...seasonGames(season), ...historyGames(history)]) {
     if (g.opponentKey === opponentSlug && !byDate.has(g.date)) byDate.set(g.date, g);
@@ -131,8 +145,9 @@ export function meetings(
   const list = [...byDate.values()].sort((a, b) => b.date.localeCompare(a.date));
   return {
     played: list.length,
-    won: list.filter((g) => g.result!.won).length,
-    lost: list.filter((g) => !g.result!.won).length,
+    won: list.filter((g) => outcome(g) === 'W').length,
+    lost: list.filter((g) => outcome(g) === 'L').length,
+    tied: list.filter((g) => outcome(g) === 'T').length,
     meetings: list,
   };
 }
@@ -152,13 +167,18 @@ const nameKey = (name: string) => slugFor(name, '');
  * school is looked up this way (seasonsBySchool gives anyone else no slug at
  * all), and never as the school whose history this is.
  */
-export function opponentResolver(directory: readonly Pick<School, 'slug' | 'name'>[]) {
-  const known = new Set(directory.map((s) => s.slug));
+const nameIndex = (directory: readonly Pick<School, 'slug' | 'name'>[]) => {
   const byName = new Map<string, string[]>();
   for (const s of directory) {
     const key = nameKey(s.name);
     byName.set(key, [...(byName.get(key) ?? []), s.slug]);
   }
+  return byName;
+};
+
+export function opponentResolver(directory: readonly Pick<School, 'slug' | 'name'>[]) {
+  const known = new Set(directory.map((s) => s.slug));
+  const byName = nameIndex(directory);
 
   return (printedSlug: string | null, name: string, self?: string): string | null => {
     if (!printedSlug) return null;
@@ -193,9 +213,29 @@ export function buildHistory(
     return true;
   });
 
-  const season = seasonsBySchool(unique).get(slug);
-  const rows: HistoryRow[] = (season?.games ?? [])
+  /*
+   * The school's own side drifts the same way an opponent's does: a season
+   * printed under another town files its games under another slug, and they
+   * would be lost without a word. So any slug today's directory doesn't have,
+   * printed with this school's name, is taken as this school too — only when
+   * no other school in the directory shares the name.
+   */
+  const known = new Set(directory.map((s) => s.slug));
+  const self = directory.find((s) => s.slug === slug);
+  const ownName = self ? nameKey(self.name) : null;
+  const nameIsOurs = ownName !== null && nameIndex(directory).get(ownName)?.length === 1;
+
+  const own: SchoolGame[] = [];
+  for (const [s, season] of seasonsBySchool(unique)) {
+    const drifted = nameIsOurs && !known.has(s) && nameKey(season.school.name) === ownName;
+    if (s === slug || drifted) own.push(...season.games);
+  }
+
+  // A school plays once a night; if two spellings of it both carry a game, keep one.
+  const nights = new Set<string>();
+  const rows: HistoryRow[] = own
     .filter((g) => g.result && Number(g.date.slice(0, 4)) >= from && Number(g.date.slice(0, 4)) <= to)
+    .filter((g) => !nights.has(g.date) && (nights.add(g.date), true))
     .map((g) => [
       g.date,
       opponentSlug(g.opponentSlug, g.opponent, slug),
