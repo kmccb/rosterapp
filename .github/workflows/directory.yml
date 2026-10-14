@@ -34,6 +34,13 @@ jobs:
       # the committed copy rather than deleting schools people have bookmarked.
       - run: npm run directory
 
+      # The playoff rankings for the regions that hold a paying school — one
+      # or two requests more. It keeps the committed table when a page will not
+      # load and exits clean either way; the guard on the step is for a crash,
+      # which must not stop the state's scores being committed.
+      - run: node scripts/build-regions.mjs
+        continue-on-error: true
+
       - name: Commit whatever changed
         run: |
           git config user.name "github-actions[bot]"

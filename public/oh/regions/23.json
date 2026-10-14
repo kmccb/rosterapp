@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 23,
+ "division": "VI",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Nelsonville-York",
+   "city": "Nelsonville",
+   "average": 14.2625,
+   "qualifying": true,
+   "slug": "nelsonville-york-nelsonville"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "River",
+   "city": "Hannibal",
+   "average": 13.4624,
+   "qualifying": true,
+   "slug": "river-hannibal"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "West Jefferson",
+   "city": "West Jefferson",
+   "average": 12.6654,
+   "qualifying": true,
+   "slug": "west-jefferson-west-jefferson"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Newark Catholic",
+   "city": "Newark",
+   "average": 11.6375,
+   "qualifying": true,
+   "slug": "newark-catholic-newark"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Newcomerstown",
+   "city": "Newcomerstown",
+   "average": 11.4,
+   "qualifying": true,
+   "slug": "newcomerstown-newcomerstown"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Waterford",
+   "city": "Waterford",
+   "average": 10.875,
+   "qualifying": true,
+   "slug": "waterford-waterford"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Garaway",
+   "city": "Sugarcreek",
+   "average": 10.7102,
+   "qualifying": true,
+   "slug": "garaway-sugarcreek"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Monroe Central",
+   "city": "Woodsfield",
+   "average": 10.1768,
+   "qualifying": true,
+   "slug": "monroe-central-woodsfield"
+  },
+  {
+   "rank": "9",
+   "record": "6-2",
+   "school": "Centerburg",
+   "city": "Centerburg",
+   "average": 9.15,
+   "qualifying": true,
+   "slug": "centerburg-centerburg"
+  },
+  {
+   "rank": "10",
+   "record": "6-2",
+   "school": "Fredericktown",
+   "city": "Fredericktown",
+   "average": 8.4,
+   "qualifying": true,
+   "slug": "fredericktown-fredericktown"
+  },
+  {
+   "rank": "11t",
+   "record": "4-4",
+   "school": "Mount Gilead",
+   "city": "Mount Gilead",
+   "average": 7.975,
+   "qualifying": true,
+   "slug": "mount-gilead-mount-gilead"
+  },
+  {
+   "rank": "11t",
+   "record": "6-2",
+   "school": "Elgin",
+   "city": "Marion",
+   "average": 7.975,
+   "qualifying": true,
+   "slug": "elgin-marion"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Berne Union",
+   "city": "Sugar Grove",
+   "average": 7.4875,
+   "qualifying": false,
+   "slug": "berne-union-sugar-grove"
+  },
+  {
+   "rank": "14",
+   "record": "5-3",
+   "school": "East Knox",
+   "city": "Howard",
+   "average": 6.2625,
+   "qualifying": false,
+   "slug": "east-knox-howard"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Colonel Crawford",
+   "city": "North Robinson",
+   "average": 5.2875,
+   "qualifying": false,
+   "slug": "colonel-crawford-north-robinson"
+  },
+  {
+   "rank": "16",
+   "record": "4-4",
+   "school": "Crooksville",
+   "city": "Crooksville",
+   "average": 4.75,
+   "qualifying": false,
+   "slug": "crooksville-crooksville"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Northridge",
+   "city": "Johnstown",
+   "average": 4.675,
+   "qualifying": false,
+   "slug": "northridge-johnstown"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Grandview Heights",
+   "city": "Columbus",
+   "average": 3.65,
+   "qualifying": false,
+   "slug": "grandview-heights-columbus"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Shenandoah",
+   "city": "Sarahsville",
+   "average": 3.625,
+   "qualifying": false,
+   "slug": "shenandoah-sarahsville"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Harvest Prep",
+   "city": "Canal Winchester",
+   "average": 3.2513,
+   "qualifying": false,
+   "slug": "harvest-prep-canal-winchester"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Caldwell",
+   "city": "Caldwell",
+   "average": 1.2875,
+   "qualifying": false,
+   "slug": "caldwell-caldwell"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Bridgeport",
+   "city": "Bridgeport",
+   "average": 1.2396,
+   "qualifying": false,
+   "slug": "bridgeport-bridgeport"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Northmor",
+   "city": "Galion",
+   "average": 0.5,
+   "qualifying": false,
+   "slug": "northmor-galion"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Buckeye Trail",
+   "city": "Lore City",
+   "average": 0,
+   "qualifying": false,
+   "slug": "buckeye-trail-lore-city"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Cardington-Lincoln",
+   "city": "Cardington",
+   "average": 0,
+   "qualifying": false,
+   "slug": "cardington-lincoln-cardington"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Liberty Union",
+   "city": "Baltimore",
+   "average": 0,
+   "qualifying": false,
+   "slug": "liberty-union-baltimore"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

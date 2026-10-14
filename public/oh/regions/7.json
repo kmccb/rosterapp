@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 7,
+ "division": "II",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Big Walnut",
+   "city": "Sunbury",
+   "average": 28.05,
+   "qualifying": true,
+   "slug": "big-walnut-sunbury"
+  },
+  {
+   "rank": "2",
+   "record": "7-0",
+   "school": "Bishop Watterson",
+   "city": "Columbus",
+   "average": 24.3492,
+   "qualifying": true,
+   "slug": "bishop-watterson-columbus"
+  },
+  {
+   "rank": "3",
+   "record": "6-1",
+   "school": "Massillon Washington",
+   "city": "Massillon",
+   "average": 20.6667,
+   "qualifying": true,
+   "slug": "massillon-washington-massillon"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "St Francis DeSales",
+   "city": "Columbus",
+   "average": 18.6607,
+   "qualifying": true,
+   "slug": "st-francis-desales-columbus"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Louisville",
+   "city": "Louisville",
+   "average": 17.1125,
+   "qualifying": true,
+   "slug": "louisville-louisville"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "New Albany",
+   "city": "New Albany",
+   "average": 16.1875,
+   "qualifying": true,
+   "slug": "new-albany-new-albany"
+  },
+  {
+   "rank": "7",
+   "record": "5-3",
+   "school": "Canal Winchester",
+   "city": "Canal Winchester",
+   "average": 14.375,
+   "qualifying": true,
+   "slug": "canal-winchester-canal-winchester"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "Hamilton Township",
+   "city": "Columbus",
+   "average": 12.825,
+   "qualifying": true,
+   "slug": "hamilton-township-columbus"
+  },
+  {
+   "rank": "9",
+   "record": "6-2",
+   "school": "Whitehall-Yearling",
+   "city": "Whitehall",
+   "average": 12.5625,
+   "qualifying": true,
+   "slug": "whitehall-yearling-whitehall"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Hoover",
+   "city": "North Canton",
+   "average": 11.2625,
+   "qualifying": true,
+   "slug": "hoover-north-canton"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Green",
+   "city": "Uniontown",
+   "average": 10.0202,
+   "qualifying": true,
+   "slug": "green-uniontown"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Ashland",
+   "city": "Ashland",
+   "average": 8.6875,
+   "qualifying": true,
+   "slug": "ashland-ashland"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Marion Harding",
+   "city": "Marion",
+   "average": 7.5,
+   "qualifying": false,
+   "slug": "marion-harding-marion"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Perry",
+   "city": "Massillon",
+   "average": 7.202,
+   "qualifying": false,
+   "slug": "perry-massillon"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Lake",
+   "city": "Uniontown",
+   "average": 7.0625,
+   "qualifying": false,
+   "slug": "lake-uniontown"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Wooster",
+   "city": "Wooster",
+   "average": 6.5125,
+   "qualifying": false,
+   "slug": "wooster-wooster"
+  },
+  {
+   "rank": "17",
+   "record": "5-3",
+   "school": "Northland",
+   "city": "Columbus",
+   "average": 6.45,
+   "qualifying": false,
+   "slug": "northland-columbus"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Watkins Memorial",
+   "city": "Pataskala",
+   "average": 6.0625,
+   "qualifying": false,
+   "slug": "watkins-memorial-pataskala"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Teays Valley",
+   "city": "Ashville",
+   "average": 5.2,
+   "qualifying": false,
+   "slug": "teays-valley-ashville"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Mount Vernon",
+   "city": "Mount Vernon",
+   "average": 5.025,
+   "qualifying": false,
+   "slug": "mount-vernon-mount-vernon"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Walnut Ridge",
+   "city": "Columbus",
+   "average": 3.1875,
+   "qualifying": false,
+   "slug": "walnut-ridge-columbus"
+  },
+  {
+   "rank": "22",
+   "record": "1-7",
+   "school": "Independence",
+   "city": "Columbus",
+   "average": 2.7875,
+   "qualifying": false,
+   "slug": "independence-columbus"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Logan",
+   "city": "Logan",
+   "average": 2.1375,
+   "qualifying": false,
+   "slug": "logan-logan"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Mifflin",
+   "city": "Columbus",
+   "average": 0,
+   "qualifying": false,
+   "slug": "mifflin-columbus"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Whetstone",
+   "city": "Columbus",
+   "average": 0,
+   "qualifying": false,
+   "slug": "whetstone-columbus"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

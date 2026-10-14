@@ -1,0 +1,189 @@
+{
+ "year": 2026,
+ "region": 2,
+ "division": "I",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Perrysburg",
+   "city": "Perrysburg",
+   "average": 22.6,
+   "qualifying": true,
+   "slug": "perrysburg-perrysburg"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "Springfield",
+   "city": "Springfield",
+   "average": 21.4407,
+   "qualifying": true,
+   "slug": "springfield-springfield"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Whitmer",
+   "city": "Toledo",
+   "average": 19.7569,
+   "qualifying": true,
+   "slug": "whitmer-toledo"
+  },
+  {
+   "rank": "4",
+   "record": "5-3",
+   "school": "Hilliard Bradley",
+   "city": "Hilliard",
+   "average": 13.5125,
+   "qualifying": true,
+   "slug": "hilliard-bradley-hilliard"
+  },
+  {
+   "rank": "5",
+   "record": "4-4",
+   "school": "Grove City",
+   "city": "Grove City",
+   "average": 12.4375,
+   "qualifying": true,
+   "slug": "grove-city-grove-city"
+  },
+  {
+   "rank": "6",
+   "record": "4-4",
+   "school": "Wayne",
+   "city": "Huber Heights",
+   "average": 11.4,
+   "qualifying": true,
+   "slug": "wayne-huber-heights"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Westland",
+   "city": "Galloway",
+   "average": 11.0421,
+   "qualifying": true,
+   "slug": "westland-galloway"
+  },
+  {
+   "rank": "8",
+   "record": "4-4",
+   "school": "Miamisburg",
+   "city": "Miamisburg",
+   "average": 9.625,
+   "qualifying": true,
+   "slug": "miamisburg-miamisburg"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Beavercreek",
+   "city": "Beavercreek",
+   "average": 8.25,
+   "qualifying": true,
+   "slug": "beavercreek-beavercreek"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Hilliard Darby",
+   "city": "Hilliard",
+   "average": 8.0375,
+   "qualifying": true,
+   "slug": "hilliard-darby-hilliard"
+  },
+  {
+   "rank": "11",
+   "record": "3-5",
+   "school": "St John's Jesuit",
+   "city": "Toledo",
+   "average": 7.6146,
+   "qualifying": true,
+   "slug": "st-john-s-jesuit-toledo"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Kettering Fairmont",
+   "city": "Kettering",
+   "average": 6.125,
+   "qualifying": true,
+   "slug": "kettering-fairmont-kettering"
+  },
+  {
+   "rank": "13",
+   "record": "3-5",
+   "school": "Marysville",
+   "city": "Marysville",
+   "average": 5.8625,
+   "qualifying": false,
+   "slug": "marysville-marysville"
+  },
+  {
+   "rank": "14",
+   "record": "2-6",
+   "school": "Centerville",
+   "city": "Centerville",
+   "average": 4.7058,
+   "qualifying": false,
+   "slug": "centerville-centerville"
+  },
+  {
+   "rank": "15",
+   "record": "2-6",
+   "school": "Dublin Jerome",
+   "city": "Dublin",
+   "average": 4.675,
+   "qualifying": false,
+   "slug": "dublin-jerome-dublin"
+  },
+  {
+   "rank": "16",
+   "record": "2-6",
+   "school": "Dublin Coffman",
+   "city": "Dublin",
+   "average": 3.7,
+   "qualifying": false,
+   "slug": "dublin-coffman-dublin"
+  },
+  {
+   "rank": "17",
+   "record": "1-7",
+   "school": "Dublin Scioto",
+   "city": "Dublin",
+   "average": 2.5,
+   "qualifying": false,
+   "slug": "dublin-scioto-dublin"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Hilliard Davidson",
+   "city": "Hilliard",
+   "average": 2.05,
+   "qualifying": false,
+   "slug": "hilliard-davidson-hilliard"
+  },
+  {
+   "rank": "19",
+   "record": "1-7",
+   "school": "Northmont",
+   "city": "Clayton",
+   "average": 1.7375,
+   "qualifying": false,
+   "slug": "northmont-clayton"
+  },
+  {
+   "rank": "20",
+   "record": "0-8",
+   "school": "Central Crossing",
+   "city": "Grove City",
+   "average": 0,
+   "qualifying": false,
+   "slug": "central-crossing-grove-city"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

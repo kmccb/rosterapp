@@ -5,6 +5,7 @@ import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
+import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
 import { StatsTab } from './StatsTab';
 import { loadTeamStats, matchTeamStats, type TeamStats } from './teamStats';
 import {
@@ -165,8 +166,9 @@ const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'schedule', label: 'Schedule' },
 ];
 
-/** Only a football row with a conference on it gets this fourth tab, so it
- * hangs on the end of the three rather than living among them. */
+/** Only football gets this tab, and only with something to put on it — a
+ * conference the seller filled in, or the school's playoff region — so it
+ * hangs on the end of the rest rather than living among them. */
 const LEAGUE_TAB: { id: SchoolTab; label: string } = { id: 'league', label: 'League' };
 
 /** Only a sport with a stats file whose names are on the roster gets this one.
@@ -470,6 +472,26 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
       })
       .catch(() => {
         /* no stats is the ordinary case */
+      });
+    return () => {
+      current = false;
+    };
+  }, [slug, sport, hasRoster]);
+
+  // The playoff rankings, for football on a paid page — the same terms the
+  // stats come on, and fetched the same way. Every school in the state is in
+  // the committed files; which pages draw them is decided here.
+  const [region, setRegion] = useState<RegionTable | null>(null);
+  useEffect(() => {
+    setRegion(null);
+    if (!hasRoster || sport !== 'football') return;
+    let current = true;
+    loadRegion(slug)
+      .then((r) => {
+        if (current) setRegion(r);
+      })
+      .catch(() => {
+        /* no rankings is no table, not a fault */
       });
     return () => {
       current = false;
@@ -883,7 +905,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
       {roster && (
         <nav className="tabs oh-school-tabs" aria-label="Sections">
-          {[...SCHOOL_TABS, ...(statTotals ? [STATS_TAB] : []), ...(conference ? [LEAGUE_TAB] : [])].map((t) => (
+          {[...SCHOOL_TABS, ...(statTotals ? [STATS_TAB] : []), ...(conference || region ? [LEAGUE_TAB] : [])].map((t) => (
             <button
               key={t.id}
               type="button"
@@ -934,6 +956,58 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                 updated={teamStats.updated}
                 source={teamStats.source}
               />
+            )}
+            {/* The playoff picture, which in Ohio is a region's points table and
+                not a conference's. It goes first: in October "are we in" is
+                the question, and the conference table answers a different one.
+                Poland's League tab draws the same table from the same source;
+                this is that table's markup over this page's own data. */}
+            {tab === 'league' && region && (
+              <>
+                <div className="group-head">
+                  Division {region.division}, Region {region.region}
+                </div>
+                {(region.caption || region.fetched) && (
+                  <p className="filter-line">
+                    <span>
+                      {[region.caption, dayLabel(region.fetched) && `as of ${dayLabel(region.fetched)}`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </p>
+                )}
+                <table className="table-lite">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>School</th>
+                      <th>W–L</th>
+                      <th>Avg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {region.rows.map((r, i) => (
+                      <tr
+                        key={r.slug ?? `${r.school}-${i}`}
+                        className={
+                          [r.slug === slug ? 'is-us' : '', r.qualifying ? 'is-in' : ''].filter(Boolean).join(' ') ||
+                          undefined
+                        }
+                      >
+                        <td>
+                          {r.rank}
+                          {/* The dot is CSS content, which a screen reader
+                              does not announce. This says it in words. */}
+                          {r.qualifying && <span className="visually-hidden">, in a playoff place</span>}
+                        </td>
+                        <td>{r.school}</td>
+                        <td>{r.record.replace('-', '–')}</td>
+                        <td>{averageLabel(r.average)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
             )}
             {tab === 'league' && conference && (
               <>

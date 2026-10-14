@@ -127,6 +127,16 @@ school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. Pricing for the
 all-sports package isn't set yet.
 
+### Playoff rankings
+
+A paid football page shows its playoff region on the League tab — Division,
+Region, every team's Harbin average, the school's own row picked out — with
+nothing to set up. It refreshes with the directory, Saturday and Wednesday.
+Two things to know: add the school to `paid-schools.json` (that list is which
+regions get refreshed), and if the refresh warns that a school "is not in the
+regions index", run `node scripts/build-regions.mjs --all` once and commit.
+Run that each August too, when the regions are redrawn.
+
 ### The conference
 
 On a football activation, ask which conference the school plays in and who

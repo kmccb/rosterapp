@@ -1,0 +1,198 @@
+{
+ "year": 2026,
+ "region": 4,
+ "division": "I",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Princeton",
+   "city": "Cincinnati",
+   "average": 25.75,
+   "qualifying": true,
+   "slug": "princeton-cincinnati"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Lakota West",
+   "city": "West Chester",
+   "average": 21.2375,
+   "qualifying": true,
+   "slug": "lakota-west-west-chester"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Elder",
+   "city": "Cincinnati",
+   "average": 21.0777,
+   "qualifying": true,
+   "slug": "elder-cincinnati"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Archbishop Moeller",
+   "city": "Cincinnati",
+   "average": 17.9625,
+   "qualifying": true,
+   "slug": "archbishop-moeller-cincinnati"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Winton Woods",
+   "city": "Cincinnati",
+   "average": 17.35,
+   "qualifying": true,
+   "slug": "winton-woods-cincinnati"
+  },
+  {
+   "rank": "6",
+   "record": "5-3",
+   "school": "Middletown",
+   "city": "Middletown",
+   "average": 15.0625,
+   "qualifying": true,
+   "slug": "middletown-middletown"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Lebanon",
+   "city": "Lebanon",
+   "average": 14.6,
+   "qualifying": true,
+   "slug": "lebanon-lebanon"
+  },
+  {
+   "rank": "8",
+   "record": "4-4",
+   "school": "St Xavier",
+   "city": "Cincinnati",
+   "average": 13.9375,
+   "qualifying": true,
+   "slug": "st-xavier-cincinnati"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Springboro",
+   "city": "Springboro",
+   "average": 13.2,
+   "qualifying": true,
+   "slug": "springboro-springboro"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Little Miami",
+   "city": "Morrow",
+   "average": 11.5875,
+   "qualifying": true,
+   "slug": "little-miami-morrow"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Fairfield",
+   "city": "Fairfield",
+   "average": 10.4,
+   "qualifying": true,
+   "slug": "fairfield-fairfield"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Oak Hills",
+   "city": "Cincinnati",
+   "average": 9.9875,
+   "qualifying": true,
+   "slug": "oak-hills-cincinnati"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Colerain",
+   "city": "Cincinnati",
+   "average": 9.7,
+   "qualifying": false,
+   "slug": "colerain-cincinnati"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Lakota East",
+   "city": "Liberty Township",
+   "average": 9.05,
+   "qualifying": false,
+   "slug": "lakota-east-liberty-township"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "West Clermont",
+   "city": "Cincinnati",
+   "average": 3.9625,
+   "qualifying": false,
+   "slug": "west-clermont-cincinnati"
+  },
+  {
+   "rank": "16",
+   "record": "1-7",
+   "school": "Sycamore",
+   "city": "Cincinnati",
+   "average": 3.3625,
+   "qualifying": false,
+   "slug": "sycamore-cincinnati"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Mason",
+   "city": "Mason",
+   "average": 2.925,
+   "qualifying": false,
+   "slug": "mason-mason"
+  },
+  {
+   "rank": "18",
+   "record": "1-7",
+   "school": "Western Hills",
+   "city": "Cincinnati",
+   "average": 2.1722,
+   "qualifying": false,
+   "slug": "western-hills-cincinnati"
+  },
+  {
+   "rank": "19",
+   "record": "1-7",
+   "school": "Hamilton",
+   "city": "Hamilton",
+   "average": 1.4625,
+   "qualifying": false,
+   "slug": "hamilton-hamilton"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Milford",
+   "city": "Milford",
+   "average": 0.8125,
+   "qualifying": false,
+   "slug": "milford-milford"
+  },
+  {
+   "rank": "21",
+   "record": "0-8",
+   "school": "Walnut Hills",
+   "city": "Cincinnati",
+   "average": 0,
+   "qualifying": false,
+   "slug": "walnut-hills-cincinnati"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

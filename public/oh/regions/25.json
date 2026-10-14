@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 25,
+ "division": "VII",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Cuyahoga Heights",
+   "city": "Cuyahoga Heights",
+   "average": 12.2875,
+   "qualifying": true,
+   "slug": "cuyahoga-heights-cuyahoga-heights"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "McDonald",
+   "city": "McDonald",
+   "average": 11.2875,
+   "qualifying": true,
+   "slug": "mcdonald-mcdonald"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "St John School",
+   "city": "Ashtabula",
+   "average": 8.9621,
+   "qualifying": true,
+   "slug": "st-john-school-ashtabula"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "East Canton",
+   "city": "East Canton",
+   "average": 8.6625,
+   "qualifying": true,
+   "slug": "east-canton-east-canton"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Mogadore",
+   "city": "Mogadore",
+   "average": 8.1594,
+   "qualifying": true,
+   "slug": "mogadore-mogadore"
+  },
+  {
+   "rank": "6",
+   "record": "5-3",
+   "school": "Springfield",
+   "city": "New Middletown",
+   "average": 6.325,
+   "qualifying": true,
+   "slug": "springfield-new-middletown"
+  },
+  {
+   "rank": "7",
+   "record": "4-4",
+   "school": "Lowellville",
+   "city": "Lowellville",
+   "average": 6.125,
+   "qualifying": true,
+   "slug": "lowellville-lowellville"
+  },
+  {
+   "rank": "8",
+   "record": "4-4",
+   "school": "Independence",
+   "city": "Independence",
+   "average": 5.3375,
+   "qualifying": true,
+   "slug": "independence-independence"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Mathews",
+   "city": "Vienna",
+   "average": 4.8273,
+   "qualifying": true,
+   "slug": "mathews-vienna"
+  },
+  {
+   "rank": "10",
+   "record": "4-3",
+   "school": "St Paul",
+   "city": "Norwalk",
+   "average": 4.5159,
+   "qualifying": true,
+   "slug": "st-paul-norwalk"
+  },
+  {
+   "rank": "11",
+   "record": "3-4",
+   "school": "Monroeville",
+   "city": "Monroeville",
+   "average": 4.0281,
+   "qualifying": true,
+   "slug": "monroeville-monroeville"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Rittman",
+   "city": "Rittman",
+   "average": 3.7582,
+   "qualifying": true,
+   "slug": "rittman-rittman"
+  },
+  {
+   "rank": "13",
+   "record": "2-6",
+   "school": "Dalton",
+   "city": "Dalton",
+   "average": 3.0875,
+   "qualifying": false,
+   "slug": "dalton-dalton"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Malvern",
+   "city": "Malvern",
+   "average": 3.0125,
+   "qualifying": false,
+   "slug": "malvern-malvern"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "South Central",
+   "city": "Greenwich",
+   "average": 2.8698,
+   "qualifying": false,
+   "slug": "south-central-greenwich"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Leetonia",
+   "city": "Leetonia",
+   "average": 2.3444,
+   "qualifying": false,
+   "slug": "leetonia-leetonia"
+  },
+  {
+   "rank": "17",
+   "record": "2-5",
+   "school": "Mapleton",
+   "city": "Ashland",
+   "average": 1.9237,
+   "qualifying": false,
+   "slug": "mapleton-ashland"
+  },
+  {
+   "rank": "18",
+   "record": "1-6",
+   "school": "Fairport Harding",
+   "city": "Fairport Harbor",
+   "average": 1.9206,
+   "qualifying": false,
+   "slug": "fairport-harding-fairport-harbor"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Western Reserve",
+   "city": "Berlin Center",
+   "average": 1.6875,
+   "qualifying": false,
+   "slug": "western-reserve-berlin-center"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Wellsville",
+   "city": "Wellsville",
+   "average": 1.5375,
+   "qualifying": false,
+   "slug": "wellsville-wellsville"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Jackson-Milton",
+   "city": "North Jackson",
+   "average": 0.9375,
+   "qualifying": false,
+   "slug": "jackson-milton-north-jackson"
+  },
+  {
+   "rank": "22",
+   "record": "1-7",
+   "school": "New London",
+   "city": "New London",
+   "average": 0.8608,
+   "qualifying": false,
+   "slug": "new-london-new-london"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Southern",
+   "city": "Salineville",
+   "average": 0.7875,
+   "qualifying": false,
+   "slug": "southern-salineville"
+  },
+  {
+   "rank": "24",
+   "record": "1-7",
+   "school": "Waterloo",
+   "city": "Atwater",
+   "average": 0.625,
+   "qualifying": false,
+   "slug": "waterloo-atwater"
+  },
+  {
+   "rank": "25",
+   "record": "0-7",
+   "school": "Cardinal",
+   "city": "Middlefield",
+   "average": 0,
+   "qualifying": false,
+   "slug": "cardinal-middlefield"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

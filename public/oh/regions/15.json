@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 15,
+ "division": "IV",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-0",
+   "school": "Indian Valley",
+   "city": "Gnadenhutten",
+   "average": 23.627,
+   "qualifying": true,
+   "slug": "indian-valley-gnadenhutten"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "New Lexington",
+   "city": "New Lexington",
+   "average": 20.2625,
+   "qualifying": true,
+   "slug": "new-lexington-new-lexington"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Johnstown",
+   "city": "Johnstown",
+   "average": 15.7,
+   "qualifying": true,
+   "slug": "johnstown-johnstown"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "West Holmes",
+   "city": "Millersburg",
+   "average": 14.9476,
+   "qualifying": true,
+   "slug": "west-holmes-millersburg"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Union Local",
+   "city": "Belmont",
+   "average": 12.3188,
+   "qualifying": true,
+   "slug": "union-local-belmont"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "West Muskingum",
+   "city": "Zanesville",
+   "average": 12.075,
+   "qualifying": true,
+   "slug": "west-muskingum-zanesville"
+  },
+  {
+   "rank": "7",
+   "record": "8-0",
+   "school": "Claymont",
+   "city": "Uhrichsville",
+   "average": 11.6375,
+   "qualifying": true,
+   "slug": "claymont-uhrichsville"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "East Liverpool",
+   "city": "East Liverpool",
+   "average": 11.5038,
+   "qualifying": true,
+   "slug": "east-liverpool-east-liverpool"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Heath",
+   "city": "Heath",
+   "average": 11.275,
+   "qualifying": true,
+   "slug": "heath-heath"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Beaver Local",
+   "city": "East Liverpool",
+   "average": 9.9117,
+   "qualifying": true,
+   "slug": "beaver-local-east-liverpool"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Philo",
+   "city": "Duncan Falls",
+   "average": 9.65,
+   "qualifying": true,
+   "slug": "philo-duncan-falls"
+  },
+  {
+   "rank": "12",
+   "record": "6-2",
+   "school": "Fairfield Union",
+   "city": "Lancaster",
+   "average": 9.525,
+   "qualifying": true,
+   "slug": "fairfield-union-lancaster"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Indian Creek",
+   "city": "Wintersville",
+   "average": 8.3312,
+   "qualifying": false,
+   "slug": "indian-creek-wintersville"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "St Clairsville",
+   "city": "St Clairsville",
+   "average": 8.2105,
+   "qualifying": false,
+   "slug": "st-clairsville-st-clairsville"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Waverly",
+   "city": "Waverly",
+   "average": 8.1875,
+   "qualifying": false,
+   "slug": "waverly-waverly"
+  },
+  {
+   "rank": "16",
+   "record": "5-3",
+   "school": "Circleville",
+   "city": "Circleville",
+   "average": 7.825,
+   "qualifying": false,
+   "slug": "circleville-circleville"
+  },
+  {
+   "rank": "17",
+   "record": "5-3",
+   "school": "Buckeye Valley",
+   "city": "Delaware",
+   "average": 6.675,
+   "qualifying": false,
+   "slug": "buckeye-valley-delaware"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Marion-Franklin",
+   "city": "Columbus",
+   "average": 5.65,
+   "qualifying": false,
+   "slug": "marion-franklin-columbus"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Alexander",
+   "city": "Albany",
+   "average": 3.95,
+   "qualifying": false,
+   "slug": "alexander-albany"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Bishop Ready",
+   "city": "Columbus",
+   "average": 3.825,
+   "qualifying": false,
+   "slug": "bishop-ready-columbus"
+  },
+  {
+   "rank": "21",
+   "record": "3-5",
+   "school": "John Glenn",
+   "city": "New Concord",
+   "average": 3.2,
+   "qualifying": false,
+   "slug": "john-glenn-new-concord"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Carrollton",
+   "city": "Carrollton",
+   "average": 3.0875,
+   "qualifying": false,
+   "slug": "carrollton-carrollton"
+  },
+  {
+   "rank": "23",
+   "record": "3-5",
+   "school": "Minerva",
+   "city": "Minerva",
+   "average": 3.0006,
+   "qualifying": false,
+   "slug": "minerva-minerva"
+  },
+  {
+   "rank": "24",
+   "record": "1-7",
+   "school": "Cambridge",
+   "city": "Cambridge",
+   "average": 0.625,
+   "qualifying": false,
+   "slug": "cambridge-cambridge"
+  },
+  {
+   "rank": "25t",
+   "record": "0-8",
+   "school": "Canton South",
+   "city": "Canton",
+   "average": 0,
+   "qualifying": false,
+   "slug": "canton-south-canton"
+  },
+  {
+   "rank": "25t",
+   "record": "0-8",
+   "school": "Lakewood",
+   "city": "Hebron",
+   "average": 0,
+   "qualifying": false,
+   "slug": "lakewood-hebron"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

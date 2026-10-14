@@ -1,0 +1,261 @@
+{
+ "year": 2026,
+ "region": 17,
+ "division": "V",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Perry",
+   "city": "Perry",
+   "average": 20.3375,
+   "qualifying": true,
+   "slug": "perry-perry"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Barnesville",
+   "city": "Barnesville",
+   "average": 18.3,
+   "qualifying": true,
+   "slug": "barnesville-barnesville"
+  },
+  {
+   "rank": "3",
+   "record": "8-0",
+   "school": "Girard",
+   "city": "Girard",
+   "average": 18.1875,
+   "qualifying": true,
+   "slug": "girard-girard"
+  },
+  {
+   "rank": "4",
+   "record": "8-0",
+   "school": "Garfield",
+   "city": "Garrettsville",
+   "average": 16.225,
+   "qualifying": true,
+   "slug": "garfield-garrettsville"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Cardinal Mooney",
+   "city": "Youngstown",
+   "average": 15.201,
+   "qualifying": true,
+   "slug": "cardinal-mooney-youngstown"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Liberty",
+   "city": "Youngstown",
+   "average": 13.0375,
+   "qualifying": true,
+   "slug": "liberty-youngstown"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "Conneaut",
+   "city": "Conneaut",
+   "average": 12.575,
+   "qualifying": true,
+   "slug": "conneaut-conneaut"
+  },
+  {
+   "rank": "8",
+   "record": "7-1",
+   "school": "Martins Ferry",
+   "city": "Martins Ferry",
+   "average": 12.5448,
+   "qualifying": true,
+   "slug": "martins-ferry-martins-ferry"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Canton Central Catholic",
+   "city": "Canton",
+   "average": 11.575,
+   "qualifying": true,
+   "slug": "canton-central-catholic-canton"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Bellaire",
+   "city": "Bellaire",
+   "average": 9.5896,
+   "qualifying": true,
+   "slug": "bellaire-bellaire"
+  },
+  {
+   "rank": "11",
+   "record": "6-2",
+   "school": "Chagrin Falls",
+   "city": "Chagrin Falls",
+   "average": 9.3375,
+   "qualifying": true,
+   "slug": "chagrin-falls-chagrin-falls"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Manchester",
+   "city": "New Franklin",
+   "average": 5.525,
+   "qualifying": true,
+   "slug": "manchester-new-franklin"
+  },
+  {
+   "rank": "13",
+   "record": "3-5",
+   "school": "Tuscarawas Valley",
+   "city": "Zoarville",
+   "average": 5.5019,
+   "qualifying": false,
+   "slug": "tuscarawas-valley-zoarville"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Ravenna",
+   "city": "Ravenna",
+   "average": 5.5,
+   "qualifying": false,
+   "slug": "ravenna-ravenna"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Fairless",
+   "city": "Brewster",
+   "average": 4.6625,
+   "qualifying": false,
+   "slug": "fairless-brewster"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Southeast",
+   "city": "Ravenna",
+   "average": 4.4625,
+   "qualifying": false,
+   "slug": "southeast-ravenna"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Crestview",
+   "city": "Columbiana",
+   "average": 4.2393,
+   "qualifying": false,
+   "slug": "crestview-columbiana"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Berkshire",
+   "city": "Burton",
+   "average": 4.1837,
+   "qualifying": false,
+   "slug": "berkshire-burton"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Tuslaw",
+   "city": "Massillon",
+   "average": 4.1,
+   "qualifying": false,
+   "slug": "tuslaw-massillon"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Edison",
+   "city": "Richmond",
+   "average": 3.1452,
+   "qualifying": false,
+   "slug": "edison-richmond"
+  },
+  {
+   "rank": "21",
+   "record": "3-5",
+   "school": "Beachwood",
+   "city": "Beachwood",
+   "average": 2.8151,
+   "qualifying": false,
+   "slug": "beachwood-beachwood"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Crestwood",
+   "city": "Mantua",
+   "average": 2.75,
+   "qualifying": false,
+   "slug": "crestwood-mantua"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Harrison Central",
+   "city": "Cadiz",
+   "average": 2.35,
+   "qualifying": false,
+   "slug": "harrison-central-cadiz"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Shaw",
+   "city": "East Cleveland",
+   "average": 2.225,
+   "qualifying": false,
+   "slug": "shaw-east-cleveland"
+  },
+  {
+   "rank": "25",
+   "record": "1-7",
+   "school": "Sandy Valley",
+   "city": "Magnolia",
+   "average": 1.6875,
+   "qualifying": false,
+   "slug": "sandy-valley-magnolia"
+  },
+  {
+   "rank": "26",
+   "record": "2-6",
+   "school": "Lakeview",
+   "city": "Cortland",
+   "average": 1.25,
+   "qualifying": false,
+   "slug": "lakeview-cortland"
+  },
+  {
+   "rank": "27t",
+   "record": "0-8",
+   "school": "Buckeye Local",
+   "city": "Rayland",
+   "average": 0,
+   "qualifying": false,
+   "slug": "buckeye-local-rayland"
+  },
+  {
+   "rank": "27t",
+   "record": "0-6",
+   "school": "East Technical",
+   "city": "Cleveland",
+   "average": 0,
+   "qualifying": false,
+   "slug": "east-technical-cleveland"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 9,
+ "division": "III",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "South",
+   "city": "Willoughby",
+   "average": 18.925,
+   "qualifying": true,
+   "slug": "south-willoughby"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Salem",
+   "city": "Salem",
+   "average": 18.1,
+   "qualifying": true,
+   "slug": "salem-salem"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Notre Dame-Cathedral Latin",
+   "city": "Chardon",
+   "average": 17.4031,
+   "qualifying": true,
+   "slug": "notre-dame-cathedral-latin-chardon"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Garfield Heights",
+   "city": "Garfield Heights",
+   "average": 15.8302,
+   "qualifying": true,
+   "slug": "garfield-heights-garfield-heights"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Ursuline",
+   "city": "Youngstown",
+   "average": 15.6146,
+   "qualifying": true,
+   "slug": "ursuline-youngstown"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Glenville",
+   "city": "Cleveland",
+   "average": 15.164,
+   "qualifying": true,
+   "slug": "glenville-cleveland"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Hawken",
+   "city": "Gates Mills",
+   "average": 14.5625,
+   "qualifying": true,
+   "slug": "hawken-gates-mills"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "Howland",
+   "city": "Warren",
+   "average": 14.1,
+   "qualifying": true,
+   "slug": "howland-warren"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Gilmour Academy",
+   "city": "Gates Mills",
+   "average": 13.0408,
+   "qualifying": true,
+   "slug": "gilmour-academy-gates-mills"
+  },
+  {
+   "rank": "10",
+   "record": "6-2",
+   "school": "University School",
+   "city": "Hunting Valley",
+   "average": 12.0125,
+   "qualifying": true,
+   "slug": "university-school-hunting-valley"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Lake Catholic",
+   "city": "Mentor",
+   "average": 12.0044,
+   "qualifying": true,
+   "slug": "lake-catholic-mentor"
+  },
+  {
+   "rank": "12",
+   "record": "4-3",
+   "school": "Benedictine",
+   "city": "Cleveland",
+   "average": 11.9206,
+   "qualifying": true,
+   "slug": "benedictine-cleveland"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Alliance",
+   "city": "Alliance",
+   "average": 10.7625,
+   "qualifying": false,
+   "slug": "alliance-alliance"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Kenston",
+   "city": "Chagrin Falls",
+   "average": 10.6875,
+   "qualifying": false,
+   "slug": "kenston-chagrin-falls"
+  },
+  {
+   "rank": "15",
+   "record": "5-3",
+   "school": "Maple Heights",
+   "city": "Maple Heights",
+   "average": 9.838,
+   "qualifying": false,
+   "slug": "maple-heights-maple-heights"
+  },
+  {
+   "rank": "16",
+   "record": "4-4",
+   "school": "Tallmadge",
+   "city": "Tallmadge",
+   "average": 9.3875,
+   "qualifying": false,
+   "slug": "tallmadge-tallmadge"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Canfield",
+   "city": "Canfield",
+   "average": 8.1964,
+   "qualifying": false,
+   "slug": "canfield-canfield"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Cuyahoga Valley Christian Academy",
+   "city": "Cuyahoga Falls",
+   "average": 6.8024,
+   "qualifying": false,
+   "slug": "cuyahoga-valley-christian-academy-cuyahoga-falls"
+  },
+  {
+   "rank": "19",
+   "record": "3-5",
+   "school": "Aurora",
+   "city": "Aurora",
+   "average": 6.4125,
+   "qualifying": false,
+   "slug": "aurora-aurora"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Harvey",
+   "city": "Painesville",
+   "average": 5.6875,
+   "qualifying": false,
+   "slug": "harvey-painesville"
+  },
+  {
+   "rank": "21",
+   "record": "4-4",
+   "school": "Kent Roosevelt",
+   "city": "Kent",
+   "average": 5,
+   "qualifying": false,
+   "slug": "kent-roosevelt-kent"
+  },
+  {
+   "rank": "22",
+   "record": "3-5",
+   "school": "Chardon",
+   "city": "Chardon",
+   "average": 4.4602,
+   "qualifying": false,
+   "slug": "chardon-chardon"
+  },
+  {
+   "rank": "23",
+   "record": "2-6",
+   "school": "Madison",
+   "city": "Madison",
+   "average": 4.1913,
+   "qualifying": false,
+   "slug": "madison-madison"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Lakeside",
+   "city": "Ashtabula",
+   "average": 3.4125,
+   "qualifying": false,
+   "slug": "lakeside-ashtabula"
+  },
+  {
+   "rank": "25",
+   "record": "3-5",
+   "school": "Geneva",
+   "city": "Geneva",
+   "average": 3.1125,
+   "qualifying": false,
+   "slug": "geneva-geneva"
+  },
+  {
+   "rank": "26",
+   "record": "2-6",
+   "school": "Bedford",
+   "city": "Bedford",
+   "average": 2.4356,
+   "qualifying": false,
+   "slug": "bedford-bedford"
+  }
+ ],
+ "fetched": "2026-10-13"
+}
