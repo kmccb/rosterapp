@@ -27,8 +27,16 @@ import { buildHistory, historyJson } from '../src/oh/history.ts';
 
 const FROM = 2011;
 const TO = 2025;
-/** Ohio's regular season is ten weeks; a week among them with no games is a page misread. */
-const REGULAR_WEEKS = 10;
+/*
+ * The bounds below are what the cached pages show, not a guess. Every season
+ * from 2011 to 2025 has a page for weeks 1–15, and every one has games through
+ * week 13; 2020's COVID season left weeks 14 and 15 as empty pages. Week 16 is
+ * the only week that is ever missing — 2011–2020 played five playoff rounds,
+ * not six — so an absence any earlier is a failure, not the end of a season.
+ */
+const FIRST_OPTIONAL_WEEK = 16;
+/** A page with no games in these weeks is a page misread, or not the page at all. */
+const NONEMPTY_THROUGH = 13;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const cacheDir = join(root, 'scripts', 'data', 'scoreboards');
@@ -38,10 +46,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let lastFetch = 0;
 
 /*
- * A week's page, or null for a playoff week the season never reached. Ohio
- * played five playoff rounds before it played six, and the site answers a week
- * it has no page for with 403, the same as week 17 of any year. That absence is
- * remembered in the cache too, so a re-run doesn't ask again.
+ * A week's page, or null for a playoff week the season never reached. The site
+ * answers a week it has no page for with 403, the same as week 17 of any year.
+ * Only from FIRST_OPTIONAL_WEEK is that believed, and remembered in the cache
+ * so a re-run doesn't ask again; earlier, a 403 is the site refusing us, which
+ * stops the run and is not written down, so the next run asks afresh.
  */
 async function weekPage(year, n) {
   const file = join(cacheDir, String(year), `week-${n}.html`);
@@ -58,7 +67,7 @@ async function weekPage(year, n) {
     signal: AbortSignal.timeout(20000),
   });
   await mkdir(dirname(file), { recursive: true });
-  if ((res.status === 403 || res.status === 404) && n > REGULAR_WEEKS) {
+  if ((res.status === 403 || res.status === 404) && n >= FIRST_OPTIONAL_WEEK) {
     await writeFile(absent, `HTTP ${res.status}\n`);
     return null;
   }
@@ -92,8 +101,8 @@ for (let year = FROM; year <= TO; year++) {
     weeks = n;
     const { games: week, unreadable } = parseScoreboardStrict(modernScoreboard(html), n);
 
-    if (n <= REGULAR_WEEKS && week.length === 0) {
-      problems.push(`${year} week ${n}: no games read from a regular-season week`);
+    if (n <= NONEMPTY_THROUGH && week.length === 0) {
+      problems.push(`${year} week ${n}: no games read — a misread page, or a challenge page in its place`);
     }
     for (const line of unreadable) {
       if (printed.some((p) => line.includes(p))) problems.push(`${year} week ${n}: unreadable: ${line}`);
@@ -116,4 +125,13 @@ for (const slug of slugs) {
   const history = buildHistory(games, slug, FROM, TO, schools);
   await writeFile(join(outDir, `${slug}.json`), historyJson(history));
   console.log(`  wrote ${slug}: ${history.games.length} games`);
+
+  /*
+   * A season with no games is the tell that the school was printed under a
+   * name this couldn't tie to it, or didn't play; either way someone should look.
+   */
+  const years = new Set(history.games.map((g) => Number(g[0].slice(0, 4))));
+  for (let year = FROM; year <= TO; year++) {
+    if (!years.has(year)) console.warn(`  ? ${slug}: no games in ${year}`);
+  }
 }
