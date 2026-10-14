@@ -18,6 +18,7 @@
  */
 
 import { CATEGORY_LABEL, type ParsedStatRow, type StatCategory } from '../stats/statsParse';
+import type { Snapshot } from '../maxpreps/weeks';
 import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import type { Player } from '../types';
 import { isDemo } from './demo';
@@ -29,6 +30,8 @@ export type TeamStats = {
   /** Who keeps them, printed under the tab: "MaxPreps". */
   source: string;
   rows: ParsedStatRow[];
+  /** The totals after each game since tracking began, oldest first. */
+  snapshots: Snapshot[];
 };
 
 const KEPT = (slug: string, sport: string): string => `oh.stats.${slug}.${sport}`;
@@ -41,13 +44,10 @@ const isCategory = (v: unknown): v is StatCategory =>
  * it is still a file, and one bad value would otherwise print "NaN yds" beside
  * a kid's name.
  */
-export const asTeamStats = (v: unknown): TeamStats | null => {
-  if (typeof v !== 'object' || v === null) return null;
-  const file = v as Record<string, unknown>;
-  if (!Array.isArray(file.rows)) return null;
-
+const cleanRows = (list: unknown): ParsedStatRow[] => {
+  if (!Array.isArray(list)) return [];
   const rows: ParsedStatRow[] = [];
-  for (const r of file.rows as Array<Record<string, unknown> | null>) {
+  for (const r of list as Array<Record<string, unknown> | null>) {
     if (typeof r !== 'object' || r === null) continue;
     if (typeof r.name !== 'string' || !r.name.trim() || !isCategory(r.category)) continue;
     if (typeof r.values !== 'object' || r.values === null) continue;
@@ -63,12 +63,33 @@ export const asTeamStats = (v: unknown): TeamStats | null => {
       values,
     });
   }
+  return rows;
+};
+
+export const asTeamStats = (v: unknown): TeamStats | null => {
+  if (typeof v !== 'object' || v === null) return null;
+  const file = v as Record<string, unknown>;
+  if (!Array.isArray(file.rows)) return null;
+  const rows = cleanRows(file.rows);
   if (rows.length === 0) return null;
+
+  // The copies of the totals the weeks are worked out from. Each is checked
+  // the way the totals are; one that is not a copy is left out, and a file
+  // with none simply has no weeks yet.
+  const snapshots: Snapshot[] = [];
+  for (const s of Array.isArray(file.snapshots) ? (file.snapshots as Array<Record<string, unknown> | null>) : []) {
+    if (typeof s !== 'object' || s === null || !Number.isInteger(s.games) || (s.games as number) < 1) continue;
+    const rows = cleanRows(s.rows);
+    // A copy with nothing usable in it would make the next week the whole
+    // season; it is left out, and that week runs into the one before.
+    if (rows.length) snapshots.push({ games: s.games as number, rows });
+  }
 
   return {
     updated: typeof file.updated === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(file.updated) ? file.updated : '',
     source: typeof file.source === 'string' ? file.source.slice(0, 40) : '',
     rows,
+    snapshots,
   };
 };
 

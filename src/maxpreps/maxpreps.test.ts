@@ -94,6 +94,8 @@ describe('the MaxPreps stats page', () => {
 
   it('finds every table it reads and has nothing to complain of', () => {
     expect(stats.problems).toEqual([]);
+    // Eight games in, by the season totals row under each table.
+    expect(stats.teamGames).toBe(8);
     expect(stats.tables).toHaveLength(10);
   });
 

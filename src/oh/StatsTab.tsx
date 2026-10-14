@@ -19,22 +19,23 @@ const SEGMENTS: Array<{ id: Segment; label: string }> = [
  * Poland's Stats tab, rebuilt over this page's own rows: the ranking and the
  * wording come from `src/stats`, which is pure and shared, while
  * `src/screens/TeamStats.tsx` is the root app's and may not be imported here.
- * It is also shorter than Poland's on purpose. That screen opens a player's
- * week by week, out of games a coach pasted one at a time; this page is fed a
- * season's totals and has no weeks to open, so its rows are not buttons — the
- * same reasoning that keeps `Row` in RosterTabs a plain `<div>`.
+ * Like Poland's, a row opens the player: his card, with his season a game at
+ * a time (src/oh/PlayerSheet.tsx), which the page draws in place of the tab.
  */
 export function StatsTab({
   players,
   totals,
   updated,
   source,
+  onSelect,
 }: {
   players: Player[];
   /** playerKey -> category -> values, already matched to `players`. */
   totals: Record<string, PlayerStats>;
   updated: string;
   source: string;
+  /** Opens the player whose stats these are, by the key the totals are filed under. */
+  onSelect: (key: string) => void;
 }) {
   const [segment, setSegment] = useState<Segment>('leaders');
 
@@ -72,13 +73,13 @@ export function StatsTab({
             <div className="group-head">{b.label}</div>
             <div className="rows">
               {b.rows.map((r) => (
-                <div className="row" key={r.key}>
+                <button type="button" className="row" key={r.key} onClick={() => onSelect(r.key)}>
                   <span className="row-number">{r.number || '—'}</span>
                   <span className="row-text">
                     <span className="row-name">{r.name}</span>
                     <span className="row-details">{r.parts.join(' · ')}</span>
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -90,7 +91,7 @@ export function StatsTab({
         ) : (
           <div className="rows">
             {side.map((r) => (
-              <div className="row" key={r.key}>
+              <button type="button" className="row" key={r.key} onClick={() => onSelect(r.key)}>
                 <span className="row-number">{r.number || '—'}</span>
                 <span className="row-text">
                   <span className="row-name">{r.name}</span>
@@ -100,7 +101,7 @@ export function StatsTab({
                     </span>
                   ))}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         ))}

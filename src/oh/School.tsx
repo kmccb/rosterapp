@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
@@ -6,7 +6,11 @@ import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
+import { PlayerSheet } from './PlayerSheet';
 import { StatsTab } from './StatsTab';
+import { weeksFrom } from '../maxpreps/weeks';
+import { playerKey } from '../stats/statsMatch';
+import type { Player } from '../types';
 import { loadTeamStats, matchTeamStats, type TeamStats } from './teamStats';
 import {
   keptSchoolSports,
@@ -222,6 +226,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [failed, setFailed] = useState(false);
   const [roster, setRoster] = useState<SchoolRoster | null>(null);
   const [tab, setTab] = useState<SchoolTab>('lookup');
+  // The player whose card is open. It is drawn over the page rather than in
+  // place of the tab, so the tab underneath keeps its search, its filters and
+  // where it was scrolled to, and Back returns to exactly that. A change of
+  // school or sport closes it.
+  const [openPlayer, setOpenPlayer] = useState<Player | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
   // null is not "no sports" — it is "couldn't ask": offline on a first visit,
   // or a deploy running ahead of the migration behind the sports door. The
   // site falls back to the football-only page it was, rather than showing a
@@ -236,6 +246,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [identity, setIdentity] = useState<SchoolIdentity | null>(null);
   const [sportsSettled, setSportsSettled] = useState(false);
   const [sport, setSport] = useState<string | null>(null);
+  useEffect(() => setOpenPlayer(null), [slug, sport]);
+  // The phone's own back button closes a card rather than leaving the page:
+  // opening one adds a history entry, and going back from it lands here.
+  useEffect(() => {
+    const onPop = () => setOpenPlayer(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   // Whether the roster behind the chosen sport has been asked for yet. A tile
   // tap sets the sport and the effect below clears the roster, so without
   // this the next render is the hub the reader just tapped out of — nothing
@@ -507,6 +525,46 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     const byPlayer = matchTeamStats(teamStats.rows, roster.players);
     return Object.keys(byPlayer).length > 0 ? byPlayer : null;
   }, [roster, teamStats]);
+
+  /*
+   * The season a game at a time, for the card: the stats job's copies of the
+   * totals after each game, less the one before (src/maxpreps/weeks.ts), each
+   * week named for the game the directory says was played. Matched to the
+   * roster the same way the totals are, so a card and the Stats tab can never
+   * disagree about whose numbers are whose.
+   */
+  const weeks = useMemo(() => {
+    if (!roster || !teamStats?.snapshots.length || sport !== 'football') return [];
+    const scored = (season?.games ?? [])
+      .filter((g) => g.result)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((g) => ({ date: g.date, opponent: g.opponent }));
+    // A week is named for a game only when the two sources agree how many have
+    // been played. A forfeit, or a score one side has and the other has not
+    // yet, would otherwise shift every name after it by one; a week called
+    // "Game 9" is less helpful than one called "McDonald" but it is not wrong.
+    const latest = Math.max(...teamStats.snapshots.map((s) => s.games));
+    const played = scored.length === latest ? scored : [];
+    return weeksFrom(teamStats.snapshots, played).map((week) => ({
+      week,
+      byPlayer: matchTeamStats(week.rows, roster.players),
+    }));
+  }, [roster, teamStats, season, sport]);
+
+  // Only a school with season stats has a card worth opening; the rest keep
+  // their rows as the plain lists they always were.
+  const showCard = (p: Player) => {
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    history.pushState({ ohCard: true }, '');
+    setOpenPlayer(p);
+  };
+  const closeCard = () => {
+    if ((history.state as { ohCard?: boolean } | null)?.ohCard) history.back();
+    else setOpenPlayer(null);
+    // Focus goes back to the row that opened it, not to the top of the page.
+    requestAnimationFrame(() => opener.current?.focus());
+  };
+  const openCard = statTotals ? showCard : undefined;
 
   const conference = sport === 'football' ? (roster?.league ?? null) : null;
   const members = useMemo(
@@ -924,6 +982,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   return (
     <Frame head={head}>
+      {roster && openPlayer && (
+        <div className="oh-sheet" role="dialog" aria-modal="true" aria-label={`#${openPlayer.number} ${openPlayer.firstName} ${openPlayer.lastName}`}>
+          <div className="screen">
+            <PlayerSheet
+              player={openPlayer}
+              season={statTotals?.[playerKey(openPlayer)]}
+              weeks={weeks.map((w) => ({ week: w.week, stats: w.byPlayer[playerKey(openPlayer)] }))}
+              onBack={closeCard}
+            />
+          </div>
+        </div>
+      )}
       {roster ? (
         tab === 'lookup' ? (
           /*
@@ -941,13 +1011,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * without first tapping through to another tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} stats={statTotals} />
+            <LookupTab players={roster.players} footer={footer} stats={statTotals} onSelect={openCard} />
           </div>
         ) : (
           <div className="screen">
             {tab === 'team' && (
               <div className="oh-roster">
-                <TeamTab players={roster.players} />
+                <TeamTab players={roster.players} onSelect={openCard} />
               </div>
             )}
             {tab === 'stats' && statTotals && teamStats && (
@@ -956,6 +1026,10 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                 totals={statTotals}
                 updated={teamStats.updated}
                 source={teamStats.source}
+                onSelect={(key) => {
+                  const p = roster.players.find((x) => playerKey(x) === key);
+                  if (p) showCard(p);
+                }}
               />
             )}
             {/* The playoff picture, which in Ohio is a region's points table and

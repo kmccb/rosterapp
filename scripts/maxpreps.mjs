@@ -54,6 +54,7 @@ import { fileURLToPath } from 'node:url';
 import { matchConference, parseMaxPrepsConference, parseMaxPrepsTeam, teamKey } from '../src/maxpreps/leagueParse.ts';
 import { parseMaxPrepsRoster, rosterCsv } from '../src/maxpreps/rosterParse.ts';
 import { parseMaxPrepsStats } from '../src/maxpreps/statsParse.ts';
+import { recordSnapshot } from '../src/maxpreps/weeks.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const withRoster = process.argv.includes('--roster');
@@ -282,7 +283,17 @@ for (const team of teams) {
     }
 
     const sameRows = kept && JSON.stringify(kept.rows) === JSON.stringify(parsed.rows);
-    if (sameRows && kept.team === origin.team && kept.print === origin.print && kept.season === origin.season) {
+    // The totals after each game, kept so the page can work out the weeks
+    // (src/maxpreps/weeks.ts) — MaxPreps publishes no week of its own.
+    const snapshots = recordSnapshot(kept?.snapshots, parsed.teamGames, parsed.rows);
+    const sameSnapshots = JSON.stringify(kept?.snapshots ?? []) === JSON.stringify(snapshots);
+    if (
+      sameRows &&
+      sameSnapshots &&
+      kept.team === origin.team &&
+      kept.print === origin.print &&
+      kept.season === origin.season
+    ) {
       console.log(`${label}: no change since ${kept.updated}`);
     } else {
       writeJson(path, {
@@ -292,7 +303,9 @@ for (const team of teams) {
         // The day the numbers changed, not the day the link did.
         updated: sameRows ? kept.updated : today,
         ...origin,
+        games: parsed.teamGames,
         rows: parsed.rows,
+        snapshots,
       });
       console.log(`${label}: ${parsed.rows.length} rows from ${parsed.tables.length} tables`);
     }
