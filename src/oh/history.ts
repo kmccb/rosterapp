@@ -84,7 +84,8 @@ export function parseHistory(raw: unknown): SchoolHistory | null {
  * page is keyed by its printed name behind a "~", which no slug can start with,
  * so it never matches a real opponent's slug by accident.
  */
-const keyFor = (slug: string | null, name: string) => slug ?? `~${name.toLowerCase()}`;
+export const keyFor = (slug: string | null, name: string): string =>
+  slug ?? `~${name.toLowerCase()}`;
 
 const asGame = ([date, slug, name, venue, us, them]: HistoryRow): Game => ({
   date,
@@ -135,6 +136,30 @@ export function meetings(
     lost: list.filter((g) => !g.result!.won).length,
     meetings: list,
   };
+}
+
+/**
+ * The committed file for one school, or null.
+ *
+ * Null covers every way of not having one — no file because the school was
+ * activated after the last hand-run, no signal, a host answering a missing
+ * file with a page of its own — because to a fan they are all the same thing:
+ * no all-time line, and the season's own meetings still there. A file for some
+ * other school is refused too, so a mis-copied file can't put another school's
+ * record on this page.
+ *
+ * No cache-busting query, unlike the season and the forecast: past seasons
+ * don't change between deploys, so the browser's ordinary caching is right.
+ */
+export async function loadHistory(slug: string): Promise<SchoolHistory | null> {
+  try {
+    const res = await fetch(`/oh/history/${slug}.json`);
+    if (!res.ok) return null;
+    const history = parseHistory(await res.json().catch(() => null));
+    return history && history.slug === slug ? history : null;
+  } catch {
+    return null;
+  }
 }
 
 /*
