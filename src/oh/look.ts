@@ -78,6 +78,36 @@ export const LOOK_VARS = [
 export const pageGround = (ground: string, mode: Mode = 'dark'): string =>
   mode === 'light' ? mix(ground, '#ffffff', 0.94) : ground;
 
+/** How colorful a color is: the spread of its channels, 0 for any grey. */
+const chroma = (hex: string): number => {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  return (Math.max(...c) - Math.min(...c)) / 255;
+};
+
+/** Below this a color reads as a grey, black or white rather than a hue. */
+const NEUTRAL = 0.08;
+/** Closer than this, two colors count as equally colorful. */
+const NEAR_TIE = 0.05;
+
+/**
+ * Which school color the light page carries as its accent — the active tab's
+ * underline, the jersey numbers, the section labels.
+ *
+ * The more colorful of the two, because on near-white a school is known by
+ * its hue: a black ground with an orange accent must come out orange (made
+ * dark enough to read by readable()), not black, or the light page is
+ * anybody's. On a near-tie the ground wins, being the color the school is
+ * painted in. Only when both are greys does it fall back to whichever stands
+ * out more on the light background.
+ */
+export function lightAccent(ground: string, accent: string, bg: string): string {
+  const g = chroma(ground);
+  const a = chroma(accent);
+  if (g < NEUTRAL && a < NEUTRAL) return contrast(ground, bg) >= contrast(accent, bg) ? ground : accent;
+  return a > g + NEAR_TIE ? accent : ground;
+}
+
 /** The colors the page is painted in, with the ones used for words both as
  * chosen and as made readable — what deriveVars paints with, and what the
  * panel's hint reads. */
@@ -112,10 +142,7 @@ function words(look: SchoolLook, mode: Mode): Words {
     const rawText = mix(ground, '#000000', 0.82);
     const text = readable(rawText, grounds);
     const rawMuted = mix(text, bg, 0.35);
-    // Of the school's two colors, the one that stands out on near-white —
-    // usually the ground (Springfield's old orange), the accent having been
-    // picked to stand out on the ground instead.
-    const rawAccent = contrast(ground, bg) >= contrast(accent, bg) ? ground : accent;
+    const rawAccent = lightAccent(ground, accent, bg);
     return {
       bg,
       surface,

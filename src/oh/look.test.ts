@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { contrast, mix } from './contrast';
-import { applyLook, clearLook, deriveVars, lookNotes, LOOK_VARS, plateColor, resizeLogo, type StyleTarget } from './look';
+import { applyLook, clearLook, deriveVars, lightAccent, lookNotes, LOOK_VARS, plateColor, resizeLogo, type StyleTarget } from './look';
 
 const hexChannels = (hex: string): [number, number, number] => {
   const n = parseInt(hex.slice(1), 16);
@@ -228,16 +228,43 @@ describe('light mode', () => {
     }
   });
 
-  it('takes the school color that stands out on near-white as the accent', () => {
-    // An orange ground with a gold accent: the gold is lost on near-white, the
-    // orange is not, darkened only as far as it must be to read at 4.5.
-    const vars = deriveVars({ ground: '#c75000', accent: '#ffd200' }, 'light');
+  const hueOf = (hex: string): number => {
+    const [r, g, b] = hexChannels(hex).map((v) => v / 255);
+    const max = Math.max(r, g, b);
+    const d = max - Math.min(r, g, b);
+    if (d === 0) return NaN;
+    const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return h * 60;
+  };
+
+  it('carries the more colorful school color, so the demo stays orange rather than turning black', () => {
+    // The demo: a near-black ground with an orange accent.
+    const vars = deriveVars({ ground: '#0e0c0b', accent: '#f26722' }, 'light');
+    expect(Math.abs(hueOf(vars['--accent']) - hueOf('#f26722'))).toBeLessThan(4);
+    expect(worst(vars['--accent'], vars['--bg'])).toBeGreaterThanOrEqual(4.5);
+    // Poland's sky blue rather than its navy, darkened to read.
+    const navyVars = deriveVars(navy, 'light');
+    expect(Math.abs(hueOf(navyVars['--accent']) - hueOf('#4fbaf7'))).toBeLessThan(4);
+  });
+
+  it('prefers the ground on a near-tie in colorfulness', () => {
+    expect(lightAccent('#c75000', '#d05a10', '#ffffff')).toBe('#c75000');
+    expect(lightAccent('#c75000', '#ffd200', '#ffffff')).toBe('#ffd200');
+  });
+
+  it('gives Springfield’s beige-and-charcoal a brown from the beige', () => {
+    const vars = deriveVars({ ground: '#e8d6ca', accent: '#292929', text: '#000000' }, 'light');
     const [r, g, b] = hexChannels(vars['--accent']);
-    expect(r).toBeGreaterThan(g);
+    expect(r).toBeGreaterThan(b);
     expect(g).toBeGreaterThanOrEqual(b);
     expect(worst(vars['--accent'], vars['--bg'])).toBeGreaterThanOrEqual(4.5);
-    // Poland's navy is the one that reads on near-white, not its sky blue.
-    expect(deriveVars(navy, 'light')['--accent']).toBe('#04043a');
+  });
+
+  it('falls back to whichever stands out on near-white when both colors are greys', () => {
+    expect(lightAccent('#333333', '#cccccc', '#f8f8f8')).toBe('#333333');
+    expect(lightAccent('#dddddd', '#222222', '#f8f8f8')).toBe('#222222');
+    const vars = deriveVars({ ground: '#dddddd', accent: '#222222' }, 'light');
+    expect(vars['--accent']).toBe('#222222');
   });
 
   it('builds the scrims from the light background at the dark page’s strengths', () => {
