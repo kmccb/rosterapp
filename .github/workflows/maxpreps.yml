@@ -55,9 +55,11 @@ jobs:
           # has its file taken down, and a removal has to be staged too.
           # The folder is gone once its last file is, and git refuses a path
           # that is neither on disk nor tracked.
-          if [ -d public/oh/stats ] || git ls-files --error-unmatch public/oh/stats >/dev/null 2>&1; then
-            git add -A public/oh/stats/
-          fi
+          for dir in public/oh/stats public/oh/leagues; do
+            if [ -d "$dir" ] || git ls-files --error-unmatch "$dir" >/dev/null 2>&1; then
+              git add -A "$dir/"
+            fi
+          done
           if git diff --staged --quiet; then
             echo "No change in anybody's stats."
             exit 0

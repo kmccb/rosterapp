@@ -132,8 +132,9 @@ export const syncNow = (slug: string, sport: string, season: number) =>
   callSync<{ state: SyncState }>({ action: 'sync', slug, sport, season });
 
 /*
- * Where a sport's season stats come from — today a team's printable MaxPreps
- * stats page, read by scripts/maxpreps.mjs on a schedule. null clears it, and
+ * Where a sport's season stats come from — today a team's own page on
+ * MaxPreps, or its printable stats page, read by scripts/maxpreps.mjs on a
+ * schedule. null clears it, and
  * the next scheduled run takes the school's stats file down. Migration 0009.
  */
 export const setStatsSource = async (r: {

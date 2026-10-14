@@ -132,7 +132,13 @@ all-sports package isn't set yet.
 On a football activation, ask which conference the school plays in and who
 else is in it — that's the whole input the League tab's standings run on;
 everything else (who played whom, who won) already lives in the directory
-data. Type the conference name and pick the member schools in the panel.
+data. Type the conference name and pick the *other* member schools in the
+panel; the school itself is in its own table without being picked.
+
+If the school's stats come from MaxPreps, don't type anything: once the stats
+job has run for it, the Conference section offers **Fill from MaxPreps** — the
+conference as MaxPreps lists it, already matched to our schools. Check the
+list (it says so if it couldn't place one), then save the card.
 
 Re-picking members **replaces** the stored list, it doesn't add to it — the
 panel has no way to show what's already saved, so treat every save here as
@@ -170,10 +176,11 @@ If the coach keeps stats on MaxPreps, the school's football page gets a Stats
 tab (Leaders, Offense, Defense, Special) and each Lookup hit shows that
 player's season. Nobody types anything after setup.
 
-1. On the team's MaxPreps Stats page, the **Print** link at the bottom is the
-   address to copy; the Roster page's address is the other one.
-2. In the panel, open the school, open Football, and paste the Print address
-   into **Stats** → Set. (Needs migration 0009. Until it is applied, add the
+1. Open the team's football page on MaxPreps and copy its address
+   (`https://www.maxpreps.com/oh/<town>/<school>/football/`).
+2. In the panel, open the school, open Football, and paste it into
+   **Stats** → Set. (The Print link at the bottom of the team's Stats page
+   also works, but then the conference can't be filled in from MaxPreps.) (Needs migration 0009. Until it is applied, add the
    school to `maxpreps-teams.json` and `paid-schools.json` instead.) The next
    scheduled run writes the stats file; to have it at once, run the "Refresh
    season stats from MaxPreps" workflow by hand.
