@@ -12,9 +12,13 @@ import { School as SchoolScreen } from './School';
  * school stays one tap away, because families follow more than one.
  */
 export function Directory() {
-  // A school link is honoured once. It is taken out of the address bar as soon
-  // as it is read, so "Follow a different school" followed by a reload doesn't
-  // snap the reader back to the school on the sign.
+  // A school link stays in the address bar for as long as that school is the
+  // one on screen: "Add to Home Screen" saves whatever address the page is on,
+  // and a phone that saved bare /oh/ opens the school picker for ever after —
+  // an iPhone's home-screen app does not even share the browser's memory of
+  // which school was chosen. It comes out the moment the reader follows a
+  // different school, so a reload then does not snap back to the one on the
+  // sign; and a link to a school the directory does not know comes out at once.
   const link = useRef(schoolParam(location.search));
   const [schools, setSchools] = useState<School[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -32,8 +36,8 @@ export function Directory() {
         const pending = link.current;
         link.current = null;
         if (pending) {
-          history.replaceState(null, '', '/oh/');
           const target = resolveLink(pending, list, chosenSlug());
+          if (target !== pending) history.replaceState(null, '', '/oh/');
           if (target) {
             if (target === pending) choose(target);
             setSlug(target);
@@ -53,6 +57,7 @@ export function Directory() {
       <SchoolScreen
         slug={slug}
         onChange={() => {
+          if (schoolParam(location.search)) history.replaceState(null, '', '/oh/');
           forget();
           setSlug(null);
           setQ('');

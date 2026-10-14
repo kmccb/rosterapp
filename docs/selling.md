@@ -83,6 +83,16 @@ After that, Look and Billing each have their own Save, and write to every
 The school list is the dashboard: one line per school, worst first — a
 refused sheet, then expired, then live, then unpublished.
 
+### On a phone's home screen
+
+A live paid school installs as its own app: "Add to Home Screen" (Share →
+Add to Home Screen on an iPhone) from its page gives the crest as the icon,
+the school's name under it, and opens straight onto the school. The icons are
+made from the crest at every deploy, so a new crest reaches them within six
+hours. The school has to be in `paid-schools.json` for this, as for the
+forecast. A crest uploaded on a white square installs as a white square —
+upload one on the school's own color, or cropped tight, for the best icon.
+
 ### The school's address
 
 Add `/oh/<short-name>` lines to `public/_redirects` (both slash forms) and

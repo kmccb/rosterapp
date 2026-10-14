@@ -27,3 +27,6 @@ supabase/.temp/
 
 # Rosters pulled by scripts/maxpreps.mjs --roster: a file to hand the panel, not one to publish.
 scripts/data/
+
+# Each paying school's home-screen app, rebuilt from the database by scripts/paid-apps.mjs on every build.
+public/oh/apps/
