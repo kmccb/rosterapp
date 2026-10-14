@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyLook, clearLook, deriveVars, LOOK_VARS, resizeLogo, type StyleTarget } from './look';
+import { applyLook, clearLook, deriveVars, LOOK_VARS, plateColor, resizeLogo, type StyleTarget } from './look';
 
 const hexChannels = (hex: string): [number, number, number] => {
   const n = parseInt(hex.slice(1), 16);
@@ -110,5 +110,25 @@ describe('resizeLogo', () => {
     // real canvas: jsdom is not part of this project's vitest setup.
     const file = new File([new Uint8Array([1, 2, 3])], 'badge.png', { type: 'image/png' });
     await expect(resizeLogo(file)).rejects.toThrow('Images can only be processed in a browser.');
+  });
+});
+
+describe('plateColor', () => {
+  const look = { ground: '#c75000', accent: '#111111' };
+
+  it('follows the school’s own colors when chosen by name, so a recolor carries the plate with it', () => {
+    expect(plateColor({ ...look, plate: 'ground' })).toBe('#c75000');
+    expect(plateColor({ ...look, plate: 'accent' })).toBe('#111111');
+  });
+
+  it('takes a hex as it is, and anything else as no plate', () => {
+    expect(plateColor({ ...look, plate: '#ffffff' })).toBe('#ffffff');
+    expect(plateColor(look)).toBe('transparent');
+    expect(plateColor({ ...look, plate: 'white' })).toBe('transparent');
+  });
+
+  it('reaches the page as --crest-plate', () => {
+    expect(deriveVars({ ...look, plate: '#ffffff' })['--crest-plate']).toBe('#ffffff');
+    expect(deriveVars(look)['--crest-plate']).toBe('transparent');
   });
 });

@@ -18,11 +18,30 @@
  * hand to match.
  */
 
-/** `text` is optional: a school that never chose one reads in white, as every
- * school did before there was a third color to choose. */
 import { liftBackdrop } from './backdrop';
 
-export type SchoolLook = { ground: string; accent: string; text?: string; logo?: string };
+/**
+ * What a crest sits on. A crest is stored with its backdrop lifted off, so on
+ * its own it floats on the page's ground — which reads well for a tiger on
+ * orange and badly for a navy crest on navy. The seller can put it back on a
+ * plate: the school's own ground or accent, kept as a word so the plate follows
+ * the colors when they change, or any hex at all (white is the usual one).
+ */
+export type CrestPlate = 'ground' | 'accent' | string;
+
+/** `text` is optional: a school that never chose one reads in white, as every
+ * school did before there was a third color to choose. `plate` is optional the
+ * same way: none means the crest sits straight on the page. */
+export type SchoolLook = { ground: string; accent: string; text?: string; plate?: CrestPlate; logo?: string };
+
+/** The plate as a CSS color, or 'transparent' for none — or for a value that is
+ * neither of the two words nor a hex, which is treated as no choice at all. */
+export function plateColor(look: Pick<SchoolLook, 'ground' | 'accent' | 'plate'>): string {
+  const { plate } = look;
+  if (plate === 'ground') return look.ground;
+  if (plate === 'accent') return look.accent;
+  return plate && /^#[0-9a-f]{6}$/i.test(plate) ? plate : 'transparent';
+}
 
 /** An element-like target for CSS custom properties — real usage defaults to
  * document.documentElement; tests pass a recording stub, since the vitest
@@ -60,7 +79,7 @@ const mix = (from: string, to: string, t: number): string => {
 export const LOOK_VARS = [
   '--bg', '--chrome', '--surface', '--surface-2', '--line',
   '--text', '--muted', '--accent', '--accent-ink', '--ghost', '--wallpaper',
-  '--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom',
+  '--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom', '--crest-plate',
 ] as const;
 
 /**
@@ -104,6 +123,7 @@ export function deriveVars(look: SchoolLook): Record<string, string> {
     '--scrim-far': rgba(ground, 0.93),
     '--scrim-top': rgba(ground, 0.72),
     '--scrim-bottom': rgba(ground, 0.88),
+    '--crest-plate': plateColor(look),
   };
 }
 

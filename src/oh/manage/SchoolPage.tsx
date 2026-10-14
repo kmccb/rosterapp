@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { School } from '../../ohio/stateModel';
 import { deriveVars, resizeLogo } from '../look';
-import { loadSchoolSports } from '../rosterStore';
+import { loadSchoolSports, NICKNAME_MAX } from '../rosterStore';
 import { upsertRoster, type RosterRow } from './adminApi';
 import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIso } from './saveArgs';
 import { capital, longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
@@ -10,11 +10,21 @@ import { SportCard } from './SportCard';
 const DEFAULT_COLORS = { ground: '#04043a', accent: '#4fbaf7', text: '#ffffff' };
 
 type Section = 'look' | 'billing';
+
+/** The fills offered by name, in the order the menu lists them. Anything else
+ * stored is a hex somebody picked, and shows as Custom. */
+const PLATES: { value: string; label: string }[] = [
+  { value: '', label: 'None — on the page color' },
+  { value: '#ffffff', label: 'White' },
+  { value: 'ground', label: 'Ground color' },
+  { value: 'accent', label: 'Accent color' },
+];
+const CUSTOM = 'custom';
 type Upsert = Parameters<typeof upsertRoster>[0];
 
 /** A row's own facts, sent back unchanged around whichever one is being edited.
  * `p_colors` is the one argument with no "keep", so it is always spelled out. */
-const unchanged = (row: RosterRow, colors: { ground: string; accent: string; text?: string }): Upsert => ({
+const unchanged = (row: RosterRow, colors: { ground: string; accent: string; text?: string; nickname?: string; plate?: string }): Upsert => ({
   slug: row.school_slug,
   sport: row.sport,
   season: row.season,
@@ -74,7 +84,12 @@ export function SchoolPage({
   const [accent, setAccent] = useState(stored?.accent ?? DEFAULT_COLORS.accent);
   // White until somebody chooses otherwise — every page before this one was.
   const [text, setText] = useState(stored?.text ?? DEFAULT_COLORS.text);
-  const colors = { ground, accent, text };
+  // Both empty until chosen: no nickname after the name, no plate behind the crest.
+  const [nickname, setNickname] = useState(stored?.nickname ?? '');
+  const [plate, setPlate] = useState(stored?.plate ?? '');
+  const nick = nickname.replace(/\s+/g, ' ').trim();
+  const colors = { ground, accent, text, ...(nick ? { nickname: nick } : {}), ...(plate ? { plate } : {}) };
+  const plateChoice = PLATES.some((p) => p.value === plate) ? plate : CUSTOM;
   // themeArg's three states: a fresh upload sets it, cleared wipes it, neither keeps it.
   const [logoData, setLogoData] = useState<string | null>(null);
   const [logoCleared, setLogoCleared] = useState(false);
@@ -132,14 +147,16 @@ export function SchoolPage({
 
   const shownLogo = logoData ?? (logoCleared ? null : storedLogo);
   const previewStyle = useMemo(
-    () => deriveVars({ ground, accent, text, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
-    [ground, accent, text, shownLogo],
+    () => deriveVars({ ground, accent, text, plate, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
+    [ground, accent, text, plate, shownLogo],
   );
 
   const lookDirty =
     ground !== (stored?.ground ?? DEFAULT_COLORS.ground) ||
     accent !== (stored?.accent ?? DEFAULT_COLORS.accent) ||
     text !== (stored?.text ?? DEFAULT_COLORS.text) ||
+    nick !== (stored?.nickname ?? '') ||
+    plate !== (stored?.plate ?? '') ||
     logoData !== null ||
     logoCleared;
   const dateDirty = paidThrough !== (latest ?? defaultPaidThrough());
@@ -305,6 +322,49 @@ export function SchoolPage({
                 </button>
               )}
             </div>
+            <div className="mg-part">
+              <div className="mg-part-label">Nickname</div>
+              <div className="mg-part-body">
+                <input
+                  className="mg-input"
+                  type="text"
+                  value={nickname}
+                  maxLength={NICKNAME_MAX}
+                  onChange={(e) => setNickname(e.target.value)}
+                  placeholder="Tigers"
+                  aria-label="Nickname"
+                />
+                <p className="mg-hint">Shown after the name: “{nick ? `${name} ${nick}` : name}”.</p>
+              </div>
+            </div>
+            {shownLogo && (
+              <div className="mg-part">
+                <div className="mg-part-label">Crest fill</div>
+                <div className="mg-part-body">
+                  <div className="mg-inline">
+                    <select
+                      className="mg-input"
+                      value={plateChoice}
+                      onChange={(e) => setPlate(e.target.value === CUSTOM ? plate || '#ffffff' : e.target.value)}
+                      aria-label="Crest fill"
+                    >
+                      {PLATES.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                      <option value={CUSTOM}>Custom…</option>
+                    </select>
+                    {plateChoice === CUSTOM && (
+                      <label className="mg-swatch">
+                        <input type="color" value={plate} onChange={(e) => setPlate(e.target.value)} />
+                      </label>
+                    )}
+                  </div>
+                  <p className="mg-hint">What shows through the clear parts of the crest.</p>
+                </div>
+              </div>
+            )}
             <p className="mg-hint">
               {isNew
                 ? 'Saved with the first sport, and used for every sport after it.'
@@ -464,7 +524,7 @@ export function SchoolPage({
             <div className="mg-preview-head">
               {shownLogo && <img className="mg-preview-crest" src={shownLogo} alt="" />}
               <div>
-                <div className="mg-preview-name">{name}</div>
+                <div className="mg-preview-name">{nick ? `${name} ${nick}` : name}</div>
                 <div className="mg-preview-city">{school?.city ?? ''}</div>
               </div>
             </div>
