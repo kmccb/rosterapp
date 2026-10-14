@@ -1353,3 +1353,86 @@ img.oh-hub-crest {
   color: var(--muted);
   font-weight: 700;
 }
+
+/* ------------------------------------------------------------- light mode */
+
+/*
+ * The sun/moon at the right end of a paid page's header. A 40px square for a
+ * thumb, drawn in the line's own text color so it is part of the header
+ * rather than a badge on it.
+ */
+.oh-mode-btn {
+  flex: none;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.oh-mode-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The title line is shorter than the button; the row grows to fit it rather
+   than the button hanging below the tabs' top edge. */
+.oh-title-row > .oh-mode-btn {
+  margin-top: -6px;
+  margin-bottom: -6px;
+}
+
+/* The name block takes what the crest and the button leave, so a long school
+   name wraps instead of pushing the button off the edge. */
+.oh-hub-head > div {
+  min-width: 0;
+}
+
+/*
+ * What the light page needs that its colors alone do not give it.
+ *
+ * Almost everything in src/styles.css is drawn from the variables look.ts
+ * writes, so the light page is mostly those variables turned over. These are
+ * the few things it hard-codes for a dark page — and src/styles.css is
+ * Poland's and is not edited — so they are turned over here, only while a paid
+ * look is applied in light mode (look.ts sets the attribute, and clearLook
+ * takes it off again).
+ */
+html[data-oh-mode='light'] {
+  /* Form controls, scrollbars and the like follow the page, not the root's
+     dark. */
+  color-scheme: light;
+  /* The status colors are bright for a dark ground and wash out on white;
+     these are the same three, deep enough to read as text on near-white and
+     to carry white text when they are a chip's fill. */
+  --ok: #17753a;
+  --danger: #c0262d;
+  --warn: #8a5300;
+}
+
+/*
+ * Ink on a filled control. src/styles.css inks its text-colored fills — the
+ * active chip, the primary button, a pressed key or position pill — and the
+ * W/L chips in --accent-ink, which on Poland's page is its navy ground. A paid
+ * page's --accent-ink is now chosen for the accent and can be white, which on a
+ * white fill is nothing at all. The page's own background is what the text
+ * color was made readable against, and contrast runs both ways, so it is the
+ * ink that always reads on --text; on a dark page it is the ground, exactly
+ * what these have always been.
+ */
+html[data-oh-mode] :is(.chip.active, .btn-primary, .pos-pill[aria-pressed='true'], .seg button[aria-pressed='true'], .key:active, .form-chip) {
+  color: var(--bg);
+}
+
+/* On the light page the W/L/T fills are the deepened ones above, and its
+   near-white background would be a pale ink on them; white reads on all three. */
+html[data-oh-mode='light'] .form-chip {
+  color: #ffffff;
+}

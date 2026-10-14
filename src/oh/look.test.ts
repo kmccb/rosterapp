@@ -201,3 +201,77 @@ describe('readable words', () => {
     expect(vars['--ghost']).toBe('rgba(27, 58, 140, 0.22)');
   });
 });
+
+describe('light mode', () => {
+  const springfieldOrange = { ground: '#c75000', accent: '#111111', logo: 'data:image/png;base64,AAAA', plate: '#ffffff' };
+  const navy = { ground: '#04043a', accent: '#4fbaf7' };
+  const cards = (bg: string) => [bg, mix(bg, '#ffffff', 0.72)];
+  const worst = (fg: string, bg: string) => Math.min(...cards(bg).map((g) => contrast(fg, g)));
+
+  it('leaves the dark page as it was when no mode is given', () => {
+    expect(deriveVars(navy)).toEqual(deriveVars(navy, 'dark'));
+  });
+
+  it('paints a near-white tinted with the ground', () => {
+    const vars = deriveVars(springfieldOrange, 'light');
+    expect(vars['--bg']).toBe(mix('#c75000', '#ffffff', 0.94));
+    expect(contrast(vars['--bg'], '#ffffff')).toBeLessThan(1.15);
+  });
+
+  it('reads in near-black words, every one of them at 4.5 or better', () => {
+    for (const look of [springfieldOrange, navy, { ground: '#e8d6ca', accent: '#292929', text: '#000000' }, { ground: '#ffff00', accent: '#ffffff' }]) {
+      const vars = deriveVars(look, 'light');
+      expect(contrast(vars['--text'], '#000000')).toBeLessThan(1.6);
+      for (const name of ['--text', '--muted', '--accent'] as const) {
+        expect(worst(vars[name], vars['--bg']), `${name} for ${look.ground}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it('takes the school color that stands out on near-white as the accent', () => {
+    // An orange ground with a gold accent: the gold is lost on near-white, the
+    // orange is not, darkened only as far as it must be to read at 4.5.
+    const vars = deriveVars({ ground: '#c75000', accent: '#ffd200' }, 'light');
+    const [r, g, b] = hexChannels(vars['--accent']);
+    expect(r).toBeGreaterThan(g);
+    expect(g).toBeGreaterThanOrEqual(b);
+    expect(worst(vars['--accent'], vars['--bg'])).toBeGreaterThanOrEqual(4.5);
+    // Poland's navy is the one that reads on near-white, not its sky blue.
+    expect(deriveVars(navy, 'light')['--accent']).toBe('#04043a');
+  });
+
+  it('builds the scrims from the light background at the dark page’s strengths', () => {
+    const dark = deriveVars(springfieldOrange);
+    const light = deriveVars(springfieldOrange, 'light');
+    const alpha = (v: string) => v.match(/, ([\d.]+)\)$/)?.[1];
+    for (const name of ['--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom', '--chrome'] as const) {
+      expect(alpha(light[name])).toBe(alpha(dark[name]));
+      expect(rgbaChannels(light[name])).toEqual(hexChannels(light['--bg']));
+    }
+  });
+
+  it('keeps the crest, its plate and the wallpaper as they are', () => {
+    const dark = deriveVars(springfieldOrange);
+    const light = deriveVars(springfieldOrange, 'light');
+    expect(light['--crest-plate']).toBe(dark['--crest-plate']);
+    expect(light['--wallpaper']).toBe(dark['--wallpaper']);
+  });
+
+  it('marks the mode on the page while a look is applied, and takes it off with the look', () => {
+    const attrs = new Map<string, string>();
+    const props = new Map<string, string>();
+    const target: StyleTarget = {
+      style: { setProperty: (n, v) => props.set(n, v), removeProperty: (n) => props.delete(n) },
+      setAttribute: (n, v) => attrs.set(n, v),
+      removeAttribute: (n) => attrs.delete(n),
+    };
+    applyLook(navy, target, 'light');
+    expect(attrs.get('data-oh-mode')).toBe('light');
+    expect(props.get('--bg')).toBe(deriveVars(navy, 'light')['--bg']);
+    applyLook(navy, target);
+    expect(attrs.get('data-oh-mode')).toBe('dark');
+    clearLook(target);
+    expect(attrs.size).toBe(0);
+    expect(props.size).toBe(0);
+  });
+});

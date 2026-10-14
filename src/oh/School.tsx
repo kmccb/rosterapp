@@ -23,7 +23,9 @@ import {
   type SchoolRoster,
 } from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
-import { applyLook, clearLook } from './look';
+import { applyLook, clearLook, pageGround } from './look';
+import { useMode } from './mode';
+import { ModeButton } from './ModeButton';
 import { SportGlyph } from './SportGlyph';
 import { hubSports, inSeason, seasonNote, sortSportsForNow, sportLabel } from './sportSeasons';
 import {
@@ -460,11 +462,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // Keyed on the values rather than on the objects holding them, so a
   // refetch that agrees with what is already on screen does not strobe the
   // page through the default theme and back.
+  //
+  // The mode is part of the look: a fan's light/dark choice repaints the page
+  // through the same door, and is taken down with it.
+  const [mode, toggleMode] = useMode();
   useEffect(() => {
     if (!ground || !accent) return;
-    applyLook({ ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined });
+    applyLook({ ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined }, undefined, mode);
     return () => clearLook();
-  }, [ground, accent, text, plate, crest]);
+  }, [ground, accent, text, plate, crest, mode]);
 
   // A school that is live on the paid tier installs as itself — its name, its
   // crest, straight onto its page (src/oh/install.ts). The identity answering
@@ -474,8 +480,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const paidLive = (identity?.sports.length ?? 0) > 0;
   useEffect(() => {
     if (!paidLive || !schoolName || isDemo()) return;
-    return installAs(slug, schoolName, ground);
-  }, [slug, paidLive, schoolName, ground]);
+    // The browser bar takes the page's own background, light or dark.
+    return installAs(slug, schoolName, ground && pageGround(ground, mode));
+  }, [slug, paidLive, schoolName, ground, mode]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.
@@ -743,6 +750,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     <div className="oh-title-row">
       {crest && <img className="oh-title-crest" src={crest} alt="" />}
       <h1 className="title">{fullName}</h1>
+      <ModeButton mode={mode} onToggle={toggleMode} />
     </div>
   );
 
@@ -861,6 +869,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                 would be a claim about all of them. */}
             <p className="oh-hub-city">{season.school.city}, Ohio</p>
           </div>
+          <ModeButton mode={mode} onToggle={toggleMode} />
         </div>
 
         <div className="oh-hub-body">
