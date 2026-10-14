@@ -4,6 +4,9 @@
  */
 
 import sharp from 'sharp';
+// The same backdrop rule the panel applies at upload, so a crest uploaded
+// transparent and one uploaded on white come out the same.
+import { liftBackdrop as lift } from '../../src/oh/backdrop.ts';
 
 /*
  * The icon, made the way Poland's is: the crest's own artwork, large, on a wash
@@ -27,63 +30,10 @@ const shade = (hex, toward, t) => {
 
 export async function liftBackdrop(source) {
   const { data, info } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const { width: W, height: H } = info;
-  const at = (x, y) => (y * W + x) * 4;
-  const corners = [at(0, 0), at(W - 1, 0), at(0, H - 1), at(W - 1, H - 1)];
-  const bg = [0, 1, 2].map((c) => Math.round(corners.reduce((s, i) => s + data[i + c], 0) / 4));
-  const off = (i) => Math.abs(data[i] - bg[0]) + Math.abs(data[i + 1] - bg[1]) + Math.abs(data[i + 2] - bg[2]);
-  if (corners.some((i) => off(i) > 60)) return sharp(source).png().toBuffer();
-
-  // Artwork running off the edge means the crest was cropped on the way in —
-  // every crest uploaded before the panel padded instead of cropping was. Its
-  // ring is open at the cut, so the flood would pour through into the
-  // artwork's own white and eat it. Such a crest is used whole, and looks
-  // right again once it is uploaded afresh.
-  let edgeArt = 0;
-  for (let x = 0; x < W; x++) edgeArt += (off(at(x, 0)) > 90) + (off(at(x, H - 1)) > 90);
-  for (let y = 0; y < H; y++) edgeArt += (off(at(0, y)) > 90) + (off(at(W - 1, y)) > 90);
-  if (edgeArt > 0.02 * 2 * (W + H)) return sharp(source).png().toBuffer();
-
-  // Flood from every edge pixel that matches, never through one that does not.
-  const seen = new Uint8Array(W * H);
-  const queue = new Int32Array(W * H);
-  let head = 0;
-  let tail = 0;
-  const push = (x, y) => {
-    const p = y * W + x;
-    if (seen[p] || off(p * 4) > 90) return;
-    seen[p] = 1;
-    queue[tail++] = p;
-  };
-  for (let x = 0; x < W; x++) {
-    push(x, 0);
-    push(x, H - 1);
-  }
-  for (let y = 0; y < H; y++) {
-    push(0, y);
-    push(W - 1, y);
-  }
-  while (head < tail) {
-    const p = queue[head++];
-    const x = p % W;
-    const y = (p - x) / W;
-    data[p * 4 + 3] = 0;
-    if (x > 0) push(x - 1, y);
-    if (x < W - 1) push(x + 1, y);
-    if (y > 0) push(x, y - 1);
-    if (y < H - 1) push(x, y + 1);
-  }
-  // The anti-aliased fringe just inside: fade it by how close it is to the
-  // backdrop, so the edge sits on the new colour without a pale halo.
-  for (let p = 0; p < W * H; p++) {
-    if (seen[p]) continue;
-    const x = p % W;
-    const y = (p - x) / W;
-    const touches =
-      (x > 0 && seen[p - 1]) || (x < W - 1 && seen[p + 1]) || (y > 0 && seen[p - W]) || (y < H - 1 && seen[p + W]);
-    if (touches) data[p * 4 + 3] = Math.round(255 * Math.min(1, off(p * 4) / 200));
-  }
-  return sharp(data, { raw: { width: W, height: H, channels: 4 } }).trim().png().toBuffer();
+  const outcome = lift(data, info.width, info.height);
+  // A crest with no flat backdrop, or one cropped at its edges, is used whole.
+  if (outcome === 'no-flat-backdrop' || outcome === 'cropped') return sharp(source).png().toBuffer();
+  return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).trim().png().toBuffer();
 }
 
 /** The artwork, big, centred on a soft wash of the ground colour. */
