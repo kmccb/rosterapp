@@ -10,19 +10,26 @@
  */
 
 import { isDone, nextGame, type Game } from '../schedule/icalParse';
-import { kickoffAt } from '../ohio/kickoff';
+import { clockOf, kickoffAt } from '../ohio/kickoff';
 import type { SchoolGame } from '../ohio/stateModel';
 import type { FixtureWeather } from './store';
 import { keyFor, meetings, outcome, type HeadToHeadRecord, type SchoolHistory } from './history';
 
-/** A directory fixture in Poland's shape, with the two things only the directory has. */
-export type Fixture = Game & { opponentCity: string; overtime?: string };
+/**
+ * A directory fixture in Poland's shape, with what only the directory has —
+ * and whether its kickoff time was printed or is kickoffAt's seven o'clock.
+ */
+export type Fixture = Game & { opponentCity: string; overtime?: string; timeKnown: boolean };
 
 /*
  * The directory prints a kickoff as "7pm" beside a date, which isn't a moment;
  * kickoffAt makes it one, in Eastern time, with seven o'clock standing in for a
  * time it can't read. Written out as an instant, so isDone and daysToKickoff
  * read it exactly as they read a calendar feed's.
+ *
+ * The stand-in hour is good enough to count down to, but not to print: a
+ * playoff game posted as "TBA" would read as a promise of seven o'clock. So the
+ * fixture says whether its time was printed, and only a printed one is shown.
  *
  * The opponent's key is the one history.ts files its rows under, so a row in
  * this list finds its own meetings in the history file.
@@ -40,6 +47,7 @@ export function asFixtures(season: SchoolGame[]): Fixture[] {
       result: g.result,
       opponentCity: g.opponentCity,
       overtime: g.overtime,
+      timeKnown: clockOf(g.kickoff) !== null,
     }));
 }
 

@@ -46,6 +46,13 @@ describe('asFixtures', () => {
     expect(f[3].kickoff).toBe('2026-10-23T23:30:00.000Z');
   });
 
+  it('counts down to seven o’clock for a blank time, but says it wasn’t printed', () => {
+    const [f] = asFixtures([game({ date: '2026-11-06', opponent: 'Lakeview', kickoff: '' })]);
+    expect(f.kickoff).toBe('2026-11-07T00:00:00.000Z');
+    expect(f.timeKnown).toBe(false);
+    expect(asFixtures(SEASON).every((g) => g.timeKnown)).toBe(true);
+  });
+
   it('keys an opponent the way the history file does', () => {
     const f = asFixtures(SEASON);
     expect(f[2].opponentKey).toBe('mcdonald-mcdonald');

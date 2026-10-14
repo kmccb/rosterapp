@@ -147,8 +147,8 @@ const WHEN = (game: Game): string =>
     month: 'long',
   });
 
-const TIME = (game: Game): string =>
-  game.kickoff
+const TIME = (game: Fixture): string =>
+  game.kickoff && game.timeKnown
     ? new Date(game.kickoff).toLocaleTimeString(undefined, {
         hour: 'numeric',
         minute: '2-digit',
