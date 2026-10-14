@@ -7,7 +7,13 @@ Three products share this repo and one deployment (Cloudflare Pages at https://r
 2. **The Ohio directory** (`/oh/`) — every OH school (717), searchable, schedules + scores,
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
 3. **The paid tier** — a school pays (~$200/season, concierge: the seller does everything),
-   its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest.
+   its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
+   **installs as its own home-screen app**: `scripts/paid-apps.mjs` (first step of `npm run build`,
+   fail-soft) asks `school_roster_sports` for each `paid-schools.json` slug and writes
+   `public/oh/apps/<slug>/` (manifest opening `/oh/?school=<slug>`, icons from the crest; gitignored,
+   rebuilt every deploy), and `src/oh/install.ts` links them in while a live school is on screen.
+   The `?school=` link now stays in the address bar until the reader changes school, because
+   Add to Home Screen saves whatever address the page is on.
    Admin panel at `/oh/?manage` (magic-link auth, single admin account; laptop-first, its own
    `.mg` styles in `src/oh/oh.css`, one row per school → a school page with Look, a card per
    sport, and Billing — `src/oh/manage/`). Privacy page at

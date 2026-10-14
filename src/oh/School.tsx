@@ -3,6 +3,7 @@ import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
+import { installAs } from './install';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
 import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
@@ -461,6 +462,17 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     applyLook({ ground, accent, text: text ?? undefined, logo: crest ?? undefined });
     return () => clearLook();
   }, [ground, accent, text, crest]);
+
+  // A school that is live on the paid tier installs as itself — its name, its
+  // crest, straight onto its page (src/oh/install.ts). The identity answering
+  // with any sport is what says it is live; the demo is not a school anybody
+  // should be putting on a home screen.
+  const schoolName = season?.school.name ?? null;
+  const paidLive = (identity?.sports.length ?? 0) > 0;
+  useEffect(() => {
+    if (!paidLive || !schoolName || isDemo()) return;
+    return installAs(slug, schoolName, ground);
+  }, [slug, paidLive, schoolName, ground]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.
