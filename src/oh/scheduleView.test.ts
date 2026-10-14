@@ -9,6 +9,8 @@ import {
   meetingsLine,
   meetingsWith,
   nextFixture,
+  recordOf,
+  recordText,
   scheduleSections,
   summaryLine,
 } from './scheduleView';
@@ -129,6 +131,33 @@ describe('the record against an opponent', () => {
     const one = meetingsWith(null, SEASON, 'lakeview-lakeview');
     expect(meetingsLine(one)).toEqual({ record: '1–0', rest: 'in 1 meeting' });
     expect(meetingsLine(meetingsWith(null, SEASON, 'nobody-nowhere'))).toBeNull();
+  });
+});
+
+describe('a tie', () => {
+  // Neither paid school has one today; the statewide scoreboards carry a few.
+  const tied: SchoolGame[] = [
+    ...SEASON,
+    game({ date: '2026-09-04', opponent: 'Lakeview', result: { us: 14, them: 14, won: false } }),
+  ];
+
+  it('counts as neither a win nor a loss in the season record', () => {
+    expect(recordOf(asFixtures(tied))).toEqual({ won: 1, lost: 1, tied: 1, played: 3 });
+    expect(summaryLine(asFixtures(tied))).toBe(
+      '5 games · 1–1–1 — tap one for the record against them',
+    );
+  });
+
+  it('shows a third figure only when there has been one', () => {
+    expect(recordText({ won: 5, lost: 3, tied: 0 })).toBe('5–3');
+    expect(recordText({ won: 5, lost: 3, tied: 1 })).toBe('5–3–1');
+  });
+
+  it('carries into the head-to-head line and the all-time record', () => {
+    const h = meetingsWith(null, tied, 'lakeview-lakeview');
+    expect(meetingsLine(h)).toEqual({ record: '1–0–1', rest: 'in 2 meetings since 2026' });
+    const withFile = { ...HISTORY, games: [] };
+    expect(allTimeRecord(withFile, tied, 'lakeview-lakeview')).toBe('1–0–1');
   });
 });
 

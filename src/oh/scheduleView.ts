@@ -9,12 +9,11 @@
  * keeps the two screens agreeing about when a game is over.
  */
 
-import { isDone, nextGame, type Game, type HeadToHead } from '../schedule/icalParse';
-import { seasonRecord } from '../schedule/mergeResults';
+import { isDone, nextGame, type Game } from '../schedule/icalParse';
 import { kickoffAt } from '../ohio/kickoff';
 import type { SchoolGame } from '../ohio/stateModel';
 import type { FixtureWeather } from './store';
-import { keyFor, meetings, type SchoolHistory } from './history';
+import { keyFor, meetings, outcome, type HeadToHeadRecord, type SchoolHistory } from './history';
 
 /** A directory fixture in Poland's shape, with the two things only the directory has. */
 export type Fixture = Game & { opponentCity: string; overtime?: string };
@@ -66,12 +65,29 @@ export function scheduleSections(
   ].filter((s) => s.games.length > 0);
 }
 
-export const recordOf = (fixtures: Fixture[]) => seasonRecord(fixtures);
+export type Tally = { won: number; lost: number; tied: number; played: number };
+
+/*
+ * A season's record, ties and all. Poland's seasonRecord calls anything not won
+ * a loss, which is right for a calendar feed that never carries a tie and wrong
+ * for a scoreboard that occasionally does.
+ */
+export function recordOf(games: Game[]): Tally {
+  const o = games.map(outcome).filter((x) => x !== null);
+  const won = o.filter((x) => x === 'W').length;
+  const lost = o.filter((x) => x === 'L').length;
+  const tied = o.filter((x) => x === 'T').length;
+  return { won, lost, tied, played: o.length };
+}
+
+/** "5–3", or "5–3–1" when there has been a tie — the third figure only when it says something. */
+export const recordText = (r: Pick<Tally, 'won' | 'lost' | 'tied'>): string =>
+  r.tied > 0 ? `${r.won}–${r.lost}–${r.tied}` : `${r.won}–${r.lost}`;
 
 /** "10 games · 5–3 — tap one for the record against them". No record before a game is played. */
 export function summaryLine(fixtures: Fixture[]): string {
-  const r = seasonRecord(fixtures);
-  const record = r.played > 0 ? ` · ${r.won}–${r.lost}` : '';
+  const r = recordOf(fixtures);
+  const record = r.played > 0 ? ` · ${recordText(r)}` : '';
   const games = `${fixtures.length} ${fixtures.length === 1 ? 'game' : 'games'}`;
   return `${games}${record} — tap one for the record against them`;
 }
@@ -84,7 +100,7 @@ export const meetingsWith = (
   history: SchoolHistory | null,
   season: SchoolGame[],
   opponentKey: string,
-): HeadToHead => meetings(history, season, opponentKey);
+): HeadToHeadRecord => meetings(history, season, opponentKey);
 
 /*
  * The card's "N–M all-time", only when there is a history file to make it
@@ -99,15 +115,15 @@ export function allTimeRecord(
 ): string | null {
   if (!history) return null;
   const h = meetings(history, season, opponentKey);
-  return h.played === 0 ? null : `${h.won}–${h.lost}`;
+  return h.played === 0 ? null : recordText(h);
 }
 
 /** "10–2 in 12 meetings since 2011" — the year only when there is more than one meeting. */
-export function meetingsLine(h: HeadToHead): { record: string; rest: string } | null {
+export function meetingsLine(h: HeadToHeadRecord): { record: string; rest: string } | null {
   if (h.played === 0) return null;
   const since = h.meetings[h.meetings.length - 1]?.date.slice(0, 4);
   return {
-    record: `${h.won}–${h.lost}`,
+    record: recordText(h),
     rest:
       `in ${h.played} ${h.played === 1 ? 'meeting' : 'meetings'}` +
       (since && h.played > 1 ? ` since ${since}` : ''),

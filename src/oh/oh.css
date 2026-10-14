@@ -1335,3 +1335,16 @@ img.oh-hub-crest {
 .fixture-row.oh-fixture-still {
   cursor: default;
 }
+
+/*
+ * A tie, which Poland's screen never has to draw. Neither the win's green nor
+ * the loss's red: the muted ink the rest of the row's small print uses.
+ */
+.form-chip.oh-tied {
+  background: var(--muted);
+}
+
+.oh-h2h-t {
+  color: var(--muted);
+  font-weight: 700;
+}

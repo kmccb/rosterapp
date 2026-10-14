@@ -17,7 +17,7 @@ import { SkyIcon } from '../components/SkyIcon';
 import { daysToKickoff, type Game } from '../schedule/icalParse';
 import { describeSky, worthMentioning } from '../schedule/weather';
 import type { SchoolSeason } from '../ohio/stateModel';
-import { loadHistory, type SchoolHistory } from './history';
+import { loadHistory, outcome, type Outcome, type SchoolHistory } from './history';
 import type { FixtureWeather } from './store';
 import {
   allTimeRecord,
@@ -27,10 +27,23 @@ import {
   meetingsWith,
   nextFixture,
   recordOf,
+  recordText,
   scheduleSections,
   summaryLine,
   type Fixture,
+  type Tally,
 } from './scheduleView';
+
+/*
+ * A tie gets its own letter and a neutral chip: drawn as a loss it would be a
+ * small lie on the very line people open to settle an argument.
+ */
+const CHIP: Record<Outcome, string> = { W: 'won', L: 'lost', T: 'oh-tied' };
+const LETTER: Record<Outcome, string> = {
+  W: 'h2h-w',
+  L: 'h2h-l',
+  T: 'oh-h2h-t',
+};
 
 /*
  * Past seasons don't change while a page is open, so a school's file is asked
@@ -136,7 +149,10 @@ const WHEN = (game: Game): string =>
 
 const TIME = (game: Game): string =>
   game.kickoff
-    ? new Date(game.kickoff).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    ? new Date(game.kickoff).toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+      })
     : '';
 
 /*
@@ -229,7 +245,7 @@ function NextGame({
   today,
 }: {
   game: Fixture;
-  record: { won: number; lost: number; played: number };
+  record: Tally;
   weather: FixtureWeather | null;
   allTime: string | null;
   crest: string | null;
@@ -252,10 +268,7 @@ function NextGame({
           take up the room. */}
       {record.played > 0 && (
         <p className="next-record">
-          <b>
-            {record.won}–{record.lost}
-          </b>{' '}
-          <span>this season</span>
+          <b>{recordText(record)}</b> <span>this season</span>
         </p>
       )}
 
@@ -290,17 +303,20 @@ function HeadToHead({ h2h }: { h2h: ReturnType<typeof meetingsWith> }) {
         <strong>{line.record}</strong> {line.rest}
       </p>
       <ul className="h2h-list">
-        {h2h.meetings.map((m) => (
-          <li key={m.date}>
-            <span className={m.result!.won ? 'h2h-w' : 'h2h-l'}>{m.result!.won ? 'W' : 'L'}</span>
-            <span className="h2h-score">
-              {m.result!.us}–{m.result!.them}
-            </span>
-            <span className="h2h-when">
-              {m.home ? 'home' : 'away'} · {m.date.slice(0, 4)}
-            </span>
-          </li>
-        ))}
+        {h2h.meetings.map((m) => {
+          const o = outcome(m)!;
+          return (
+            <li key={m.date}>
+              <span className={LETTER[o]}>{o}</span>
+              <span className="h2h-score">
+                {m.result!.us}–{m.result!.them}
+              </span>
+              <span className="h2h-when">
+                {m.home ? 'home' : 'away'} · {m.date.slice(0, 4)}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -349,9 +365,7 @@ function FixtureRow({
       <span className="fixture-result">
         {game.result ? (
           <>
-            <span className={`form-chip ${game.result.won ? 'won' : 'lost'}`}>
-              {game.result.won ? 'W' : 'L'}
-            </span>{' '}
+            <span className={`form-chip ${CHIP[outcome(game)!]}`}>{outcome(game)}</span>{' '}
             {game.result.us}–{game.result.them}
           </>
         ) : (
