@@ -179,67 +179,63 @@ Poland's own page — a short address outside that prefix would never reach the 
   partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
-## Where things stand (2026-10-02)
+## Where things stand (2026-10-14)
 
-**Hosting moved 2026-09-11:** GitHub Pages → Cloudflare Pages, same domain (the `scottforge.ai`
-zone is on Cloudflare; `roster` is a proxied CNAME to `rosterapp-7zt.pages.dev`). Verified
-byte-identical pages, service-worker update on an existing install, Supabase and admin sign-in on
-the real domain. GitHub Pages retired; its repo *variables* were dead config until `maxpreps.yml` began reading
-the two Supabase ones.
+**Springfield (New Middletown) is the first real school, activated by the seller 2026-10-13/14** —
+football live on `/oh/springfield` (`/oh/?school=springfield-new-middletown`), real 41-player
+MaxPreps roster, orange ground `#c75000`, crest uploaded. It is in `paid-schools.json`, and that
+list now drives its **stats fallback, playoff-region refresh and home-screen app** — never let a
+branch drop it (the `marketing-site` branch, PR #16, does; fix that before merging it).
 
-**Live and verified:** directory (717 schools, auto-refreshing, scores flowing), paid tier v2
-(tabs, full theming, crest upload), the all-sports hub, identity and league (0004–0007 applied
-and verified), share-code system proven alive post-migrations, security script 7/7. The demo at
-`/oh/demo/` is the real Springfield (`springfield-new-middletown`, the first prospect, matching
-the sales video): sample rosters/colors/crest and pasted volleyball/basketball schedules from
-`public/oh/demo.json`, with its real football season, scores and MVAC Scarlet standings read from
-the directory (it was the fictional `springfield-local-demo` before the `springfield-demo` branch).
-It is also in `paid-schools.json` for the kickoff forecast — remove it if they don't buy, and move
-the demo on when the pitch does (selling.md). A `poland-demo` branch that put Poland itself on its
-real Eventlink calendar was explored but never merged.
+**Shipped 2026-10-13/14 (PRs #14–#21, all merged to main and deployed):**
+- **#14 MaxPreps season stats** — Stats tab (Leaders/Offense/Defense/Special) + season lines on
+  Lookup, fed by `.github/workflows/maxpreps.yml`. Springfield comes via `maxpreps-teams.json`.
+- **#15 seller panel rebuilt** for a laptop — school list as dashboard, a page per school with Look
+  (ground/accent/text colors, crest) and Billing written to every sport, a card per sport.
+- **#17 Fill conference from MaxPreps** — `public/oh/leagues/`, one button in the Conference section.
+- **#18 playoff region rankings** on the League tab (`public/oh/regions/`, name+city matching).
+  Springfield: Division VII Region 25. **Run `node scripts/build-regions.mjs --all` each August.**
+- **#19 text color** (third picker) + crest watermark in the panel preview.
+- **#20 player card + week by week** — tap a row on Lookup/Team/Stats. Weeks come from snapshots
+  of season totals (MaxPreps has no per-game data); Springfield's baseline is after game 8, so
+  games 1–8 are one stretch. **Game 9 is Fri 2026-10-16 vs McDonald; the Sat 14:00 UTC run should
+  record it as its own week** — first real proof of the snapshot method; check the card Saturday.
+- **#21 installable school app** — `scripts/paid-apps.mjs` at build makes a manifest + icons per
+  paid school; `?school=` now stays in the address.
 
-**Shipped, function not yet deployed:** live sources — a roster that stays current from a
-coach's Google Sheet, a non-football schedule that stays current from a calendar, the
-`sync-sources` Edge Function that checks both every 15 minutes and alerts the seller by Resend
-when one is refused, and the panel UI to link, check, and unlink them. Merged to main
-2026-10-01 (PR #10); `/oh/springfield` is the first short address. Migration 0008 was applied
-twice on 2026-10-01 and the verify script passed 11/11. Until the function is deployed and
-scheduled, the panel's Check link / Sync now controls have nothing to call.
+**Open right now:**
+1. **PR #22 (Poland-style icons) — not merged.** After merging, re-upload Springfield's crest in the
+   panel (Look → Replace crest, the full logo — `docs/design/springfield-video/tigers-logo.png`) and
+   Save look; the stored crest was centre-cropped by the old upload, so the new icon can't lift its
+   backdrop. Then wait for a rebuild (≤6h) and re-add to the home screen.
+2. **Migration 0009 is NOT applied** — the panel's Stats link box errors ("Could not find the
+   function … school_roster_set_stats_source"). Springfield doesn't need it. To apply: paste
+   `supabase/migrations/0009_stats_source.sql` into the Supabase SQL editor, run twice, then
+   `node scripts/verify-school-roster.mjs` (expect 13). Never run against Postgres yet.
+3. **Unproven in production:** the MaxPreps workflow has never run on a GitHub runner (first
+   scheduled run Sat 2026-10-17 14:00 UTC — check Actions); whether the repo variables
+   `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` still exist (unset = job reads the file only); a
+   real phone install of the tiger app; the week-by-week card with real data.
+4. **Seen once on a test machine:** `/oh/` first load showed Victory Christian — almost certainly a
+   service worker from before the 2026-08-22 `/oh` denylist; it fixed itself on refresh.
+5. **Ideas raised, not built:** a game-day sponsor band ("Presented by …" per game, like the
+   school's Gameday graphics — needs a schedule field + logo upload); other sports from MaxPreps
+   (the AD wants girls/boys basketball, volleyball, soccer, softball).
+6. **Housekeeping:** worktrees under `.superpowers/wt/` for merged branches (manage-redesign,
+   league-fill, regions, text-color, weekly, install) can be removed; their remote branches too.
+   Strasburg-Franklin reported "not live" to the icon builder on 2026-10-14 — its smoke-test roster
+   may already be gone; check the panel.
+7. **Email Joe Eitel** — still unsent; the directory, two Poland tabs and now the region rankings
+   depend on his site.
+8. **Phase 2** (coach self-serve) and the **other-sports schedules** from earlier remain as before.
 
-**Open items, in priority order:**
-1. **Live sources are rehearsed and live (2026-10-02).** On a throwaway Strasburg-Franklin
-   volleyball activation (since deleted): Check link and Link on a published sheet; a blanked
-   name refused at the 12:00 run with exactly one email and a ⚠ line in the school list; no
-   repeat at 12:15; Sync now after the fix cleared it; an unfiltered whole-school calendar
-   refused at Check link (268 games), the filtered one linked with 22; Unlink kept the synced
-   data. The rehearsal found three panel bugs, fixed in PR #11 (stacked layout, per-side keys,
-   Save unpublished with no players). Note: Google keeps serving a trashed sheet's published
-   CSV for a while, so Unlink in the panel is what actually stops a sync. The sync job is
-   up as of 2026-10-02: `sync-sources` deployed to project `jkuocstqtveuymfqqlwg` (CLI linked
-   via `npx supabase login`), secrets set in the dashboard (RESEND_API_KEY from the existing
-   Resend account, where scottforge.ai was already verified; CRON_SECRET; ALERT_TO;
-   ALERT_FROM), pg_cron scheduled every 15 minutes, and `net._http_response` shows
-   `200 {"synced":0,"failed":0}` runs. Redeploy after any src/sync change with
-   `npm run build:sync` then
-   `npx supabase functions deploy sync-sources --no-verify-jwt --project-ref jkuocstqtveuymfqqlwg`.
-2. **Strasburg-Franklin carries a TEST roster** (2 fake players: Jake Miller/Sam Ortiz,
-   published, paid through 2027-02-01, note "smoke test"). Delete it from `/oh/?manage`
-   or replace with a real roster. The seller's admin session expires hourly — re-sign-in
-   via magic link is normal.
-3. **First real sale** — the pitch: "send me your roster spreadsheet, I take care of
-   everything." Panel workflow is in selling.md. A crest upload + colors makes the demo.
-4. **Remaining live checks** (nice-to-have): the theme ceiling probe (>500 kB must be
-   refused) and the second-non-admin-account check — listed in going-live.md.
-5. **Email Joe Eitel** — still unsent. Two tabs and the whole directory now depend on his
-   hobby site; a courtesy note converts silent breakage into a heads-up.
-6. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
-   mid-season roster-change texts become a burden.
-7. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
-   member list from the panel); region standings are done too (2026-10-13, by name and city rather than the
-   team-id mapping once thought necessary); what's left is
-   multi-sport schedules for non-football sports beyond what live sources and the concierge-pasted
-   rows now cover — a ScheduleStar uuid per sport would automate the rest later, same as
-   football's.
+**Older context still true:** hosting is Cloudflare Pages since 2026-09-11; live sources (sheet /
+calendar sync, `sync-sources` Edge Function every 15 min, Resend alerts) are live and rehearsed
+since 2026-10-02 — redeploy after any `src/sync` change with `npm run build:sync` then
+`npx supabase functions deploy sync-sources --no-verify-jwt --project-ref jkuocstqtveuymfqqlwg`.
+The repo is public: no real rosters or athlete ids in commits (`scripts/data/` is gitignored).
+Another Claude session may be working in this checkout — use a worktree, never switch branches in
+the main folder.
 
 ## Conventions
 
