@@ -14,7 +14,7 @@ import type { ScheduleRow } from './scheduleParse';
 import { chosenSlug } from './store';
 import { rpc, supaAvailable } from './supa';
 
-export type SchoolColors = { ground: string; accent: string } | null;
+export type SchoolColors = { ground: string; accent: string; text?: string } | null;
 /** The conference the school told us about: a name to head the table with and
  * the directory slugs of everyone in it. Nobody scrapes this — it arrives
  * through the concierge, or not at all. */
@@ -61,12 +61,18 @@ const HEX = /^#[0-9a-f]{6}$/i;
 const validColors = (v: unknown): SchoolColors => {
   if (v === null || v === undefined) return null;
   if (typeof v !== 'object') return null;
-  const c = v as Partial<{ ground: unknown; accent: unknown }>;
+  const c = v as Partial<{ ground: unknown; accent: unknown; text: unknown }>;
   return typeof c.ground === 'string' &&
     typeof c.accent === 'string' &&
     HEX.test(c.ground) &&
     HEX.test(c.accent)
-    ? { ground: c.ground, accent: c.accent }
+    ? {
+        ground: c.ground,
+        accent: c.accent,
+        // Optional, and dropped rather than refusing the pair when it is junk:
+        // two good colors and a bad third still paint a page.
+        ...(typeof c.text === 'string' && HEX.test(c.text) ? { text: c.text } : {}),
+      }
     : null;
 };
 

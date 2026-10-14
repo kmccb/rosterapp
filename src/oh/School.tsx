@@ -419,6 +419,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const look = lookFor(roster, identity);
   const ground = look?.colors?.ground ?? null;
   const accent = look?.colors?.accent ?? null;
+  const text = look?.colors?.text ?? null;
   const crest = look?.logo ?? null;
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
@@ -434,14 +435,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // only once football had loaded. Now the hub is dressed and the sport page
   // inherits rather than flashing.
   //
-  // Keyed on the three values rather than on the objects holding them, so a
+  // Keyed on the values rather than on the objects holding them, so a
   // refetch that agrees with what is already on screen does not strobe the
   // page through the default theme and back.
   useEffect(() => {
     if (!ground || !accent) return;
-    applyLook({ ground, accent, logo: crest ?? undefined });
+    applyLook({ ground, accent, text: text ?? undefined, logo: crest ?? undefined });
     return () => clearLook();
-  }, [ground, accent, crest]);
+  }, [ground, accent, text, crest]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.

@@ -7,14 +7,14 @@ import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIs
 import { capital, longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
 import { SportCard } from './SportCard';
 
-const DEFAULT_COLORS = { ground: '#04043a', accent: '#4fbaf7' };
+const DEFAULT_COLORS = { ground: '#04043a', accent: '#4fbaf7', text: '#ffffff' };
 
 type Section = 'look' | 'billing';
 type Upsert = Parameters<typeof upsertRoster>[0];
 
 /** A row's own facts, sent back unchanged around whichever one is being edited.
  * `p_colors` is the one argument with no "keep", so it is always spelled out. */
-const unchanged = (row: RosterRow, colors: { ground: string; accent: string }): Upsert => ({
+const unchanged = (row: RosterRow, colors: { ground: string; accent: string; text?: string }): Upsert => ({
   slug: row.school_slug,
   sport: row.sport,
   season: row.season,
@@ -72,6 +72,9 @@ export function SchoolPage({
 
   const [ground, setGround] = useState(stored?.ground ?? DEFAULT_COLORS.ground);
   const [accent, setAccent] = useState(stored?.accent ?? DEFAULT_COLORS.accent);
+  // White until somebody chooses otherwise — every page before this one was.
+  const [text, setText] = useState(stored?.text ?? DEFAULT_COLORS.text);
+  const colors = { ground, accent, text };
   // themeArg's three states: a fresh upload sets it, cleared wipes it, neither keeps it.
   const [logoData, setLogoData] = useState<string | null>(null);
   const [logoCleared, setLogoCleared] = useState(false);
@@ -129,13 +132,14 @@ export function SchoolPage({
 
   const shownLogo = logoData ?? (logoCleared ? null : storedLogo);
   const previewStyle = useMemo(
-    () => deriveVars({ ground, accent, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
-    [ground, accent, shownLogo],
+    () => deriveVars({ ground, accent, text, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
+    [ground, accent, text, shownLogo],
   );
 
   const lookDirty =
     ground !== (stored?.ground ?? DEFAULT_COLORS.ground) ||
     accent !== (stored?.accent ?? DEFAULT_COLORS.accent) ||
+    text !== (stored?.text ?? DEFAULT_COLORS.text) ||
     logoData !== null ||
     logoCleared;
   const dateDirty = paidThrough !== (latest ?? defaultPaidThrough());
@@ -162,7 +166,7 @@ export function SchoolPage({
     let ok = false;
     try {
       for (const row of targets) {
-        await upsertRoster({ ...unchanged(row, { ground, accent }), ...change(row) });
+        await upsertRoster({ ...unchanged(row, colors), ...change(row) });
         done += 1;
       }
       setSaved(where);
@@ -179,7 +183,7 @@ export function SchoolPage({
   };
 
   const saveLook = () =>
-    toRows('look', rows, () => ({ colors: { ground, accent }, theme: themeArg(logoData, logoCleared) })).then((ok) => {
+    toRows('look', rows, () => ({ colors, theme: themeArg(logoData, logoCleared) })).then((ok) => {
       // A refused save keeps the upload in hand, so saving again sends it again.
       if (!ok) return;
       if (logoData) setStoredLogo(logoData);
@@ -273,6 +277,10 @@ export function SchoolPage({
                 <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
                 Accent
               </label>
+              <label className="mg-swatch">
+                <input type="color" value={text} onChange={(e) => setText(e.target.value)} />
+                Text
+              </label>
               <label className="mg-btn is-small mg-file">
                 {hasStoredLogo || logoData ? 'Replace crest' : 'Upload a crest'}
                 <input
@@ -331,7 +339,7 @@ export function SchoolPage({
                 slug={slug}
                 row={row}
                 taken={[]}
-                colors={{ ground, accent }}
+                colors={colors}
                 billing={{ paidThrough, note }}
                 schoolPaidThrough={latest}
                 crest={null}
@@ -351,7 +359,7 @@ export function SchoolPage({
               // A sport whose only row is a past season's can be added again:
               // that is how next year's roster starts.
               taken={rows.filter((r) => r.season === season).map((r) => r.sport)}
-              colors={{ ground, accent }}
+              colors={colors}
               billing={{ paidThrough, note }}
               schoolPaidThrough={latest}
               crest={logoData ?? (logoCleared ? null : storedLogo)}
