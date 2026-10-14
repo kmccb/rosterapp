@@ -53,6 +53,33 @@
   background: var(--crest-plate, transparent);
 }
 
+/* A paid sport page's header: Poland's own `.title` line with the crest
+   beside it. The row takes the title's bottom margin so the gap above the
+   tabs is exactly Poland's whether or not there is a crest, and the crest is
+   sized to the line — a 15px cap height wants a badge, not a logo. */
+.oh-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.oh-title-row > .title {
+  margin: 0;
+  min-width: 0;
+}
+
+.oh-title-crest {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  /* Contain, not cover: the crest is stored padded to a square with its
+     backdrop lifted off, so nothing of it should be cropped to fit. */
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
+}
+
 .oh-school-head {
   padding: 8px 12px;
   border-radius: 12px;

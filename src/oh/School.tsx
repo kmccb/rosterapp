@@ -728,6 +728,24 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   );
 
   /*
+   * A paid school's sport page is headed the way Poland's app is: one small
+   * muted uppercase line, "SPRINGFIELD TIGERS", in Poland's own `.title`, and
+   * nothing under it, so the keys and the hits get the height the big name and
+   * the town-and-record line used to take — Poland's header carries no record
+   * either; the results are the Schedule tab's to tell. The crest rides beside the line at the line's own scale, on the
+   * plate the seller chose, so it reads as the school's mark rather than a
+   * picture. A free directory page keeps the big name and the town: among 717
+   * schools, several of them Springfields, the town is how a reader knows they
+   * found the right one, and a free page has no nickname to tell them apart.
+   */
+  const titleLine = (
+    <div className="oh-title-row">
+      {crest && <img className="oh-title-crest" src={crest} alt="" />}
+      <h1 className="title">{fullName}</h1>
+    </div>
+  );
+
+  /*
    * One quiet line saying what this is.
    *
    * A prospect looking at the Springfield demo has to be able to tell at a
@@ -976,7 +994,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   const head = (
     <>
-      <div className="oh-school-head">{nameBlock}</div>
+      {look ? titleLine : <div className="oh-school-head">{nameBlock}</div>}
 
       {back}
 
