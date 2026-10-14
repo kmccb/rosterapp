@@ -56,26 +56,37 @@ imported). The pure helpers in `src/schedule/icalParse.ts` (`headToHead`, etc.) 
   because the history and the directory are football.
 
 ### 5. History data: `public/oh/history/<slug>.json`
-- **Source:** joeeitel's weekly scoreboards, `scoreboard/<year>/week-<n>`, for **2011–2025**, read
-  with the existing `fetchSeason(year)` (`scripts/lib/ohio-state.mjs`) and parsed by
-  `src/ohio/stateParse.ts`. That gives the directory's own "Name (City)" slugs, so no team ids
-  are needed. **Before trusting the parser on old pages, diff a 2011 and a 2018 page against
-  the fixture** and, if the shape differs, fail loudly rather than guess.
+- **Source:** joeeitel's weekly scoreboards, `scoreboard/<year>/week-<n>`, for **2011–2025**,
+  parsed by `src/ohio/stateParse.ts`. That gives the directory's own "Name (City)" slugs, so no
+  team ids are needed. **The old pages are in older markup** (checked 2026-10-14): 2011–2014 use
+  `<PRE>`/`<BR/>` and 2015–2023 `<br/>`, with scores in `<font color="blue">`, overtime and
+  unplayed in `<font color="red">`, and "cancelled" for "cancel". Fed to the parser as they are,
+  they read as **zero games and zero unreadable lines** — silently. `stateParse.ts` stays
+  byte-identical (it serves the live directory); a pure `src/ohio/legacyScoreboard.ts`
+  (`modernScoreboard(html)`) rewrites the old markup into today's, is a no-op on 2024+ pages, and
+  is pinned to trimmed 2011/2018/2025 fixtures.
 - **New script** `scripts/build-history.mjs`:
   - Writes a file **only for slugs in `paid-schools.json`** (owner's choice).
   - Caches raw week pages under `scripts/data/scoreboards/<year>/week-<n>.html` (gitignored), so
     adding a paid school later re-reads nothing. That's about 240 requests once, a second apart.
   - **Run by hand, never scheduled**, since past seasons don't change.
+  - Fails before writing anything if a week won't fetch, a regular-season week (1–10) reads as no
+    games, or a line it can't read names a school being written. A playoff week the site has no
+    page for (403 — 2011–2020 had five playoff rounds, not six) ends that season.
   - The current season isn't in the file; the page already has it from the directory.
 - **Shape:**
   ```json
   { "slug": "springfield-new-middletown", "from": 2011, "to": 2025,
     "games": [["2025-10-17", "mcdonald-mcdonald", "McDonald", "home", 42, 7], ...] }
   ```
-  - `home` is `"home" | "away" | "neutral"`. The two numbers are **this school's** score, then
+  - `home` is `"home" | "away"`. There is no "neutral": 2011–2015 print every game as "A vs B",
+    so a neutral site can't be told apart for those years. The parser's away-then-home order holds
+    for every year (checked against Poland's record book). The two numbers are **this school's** score, then
     the opponent's.
-  - Games are ordered newest first. The opponent's slug is `null` when it isn't in the directory
-    (an out-of-state team), with the printed name kept.
+  - Games are ordered newest first. The opponent's slug is `null` when it isn't in today's
+    directory (`public/oh/index.json`) — an out-of-state team, a school that has since closed or
+    merged, or one printed under an older town ("South Range (North Lima)" before it was
+    "(Canfield)") — with the printed name kept.
 - **Pure reader** `src/oh/history.ts`. It validates the shape (junk gives no history, never a
   crash) and builds the meetings for one opponent, matched by slug. It is tested against a small
   committed fixture.

@@ -14,7 +14,10 @@
  */
 import { parseScoreboard } from '../../src/ohio/stateParse.ts';
 
-const WEEK = (year, n) => `https://joeeitel.com/hsfoot/scoreboard/${year}/week-${n}`;
+export const WEEK = (year, n) => `https://joeeitel.com/hsfoot/scoreboard/${year}/week-${n}`;
+
+/** Who is asking, so the site's owner can tell. */
+export const USER_AGENT = 'rosterapp (github.com/kmccb/rosterapp)';
 
 /** Ohio plays ten regular-season weeks and up to six of playoffs. */
 export const WEEKS = 16;
@@ -29,7 +32,7 @@ export async function fetchSeason(year, { pause = 400 } = {}) {
   for (let n = 1; n <= WEEKS; n++) {
     try {
       const res = await fetch(WEEK(year, n), {
-        headers: { 'User-Agent': 'rosterapp (github.com/kmccb/rosterapp)' },
+        headers: { 'User-Agent': USER_AGENT },
         signal: AbortSignal.timeout(20000),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
