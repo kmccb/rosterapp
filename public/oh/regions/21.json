@@ -1,0 +1,261 @@
+{
+ "year": 2026,
+ "region": 21,
+ "division": "VI",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Kirtland",
+   "city": "Kirtland",
+   "average": 15.8,
+   "qualifying": true,
+   "slug": "kirtland-kirtland"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "South Range",
+   "city": "Canfield",
+   "average": 14.4656,
+   "qualifying": true,
+   "slug": "south-range-canfield"
+  },
+  {
+   "rank": "3",
+   "record": "8-0",
+   "school": "Mineral Ridge",
+   "city": "Mineral Ridge",
+   "average": 13.762,
+   "qualifying": true,
+   "slug": "mineral-ridge-mineral-ridge"
+  },
+  {
+   "rank": "4",
+   "record": "6-1",
+   "school": "United",
+   "city": "Hanoverton",
+   "average": 13.3651,
+   "qualifying": true,
+   "slug": "united-hanoverton"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Brookfield",
+   "city": "Brookfield",
+   "average": 12.4375,
+   "qualifying": true,
+   "slug": "brookfield-brookfield"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Columbia",
+   "city": "Columbia Station",
+   "average": 11.0344,
+   "qualifying": true,
+   "slug": "columbia-columbia-station"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "Smithville",
+   "city": "Smithville",
+   "average": 10.8125,
+   "qualifying": true,
+   "slug": "smithville-smithville"
+  },
+  {
+   "rank": "8",
+   "record": "7-1",
+   "school": "Wickliffe",
+   "city": "Wickliffe",
+   "average": 10.1016,
+   "qualifying": true,
+   "slug": "wickliffe-wickliffe"
+  },
+  {
+   "rank": "9",
+   "record": "7-1",
+   "school": "Hillsdale",
+   "city": "Jeromesville",
+   "average": 10.0625,
+   "qualifying": true,
+   "slug": "hillsdale-jeromesville"
+  },
+  {
+   "rank": "10",
+   "record": "6-2",
+   "school": "Grand Valley",
+   "city": "Orwell",
+   "average": 8.8444,
+   "qualifying": true,
+   "slug": "grand-valley-orwell"
+  },
+  {
+   "rank": "11",
+   "record": "6-2",
+   "school": "Chippewa",
+   "city": "Doylestown",
+   "average": 8.8375,
+   "qualifying": true,
+   "slug": "chippewa-doylestown"
+  },
+  {
+   "rank": "12",
+   "record": "6-2",
+   "school": "Columbiana",
+   "city": "Columbiana",
+   "average": 8.041,
+   "qualifying": true,
+   "slug": "columbiana-columbiana"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "East Palestine",
+   "city": "East Palestine",
+   "average": 7.2115,
+   "qualifying": false,
+   "slug": "east-palestine-east-palestine"
+  },
+  {
+   "rank": "14",
+   "record": "5-2",
+   "school": "John Adams",
+   "city": "Cleveland",
+   "average": 6.9048,
+   "qualifying": false,
+   "slug": "john-adams-cleveland"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "John F Kennedy",
+   "city": "Warren",
+   "average": 6.45,
+   "qualifying": false,
+   "slug": "john-f-kennedy-warren"
+  },
+  {
+   "rank": "16",
+   "record": "5-3",
+   "school": "Lisbon David Anderson",
+   "city": "Lisbon",
+   "average": 4.9268,
+   "qualifying": false,
+   "slug": "lisbon-david-anderson-lisbon"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Richmond Heights",
+   "city": "Richmond Heights",
+   "average": 4.8188,
+   "qualifying": false,
+   "slug": "richmond-heights-richmond-heights"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "LaBrae",
+   "city": "Leavittsburg",
+   "average": 4.7153,
+   "qualifying": false,
+   "slug": "labrae-leavittsburg"
+  },
+  {
+   "rank": "19",
+   "record": "3-5",
+   "school": "Pymatuning Valley",
+   "city": "Andover",
+   "average": 4.625,
+   "qualifying": false,
+   "slug": "pymatuning-valley-andover"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Rootstown",
+   "city": "Rootstown",
+   "average": 3.6957,
+   "qualifying": false,
+   "slug": "rootstown-rootstown"
+  },
+  {
+   "rank": "21",
+   "record": "3-5",
+   "school": "Campbell Memorial",
+   "city": "Campbell",
+   "average": 3.6875,
+   "qualifying": false,
+   "slug": "campbell-memorial-campbell"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "St Thomas Aquinas",
+   "city": "Louisville",
+   "average": 1.9875,
+   "qualifying": false,
+   "slug": "st-thomas-aquinas-louisville"
+  },
+  {
+   "rank": "23",
+   "record": "2-6",
+   "school": "Northwestern",
+   "city": "West Salem",
+   "average": 1.85,
+   "qualifying": false,
+   "slug": "northwestern-west-salem"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Champion",
+   "city": "Warren",
+   "average": 1.642,
+   "qualifying": false,
+   "slug": "champion-warren"
+  },
+  {
+   "rank": "25",
+   "record": "2-6",
+   "school": "Newton Falls",
+   "city": "Newton Falls",
+   "average": 1.575,
+   "qualifying": false,
+   "slug": "newton-falls-newton-falls"
+  },
+  {
+   "rank": "26",
+   "record": "1-7",
+   "school": "Black River",
+   "city": "Sullivan",
+   "average": 1.029,
+   "qualifying": false,
+   "slug": "black-river-sullivan"
+  },
+  {
+   "rank": "27",
+   "record": "1-7",
+   "school": "Valley Christian School",
+   "city": "Youngstown",
+   "average": 0.791,
+   "qualifying": false,
+   "slug": "valley-christian-school-youngstown"
+  },
+  {
+   "rank": "28",
+   "record": "1-6",
+   "school": "Wellington",
+   "city": "Wellington",
+   "average": 0.5,
+   "qualifying": false,
+   "slug": "wellington-wellington"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

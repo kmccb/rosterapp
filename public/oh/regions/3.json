@@ -1,0 +1,189 @@
+{
+ "year": 2026,
+ "region": 3,
+ "division": "I",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Gahanna Lincoln",
+   "city": "Gahanna",
+   "average": 27.3875,
+   "qualifying": true,
+   "slug": "gahanna-lincoln-gahanna"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "Upper Arlington",
+   "city": "Upper Arlington",
+   "average": 22.6625,
+   "qualifying": true,
+   "slug": "upper-arlington-upper-arlington"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Pickerington North",
+   "city": "Pickerington",
+   "average": 21.725,
+   "qualifying": true,
+   "slug": "pickerington-north-pickerington"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Worthington Kilbourne",
+   "city": "Columbus",
+   "average": 19.1875,
+   "qualifying": true,
+   "slug": "worthington-kilbourne-columbus"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Olentangy Liberty",
+   "city": "Powell",
+   "average": 18.8625,
+   "qualifying": true,
+   "slug": "olentangy-liberty-powell"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Olentangy Berlin",
+   "city": "Delaware",
+   "average": 16.375,
+   "qualifying": true,
+   "slug": "olentangy-berlin-delaware"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "St Charles",
+   "city": "Columbus",
+   "average": 13.6,
+   "qualifying": true,
+   "slug": "st-charles-columbus"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Pickerington Central",
+   "city": "Pickerington",
+   "average": 13.584,
+   "qualifying": true,
+   "slug": "pickerington-central-pickerington"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Westerville North",
+   "city": "Westerville",
+   "average": 11.3,
+   "qualifying": true,
+   "slug": "westerville-north-westerville"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Groveport Madison",
+   "city": "Groveport",
+   "average": 11.2125,
+   "qualifying": true,
+   "slug": "groveport-madison-groveport"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Westerville Central",
+   "city": "Westerville",
+   "average": 11.0625,
+   "qualifying": true,
+   "slug": "westerville-central-westerville"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Reynoldsburg",
+   "city": "Reynoldsburg",
+   "average": 11.0375,
+   "qualifying": true,
+   "slug": "reynoldsburg-reynoldsburg"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Olentangy Orange",
+   "city": "Lewis Center",
+   "average": 10.85,
+   "qualifying": false,
+   "slug": "olentangy-orange-lewis-center"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Olentangy",
+   "city": "Lewis Center",
+   "average": 8.95,
+   "qualifying": false,
+   "slug": "olentangy-lewis-center"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Delaware Hayes",
+   "city": "Delaware",
+   "average": 6.75,
+   "qualifying": false,
+   "slug": "delaware-hayes-delaware"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Westerville South",
+   "city": "Westerville",
+   "average": 6.1375,
+   "qualifying": false,
+   "slug": "westerville-south-westerville"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Newark",
+   "city": "Newark",
+   "average": 4.1625,
+   "qualifying": false,
+   "slug": "newark-newark"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Thomas Worthington",
+   "city": "Worthington",
+   "average": 4.025,
+   "qualifying": false,
+   "slug": "thomas-worthington-worthington"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Lancaster",
+   "city": "Lancaster",
+   "average": 3.25,
+   "qualifying": false,
+   "slug": "lancaster-lancaster"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Licking Heights",
+   "city": "Pataskala",
+   "average": 1.8,
+   "qualifying": false,
+   "slug": "licking-heights-pataskala"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

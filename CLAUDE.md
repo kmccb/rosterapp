@@ -45,6 +45,15 @@ not a config bug — wait for the next cron. Consequences:
   league data — the ScheduleStar iCal feed publishes **fixtures only, never results**).
   All parsers are pure and pinned to saved fixtures in `src/*/fixtures/`; a shape change fails
   a test here, not a phone. Diff a fresh capture against the fixture before touching a regex.
+- **Playoff regions** (joeeitel.com again) — `scripts/build-regions.mjs` writes
+  `public/oh/regions/<n>.json` (a region's Harbin rankings) and `regions/index.json` (which of the
+  28 regions each school is in). Rows are tied to directory schools by **name and mailing city**,
+  both printed on the rankings page (`src/ohio/regionParse.ts`), so no team-id table is needed —
+  that is what unblocked this. The scheduled run (a step in `directory.yml`, `continue-on-error`)
+  reads only the regions holding a school in `paid-schools.json`; `--all` reads all 28 a second
+  apart and is run **by hand** — when regions are drawn in August, and when a newly paid school
+  is not in the index (the run warns). A paid football page shows the table on its League tab
+  (`src/oh/regions.ts`), above the conference.
 - **ScheduleStar iCal** (uuid in `teams/poland/team.json`) feeds Poland's fixtures + kickoff
   times. Other sports statewide would come from ScheduleStar uuids obtained through the
   concierge relationship (phase 3 — no scrapeable source exists).
@@ -128,7 +137,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 613 tests / 45 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 626 tests / 47 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
@@ -207,8 +216,8 @@ scheduled, the panel's Check link / Sync now controls have nothing to call.
 6. **Phase 2** (coach self-serve accounts) — schema is ready (`school_account`); build when
    mid-season roster-change texts become a burden.
 7. **Phase 3** (all-sports package) — conference standings are done (committed directory data,
-   member list from the panel); what's left is the **Region standings** tab, which needs the
-   school→team-id mapping (blocked on ~90 team-page captures, deliberately deferred), and
+   member list from the panel); region standings are done too (2026-10-13, by name and city rather than the
+   team-id mapping once thought necessary); what's left is
    multi-sport schedules for non-football sports beyond what live sources and the concierge-pasted
    rows now cover — a ScheduleStar uuid per sport would automate the rest later, same as
    football's.

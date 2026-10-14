@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 10,
+ "division": "III",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Celina",
+   "city": "Celina",
+   "average": 19.3,
+   "qualifying": true,
+   "slug": "celina-celina"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Ontario",
+   "city": "Ontario",
+   "average": 16.8625,
+   "qualifying": true,
+   "slug": "ontario-ontario"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Cloverleaf",
+   "city": "Seville",
+   "average": 15.8251,
+   "qualifying": true,
+   "slug": "cloverleaf-seville"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Copley",
+   "city": "Copley",
+   "average": 13.9125,
+   "qualifying": true,
+   "slug": "copley-copley"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Wapakoneta",
+   "city": "Wapakoneta",
+   "average": 10.9125,
+   "qualifying": true,
+   "slug": "wapakoneta-wapakoneta"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Tiffin Columbian",
+   "city": "Tiffin",
+   "average": 10.25,
+   "qualifying": true,
+   "slug": "tiffin-columbian-tiffin"
+  },
+  {
+   "rank": "7",
+   "record": "5-3",
+   "school": "St Marys Memorial",
+   "city": "St Marys",
+   "average": 10.075,
+   "qualifying": true,
+   "slug": "st-marys-memorial-st-marys"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Revere",
+   "city": "Richfield",
+   "average": 9.1875,
+   "qualifying": true,
+   "slug": "revere-richfield"
+  },
+  {
+   "rank": "9",
+   "record": "4-3",
+   "school": "Holy Name",
+   "city": "Parma Heights",
+   "average": 9.0317,
+   "qualifying": true,
+   "slug": "holy-name-parma-heights"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Maumee",
+   "city": "Maumee",
+   "average": 9.025,
+   "qualifying": true,
+   "slug": "maumee-maumee"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Buchtel",
+   "city": "Akron",
+   "average": 8.916,
+   "qualifying": true,
+   "slug": "buchtel-akron"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Padua Franciscan",
+   "city": "Parma",
+   "average": 7.471,
+   "qualifying": true,
+   "slug": "padua-franciscan-parma"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Midview",
+   "city": "Grafton",
+   "average": 7.45,
+   "qualifying": false,
+   "slug": "midview-grafton"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Elyria Catholic",
+   "city": "Elyria",
+   "average": 5.5473,
+   "qualifying": false,
+   "slug": "elyria-catholic-elyria"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Shawnee",
+   "city": "Lima",
+   "average": 5.0875,
+   "qualifying": false,
+   "slug": "shawnee-lima"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Madison Comprehensive",
+   "city": "Mansfield",
+   "average": 4.2125,
+   "qualifying": false,
+   "slug": "madison-comprehensive-mansfield"
+  },
+  {
+   "rank": "17",
+   "record": "1-7",
+   "school": "Lexington",
+   "city": "Lexington",
+   "average": 2.4,
+   "qualifying": false,
+   "slug": "lexington-lexington"
+  },
+  {
+   "rank": "18",
+   "record": "1-7",
+   "school": "Lutheran West",
+   "city": "Rocky River",
+   "average": 2.2532,
+   "qualifying": false,
+   "slug": "lutheran-west-rocky-river"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Bowling Green",
+   "city": "Bowling Green",
+   "average": 2.225,
+   "qualifying": false,
+   "slug": "bowling-green-bowling-green"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Defiance",
+   "city": "Defiance",
+   "average": 1.775,
+   "qualifying": false,
+   "slug": "defiance-defiance"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Woodward",
+   "city": "Toledo",
+   "average": 1.4571,
+   "qualifying": false,
+   "slug": "woodward-toledo"
+  },
+  {
+   "rank": "22",
+   "record": "1-7",
+   "school": "St Vincent-St Mary",
+   "city": "Akron",
+   "average": 1.3561,
+   "qualifying": false,
+   "slug": "st-vincent-st-mary-akron"
+  },
+  {
+   "rank": "23t",
+   "record": "1-7",
+   "school": "Mansfield Senior",
+   "city": "Mansfield",
+   "average": 1.2875,
+   "qualifying": false,
+   "slug": "mansfield-senior-mansfield"
+  },
+  {
+   "rank": "23t",
+   "record": "1-7",
+   "school": "Scott",
+   "city": "Toledo",
+   "average": 1.2875,
+   "qualifying": false,
+   "slug": "scott-toledo"
+  },
+  {
+   "rank": "25",
+   "record": "0-8",
+   "school": "Norwalk",
+   "city": "Norwalk",
+   "average": 0,
+   "qualifying": false,
+   "slug": "norwalk-norwalk"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

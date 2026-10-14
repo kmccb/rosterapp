@@ -1,0 +1,252 @@
+{
+ "year": 2026,
+ "region": 22,
+ "division": "VI",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Lima Central Catholic",
+   "city": "Lima",
+   "average": 19.2375,
+   "qualifying": true,
+   "slug": "lima-central-catholic-lima"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Liberty Center",
+   "city": "Liberty Center",
+   "average": 17.525,
+   "qualifying": true,
+   "slug": "liberty-center-liberty-center"
+  },
+  {
+   "rank": "3",
+   "record": "8-0",
+   "school": "Woodmore",
+   "city": "Elmore",
+   "average": 15.825,
+   "qualifying": true,
+   "slug": "woodmore-elmore"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Columbus Grove",
+   "city": "Columbus Grove",
+   "average": 13.275,
+   "qualifying": true,
+   "slug": "columbus-grove-columbus-grove"
+  },
+  {
+   "rank": "5",
+   "record": "8-0",
+   "school": "Western Reserve",
+   "city": "Collins",
+   "average": 12.5104,
+   "qualifying": true,
+   "slug": "western-reserve-collins"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Paulding",
+   "city": "Paulding",
+   "average": 11.3875,
+   "qualifying": true,
+   "slug": "paulding-paulding"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Seneca East",
+   "city": "Attica",
+   "average": 9.8023,
+   "qualifying": true,
+   "slug": "seneca-east-attica"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Carey",
+   "city": "Carey",
+   "average": 9.8,
+   "qualifying": true,
+   "slug": "carey-carey"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Patrick Henry",
+   "city": "Hamler",
+   "average": 8.75,
+   "qualifying": true,
+   "slug": "patrick-henry-hamler"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Delta",
+   "city": "Delta",
+   "average": 8.6231,
+   "qualifying": true,
+   "slug": "delta-delta"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Ada",
+   "city": "Ada",
+   "average": 8.4625,
+   "qualifying": true,
+   "slug": "ada-ada"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Allen East",
+   "city": "Harrod",
+   "average": 8.4,
+   "qualifying": true,
+   "slug": "allen-east-harrod"
+  },
+  {
+   "rank": "13",
+   "record": "6-2",
+   "school": "Fairview",
+   "city": "Sherwood",
+   "average": 8.3125,
+   "qualifying": false,
+   "slug": "fairview-sherwood"
+  },
+  {
+   "rank": "14",
+   "record": "6-2",
+   "school": "Van Buren",
+   "city": "Van Buren",
+   "average": 7.925,
+   "qualifying": false,
+   "slug": "van-buren-van-buren"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Elmwood",
+   "city": "Bloomdale",
+   "average": 7.425,
+   "qualifying": false,
+   "slug": "elmwood-bloomdale"
+  },
+  {
+   "rank": "16",
+   "record": "4-4",
+   "school": "Perry",
+   "city": "Lima",
+   "average": 5.3,
+   "qualifying": false,
+   "slug": "perry-lima"
+  },
+  {
+   "rank": "17",
+   "record": "4-4",
+   "school": "Lakota",
+   "city": "Kansas",
+   "average": 5.2468,
+   "qualifying": false,
+   "slug": "lakota-kansas"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Tinora",
+   "city": "Defiance",
+   "average": 4.65,
+   "qualifying": false,
+   "slug": "tinora-defiance"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Bucyrus",
+   "city": "Bucyrus",
+   "average": 4.5375,
+   "qualifying": false,
+   "slug": "bucyrus-bucyrus"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Huron",
+   "city": "Huron",
+   "average": 3.7125,
+   "qualifying": false,
+   "slug": "huron-huron"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Parkway",
+   "city": "Rockford",
+   "average": 3.25,
+   "qualifying": false,
+   "slug": "parkway-rockford"
+  },
+  {
+   "rank": "22",
+   "record": "3-5",
+   "school": "Ottawa Hills",
+   "city": "Toledo",
+   "average": 2.3163,
+   "qualifying": false,
+   "slug": "ottawa-hills-toledo"
+  },
+  {
+   "rank": "23",
+   "record": "2-6",
+   "school": "Crestview",
+   "city": "Convoy",
+   "average": 2.1375,
+   "qualifying": false,
+   "slug": "crestview-convoy"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Wynford",
+   "city": "Bucyrus",
+   "average": 1.2875,
+   "qualifying": false,
+   "slug": "wynford-bucyrus"
+  },
+  {
+   "rank": "25",
+   "record": "1-7",
+   "school": "Evergreen",
+   "city": "Metamora",
+   "average": 0.9125,
+   "qualifying": false,
+   "slug": "evergreen-metamora"
+  },
+  {
+   "rank": "26",
+   "record": "1-7",
+   "school": "Crestview",
+   "city": "Ashland",
+   "average": 0.4375,
+   "qualifying": false,
+   "slug": "crestview-ashland"
+  },
+  {
+   "rank": "27",
+   "record": "0-8",
+   "school": "Spencerville",
+   "city": "Spencerville",
+   "average": 0,
+   "qualifying": false,
+   "slug": "spencerville-spencerville"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

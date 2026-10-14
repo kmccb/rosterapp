@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 13,
+ "division": "IV",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Rocky River",
+   "city": "Rocky River",
+   "average": 18.0125,
+   "qualifying": true,
+   "slug": "rocky-river-rocky-river"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "Streetsboro",
+   "city": "Streetsboro",
+   "average": 17.65,
+   "qualifying": true,
+   "slug": "streetsboro-streetsboro"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Norton",
+   "city": "Norton",
+   "average": 16.7375,
+   "qualifying": true,
+   "slug": "norton-norton"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "West Geauga",
+   "city": "Chesterland",
+   "average": 16.675,
+   "qualifying": true,
+   "slug": "west-geauga-chesterland"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Woodridge",
+   "city": "Peninsula",
+   "average": 16.15,
+   "qualifying": true,
+   "slug": "woodridge-peninsula"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Northwest",
+   "city": "Canal Fulton",
+   "average": 14.7,
+   "qualifying": true,
+   "slug": "northwest-canal-fulton"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "West Branch",
+   "city": "Beloit",
+   "average": 14.65,
+   "qualifying": true,
+   "slug": "west-branch-beloit"
+  },
+  {
+   "rank": "8",
+   "record": "7-1",
+   "school": "Orrville",
+   "city": "Orrville",
+   "average": 14.5625,
+   "qualifying": true,
+   "slug": "orrville-orrville"
+  },
+  {
+   "rank": "9",
+   "record": "7-1",
+   "school": "East",
+   "city": "Akron",
+   "average": 11.625,
+   "qualifying": true,
+   "slug": "east-akron"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Poland Seminary",
+   "city": "Poland",
+   "average": 9.1625,
+   "qualifying": true,
+   "slug": "poland-seminary-poland"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Hubbard",
+   "city": "Hubbard",
+   "average": 9.0375,
+   "qualifying": true,
+   "slug": "hubbard-hubbard"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Edgewood",
+   "city": "Ashtabula",
+   "average": 8.95,
+   "qualifying": true,
+   "slug": "edgewood-ashtabula"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Cleveland Central Catholic",
+   "city": "Cleveland",
+   "average": 8.8056,
+   "qualifying": false,
+   "slug": "cleveland-central-catholic-cleveland"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Orange",
+   "city": "Pepper Pike",
+   "average": 6.175,
+   "qualifying": false,
+   "slug": "orange-pepper-pike"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Niles McKinley",
+   "city": "Niles",
+   "average": 5.9875,
+   "qualifying": false,
+   "slug": "niles-mckinley-niles"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Lutheran East",
+   "city": "Cleveland Heights",
+   "average": 4.7946,
+   "qualifying": false,
+   "slug": "lutheran-east-cleveland-heights"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Marlington",
+   "city": "Alliance",
+   "average": 3.7,
+   "qualifying": false,
+   "slug": "marlington-alliance"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Field",
+   "city": "Mogadore",
+   "average": 3.5,
+   "qualifying": false,
+   "slug": "field-mogadore"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Warrensville Heights",
+   "city": "Warrensville Heights",
+   "average": 2.9407,
+   "qualifying": false,
+   "slug": "warrensville-heights-warrensville-heights"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Trinity",
+   "city": "Garfield Heights",
+   "average": 0.892,
+   "qualifying": false,
+   "slug": "trinity-garfield-heights"
+  },
+  {
+   "rank": "21",
+   "record": "1-6",
+   "school": "John F Kennedy",
+   "city": "Cleveland",
+   "average": 0.6429,
+   "qualifying": false,
+   "slug": "john-f-kennedy-cleveland"
+  },
+  {
+   "rank": "22",
+   "record": "1-7",
+   "school": "Coventry",
+   "city": "Coventry Twp",
+   "average": 0.625,
+   "qualifying": false,
+   "slug": "coventry-coventry-twp"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "Jefferson Area",
+   "city": "Jefferson",
+   "average": 0,
+   "qualifying": false,
+   "slug": "jefferson-area-jefferson"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "Springfield",
+   "city": "Akron",
+   "average": 0,
+   "qualifying": false,
+   "slug": "springfield-akron"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "Struthers",
+   "city": "Struthers",
+   "average": 0,
+   "qualifying": false,
+   "slug": "struthers-struthers"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

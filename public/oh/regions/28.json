@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 28,
+ "division": "VII",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Marion Local",
+   "city": "Maria Stein",
+   "average": 15.4125,
+   "qualifying": true,
+   "slug": "marion-local-maria-stein"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Ansonia",
+   "city": "Ansonia",
+   "average": 13.6696,
+   "qualifying": true,
+   "slug": "ansonia-ansonia"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Minster",
+   "city": "Minster",
+   "average": 10.275,
+   "qualifying": true,
+   "slug": "minster-minster"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Riverside",
+   "city": "De Graff",
+   "average": 9.925,
+   "qualifying": true,
+   "slug": "riverside-de-graff"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Waynesfield-Goshen",
+   "city": "Waynesfield",
+   "average": 9.6067,
+   "qualifying": true,
+   "slug": "waynesfield-goshen-waynesfield"
+  },
+  {
+   "rank": "6",
+   "record": "4-4",
+   "school": "Cincinnati Country Day",
+   "city": "Cincinnati",
+   "average": 6.822,
+   "qualifying": true,
+   "slug": "cincinnati-country-day-cincinnati"
+  },
+  {
+   "rank": "7",
+   "record": "5-3",
+   "school": "Fort Loramie",
+   "city": "Fort Loramie",
+   "average": 6.275,
+   "qualifying": true,
+   "slug": "fort-loramie-fort-loramie"
+  },
+  {
+   "rank": "8",
+   "record": "3-5",
+   "school": "New Bremen",
+   "city": "New Bremen",
+   "average": 5.925,
+   "qualifying": true,
+   "slug": "new-bremen-new-bremen"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Tri-County North",
+   "city": "Lewisburg",
+   "average": 4.85,
+   "qualifying": true,
+   "slug": "tri-county-north-lewisburg"
+  },
+  {
+   "rank": "10",
+   "record": "3-5",
+   "school": "Fort Recovery",
+   "city": "Fort Recovery",
+   "average": 3.8472,
+   "qualifying": true,
+   "slug": "fort-recovery-fort-recovery"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Upper Scioto Valley",
+   "city": "McGuffey",
+   "average": 2.8625,
+   "qualifying": true,
+   "slug": "upper-scioto-valley-mcguffey"
+  },
+  {
+   "rank": "12",
+   "record": "2-6",
+   "school": "Ridgemont",
+   "city": "Mt Victory",
+   "average": 1.925,
+   "qualifying": true,
+   "slug": "ridgemont-mt-victory"
+  },
+  {
+   "rank": "13",
+   "record": "3-4",
+   "school": "Manchester",
+   "city": "Manchester",
+   "average": 1.9118,
+   "qualifying": false,
+   "slug": "manchester-manchester"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Southeastern Local",
+   "city": "South Charleston",
+   "average": 1.8415,
+   "qualifying": false,
+   "slug": "southeastern-local-south-charleston"
+  },
+  {
+   "rank": "15",
+   "record": "2-6",
+   "school": "Cedarville",
+   "city": "Cedarville",
+   "average": 1.7216,
+   "qualifying": false,
+   "slug": "cedarville-cedarville"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Hardin Northern",
+   "city": "Dola",
+   "average": 1.666,
+   "qualifying": false,
+   "slug": "hardin-northern-dola"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Bradford",
+   "city": "Bradford",
+   "average": 1.2358,
+   "qualifying": false,
+   "slug": "bradford-bradford"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Triad",
+   "city": "North Lewisburg",
+   "average": 0.875,
+   "qualifying": false,
+   "slug": "triad-north-lewisburg"
+  },
+  {
+   "rank": "19",
+   "record": "1-5",
+   "school": "Twin Valley South",
+   "city": "West Alexandria",
+   "average": 0.5833,
+   "qualifying": false,
+   "slug": "twin-valley-south-west-alexandria"
+  },
+  {
+   "rank": "20t",
+   "record": "0-4",
+   "school": "Catholic Central",
+   "city": "Springfield",
+   "average": 0,
+   "qualifying": false,
+   "slug": "catholic-central-springfield"
+  },
+  {
+   "rank": "20t",
+   "record": "0-8",
+   "school": "Lehman Catholic",
+   "city": "Sidney",
+   "average": 0,
+   "qualifying": false,
+   "slug": "lehman-catholic-sidney"
+  },
+  {
+   "rank": "20t",
+   "record": "0-7",
+   "school": "Mississinawa Valley",
+   "city": "Union City",
+   "average": 0,
+   "qualifying": false,
+   "slug": "mississinawa-valley-union-city"
+  },
+  {
+   "rank": "20t",
+   "record": "0-8",
+   "school": "New Miami",
+   "city": "Hamilton",
+   "average": 0,
+   "qualifying": false,
+   "slug": "new-miami-hamilton"
+  },
+  {
+   "rank": "20t",
+   "record": "0-8",
+   "school": "Paint Valley",
+   "city": "Bainbridge",
+   "average": 0,
+   "qualifying": false,
+   "slug": "paint-valley-bainbridge"
+  },
+  {
+   "rank": "20t",
+   "record": "0-8",
+   "school": "Ridgedale",
+   "city": "Morral",
+   "average": 0,
+   "qualifying": false,
+   "slug": "ridgedale-morral"
+  }
+ ],
+ "fetched": "2026-10-13"
+}
