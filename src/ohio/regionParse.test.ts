@@ -17,6 +17,7 @@ describe('a region’s rankings page', () => {
   it('knows which region it is and what the page says qualifies', () => {
     expect(region).not.toBeNull();
     expect(region!.region).toBe(13);
+    expect(region!.year).toBe(2026);
     expect(region!.caption).toMatch(/qualify for playoffs/);
   });
 
@@ -28,7 +29,8 @@ describe('a region’s rankings page', () => {
       school: 'Cleveland Central Catholic',
       city: 'Cleveland',
       average: 0,
-      qualifying: expect.any(Boolean),
+      // Nobody has played, so nobody is in a playoff place whatever the site marks.
+      qualifying: false,
     });
     expect(region!.rows.find((r) => r.school === 'Poland Seminary')?.city).toBe('Poland');
     for (const r of region!.rows) expect(r.school, r.rank).not.toMatch(/^\d+$/);

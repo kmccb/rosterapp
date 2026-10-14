@@ -32,6 +32,8 @@ export type RegionRow = {
 };
 
 export type RegionPage = {
+  /** The season the page says it is for. */
+  year: number;
   region: number;
   /** "Top 12 teams following week 10 qualify for playoffs" */
   caption: string;
@@ -54,7 +56,9 @@ export const divisionOf = (region: number): string =>
  * city into a school without anything failing.
  */
 export function parseRegionPage(html: string): RegionPage | null {
-  const region = Number(html.match(/<title>\s*\d{4}\s+Region\s+(\d+)\b/i)?.[1]);
+  const title = html.match(/<title>\s*(\d{4})\s+Region\s+(\d+)\b/i);
+  const year = Number(title?.[1]);
+  const region = Number(title?.[2]);
   if (!divisionOf(region)) return null;
 
   const head = html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1] ?? '';
@@ -86,7 +90,12 @@ export function parseRegionPage(html: string): RegionPage | null {
   }
   if (rows.length === 0) return null;
 
-  return { region, caption: strip(html.match(/<caption>([\s\S]*?)<\/caption>/)?.[1] ?? ''), rows };
+  // Before a game has been played every team is level on nothing, and the
+  // site still marks the first dozen it lists. That is the order it happens to
+  // print them in, not a playoff place.
+  if (rows.every((r) => r.average === 0)) for (const r of rows) r.qualifying = false;
+
+  return { year, region, caption: strip(html.match(/<caption>([\s\S]*?)<\/caption>/)?.[1] ?? ''), rows };
 }
 
 const squash = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');

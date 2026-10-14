@@ -18,7 +18,7 @@
  *                                          that the index has never heard of.
  *   node scripts/build-regions.mjs         the scheduled run: only the regions
  *                                          that hold a school in
- *                                          paid-schools.json — today, one.
+ *                                          paid-schools.json — today, two.
  *
  * It never makes things worse and, on the scheduled run, never fails: it
  * shares a workflow with the directory, and a rankings page that would not
@@ -81,6 +81,8 @@ for (const [i, n] of wanted.entries()) {
     const page = parseRegionPage(await res.text());
     if (!page) throw new Error('the page is not a region’s table');
     if (page.region !== n) throw new Error(`the page is region ${page.region}’s`);
+    // Asked for a season the site has not posted, it may answer with the last one it has.
+    if (page.year !== year) throw new Error(`the page is ${page.year}’s, not ${year}’s`);
 
     const kept = readJson(path);
     if (kept?.year === year && page.rows.length < kept.rows.length / 2) {
@@ -89,7 +91,12 @@ for (const [i, n] of wanted.entries()) {
 
     const rows = page.rows.map((row) => ({ ...row, slug: slugForRow(row, schools) }));
     const unplaced = rows.filter((r) => !r.slug).map((r) => r.school);
-    for (const row of rows) if (row.slug) regions[row.slug] = n;
+    // The index has to agree with the table it points into, on every run: a
+    // school that has left this region since the last look is taken out of the
+    // index here, not left for the next full sweep to find.
+    const here = new Set(rows.map((r) => r.slug).filter(Boolean));
+    for (const [slug, at] of Object.entries(regions)) if (at === n && !here.has(slug)) delete regions[slug];
+    for (const slug of here) regions[slug] = n;
 
     const next = { year, region: n, division: divisionOf(n), caption: page.caption, rows };
     // Rewritten only when the table moved, so `fetched` is the day it last did.

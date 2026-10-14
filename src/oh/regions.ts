@@ -34,14 +34,31 @@ export type RegionTable = {
   division: string;
   /** "Top 12 teams following week 10 qualify for playoffs" */
   caption: string;
+  /** The day the table last changed, `YYYY-MM-DD`, or '' when the file does not say. */
+  fetched: string;
   rows: RegionStanding[];
 };
 
+/**
+ * The football season a day belongs to: July onward is this year's, and the
+ * months before it still belong to last autumn's — the same clock the panel
+ * files a row under. The rankings are only shown for the season it is.
+ */
+export const seasonOf = (day: Date): number =>
+  day.getMonth() >= 6 ? day.getFullYear() : day.getFullYear() - 1;
+
 const KEPT = (slug: string): string => `oh.region.${slug}`;
 
-export const asRegionTable = (v: unknown): RegionTable | null => {
+/**
+ * `season` is the one the reader is in. A table from any other is refused:
+ * the regions are redrawn every August, and until somebody runs the full
+ * sweep the committed files are last year's — a finished season's final
+ * standings, which under this year's schedule would read as today's.
+ */
+export const asRegionTable = (v: unknown, season: number): RegionTable | null => {
   if (typeof v !== 'object' || v === null) return null;
   const file = v as Record<string, unknown>;
+  if (file.year !== season) return null;
   const region = Number(file.region);
   if (!divisionOf(region) || !Array.isArray(file.rows)) return null;
 
@@ -66,6 +83,7 @@ export const asRegionTable = (v: unknown): RegionTable | null => {
     region,
     division: divisionOf(region),
     caption: typeof file.caption === 'string' ? file.caption.slice(0, 120) : '',
+    fetched: typeof file.fetched === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(file.fetched) ? file.fetched : '',
     rows,
   };
 };
@@ -82,21 +100,25 @@ const getJson = async (path: string): Promise<unknown> => {
  * when the school is in no region this season, which is true of a school the
  * rankings do not list and of every school before the regions are drawn.
  */
-export async function loadRegion(slug: string): Promise<RegionTable | null> {
+export async function loadRegion(slug: string, today = new Date()): Promise<RegionTable | null> {
+  const season = seasonOf(today);
   try {
-    const index = (await getJson('/oh/regions/index.json')) as { regions?: Record<string, unknown> } | null;
-    const n = Number(index?.regions?.[slug]);
+    const index = (await getJson('/oh/regions/index.json')) as
+      | { year?: unknown; regions?: Record<string, unknown> }
+      | null;
+    const n = index?.year === season ? Number(index?.regions?.[slug]) : NaN;
     if (index && !divisionOf(n)) {
       if (!isDemo()) localStorage.removeItem(KEPT(slug));
       return null;
     }
     if (divisionOf(n)) {
-      const table = asRegionTable(await getJson(`/oh/regions/${n}.json`));
+      const table = asRegionTable(await getJson(`/oh/regions/${n}.json`), season);
       if (table) {
         // Kept for the followed school only, and never by the demo.
         if (!isDemo() && slug === chosenSlug()) {
           try {
-            localStorage.setItem(KEPT(slug), JSON.stringify(table));
+            // With its year, which is what lets a kept copy be refused next season.
+            localStorage.setItem(KEPT(slug), JSON.stringify({ ...table, year: season }));
           } catch {
             // A full jar must not fail a fetch that already succeeded.
           }
@@ -109,11 +131,19 @@ export async function loadRegion(slug: string): Promise<RegionTable | null> {
   }
   if (isDemo()) return null;
   try {
-    return asRegionTable(JSON.parse(localStorage.getItem(KEPT(slug)) ?? 'null'));
+    return asRegionTable(JSON.parse(localStorage.getItem(KEPT(slug)) ?? 'null'), season);
   } catch {
     return null;
   }
 }
 
 /** "6.3250" — the site prints four places and seeding has been decided on the third. */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "2026-10-10" → "Oct 10". A calendar day, never shifted by a zone. */
+export const dayLabel = (iso: string): string => {
+  const m = iso.match(/^\d{4}-(\d{2})-(\d{2})$/);
+  return m && MONTHS[Number(m[1]) - 1] ? `${MONTHS[Number(m[1]) - 1]} ${Number(m[2])}` : '';
+};
+
 export const averageLabel = (average: number): string => average.toFixed(4);

@@ -5,7 +5,7 @@ import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
-import { averageLabel, loadRegion, type RegionTable } from './regions';
+import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
 import { StatsTab } from './StatsTab';
 import { loadTeamStats, matchTeamStats, type TeamStats } from './teamStats';
 import {
@@ -967,9 +967,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                 <div className="group-head">
                   Division {region.division}, Region {region.region}
                 </div>
-                {region.caption && (
+                {(region.caption || region.fetched) && (
                   <p className="filter-line">
-                    <span>{region.caption}</span>
+                    <span>
+                      {[region.caption, dayLabel(region.fetched) && `as of ${dayLabel(region.fetched)}`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
                   </p>
                 )}
                 <table className="table-lite">

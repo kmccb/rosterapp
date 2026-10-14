@@ -137,7 +137,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 626 tests / 47 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 628 tests / 47 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
