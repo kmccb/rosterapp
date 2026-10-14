@@ -135,9 +135,9 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
   });
 
 /**
- * Reads a picked file into a square, re-encoded badge — the same centre-crop
- * and resize src/theme/theme.ts's themeFromFile applies, minus the palette
- * extraction this bundle has no use for.
+ * Reads a picked file into a square, re-encoded badge. It pads where
+ * src/theme/theme.ts's themeFromFile crops — see below for why — and skips the
+ * palette extraction this bundle has no use for.
  *
  * Only meaningful in a browser: it draws through a canvas, which the vitest
  * environment (node, no DOM) does not have. Called there, it throws rather
@@ -169,10 +169,26 @@ export async function resizeLogo(file: File): Promise<string> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('This browser will not let the app read the image.');
 
-  const side = Math.min(img.naturalWidth, img.naturalHeight);
-  const sx = (img.naturalWidth - side) / 2;
-  const sy = (img.naturalHeight - side) / 2;
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, WALLPAPER_PX, WALLPAPER_PX);
+  /*
+   * Padded to a square, never cropped. Crests are usually wider than they are
+   * tall — Springfield's tiger is an oval twice as wide as it is high — and a
+   * centre crop took both ends off it, which then showed as flat cut edges in
+   * every home-screen icon. The band either side is filled with the image's
+   * own corner colour, so a flat backdrop simply carries on; the icon builder
+   * (scripts/paid-apps.mjs) then lifts that backdrop off whole.
+   */
+  const scale = WALLPAPER_PX / Math.max(img.naturalWidth, img.naturalHeight);
+  const w = Math.round(img.naturalWidth * scale);
+  const h = Math.round(img.naturalHeight * scale);
+  const probe = document.createElement('canvas');
+  probe.width = 1;
+  probe.height = 1;
+  const pctx = probe.getContext('2d');
+  pctx?.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
+  const [r, g, b] = pctx ? Array.from(pctx.getImageData(0, 0, 1, 1).data) : [255, 255, 255];
+  ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+  ctx.fillRect(0, 0, WALLPAPER_PX, WALLPAPER_PX);
+  ctx.drawImage(img, Math.round((WALLPAPER_PX - w) / 2), Math.round((WALLPAPER_PX - h) / 2), w, h);
 
   return canvas.toDataURL('image/jpeg', 0.85);
 }
