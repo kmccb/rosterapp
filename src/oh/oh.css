@@ -1427,7 +1427,14 @@ html[data-oh-mode='light'] {
  * ink that always reads on --text; on a dark page it is the ground, exactly
  * what these have always been.
  */
-html[data-oh-mode] :is(.chip.active, .btn-primary, .pos-pill[aria-pressed='true'], .seg button[aria-pressed='true'], .key:active, .form-chip) {
+html[data-oh-mode] :is(.chip.active, .btn-primary, .pos-pill[aria-pressed='true'], .seg button[aria-pressed='true'], .key:active) {
+  color: var(--bg);
+}
+
+/* The chips are kept out of the list above: :is() takes the weight of its
+   heaviest member, so the light rule below could never have beaten it. Here
+   the two carry the same weight and the later one wins. */
+html[data-oh-mode] .form-chip {
   color: var(--bg);
 }
 
