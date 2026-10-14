@@ -85,8 +85,9 @@ imported). The pure helpers in `src/schedule/icalParse.ts` (`headToHead`, etc.) 
     the opponent's.
   - Games are ordered newest first. The opponent's slug is `null` when it isn't in today's
     directory (`public/oh/index.json`) — an out-of-state team, a school that has since closed or
-    merged, or one printed under an older town ("South Range (North Lima)" before it was
-    "(Canfield)") — with the printed name kept.
+    merged, or a shared name like "East" — with the printed name kept. A school printed under an
+    older town ("South Range (North Lima)" before "(Canfield)") is matched by name alone when
+    exactly one directory school has that name.
 - **Pure reader** `src/oh/history.ts`. It validates the shape (junk gives no history, never a
   crash) and builds the meetings for one opponent, matched by slug. It is tested against a small
   committed fixture.

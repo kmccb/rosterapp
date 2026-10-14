@@ -7,6 +7,7 @@ import {
   historyGames,
   historyJson,
   meetings,
+  opponentResolver,
   parseHistory,
   seasonGames,
 } from './history';
@@ -134,11 +135,17 @@ describe('buildHistory', () => {
     game('2024-09-06', side('Westinghouse', 'Pittsburgh', 0, 'PA'), side('Springfield', 'New Middletown', 35)),
     // An Ohio school that has since closed: no page today, so no slug.
     game('2023-09-01', side('Old School', 'Gone', 6), side('Springfield', 'New Middletown', 13)),
+    // A town that has since changed: South Range is the directory's only one.
+    game('2012-10-12', side('South Range', 'North Lima', 21), side('Springfield', 'New Middletown', 20)),
     // Unplayed, and outside the years asked for.
     game('2025-11-01', side('Springfield', 'New Middletown', null), side('McDonald', 'McDonald', null)),
     game('2010-09-01', side('Springfield', 'New Middletown', 7), side('McDonald', 'McDonald', 3)),
   ];
-  const known = new Set(['springfield-new-middletown', 'mcdonald-mcdonald']);
+  const known = [
+    { slug: 'springfield-new-middletown', name: 'Springfield' },
+    { slug: 'mcdonald-mcdonald', name: 'McDonald' },
+    { slug: 'south-range-canfield', name: 'South Range' },
+  ];
 
   it('files each game from the school’s side, newest first, once', () => {
     const h = buildHistory(games, 'springfield-new-middletown', 2011, 2025, known);
@@ -150,6 +157,7 @@ describe('buildHistory', () => {
         ['2024-10-18', 'mcdonald-mcdonald', 'McDonald', 'away', 14, 17],
         ['2024-09-06', null, 'Westinghouse', 'home', 35, 0],
         ['2023-09-01', null, 'Old School', 'home', 13, 6],
+        ['2012-10-12', 'south-range-canfield', 'South Range', 'home', 20, 21],
       ],
     });
   });
@@ -159,5 +167,43 @@ describe('buildHistory', () => {
     expect(parseHistory(JSON.parse(historyJson(h)))).toEqual(h);
     const empty = buildHistory([], 'nobody', 2011, 2025, known);
     expect(parseHistory(JSON.parse(historyJson(empty)))).toEqual(empty);
+  });
+});
+
+describe('opponentResolver', () => {
+  const resolve = opponentResolver([
+    { slug: 'south-range-canfield', name: 'South Range' },
+    { slug: 'st-john-ashtabula', name: 'St. John' },
+    { slug: 'east-akron', name: 'East' },
+    { slug: 'east-columbus', name: 'East' },
+    { slug: 'springfield-new-middletown', name: 'Springfield' },
+  ]);
+
+  it('keeps a printed name and town that is still a slug', () => {
+    expect(resolve('east-akron', 'East')).toBe('east-akron');
+  });
+
+  it('matches a drifted town by name when exactly one school has it', () => {
+    expect(resolve('south-range-north-lima', 'South Range')).toBe('south-range-canfield');
+  });
+
+  it('compares names the way the directory makes slugs', () => {
+    expect(resolve('st-john-jefferson', 'ST JOHN')).toBe('st-john-ashtabula');
+  });
+
+  it('gives null for a name several schools share', () => {
+    expect(resolve('east-youngstown', 'East')).toBeNull();
+  });
+
+  it('gives null for a name no school has', () => {
+    expect(resolve('youngstown-christian-youngstown', 'Youngstown Christian')).toBeNull();
+  });
+
+  it('gives null to a side the scoreboard gave no slug (out of state)', () => {
+    expect(resolve(null, 'South Range')).toBeNull();
+  });
+
+  it('never resolves an opponent to the school whose history it is', () => {
+    expect(resolve('springfield-old-town', 'Springfield', 'springfield-new-middletown')).toBeNull();
   });
 });

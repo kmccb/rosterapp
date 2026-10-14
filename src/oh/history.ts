@@ -14,9 +14,13 @@
  * holds for every year (checked against Poland's own record book), so that is
  * what is kept.
  *
- * The opponent's slug is null when today's directory has no such school — an
- * out-of-state side, or one that has since closed or merged — so a row never
- * links to a page that isn't there. The printed name is always kept.
+ * The opponent's slug is today's directory slug. An Ohio school printed under an
+ * older town ("South Range (North Lima)" before it was "(Canfield)") is matched
+ * by name alone when exactly one school in the directory has that name. It is
+ * null otherwise — an out-of-state side, a school that has since closed or
+ * merged, or a name like "East" that several schools share — so a row never
+ * links to a page that isn't there, or to the wrong one. The printed name is
+ * always kept.
  *
  * Built to be fetched and read on a phone: a file that isn't what this expects
  * gives no history rather than an error, and a malformed row is dropped rather
@@ -24,7 +28,7 @@
  */
 
 import type { Game, HeadToHead } from '../schedule/icalParse.ts';
-import { seasonsBySchool, type SchoolGame } from '../ohio/stateModel.ts';
+import { seasonsBySchool, slugFor, type School, type SchoolGame } from '../ohio/stateModel.ts';
 import type { StateGame } from '../ohio/stateParse.ts';
 
 export type Venue = 'home' | 'away';
@@ -134,6 +138,37 @@ export function meetings(
 }
 
 /*
+ * A name reduced the way the directory reduces one for a slug, so "St. John"
+ * and "St John" are the same name.
+ */
+const nameKey = (name: string) => slugFor(name, '');
+
+/*
+ * Today's slug for an opponent as the scoreboard printed it. The town is part
+ * of a slug because forty-five Ohio school names are shared, but towns drift:
+ * a school's mailing town on joeeitel's pages can change between seasons. So a
+ * printed name and town that is no longer a slug falls back to the name alone,
+ * trusted only when exactly one school in the directory has it. Only an Ohio
+ * school is looked up this way (seasonsBySchool gives anyone else no slug at
+ * all), and never as the school whose history this is.
+ */
+export function opponentResolver(directory: readonly Pick<School, 'slug' | 'name'>[]) {
+  const known = new Set(directory.map((s) => s.slug));
+  const byName = new Map<string, string[]>();
+  for (const s of directory) {
+    const key = nameKey(s.name);
+    byName.set(key, [...(byName.get(key) ?? []), s.slug]);
+  }
+
+  return (printedSlug: string | null, name: string, self?: string): string | null => {
+    if (!printedSlug) return null;
+    if (known.has(printedSlug)) return printedSlug;
+    const same = byName.get(nameKey(name)) ?? [];
+    return same.length === 1 && same[0] !== self ? same[0] : null;
+  };
+}
+
+/*
  * The writer's half, kept beside the reader so the two can't drift: one
  * school's rows out of every scoreboard game for the years read. It goes
  * through the directory's own seasonsBySchool, so home and away, the score
@@ -145,8 +180,10 @@ export function buildHistory(
   slug: string,
   from: number,
   to: number,
-  known: ReadonlySet<string>,
+  directory: readonly Pick<School, 'slug' | 'name'>[],
 ): SchoolHistory {
+  const opponentSlug = opponentResolver(directory);
+
   // A page that lists a game twice, or two pages that both carry it, count it once.
   const seen = new Set<string>();
   const unique = games.filter((g) => {
@@ -161,7 +198,7 @@ export function buildHistory(
     .filter((g) => g.result && Number(g.date.slice(0, 4)) >= from && Number(g.date.slice(0, 4)) <= to)
     .map((g) => [
       g.date,
-      g.opponentSlug && known.has(g.opponentSlug) ? g.opponentSlug : null,
+      opponentSlug(g.opponentSlug, g.opponent, slug),
       g.opponent,
       g.home ? 'home' : 'away',
       g.result!.us,

@@ -70,7 +70,6 @@ async function weekPage(year, n) {
 
 const { slugs } = JSON.parse(await readFile(join(root, 'paid-schools.json'), 'utf8'));
 const { schools } = JSON.parse(await readFile(join(root, 'public', 'oh', 'index.json'), 'utf8'));
-const known = new Set(schools.map((s) => s.slug));
 const bySlug = new Map(schools.map((s) => [s.slug, s]));
 
 for (const slug of slugs) {
@@ -114,7 +113,7 @@ if (skipped) console.log(`  (${skipped} unreadable lines named no paid school â€
 
 await mkdir(outDir, { recursive: true });
 for (const slug of slugs) {
-  const history = buildHistory(games, slug, FROM, TO, known);
+  const history = buildHistory(games, slug, FROM, TO, schools);
   await writeFile(join(outDir, `${slug}.json`), historyJson(history));
   console.log(`  wrote ${slug}: ${history.games.length} games`);
 }
