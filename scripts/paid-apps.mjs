@@ -27,6 +27,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { icon, liftBackdrop, monogram } from './lib/school-icon.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public/oh/apps');
@@ -44,29 +45,6 @@ const env = (name) => {
 
 const HEX = /^#[0-9a-f]{6}$/i;
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
-/** The crest on the school's own ground, with room round it for a phone's mask. */
-async function icon(crest, ground, size, padding) {
-  const inner = Math.round(size * (1 - 2 * padding));
-  const art = crest
-    ? await sharp(crest).resize(inner, inner, { fit: 'contain', background: ground }).png().toBuffer()
-    : null;
-  return sharp({ create: { width: size, height: size, channels: 3, background: ground } })
-    .composite(art ? [{ input: art, gravity: 'center' }] : [])
-    .png()
-    .toBuffer();
-}
-
-/** No crest uploaded: the school's initial in its accent, so it is still its own. */
-const monogram = (name, accent, ground) =>
-  Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
-       <rect width="512" height="512" fill="${ground}"/>
-       <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle"
-             font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="300"
-             fill="${accent}">${(name.trim()[0] ?? '?').toUpperCase().replace(/[<&>]/g, '')}</text>
-     </svg>`,
-  );
 
 async function main() {
   const base = env('VITE_SUPABASE_URL');
@@ -104,16 +82,16 @@ async function main() {
           : null;
       const school = index.find((s) => s.slug === slug);
       const name = school?.name ?? slug;
-      const art = crest ?? (await sharp(monogram(name, accent, ground)).png().toBuffer());
+      const art = crest ? await liftBackdrop(crest) : await sharp(monogram(name, accent, ground)).png().toBuffer();
 
       const dir = join(outDir, slug);
       mkdirSync(dir, { recursive: true });
-      // "any" icons fill the square; the maskable one keeps the crest inside the
-      // circle Android may cut it to, and the iPhone's gets a little room too.
-      writeFileSync(join(dir, 'icon-192.png'), await icon(art, ground, 192, 0.06));
-      writeFileSync(join(dir, 'icon-512.png'), await icon(art, ground, 512, 0.06));
-      writeFileSync(join(dir, 'icon-maskable-512.png'), await icon(art, ground, 512, 0.16));
-      writeFileSync(join(dir, 'apple-touch-icon.png'), await icon(art, ground, 180, 0.08));
+      // The maskable one keeps the crest inside the circle Android may cut it
+      // to; the rest leave the tenth of a margin Poland's icons do.
+      writeFileSync(join(dir, 'icon-192.png'), await icon(art, ground, 192, 0.1));
+      writeFileSync(join(dir, 'icon-512.png'), await icon(art, ground, 512, 0.1));
+      writeFileSync(join(dir, 'icon-maskable-512.png'), await icon(art, ground, 512, 0.18));
+      writeFileSync(join(dir, 'apple-touch-icon.png'), await icon(art, ground, 180, 0.1));
       writeFileSync(
         join(dir, 'manifest.webmanifest'),
         JSON.stringify(

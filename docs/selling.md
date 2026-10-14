@@ -91,7 +91,7 @@ the school's name under it, and opens straight onto the school. The icons are
 made from the crest at every deploy, so a new crest reaches them within six
 hours. The school has to be in `paid-schools.json` for this, as for the
 forecast. A crest uploaded on a white square installs as a white square —
-upload one on the school's own color, or cropped tight, for the best icon.
+the icon builder lifts a flat backdrop off a crest uploaded whole, so upload the full crest (not one cropped at its edges) for the best icon.
 
 ### The school's address
 
