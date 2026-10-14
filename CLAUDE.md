@@ -72,11 +72,17 @@ not a config bug — wait for the next cron. Consequences:
   neither source names is swept away — but only on a run where the database answered. Rows are tied to the
   roster on the page by whole name, then jersey-plus-surname (`matchTeamStats` in
   `src/oh/teamStats.ts`), never by Poland's surname-and-initial matcher.
+  A stats link may be the print page or the **team's own MaxPreps page** (what a seller can copy
+  from a browser): from the team page the script works out the print address once and keeps it in
+  the stats file, and the first time it sees a team it also reads the **conference**, places its
+  members in the directory by town then name (`src/maxpreps/leagueParse.ts`) and commits
+  `public/oh/leagues/<slug>-<sport>.json` — a suggestion only the panel reads, behind the
+  Conference section's **Fill from MaxPreps** button (`--league` re-reads it).
   The roster parser reads positional arrays and checks itself against the page's stated count;
   `--roster` writes a CSV for the panel into `scripts/data/` (gitignored — the repo is public)
   and is never scheduled. The fixtures carry no athlete ids and invented names for removed players. MaxPreps' robots.txt disallows
   `/print` and its terms have not been read — one request per team per run, by the school's
-  say-so, is the whole footprint; keep it that way.
+  say-so, is the steady footprint (plus two, once, for the team and conference pages); keep it that way.
 
 ## Short addresses
 
@@ -128,7 +134,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 613 tests / 45 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 626 tests / 47 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
