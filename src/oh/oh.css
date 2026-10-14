@@ -1319,3 +1319,19 @@ img.oh-hub-crest {
   margin: 0 auto;
   min-height: 100%;
 }
+
+/*
+ * The Schedule tab's game-day badge is the school's crest. Poland's badge is a
+ * square photo and is cropped to fill; a crest is stored padded to a square
+ * with its backdrop lifted off, so it is contained and sat on the school's own
+ * plate, as it is in the header.
+ */
+.countdown-badge.oh-countdown-crest {
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
+}
+
+/* A fixture with nothing to open is a plain line, not a control. */
+.fixture-row.oh-fixture-still {
+  cursor: default;
+}

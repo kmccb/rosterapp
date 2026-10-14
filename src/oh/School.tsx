@@ -9,6 +9,7 @@ import { LookupTab, TeamTab } from './RosterTabs';
 import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
 import { PlayerSheet } from './PlayerSheet';
 import { StatsTab } from './StatsTab';
+import { ScheduleTab } from './ScheduleTab';
 import { weeksFrom } from '../maxpreps/weeks';
 import { playerKey } from '../stats/statsMatch';
 import type { Player } from '../types';
@@ -1178,7 +1179,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                     school in the state has. Any other sport can only show what
                     was pasted for it. */}
                 {sport === 'football' ? (
-                  schedule
+                  <ScheduleTab slug={slug} season={season} weather={weather} crest={crest} />
                 ) : roster.schedule ? (
                   <PastedSchedule rows={roster.schedule} />
                 ) : (
