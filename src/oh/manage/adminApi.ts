@@ -14,7 +14,7 @@ export type RosterRow = {
   sport: string;
   season: number;
   player_count: number;
-  colors: { ground: string; accent: string } | null;
+  colors: { ground: string; accent: string; text?: string } | null;
   has_logo: boolean;
   has_schedule: boolean;
   has_league: boolean;
@@ -46,7 +46,7 @@ export const upsertRoster = async (row: {
   season: number;
   /** null means keep the stored roster — the renewal case. */
   players: unknown[] | null;
-  colors: { ground: string; accent: string } | null;
+  colors: { ground: string; accent: string; text?: string } | null;
   /** null keeps the stored theme (renewal case), {} clears it, {logo} sets it. */
   theme: { logo: string } | Record<string, never> | null;
   /** null keeps the stored schedule (renewal case), [] clears it, rows set it. */

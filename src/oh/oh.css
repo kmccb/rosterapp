@@ -787,7 +787,13 @@
   overflow: hidden;
   padding: 16px 14px 14px;
   border-radius: 14px;
-  background: var(--bg);
+  /* The crest behind it all, under the school's own dark — the same two
+     layers body::before and body::after lay on the real page, so the
+     watermark shows here as faintly as it will there. */
+  background:
+    linear-gradient(var(--scrim-near), var(--scrim-far)),
+    var(--wallpaper) center / cover no-repeat,
+    var(--bg);
   color: var(--text);
 }
 

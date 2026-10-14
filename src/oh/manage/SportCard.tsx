@@ -141,7 +141,7 @@ export function SportCard({
   /** Sports this school already has, which a new card must not offer again. */
   taken: string[];
   /** The school's colors, for a row that has none of its own; `p_colors` has no "keep", so every save sends some. */
-  colors: { ground: string; accent: string };
+  colors: { ground: string; accent: string; text?: string };
   /** The school's date and note as they stand on the page, for a sport that has no row of its own yet. */
   billing: { paidThrough: string; note: string };
   /** The latest date any of the school's sports is stored as paid to. */

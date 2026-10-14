@@ -55,6 +55,14 @@ describe('roster cache plumbing', () => {
     expect(parseCached(JSON.stringify(half))?.colors).toBeNull();
   });
 
+  it('keeps a third, text color when it is hex, and drops only it when it is not', () => {
+    const base = { season: 2026, players: [], logo: null, schedule: null, league: null };
+    const three = { ...base, colors: { ground: '#c84f0f', accent: '#222222', text: '#111111' } };
+    expect(parseCached(JSON.stringify(three))?.colors).toEqual(three.colors);
+    const bad = { ...base, colors: { ground: '#c84f0f', accent: '#222222', text: 'black' } };
+    expect(parseCached(JSON.stringify(bad))?.colors).toEqual({ ground: '#c84f0f', accent: '#222222' });
+  });
+
   it('accepts a logo only as a data:image/ URI, defaulting anything else to none', () => {
     const dataUri = 'data:image/jpeg;base64,AAAA';
     const good = { season: 2026, players: [], colors: null, logo: dataUri, schedule: null, league: null };

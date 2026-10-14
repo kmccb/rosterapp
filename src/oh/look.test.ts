@@ -51,6 +51,26 @@ describe('deriveVars', () => {
   });
 });
 
+describe('a chosen text color', () => {
+  it('reads in white with the accent-lightened second voice when none is chosen, as before', () => {
+    const plain = deriveVars({ ground: '#0e0c0b', accent: '#f26722' });
+    expect(plain['--text']).toBe('#ffffff');
+    expect(deriveVars({ ground: '#0e0c0b', accent: '#f26722', text: undefined })).toEqual(plain);
+  });
+
+  it('sets the text, and takes the second voice from it rather than the accent', () => {
+    const vars = deriveVars({ ground: '#c84f0f', accent: '#222222', text: '#111111' });
+    expect(vars['--text']).toBe('#111111');
+    // A third of the way from the text toward the ground: still dark on orange.
+    expect(vars['--muted']).toBe('#512710');
+    expect(vars['--accent']).toBe('#222222');
+  });
+
+  it('ignores a text color that is not one', () => {
+    expect(deriveVars({ ground: '#0e0c0b', accent: '#f26722', text: 'red' })['--text']).toBe('#ffffff');
+  });
+});
+
 describe('applyLook / clearLook', () => {
   const makeTarget = () => {
     const props = new Map<string, string>();

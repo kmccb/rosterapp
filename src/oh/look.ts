@@ -18,7 +18,9 @@
  * hand to match.
  */
 
-export type SchoolLook = { ground: string; accent: string; logo?: string };
+/** `text` is optional: a school that never chose one reads in white, as every
+ * school did before there was a third color to choose. */
+export type SchoolLook = { ground: string; accent: string; text?: string; logo?: string };
 
 /** An element-like target for CSS custom properties — real usage defaults to
  * document.documentElement; tests pass a recording stub, since the vitest
@@ -66,13 +68,19 @@ export const LOOK_VARS = [
  */
 export function deriveVars(look: SchoolLook): Record<string, string> {
   const { ground, accent, logo } = look;
+  const chosenText = look.text && /^#[0-9a-f]{6}$/i.test(look.text) ? look.text : null;
 
   // A step up from the ground, the way palette.ts's surface is a step up from
   // its own ground — but built by mixing toward white rather than by a second
   // HSL pass, since this module only has two colors to work with.
   const surface = mix(ground, '#ffffff', 0.16);
-  const muted = mix(accent, '#ffffff', 0.55);
-  const text = '#ffffff';
+  // The second voice — a player's details, a heading over a list. Lightened
+  // from the accent when the text is white, as it always was; taken from the
+  // chosen text when there is one, a third of the way back toward the ground,
+  // because a school that picks dark text on a light ground would otherwise
+  // get its details in a pale accent nobody could read.
+  const muted = chosenText ? mix(chosenText, ground, 0.35) : mix(accent, '#ffffff', 0.55);
+  const text = chosenText ?? '#ffffff';
   // No badge to sample for an ink color here, so the ground stands in — the
   // same dark that reads against white text reads against the accent too,
   // for every accent this derivation is asked to lighten toward readability.
