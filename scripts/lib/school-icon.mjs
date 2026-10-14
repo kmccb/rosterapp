@@ -36,7 +36,8 @@ export async function liftBackdrop(source) {
   return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).trim().png().toBuffer();
 }
 
-/** The artwork, big, centred on a soft wash of the ground colour. */
+/** The artwork, big, centred on a soft wash of its tile colour — the crest's
+ * plate when the seller chose one, otherwise the school's ground. */
 export async function icon(art, ground, size, margin) {
   const wash = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">

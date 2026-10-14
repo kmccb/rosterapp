@@ -19,29 +19,15 @@
  */
 
 import { liftBackdrop } from './backdrop';
+import { plateColor, type CrestPlate } from './plate';
 
-/**
- * What a crest sits on. A crest is stored with its backdrop lifted off, so on
- * its own it floats on the page's ground — which reads well for a tiger on
- * orange and badly for a navy crest on navy. The seller can put it back on a
- * plate: the school's own ground or accent, kept as a word so the plate follows
- * the colors when they change, or any hex at all (white is the usual one).
- */
-export type CrestPlate = 'ground' | 'accent' | string;
+// The plate rule lives in ./plate so the home-screen icon script can share it.
+export { plateColor, type CrestPlate };
 
 /** `text` is optional: a school that never chose one reads in white, as every
  * school did before there was a third color to choose. `plate` is optional the
  * same way: none means the crest sits straight on the page. */
 export type SchoolLook = { ground: string; accent: string; text?: string; plate?: CrestPlate; logo?: string };
-
-/** The plate as a CSS color, or 'transparent' for none — or for a value that is
- * neither of the two words nor a hex, which is treated as no choice at all. */
-export function plateColor(look: Pick<SchoolLook, 'ground' | 'accent' | 'plate'>): string {
-  const { plate } = look;
-  if (plate === 'ground') return look.ground;
-  if (plate === 'accent') return look.accent;
-  return plate && /^#[0-9a-f]{6}$/i.test(plate) ? plate : 'transparent';
-}
 
 /** An element-like target for CSS custom properties — real usage defaults to
  * document.documentElement; tests pass a recording stub, since the vitest
