@@ -147,6 +147,15 @@ regions get refreshed), and if the refresh warns that a school "is not in the
 regions index", run `node scripts/build-regions.mjs --all` once and commit.
 Run that each August too, when the regions are redrawn.
 
+### Past results
+
+A paid football page's Schedule tab gives each opponent's all-time record back
+to 2011. That comes from a committed file per school, written by hand: after
+adding the school to `paid-schools.json`, run `node scripts/build-history.mjs`
+and commit `public/oh/history/`. Until then the page simply shows this season's
+meetings and no all-time line. Each winter, bump `TO` in the script to the
+season just finished and run it again.
+
 ### The conference
 
 On a football activation, ask which conference the school plays in and who

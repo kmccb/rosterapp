@@ -53,19 +53,31 @@
   background: var(--crest-plate, transparent);
 }
 
-/* The keypad's readout. Nothing on this screen shows what's been tapped
-   except this line, so it has to carry the same weight ../styles.css gives
-   its own big digit display, `.empty-number` — large, bold, steady — rather
-   than sit there as plain paragraph text underneath a segmented control. */
-.oh-query {
-  min-height: 1em;
-  margin: 4px 0 12px;
-  font-size: 56px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
+/* A paid sport page's header: Poland's own `.title` line with the crest
+   beside it. The row takes the title's bottom margin so the gap above the
+   tabs is exactly Poland's whether or not there is a crest, and the crest is
+   sized to the line — a 15px cap height wants a badge, not a logo. */
+.oh-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.oh-title-row > .title {
+  margin: 0;
+  min-width: 0;
+}
+
+.oh-title-crest {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  /* Contain, not cover: the crest is stored padded to a square with its
+     backdrop lifted off, so nothing of it should be cropped to fit. */
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
 }
 
 .oh-school-head {
@@ -111,18 +123,15 @@
   padding: 0 var(--screen-pad, 14px);
 }
 
-/* The readout is one line and always the same line. It never gives ground. */
-.oh-lookup > .oh-query {
-  flex: none;
-}
-
-/* Everything between the readout and the keys: the hits, the "nobody wears
-   that" line, and the footer rows. It takes all the height the readout and the
-   pad leave, and it is the only part that scrolls — one player or twenty-two,
-   the keys do not move. */
+/* Everything above the keys: the hits, the "nobody wears that" line, and the
+   footer rows. It takes all the height the pad leaves, and it is the only part
+   that scrolls — one player or twenty-two, the keys do not move. The top
+   padding is .results' own, so the count sits as far under the tabs as
+   Poland's does. */
 .oh-lookup > .oh-lookup-body {
   flex: 1;
   min-height: 0;
+  padding-top: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -139,9 +148,9 @@
 }
 
 .oh-lookup > .keypad {
-  /* With no hits at all — the state this screen opens in — nothing above the
-     keys wants the leftover height, and without somewhere for it to go the
-     pad would ride up under the readout. An auto margin takes it. */
+  /* The body takes the leftover height now, so this is only a backstop: were
+     it ever to stop flexing, the pad still keeps to the bottom of the screen
+     rather than riding up under the tabs. An auto margin takes the slack. */
   margin-top: auto;
   /* The keys are chrome and run to both edges, the way they do in the root
      app, so they come back out through the column's side padding. Their own
@@ -1261,21 +1270,81 @@ img.oh-hub-crest {
   margin-top: 10px;
 }
 
-/* Over the whole page, so the tab beneath it is left exactly as it was. The
-   school's own dark, a touch less see-through than the page, so the crest
-   behind stays a watermark and the numbers stay the thing you read. */
+/*
+ * The player screen. Over the whole page, so the tab beneath it is left
+ * exactly as it was when Back closes this — but opaque, the school's own
+ * ground, because the see-through version let the keypad's digits ghost
+ * through behind a player's numbers and blurred the crest to nothing.
+ *
+ * The crest is the screen's own watermark instead (::before), stronger than
+ * what the page shows through body::after's two scrims (about a twentieth of
+ * the wallpaper at the brightest point): plainly the school's, still far
+ * enough back that the numbers over it are what you read.
+ *
+ * It scrolls itself when a long season outgrows a phone, and contains its own
+ * overscroll, so a flick at either end is not handed on to the page below.
+ * The sheet is not inside any of the page's scrolling boxes, so there is
+ * nothing for iOS to chain to but the body, which never scrolls on this page.
+ */
 .oh-sheet {
   position: fixed;
   inset: 0;
   z-index: 20;
   overflow-y: auto;
-  background: var(--scrim-far, rgba(2, 3, 40, 0.96));
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg);
+}
+
+/* Fixed, not absolute, so the crest stays put while the content scrolls over
+   it. Nothing on .oh-sheet makes it a containing block (no transform, no
+   filter — the old backdrop blur would have), so this is the viewport, which
+   is exactly the sheet's own box. Inset by a margin so the crest sits clear
+   of the edges, as a centred mark rather than a wallpaper. */
+.oh-sheet::before {
+  content: '';
+  position: fixed;
+  inset: 48px 24px;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--wallpaper) center / contain no-repeat;
+  opacity: 0.14;
 }
 
 .oh-sheet > .screen {
+  position: relative;
+  z-index: 1;
   max-width: 560px;
   margin: 0 auto;
   min-height: 100%;
+}
+
+/*
+ * The Schedule tab's game-day badge is the school's crest. Poland's badge is a
+ * square photo and is cropped to fill; a crest is stored padded to a square
+ * with its backdrop lifted off, so it is contained and sat on the school's own
+ * plate, as it is in the header.
+ */
+.countdown-badge.oh-countdown-crest {
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
+}
+
+/* A fixture with nothing to open is a plain line, not a control. */
+.fixture-row.oh-fixture-still {
+  cursor: default;
+}
+
+/*
+ * A tie, which Poland's screen never has to draw. Neither the win's green nor
+ * the loss's red: the muted ink the rest of the row's small print uses.
+ */
+.form-chip.oh-tied {
+  background: var(--muted);
+}
+
+.oh-h2h-t {
+  color: var(--muted);
+  font-weight: 700;
 }

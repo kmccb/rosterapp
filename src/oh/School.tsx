@@ -9,6 +9,7 @@ import { LookupTab, TeamTab } from './RosterTabs';
 import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
 import { PlayerSheet } from './PlayerSheet';
 import { StatsTab } from './StatsTab';
+import { ScheduleTab } from './ScheduleTab';
 import { weeksFrom } from '../maxpreps/weeks';
 import { playerKey } from '../stats/statsMatch';
 import type { Player } from '../types';
@@ -728,6 +729,24 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   );
 
   /*
+   * A paid school's sport page is headed the way Poland's app is: one small
+   * muted uppercase line, "SPRINGFIELD TIGERS", in Poland's own `.title`, and
+   * nothing under it, so the keys and the hits get the height the big name and
+   * the town-and-record line used to take — Poland's header carries no record
+   * either; the results are the Schedule tab's to tell. The crest rides beside the line at the line's own scale, on the
+   * plate the seller chose, so it reads as the school's mark rather than a
+   * picture. A free directory page keeps the big name and the town: among 717
+   * schools, several of them Springfields, the town is how a reader knows they
+   * found the right one, and a free page has no nickname to tell them apart.
+   */
+  const titleLine = (
+    <div className="oh-title-row">
+      {crest && <img className="oh-title-crest" src={crest} alt="" />}
+      <h1 className="title">{fullName}</h1>
+    </div>
+  );
+
+  /*
    * One quiet line saying what this is.
    *
    * A prospect looking at the Springfield demo has to be able to tell at a
@@ -976,7 +995,11 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   const head = (
     <>
-      <div className="oh-school-head">{nameBlock}</div>
+      {/* Only a page with a roster gets Poland's line. A paid school's sport
+          with no roster of its own (a volleyball-only school's football page,
+          or a roster that failed to load) is the free single scroll, and the
+          record under the big name is the only place that page shows it. */}
+      {look && roster ? titleLine : <div className="oh-school-head">{nameBlock}</div>}
 
       {back}
 
@@ -1029,7 +1052,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * without first tapping through to another tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} stats={statTotals} onSelect={openCard} />
+            <LookupTab players={roster.players} footer={footer} onSelect={openCard} />
           </div>
         ) : (
           <div className="screen">
@@ -1156,7 +1179,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                     school in the state has. Any other sport can only show what
                     was pasted for it. */}
                 {sport === 'football' ? (
-                  schedule
+                  <ScheduleTab slug={slug} season={season} weather={weather} crest={crest} />
                 ) : roster.schedule ? (
                   <PastedSchedule rows={roster.schedule} />
                 ) : (

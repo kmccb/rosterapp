@@ -60,6 +60,13 @@ not a config bug — wait for the next cron. Consequences:
   apart and is run **by hand** — when regions are drawn in August, and when a newly paid school
   is not in the index (the run warns). A paid football page shows the table on its League tab
   (`src/oh/regions.ts`), above the conference.
+- **Football history** (joeeitel.com again) — `scripts/build-history.mjs` writes
+  `public/oh/history/<slug>.json`, every 2011–2025 result of each `paid-schools.json` school, for
+  the Schedule tab's all-time line and head-to-heads (`src/oh/history.ts`; the current season comes
+  from the directory). Run **by hand, never scheduled** — when a school is added to
+  `paid-schools.json` (no file just means no all-time line), and each winter with `TO` bumped so the
+  finished season joins the file. The 240 week pages are cached in `scripts/data/scoreboards/`
+  (gitignored), so a rerun asks joeeitel only for weeks it lacks.
 - **ScheduleStar iCal** (uuid in `teams/poland/team.json`) feeds Poland's fixtures + kickoff
   times. Other sports statewide would come from ScheduleStar uuids obtained through the
   concierge relationship (phase 3 — no scrapeable source exists).
@@ -156,7 +163,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 667 tests / 51 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 728 tests / 54 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main

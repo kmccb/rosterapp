@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Keypad } from '../components/Keypad';
 import { numberKey, numberMatches } from '../parse/rosterParse';
 import { inArea, positionsForArea, positionsOf, sidesOf } from '../roster/filters';
-import { summarise as summariseStats } from '../stats/statsFormat';
-import { playerKey, type PlayerStats } from '../stats/statsMatch';
 import { formatHeight, formatWeight, fullName, type Player, type Side } from '../types';
 
 /**
@@ -58,20 +56,21 @@ const useByNumber = (players: Player[]): Player[] =>
  * rather than below them: the pad owns the bottom of the screen and there is
  * nothing underneath it to scroll to.
  *
- * `stats` is the season so far, for a school that has it: the answer to "who is
- * number four" is better with "and he has 709 yards" on the end. It prints
- * under the hit and nowhere else — the Team tab is a list to scan, and forty
- * rows of numbers would bury the names.
+ * The screen is Poland's: no readout of what has been tapped (the pad's own
+ * keys and the hits are the feedback), "Tap a jersey number." before anything
+ * is, a count above the hits, and the tapped number standing large and
+ * ghosted when nobody wears it. A hit is the name and the vitals, as
+ * `PlayerRow` draws it; a season's numbers wait on the player screen a tap
+ * away, because three stat lines under every hit pushed the second and third
+ * players off a phone's half-screen above the keys.
  */
 export function LookupTab({
   players,
   footer,
-  stats,
   onSelect,
 }: {
   players: Player[];
   footer?: ReactNode;
-  stats?: Record<string, PlayerStats> | null;
   /** Opens a player's card. Without it the rows are dead ends, as they were. */
   onSelect?: (player: Player) => void;
 }) {
@@ -87,24 +86,34 @@ export function LookupTab({
 
   return (
     <>
-      <div className="oh-query" aria-live="polite">{query || ' '}</div>
-      {/* Everything between the readout and the keys, in one box, because the
-          column needs a single part that gives up height — the hits alone
-          cannot be it once there is a footer under them. */}
+      {/* Everything above the keys, in one box, because the column needs a
+          single part that gives up height — the hits alone cannot be it once
+          there is a footer under them. */}
       <div className="oh-lookup-body">
-        {hits.length > 0 && (
-          <div className="rows">
-            {hits.map((p) => (
-              <Row
-                key={p.id}
-                player={p}
-                stats={stats?.[playerKey(p)]}
-                onSelect={onSelect ? () => onSelect(p) : undefined}
-              />
-            ))}
+        {hits.length > 0 ? (
+          <>
+            {/* Announced on each key; the rows under it are not, or a screen
+                reader would read the whole list again at every tap. */}
+            <p className="results-count" aria-live="polite">
+              {hits.length} {hits.length === 1 ? 'player' : 'players'} starting with {query}
+            </p>
+            <div className="rows">
+              {hits.map((p) => (
+                <Row key={p.id} player={p} onSelect={onSelect ? () => onSelect(p) : undefined} />
+              ))}
+            </div>
+          </>
+        ) : query ? (
+          <div className="empty">
+            <p className="empty-number">{query}</p>
+            <p className="empty-text" aria-live="polite">Nobody on the roster wears that.</p>
+          </div>
+        ) : (
+          <div className="empty">
+            <p className="empty-text">Tap a jersey number.</p>
+            <p className="empty-hint">{players.length} players</p>
           </div>
         )}
-        {query && !hits.length && <p className="empty-text">Nobody wears {query}.</p>}
         {footer && <div className="oh-lookup-foot">{footer}</div>}
       </div>
       <Keypad
@@ -381,12 +390,10 @@ const Shell = ({ onSelect, children }: { onSelect?: () => void; children: ReactN
 const Row = ({
   player,
   dense = false,
-  stats,
   onSelect,
 }: {
   player: Player;
   dense?: boolean;
-  stats?: PlayerStats;
   onSelect?: () => void;
 }) => {
   if (dense) {
@@ -416,11 +423,6 @@ const Row = ({
       <span className="row-text">
         <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
         {details && <span className="row-details">{details}</span>}
-        {summariseStats(stats).map((l) => (
-          <span className="row-details" key={l.category}>
-            {l.label} · {l.parts.join(' · ')}
-          </span>
-        ))}
       </span>
     </Shell>
   );
