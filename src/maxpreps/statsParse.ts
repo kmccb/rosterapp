@@ -150,6 +150,12 @@ export type MaxPrepsStats = {
   rows: ParsedStatRow[];
   /** Heading ids of the tables that were found and read. */
   tables: string[];
+  /**
+   * How many games the team has played, by its own totals row — the most any
+   * table's foot says. Null when no foot says. The stats job keys its
+   * after-each-game snapshots on it (src/maxpreps/weeks.ts).
+   */
+  teamGames: number | null;
   /** Why this page should not replace what is already published; empty when it may. */
   problems: string[];
 };
@@ -173,6 +179,8 @@ const toNumber = (raw: string): number | undefined => {
 
 const TABLE = /<h3 id="([a-z0-9_]+)"[^>]*>[^<]*<\/h3>\s*<table\b[\s\S]*?<\/table>/g;
 const BODY = /<tbody>([\s\S]*?)<\/tbody>/;
+const FOOT = /<tfoot>([\s\S]*?)<\/tfoot>/;
+const FOOT_GAMES = /<td class="gamesplayed[^"]*"[^>]*>\s*(\d+)\s*<\/td>/;
 const ROW = /<tr\b[^>]*>([\s\S]*?)<\/tr>/g;
 const CELL = /<td class="([a-z0-9]+)[^"]*"[^>]*>([\s\S]*?)<\/td>/g;
 /* The link's title is the name in full; its text is "M. Tuscano", which cannot
@@ -183,10 +191,13 @@ export function parseMaxPrepsStats(html: string): MaxPrepsStats {
   const rows: ParsedStatRow[] = [];
   const tables: string[] = [];
 
+  let teamGames: number | null = null;
   for (const table of html.matchAll(TABLE)) {
     const specs = TABLES[table[1]];
     if (!specs) continue;
     // The season's totals sit in the foot; only the body is players.
+    const footGames = Number(table[0].match(FOOT)?.[1].match(FOOT_GAMES)?.[1]);
+    if (Number.isInteger(footGames) && footGames > (teamGames ?? -1)) teamGames = footGames;
     const body = table[0].match(BODY)?.[1];
     if (body === undefined) continue;
     tables.push(table[1]);
@@ -225,5 +236,5 @@ export function parseMaxPrepsStats(html: string): MaxPrepsStats {
     }
   }
 
-  return { rows, tables, problems };
+  return { rows, tables, teamGames, problems };
 }

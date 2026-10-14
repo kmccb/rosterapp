@@ -29,12 +29,11 @@ import { formatHeight, formatWeight, fullName, type Player, type Side } from '..
  *
  * `Row` below reuses the root app's `.row`/`.rows-dense` classes so this
  * looks exactly like `PlayerRow`, but it isn't `PlayerRow`: that component
- * is a `<button disabled={!onSelect}>`, and every row here is a dead end —
- * there is no card to open, so nothing was ever wired to `onSelect`. A
- * screen reader reads a permanently-disabled button as "unavailable" on
- * every single row, which is worse than not being a button at all. A plain
- * `<div>` with the same classes costs a few duplicate lines and reads
- * correctly instead.
+ * is a `<button disabled={!onSelect}>`, and a screen reader reads a
+ * permanently-disabled button as "unavailable" on every single row, which is
+ * worse than not being a button at all. So a row here is a real button when
+ * the page has a card to open (a school with season stats does) and a plain
+ * `<div>` with the same classes when it has not.
  */
 
 // A number that doesn't parse (blank, "N/A") sorts to the bottom; a
@@ -68,10 +67,13 @@ export function LookupTab({
   players,
   footer,
   stats,
+  onSelect,
 }: {
   players: Player[];
   footer?: ReactNode;
   stats?: Record<string, PlayerStats> | null;
+  /** Opens a player's card. Without it the rows are dead ends, as they were. */
+  onSelect?: (player: Player) => void;
 }) {
   const [query, setQuery] = useState('');
   const byNumber = useByNumber(players);
@@ -93,7 +95,12 @@ export function LookupTab({
         {hits.length > 0 && (
           <div className="rows">
             {hits.map((p) => (
-              <Row key={p.id} player={p} stats={stats?.[playerKey(p)]} />
+              <Row
+                key={p.id}
+                player={p}
+                stats={stats?.[playerKey(p)]}
+                onSelect={onSelect ? () => onSelect(p) : undefined}
+              />
             ))}
           </div>
         )}
@@ -177,7 +184,7 @@ function Chip({
 }
 
 /** The whole roster, narrowable by side of the ball, by position and by name. */
-export function TeamTab({ players }: { players: Player[] }) {
+export function TeamTab({ players, onSelect }: { players: Player[]; onSelect?: (player: Player) => void }) {
   const [search, setSearch] = useState('');
   const [area, setArea] = useState<Side | null>(null);
   const [position, setPosition] = useState<string | null>(null);
@@ -347,7 +354,7 @@ export function TeamTab({ players }: { players: Player[] }) {
             <div key={g.label}>
               <div className="group-head">{g.label}</div>
               {g.players.map((p) => (
-                <Row key={p.id} player={p} dense />
+                <Row key={p.id} player={p} dense onSelect={onSelect ? () => onSelect(p) : undefined} />
               ))}
             </div>
           ))}
@@ -357,14 +364,30 @@ export function TeamTab({ players }: { players: Player[] }) {
   );
 }
 
+/*
+ * A row is a button when there is a card to open, and a plain row when there
+ * is not — never a disabled button, which a screen reader reads out as
+ * "unavailable" on every line (see the note at the top of this file).
+ */
+const Shell = ({ onSelect, children }: { onSelect?: () => void; children: ReactNode }) =>
+  onSelect ? (
+    <button type="button" className="row" onClick={onSelect}>
+      {children}
+    </button>
+  ) : (
+    <div className="row">{children}</div>
+  );
+
 const Row = ({
   player,
   dense = false,
   stats,
+  onSelect,
 }: {
   player: Player;
   dense?: boolean;
   stats?: PlayerStats;
+  onSelect?: () => void;
 }) => {
   if (dense) {
     const vitals = [formatHeight(player.heightIn), formatWeight(player.weightLb), player.grade]
@@ -372,14 +395,14 @@ const Row = ({
       .join(' · ');
 
     return (
-      <div className="row">
+      <Shell onSelect={onSelect}>
         <span className="row-number">{player.number || '—'}</span>
         <span className="row-who">
           <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
           {vitals && <span className="row-details">{vitals}</span>}
         </span>
         {player.position && <span className="row-pos">{player.position}</span>}
-      </div>
+      </Shell>
     );
   }
 
@@ -388,7 +411,7 @@ const Row = ({
     .join(' · ');
 
   return (
-    <div className="row">
+    <Shell onSelect={onSelect}>
       <span className="row-number">{player.number || '—'}</span>
       <span className="row-text">
         <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
@@ -399,6 +422,6 @@ const Row = ({
           </span>
         ))}
       </span>
-    </div>
+    </Shell>
   );
 };

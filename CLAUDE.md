@@ -87,6 +87,13 @@ not a config bug — wait for the next cron. Consequences:
   members in the directory by town then name (`src/maxpreps/leagueParse.ts`) and commits
   `public/oh/leagues/<slug>-<sport>.json` — a suggestion only the panel reads, behind the
   Conference section's **Fill from MaxPreps** button (`--league` re-reads it).
+  **Week by week**: MaxPreps publishes no per-game player stats (not on the print page, a game's
+  page — top three only — or a player's page). So the stats file also keeps `snapshots`, the season
+  totals each time the team's games-played count (the print page's totals row) goes up, and
+  `src/maxpreps/weeks.ts` subtracts consecutive ones. Tracking began after game 8 of 2026, so
+  Springfield's earlier games are one "before week by week began" stretch. A week is named for a
+  game only when the directory's scored games equal the latest snapshot's count. Rows on
+  Lookup/Team/Stats open a player card (`src/oh/PlayerSheet.tsx`) drawn over the page.
   The roster parser reads positional arrays and checks itself against the page's stated count;
   `--roster` writes a CSV for the panel into `scripts/data/` (gitignored — the repo is public)
   and is never scheduled. The fixtures carry no athlete ids and invented names for removed players. MaxPreps' robots.txt disallows
@@ -143,7 +150,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 649 tests / 49 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 661 tests / 50 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
