@@ -156,7 +156,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 661 tests / 50 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 667 tests / 51 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
@@ -204,10 +204,12 @@ branch drop it (the `marketing-site` branch, PR #16, does; fix that before mergi
   paid school; `?school=` now stays in the address.
 
 **Open right now:**
-1. **PR #22 (Poland-style icons) — not merged.** After merging, re-upload Springfield's crest in the
-   panel (Look → Replace crest, the full logo — `docs/design/springfield-video/tigers-logo.png`) and
-   Save look; the stored crest was centre-cropped by the old upload, so the new icon can't lift its
-   backdrop. Then wait for a rebuild (≤6h) and re-add to the home screen.
+1. **Re-upload Springfield's crest** (panel → Look → Replace crest, the full logo —
+   `docs/design/springfield-video/tigers-logo.png` — then Save look). Since PR #22 (Poland-style
+   icons) and the transparent-crest change, an upload is padded (not cropped) and its flat backdrop
+   is lifted off (`src/oh/backdrop.ts`, shared by the panel and `scripts/lib/school-icon.mjs`), so the
+   crest is stored as a transparent PNG. The crest stored now is the old centre-cropped JPEG, which
+   neither can fix. After the next rebuild (≤6h), re-add the app to the home screen.
 2. **Migration 0009 is NOT applied** — the panel's Stats link box errors ("Could not find the
    function … school_roster_set_stats_source"). Springfield doesn't need it. To apply: paste
    `supabase/migrations/0009_stats_source.sql` into the Supabase SQL editor, run twice, then

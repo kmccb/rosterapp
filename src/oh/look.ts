@@ -20,6 +20,8 @@
 
 /** `text` is optional: a school that never chose one reads in white, as every
  * school did before there was a third color to choose. */
+import { liftBackdrop } from './backdrop';
+
 export type SchoolLook = { ground: string; accent: string; text?: string; logo?: string };
 
 /** An element-like target for CSS custom properties — real usage defaults to
@@ -172,23 +174,51 @@ export async function resizeLogo(file: File): Promise<string> {
   /*
    * Padded to a square, never cropped. Crests are usually wider than they are
    * tall — Springfield's tiger is an oval twice as wide as it is high — and a
-   * centre crop took both ends off it, which then showed as flat cut edges in
-   * every home-screen icon. The band either side is filled with the image's
-   * own corner colour, so a flat backdrop simply carries on; the icon builder
-   * (scripts/paid-apps.mjs) then lifts that backdrop off whole.
+   * centre crop took both ends off it.
+   *
+   * And transparent, not on its backdrop. The crest is drawn at size on its
+   * own canvas first and its flat backdrop is lifted off there (src/oh/
+   * backdrop.ts) — the white square a tiger usually comes on — so the page
+   * shows the oval on the school's own colour, and the home-screen icon is
+   * built from the same clean artwork. A crest with no flat backdrop to take
+   * off, or one cropped at its edges, is kept as it came, on a square of its
+   * own corner colour, as a JPEG.
    */
   const scale = WALLPAPER_PX / Math.max(img.naturalWidth, img.naturalHeight);
-  const w = Math.round(img.naturalWidth * scale);
-  const h = Math.round(img.naturalHeight * scale);
-  const probe = document.createElement('canvas');
-  probe.width = 1;
-  probe.height = 1;
-  const pctx = probe.getContext('2d');
-  pctx?.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
-  const [r, g, b] = pctx ? Array.from(pctx.getImageData(0, 0, 1, 1).data) : [255, 255, 255];
-  ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-  ctx.fillRect(0, 0, WALLPAPER_PX, WALLPAPER_PX);
-  ctx.drawImage(img, Math.round((WALLPAPER_PX - w) / 2), Math.round((WALLPAPER_PX - h) / 2), w, h);
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const art = document.createElement('canvas');
+  art.width = w;
+  art.height = h;
+  const actx = art.getContext('2d');
+  if (!actx) throw new Error('This browser will not let the app read the image.');
+  actx.drawImage(img, 0, 0, w, h);
+  const pixels = actx.getImageData(0, 0, w, h);
+  const corner = Array.from(pixels.data.slice(0, 3));
+  const outcome = liftBackdrop(pixels.data, w, h);
+  const clear = outcome === 'lifted' || outcome === 'already-clear';
+  if (outcome === 'lifted') actx.putImageData(pixels, 0, 0);
 
-  return canvas.toDataURL('image/jpeg', 0.85);
+  if (!clear) {
+    ctx.fillStyle = `rgb(${corner[0]}, ${corner[1]}, ${corner[2]})`;
+    ctx.fillRect(0, 0, WALLPAPER_PX, WALLPAPER_PX);
+  }
+  ctx.drawImage(art, Math.round((WALLPAPER_PX - w) / 2), Math.round((WALLPAPER_PX - h) / 2));
+  if (!clear) return canvas.toDataURL('image/jpeg', 0.85);
+
+  /*
+   * Transparency needs PNG (or WebP), which runs larger than the JPEG it
+   * replaces, and the database refuses a look over 500 kB. Flat artwork is
+   * well under that as PNG; a busy one is tried as WebP, then smaller.
+   */
+  const LIMIT = 450_000;
+  const png = canvas.toDataURL('image/png');
+  if (png.length <= LIMIT) return png;
+  const webp = canvas.toDataURL('image/webp', 0.9);
+  if (webp.startsWith('data:image/webp') && webp.length <= LIMIT) return webp;
+  const small = document.createElement('canvas');
+  small.width = 480;
+  small.height = 480;
+  small.getContext('2d')?.drawImage(canvas, 0, 0, 480, 480);
+  return small.toDataURL('image/png');
 }
