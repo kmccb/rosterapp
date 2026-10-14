@@ -74,8 +74,21 @@ export function parseMaxPrepsTeam(html: string): MaxPrepsTeam | null {
 
 export type ConferenceTeam = {
   name: string;
-  /** The town, as the first part of the team's address spells it: "new-middletown". */
+  /** The state, as the team's address spells it: "oh". */
+  state: string;
+  /** The town, as the team's address spells it: "new-middletown". */
   town: string;
+  /** State, town and school from the address — what tells one team from every other. */
+  key: string;
+};
+
+/** ".../oh/campbell/memorial-red-devils/football/stats/" → "oh/campbell/memorial-red-devils". */
+export const teamKey = (address: string): string => {
+  try {
+    return new URL(address).pathname.split('/').filter(Boolean).slice(0, 3).join('/').toLowerCase();
+  } catch {
+    return '';
+  }
 };
 
 export type MaxPrepsConference = { name: string; teams: ConferenceTeam[] };
@@ -94,8 +107,9 @@ export function parseMaxPrepsConference(html: string): MaxPrepsConference | null
     const address = onMaxPreps(row?.teamCanonicalUrl);
     if (typeof school !== 'string' || !school.trim() || !address) continue;
     // /oh/campbell/memorial-red-devils/football/ — state, town, school.
-    const town = new URL(address).pathname.split('/').filter(Boolean)[1] ?? '';
-    teams.push({ name: school.trim(), town });
+    const key = teamKey(address);
+    const [state = '', town = ''] = key.split('/');
+    teams.push({ name: school.trim(), state, town, key });
   }
   return teams.length ? { name: name.trim(), teams } : null;
 }
@@ -120,34 +134,46 @@ export type MatchedConference = {
  * The conference's teams as directory slugs, without `ownSlug` — the fan page
  * puts a school in its own table without being asked.
  *
- * Town first. With one school in the town, that is it, whatever the two sides
- * call it. With several, the one whose name agrees — either name contained in
- * the other, so "Memorial" finds "Campbell Memorial" — and only if exactly one
- * does. A town the directory does not have is tried by exact name across the
- * state, and taken only if the name is unique.
+ * Town first, then name. Within the town, a school of exactly that name; else
+ * the one whose name agrees — either contained in the other, so "Memorial"
+ * finds "Campbell Memorial" — and only if exactly one does. The name has to
+ * agree even when the town has a single school: the directory holds football
+ * schools only, and the private school MaxPreps lists in a one-school town is
+ * not that town's public one. A town the directory does not have is tried by
+ * exact name across the state, and taken only if the name is unique. A team
+ * outside Ohio is never placed.
+ *
+ * `ownKey` is the school's own team on MaxPreps (`teamKey` of its address). It
+ * is left out by that, before any matching — so the school can neither be
+ * listed as a rival of itself nor reported as a member nobody could place.
  */
 export function matchConference(
   teams: ConferenceTeam[],
   directory: DirectorySchool[],
   ownSlug: string,
+  ownKey = '',
 ): MatchedConference {
   const members: string[] = [];
   const unmatched: string[] = [];
 
   for (const team of teams) {
+    if (ownKey && team.key === ownKey) continue;
+    if (team.state !== 'oh') {
+      unmatched.push(team.name);
+      continue;
+    }
     const town = squash(team.town);
     const name = squash(team.name);
     const inTown = directory.filter((s) => squash(s.city) === town);
 
     let hit: DirectorySchool | null = null;
-    if (inTown.length === 1) {
-      hit = inTown[0];
-    } else if (inTown.length > 1) {
+    if (inTown.length > 0) {
+      const exact = inTown.filter((s) => squash(s.name) === name);
       const agree = inTown.filter((s) => {
         const theirs = squash(s.name);
         return theirs.includes(name) || name.includes(theirs);
       });
-      hit = agree.length === 1 ? agree[0] : null;
+      hit = exact.length === 1 ? exact[0] : agree.length === 1 ? agree[0] : null;
     } else {
       const sameName = directory.filter((s) => squash(s.name) === name);
       hit = sameName.length === 1 ? sameName[0] : null;

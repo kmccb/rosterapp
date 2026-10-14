@@ -176,11 +176,11 @@ If the coach keeps stats on MaxPreps, the school's football page gets a Stats
 tab (Leaders, Offense, Defense, Special) and each Lookup hit shows that
 player's season. Nobody types anything after setup.
 
-1. On the team's MaxPreps Stats page, the **Print** link at the bottom is the
-   address to copy; the Roster page's address is the other one.
-2. In the panel, open the school, open Football, and paste the Print address
-   into **Stats** → Set. The team's own MaxPreps football page address works
-   just as well and is easier to find. (Needs migration 0009. Until it is applied, add the
+1. Open the team's football page on MaxPreps and copy its address
+   (`https://www.maxpreps.com/oh/<town>/<school>/football/`).
+2. In the panel, open the school, open Football, and paste it into
+   **Stats** → Set. (The Print link at the bottom of the team's Stats page
+   also works, but then the conference can't be filled in from MaxPreps.) (Needs migration 0009. Until it is applied, add the
    school to `maxpreps-teams.json` and `paid-schools.json` instead.) The next
    scheduled run writes the stats file; to have it at once, run the "Refresh
    season stats from MaxPreps" workflow by hand.
