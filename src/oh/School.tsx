@@ -1044,15 +1044,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * exactly the pieces that column expects, so the arrangement is
            * the same one Poland's Lookup screen has always used.
            *
-           * The footer rows go *inside* the tab rather than under it, because
-           * below the keys there is nothing — the pad owns the bottom of the
-           * screen now. Poland has no footer on its own Lookup screen and does
-           * not need one, but this is a public page and Lookup is where every
-           * paid school lands, so the privacy notice has to stay reachable
-           * without first tapping through to another tab.
+           * No footer here, as on Poland's own Lookup screen: the owner wants
+           * the keys and the hits alone. The privacy notice and the way to
+           * another school stay at the foot of every other tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} onSelect={openCard} />
+            <LookupTab players={roster.players} onSelect={openCard} />
           </div>
         ) : (
           <div className="screen">

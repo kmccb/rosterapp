@@ -48,13 +48,8 @@ const useByNumber = (players: Player[]): Player[] =>
   useMemo(() => [...players].sort((a, b) => sortKey(a.number) - sortKey(b.number)), [players]);
 
 /**
- * `footer` is the page's own way out — "Follow a different school", and the
- * privacy notice. Poland keeps neither on its Lookup screen, but `/oh/` is a
- * public fan page and Lookup is the tab every paid school lands on, so a
- * privacy link only reachable by first tapping Team would be unreachable in
- * practice. It rides inside the scrolling half of the column, above the keys
- * rather than below them: the pad owns the bottom of the screen and there is
- * nothing underneath it to scroll to.
+ * No footer, as Poland's Lookup screen has none: the way to another school
+ * and the privacy notice sit at the foot of the page's other tabs.
  *
  * The screen is Poland's: no readout of what has been tapped (the pad's own
  * keys and the hits are the feedback), "Tap a jersey number." before anything
@@ -66,11 +61,9 @@ const useByNumber = (players: Player[]): Player[] =>
  */
 export function LookupTab({
   players,
-  footer,
   onSelect,
 }: {
   players: Player[];
-  footer?: ReactNode;
   /** Opens a player's card. Without it the rows are dead ends, as they were. */
   onSelect?: (player: Player) => void;
 }) {
@@ -86,9 +79,8 @@ export function LookupTab({
 
   return (
     <>
-      {/* Everything above the keys, in one box, because the column needs a
-          single part that gives up height — the hits alone cannot be it once
-          there is a footer under them. */}
+      {/* Everything above the keys, in one box: the column needs a single
+          part that gives up height to the pad. */}
       <div className="oh-lookup-body">
         {hits.length > 0 ? (
           <>
@@ -114,7 +106,6 @@ export function LookupTab({
             <p className="empty-hint">{players.length} players</p>
           </div>
         )}
-        {footer && <div className="oh-lookup-foot">{footer}</div>}
       </div>
       <Keypad
         onDigit={(d) => setQuery((q) => (q + d).slice(0, 2))}

@@ -138,15 +138,6 @@
   flex-direction: column;
 }
 
-/* The way out of the school, and the privacy notice. They belong at the foot
-   of what is on screen rather than floating under a single search hit, so with
-   room to spare they take it; with the hits overflowing, the auto margin
-   collapses and they sit where they always would, after the last row. */
-.oh-lookup-foot {
-  margin-top: auto;
-  padding-top: 14px;
-}
-
 .oh-lookup > .keypad {
   /* The body takes the leftover height now, so this is only a backstop: were
      it ever to stop flexing, the pad still keeps to the bottom of the screen
@@ -1297,24 +1288,38 @@ img.oh-hub-crest {
   background: var(--bg);
 }
 
-/* Fixed, not absolute, so the crest stays put while the content scrolls over
-   it. Nothing on .oh-sheet makes it a containing block (no transform, no
-   filter — the old backdrop blur would have), so this is the viewport, which
-   is exactly the sheet's own box. Inset by a margin so the crest sits clear
-   of the edges, as a centred mark rather than a wallpaper. */
-.oh-sheet::before {
+/*
+ * The same faint crest the page behind wears: the wallpaper at cover under the
+ * same two scrims body::before and body::after lay over it (src/styles.css),
+ * so the player screen reads as the page itself rather than a picture of the
+ * crest. A bolder centred crest was tried and the owner found it too loud.
+ * Fixed, not absolute, so it stays put while the content scrolls; nothing on
+ * .oh-sheet makes it a containing block, so these cover the viewport, which is
+ * exactly the sheet's own box.
+ */
+.oh-sheet::before,
+.oh-sheet::after {
   content: '';
   position: fixed;
-  inset: 48px 24px;
-  z-index: 0;
+  inset: 0;
   pointer-events: none;
-  background: var(--wallpaper) center / contain no-repeat;
-  opacity: 0.14;
+}
+
+.oh-sheet::before {
+  z-index: 0;
+  background: var(--wallpaper) center / cover no-repeat;
+}
+
+.oh-sheet::after {
+  z-index: 1;
+  background:
+    radial-gradient(120% 85% at 50% 40%, var(--scrim-near), var(--scrim-far) 72%),
+    linear-gradient(180deg, var(--scrim-top), var(--scrim-bottom));
 }
 
 .oh-sheet > .screen {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 560px;
   margin: 0 auto;
   min-height: 100%;
