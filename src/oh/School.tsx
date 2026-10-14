@@ -1029,7 +1029,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * without first tapping through to another tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} stats={statTotals} onSelect={openCard} />
+            <LookupTab players={roster.players} footer={footer} onSelect={openCard} />
           </div>
         ) : (
           <div className="screen">

@@ -53,21 +53,6 @@
   background: var(--crest-plate, transparent);
 }
 
-/* The keypad's readout. Nothing on this screen shows what's been tapped
-   except this line, so it has to carry the same weight ../styles.css gives
-   its own big digit display, `.empty-number` — large, bold, steady — rather
-   than sit there as plain paragraph text underneath a segmented control. */
-.oh-query {
-  min-height: 1em;
-  margin: 4px 0 12px;
-  font-size: 56px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
 .oh-school-head {
   padding: 8px 12px;
   border-radius: 12px;
@@ -111,18 +96,15 @@
   padding: 0 var(--screen-pad, 14px);
 }
 
-/* The readout is one line and always the same line. It never gives ground. */
-.oh-lookup > .oh-query {
-  flex: none;
-}
-
-/* Everything between the readout and the keys: the hits, the "nobody wears
-   that" line, and the footer rows. It takes all the height the readout and the
-   pad leave, and it is the only part that scrolls — one player or twenty-two,
-   the keys do not move. */
+/* Everything above the keys: the hits, the "nobody wears that" line, and the
+   footer rows. It takes all the height the pad leaves, and it is the only part
+   that scrolls — one player or twenty-two, the keys do not move. The top
+   padding is .results' own, so the count sits as far under the tabs as
+   Poland's does. */
 .oh-lookup > .oh-lookup-body {
   flex: 1;
   min-height: 0;
+  padding-top: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -139,9 +121,9 @@
 }
 
 .oh-lookup > .keypad {
-  /* With no hits at all — the state this screen opens in — nothing above the
-     keys wants the leftover height, and without somewhere for it to go the
-     pad would ride up under the readout. An auto margin takes it. */
+  /* The body takes the leftover height now, so this is only a backstop: were
+     it ever to stop flexing, the pad still keeps to the bottom of the screen
+     rather than riding up under the tabs. An auto margin takes the slack. */
   margin-top: auto;
   /* The keys are chrome and run to both edges, the way they do in the root
      app, so they come back out through the column's side padding. Their own
