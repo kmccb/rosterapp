@@ -2,7 +2,10 @@
  * Season stats for the schools whose coaches keep them on MaxPreps.
  *
  * One request per team per run: the team's printable stats page, which is
- * every table MaxPreps has for it on one sheet. It is parsed by
+ * every table MaxPreps has for it on one sheet. (A link may instead be the
+ * team's own page, which is what a person can find; the print address is
+ * worked out from it once a season. That first run also reads the team's
+ * conference and leaves it in public/oh/leagues/ for the panel to offer.) It is parsed by
  * src/maxpreps/statsParse.ts and written to public/oh/stats/<slug>-<sport>.json,
  * where the school's page reads it (src/oh/teamStats.ts). The workflow commits
  * whatever changed and the push is the deploy, the same route the directory
@@ -35,6 +38,9 @@
  * `updated` is the day the stats last changed, not the day somebody looked.
  *
  *   node scripts/maxpreps.mjs            the scheduled run: stats for every team
+ *   node scripts/maxpreps.mjs --league   read each team's conference again, though
+ *                                        it has one on file — for the season a
+ *                                        school changes conference.
  *   node scripts/maxpreps.mjs --roster   also write each team's roster to
  *                                        scripts/data/ as a CSV, for the
  *                                        panel's "Or a CSV file". Never
@@ -45,6 +51,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { matchConference, parseMaxPrepsConference, parseMaxPrepsTeam, teamKey } from '../src/maxpreps/leagueParse.ts';
 import { parseMaxPrepsRoster, rosterCsv } from '../src/maxpreps/rosterParse.ts';
 import { parseMaxPrepsStats } from '../src/maxpreps/statsParse.ts';
 
@@ -83,6 +90,32 @@ const writeJson = (path, value) => {
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
 
 const failures = [];
+
+/*
+ * A link is either the printable stats page itself or the team's own page —
+ * the address a seller can copy from a browser without hunting for a Print
+ * link. From the team's page the stats page's address is worked out, once, and
+ * kept in the stats file beside the link it came from, so the steady state is
+ * still one request per team per run.
+ */
+const isPrint = (value) => {
+  try {
+    return new URL(value).pathname.toLowerCase().startsWith('/print/');
+  } catch {
+    return false;
+  }
+};
+
+/* The school year a fall season belongs to: July onward is this year's, the
+   same clock the panel files a new row under. */
+const seasonYear = (() => {
+  const [year, month] = today.split('-').map(Number);
+  return month >= 7 ? year : year - 1;
+})();
+
+const forceLeague = process.argv.includes('--league');
+const leagueDir = join(root, 'public/oh/leagues');
+const directory = JSON.parse(readFileSync(join(root, 'public/oh/index.json'), 'utf8')).schools;
 
 /*
  * The database's teams, or null when it could not be asked. Null and an empty
@@ -159,7 +192,7 @@ for (const row of dbRows ?? []) {
   }
   // The file's roster link, if it has one for this team, still serves --roster.
   const inFile = fileTeams.find((t) => keyOf(t) === keyOf(row));
-  dbTeams.push({ slug: row.slug, sport: row.sport, stats: row.stats_source_url, roster: inFile?.roster, paidByDatabase: true });
+  dbTeams.push({ slug: row.slug, sport: row.sport, stats: row.stats_source_url, team: inFile?.team, roster: inFile?.roster, paidByDatabase: true });
 }
 
 const teams = [...dbTeams, ...fileTeams.filter((t) => !dbNamed.has(keyOf(t)))];
@@ -176,16 +209,63 @@ for (const team of teams) {
       continue;
     }
     rmSync(join(root, 'public/oh/stats', `${team.slug}-${team.sport}.json`), { force: true });
+    rmSync(join(root, 'public/oh/leagues', `${team.slug}-${team.sport}.json`), { force: true });
     console.log(`${label}: not in paid-schools.json — skipped, and no stats file left up`);
     continue;
   }
 
-  try {
-    const parsed = parseMaxPrepsStats(await get(team.stats));
-    if (parsed.problems.length) throw new Error(parsed.problems.join(' '));
+  const path = join(root, 'public/oh/stats', `${team.slug}-${team.sport}.json`);
+  // A link that is itself a team's page says which team; the file's `team` is
+  // only for a link that is a print page and so cannot say.
+  const named = isPrint(team.stats) ? team.team : team.stats;
+  const teamUrl = named && isMaxPreps(named) ? named : null;
+  // The team's page, read at most once a run however many things want it.
+  let teamPage = null;
+  const readTeamPage = async () => {
+    if (!teamPage) {
+      teamPage = parseMaxPrepsTeam(await get(teamUrl));
+      if (!teamPage) throw new Error('that address is not a team’s page on MaxPreps');
+    }
+    return teamPage;
+  };
 
-    const path = join(root, 'public/oh/stats', `${team.slug}-${team.sport}.json`);
-    const kept = readJson(path);
+  try {
+    const onFile = readJson(path);
+    /*
+     * A team's page has the same address every year and its print page does
+     * not: the print address carries the season. So what was worked out is
+     * good for the season it was worked out in and no longer — reused past
+     * August it would go on fetching last year's finished stats, find them
+     * unchanged, and publish them under this year's name for ever. A file
+     * from another season is therefore not a cache, and not something to
+     * measure this season's page against either: week one is allowed to have
+     * fewer rows than last November.
+     */
+    const derived = !isPrint(team.stats);
+    const kept = derived && onFile && onFile.season !== seasonYear ? null : onFile;
+
+    let statsUrl = derived ? null : team.stats;
+    if (!statsUrl) {
+      statsUrl =
+        kept?.team === teamUrl && isMaxPreps(kept?.print) && isPrint(kept.print)
+          ? kept.print
+          : (await readTeamPage()).statsUrl;
+    }
+    // Where the numbers came from, kept only when it had to be worked out.
+    const origin = derived ? { season: seasonYear, team: teamUrl, print: statsUrl } : {};
+
+    const parsed = parseMaxPrepsStats(await get(statsUrl));
+    if (parsed.problems.length) {
+      // A new season with nothing entered yet. Last season's numbers must not
+      // stand in for it, so the old file goes rather than being "kept".
+      if (derived && onFile && !kept) {
+        rmSync(path, { force: true });
+        console.log(`${label}: no ${seasonYear} stats on MaxPreps yet — last season's file taken down`);
+        continue;
+      }
+      throw new Error(parsed.problems.join(' '));
+    }
+
     if (kept && parsed.rows.length < kept.rows.length / 2) {
       throw new Error(
         `only ${parsed.rows.length} rows where ${kept.rows.length} are published — kept what is there`,
@@ -201,20 +281,76 @@ for (const team of teams) {
       throw new Error(`${lost.join(', ')} published before and missing now — kept what is there`);
     }
 
-    if (kept && JSON.stringify(kept.rows) === JSON.stringify(parsed.rows)) {
+    const sameRows = kept && JSON.stringify(kept.rows) === JSON.stringify(parsed.rows);
+    if (sameRows && kept.team === origin.team && kept.print === origin.print && kept.season === origin.season) {
       console.log(`${label}: no change since ${kept.updated}`);
     } else {
       writeJson(path, {
         slug: team.slug,
         sport: team.sport,
         source: 'MaxPreps',
-        updated: today,
+        // The day the numbers changed, not the day the link did.
+        updated: sameRows ? kept.updated : today,
+        ...origin,
         rows: parsed.rows,
       });
       console.log(`${label}: ${parsed.rows.length} rows from ${parsed.tables.length} tables`);
     }
   } catch (err) {
     failures.push(`${label} stats: ${err.message}`);
+  }
+
+  /*
+   * The conference, once. It is who a school plays every year, so it is read
+   * when there is no file for it yet (or on --league) and then left alone: two
+   * more requests the first time, none after. What it writes is a suggestion
+   * the panel offers to fill the conference form with — the seller still looks
+   * at it and saves it — so a member it could not place is listed, not dropped.
+   */
+  const leaguePath = join(leagueDir, `${team.slug}-${team.sport}.json`);
+  let leagueOnFile = null;
+  try {
+    leagueOnFile = readJson(leaguePath);
+  } catch {
+    // An unreadable file is no file: it is read again and written over.
+  }
+  if (teamUrl && (forceLeague || leagueOnFile?.season !== seasonYear)) {
+    /*
+     * Whatever is found is written down, including nothing. The file is what
+     * says "this has been looked at this season"; without one for a team that
+     * has no conference, or whose conference cannot be placed, every run would
+     * ask again and fail again. Only a page that would not load is left
+     * unrecorded, because that is worth another try. An empty file offers the
+     * panel nothing — it reads a conference with nobody in it as no conference.
+     */
+    const record = (name, members, unmatched) =>
+      writeJson(leaguePath, {
+        slug: team.slug,
+        sport: team.sport,
+        source: 'MaxPreps',
+        season: seasonYear,
+        fetched: today,
+        name,
+        members,
+        unmatched,
+      });
+    try {
+      const { leagueUrl } = await readTeamPage();
+      const conference = leagueUrl ? parseMaxPrepsConference(await get(leagueUrl)) : null;
+      if (!conference) {
+        record('', [], []);
+        console.log(`${label}: MaxPreps lists no conference for it`);
+      } else {
+        const { members, unmatched } = matchConference(conference.teams, directory, team.slug, teamKey(teamUrl));
+        record(conference.name, members, unmatched);
+        console.log(
+          `${label}: ${conference.name}, ${members.length} placed` +
+            (unmatched.length ? `, could not place ${unmatched.join(', ')}` : ''),
+        );
+      }
+    } catch (err) {
+      failures.push(`${label} conference: ${err.message}`);
+    }
   }
 
   if (withRoster && team.roster) {
@@ -250,7 +386,26 @@ if (dbRows && existsSync(statsDir)) {
     if (!plainName(kept?.slug) || !plainName(kept?.sport) || name !== `${kept.slug}-${kept.sport}.json`) continue;
     if (wanted.has(keyOf(kept))) continue;
     rmSync(join(statsDir, name), { force: true });
+    rmSync(join(leagueDir, name), { force: true });
     console.log(`${keyOf(kept)}: no stats link in the database or the file — stats file taken down`);
+  }
+}
+
+// The same for a conference on file: one can outlive its stats file — the
+// stats page failed the day the conference was read — and nothing else would
+// ever come back for it.
+if (dbRows && existsSync(leagueDir)) {
+  const wanted = new Set([...dbNamed, ...fileTeams.map(keyOf)]);
+  for (const name of readdirSync(leagueDir).filter((n) => n.endsWith('.json'))) {
+    let kept;
+    try {
+      kept = readJson(join(leagueDir, name));
+    } catch {
+      continue;
+    }
+    if (!plainName(kept?.slug) || !plainName(kept?.sport) || name !== `${kept.slug}-${kept.sport}.json`) continue;
+    if (wanted.has(keyOf(kept))) continue;
+    rmSync(join(leagueDir, name), { force: true });
   }
 }
 

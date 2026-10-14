@@ -16,6 +16,7 @@ import {
   todayIso,
   toPlayers,
 } from './saveArgs';
+import { loadLeagueSuggestion, type LeagueSuggestion } from './leagueSuggest';
 import { capital, rowIsLive, SPORTS } from './schools';
 import { Sources } from './SourceLinks';
 import { rowProblems } from './sources';
@@ -84,7 +85,7 @@ function StatsSource({ row, onSaved }: { row: RosterRow; onSaved: () => void }) 
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://www.maxpreps.com/print/team_stats.aspx?…"
+          placeholder="https://www.maxpreps.com/oh/town/school-mascot/football/"
           aria-label="MaxPreps stats link"
         />
         <button
@@ -97,8 +98,8 @@ function StatsSource({ row, onSaved }: { row: RosterRow; onSaved: () => void }) 
         </button>
       </div>
       <p className="mg-hint">
-        On the team’s MaxPreps Stats page, copy the address of the Print link at the bottom. Numbers appear after the
-        next scheduled run.
+        Open the team’s football page on MaxPreps and copy its address. Stats appear after the next scheduled run, and
+        the conference can then be filled in from MaxPreps too.
       </p>
       {(problem || error) && <p className="mg-error">{problem ?? error}</p>}
     </>
@@ -182,6 +183,29 @@ export function SportCard({
    * stored — exactly what it did before. Never over anything already typed.
    */
   const leagueTouched = useRef(false);
+
+  /*
+   * The conference as MaxPreps lists it, when the stats job has left one on
+   * file for this team. Offered, never applied: the button puts it in the form
+   * below, where it is looked at and saved like anything typed there.
+   */
+  const [suggested, setSuggested] = useState<LeagueSuggestion | null>(null);
+  const known = useMemo(() => new Set(schools.map((s) => s.slug)), [schools]);
+  useEffect(() => {
+    setSuggested(null);
+    if (!football || known.size === 0) return;
+    let current = true;
+    loadLeagueSuggestion(slug, sport, known)
+      .then((found) => {
+        if (current) setSuggested(found);
+      })
+      .catch(() => {
+        /* no suggestion is the ordinary case */
+      });
+    return () => {
+      current = false;
+    };
+  }, [slug, sport, football, known]);
   useEffect(() => {
     if (!row?.has_league || !rowIsLive(row, todayIso())) return;
     let current = true;
@@ -530,6 +554,34 @@ export function SportCard({
                   ? 'One is stored. Fill this in to replace it.'
                   : 'None. The page has no League tab.'}
           </p>
+          {suggested && (
+            <div className="mg-source">
+              <p className="mg-state">
+                {suggested.source || 'A source'} lists {suggested.name} with {suggested.members.length} other{' '}
+                {suggested.members.length === 1 ? 'school' : 'schools'}.
+              </p>
+              {suggested.unmatched.length > 0 && (
+                <p className="mg-hint">
+                  Couldn’t place {suggested.unmatched.join(', ')} in the directory — add {suggested.unmatched.length === 1 ? 'it' : 'them'} by hand.
+                </p>
+              )}
+              <div className="mg-actions">
+                <button
+                  type="button"
+                  className="mg-btn is-small"
+                  onClick={() => {
+                    setLeagueName(suggested.name);
+                    setLeagueMembers(suggested.members);
+                    setLeagueQuery('');
+                    touchLeague();
+                  }}
+                >
+                  Fill from {suggested.source || 'it'}
+                </button>
+              </div>
+              <p className="mg-hint">Check the list, then save the card.</p>
+            </div>
+          )}
           <input
             className="mg-input"
             type="text"
@@ -538,7 +590,7 @@ export function SportCard({
               setLeagueName(e.target.value);
               touchLeague();
             }}
-            placeholder="Conference name — it heads the table"
+            placeholder="Conference name, as it should head the table"
             aria-label="Conference name"
           />
           <input
@@ -546,7 +598,7 @@ export function SportCard({
             type="search"
             value={leagueQuery}
             onChange={(e) => setLeagueQuery(e.target.value)}
-            placeholder="Add a school to the conference"
+            placeholder="Add the other schools — this one is included automatically"
             aria-label="Search for a school to add to the conference"
           />
           {leagueQuery.trim() !== '' && (
