@@ -439,6 +439,8 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const ground = look?.colors?.ground ?? null;
   const accent = look?.colors?.accent ?? null;
   const text = look?.colors?.text ?? null;
+  const plate = look?.colors?.plate ?? null;
+  const nickname = look?.colors?.nickname ?? null;
   const crest = look?.logo ?? null;
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
@@ -459,9 +461,9 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // page through the default theme and back.
   useEffect(() => {
     if (!ground || !accent) return;
-    applyLook({ ground, accent, text: text ?? undefined, logo: crest ?? undefined });
+    applyLook({ ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined });
     return () => clearLook();
-  }, [ground, accent, text, crest]);
+  }, [ground, accent, text, plate, crest]);
 
   // A school that is live on the paid tier installs as itself — its name, its
   // crest, straight onto its page (src/oh/install.ts). The identity answering
@@ -697,9 +699,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     );
   }
 
+  // "Springfield Tigers" where the seller gave the nickname. The directory
+  // only knows the school's name, so a free page never has one.
+  const fullName = nickname ? `${season.school.name} ${nickname}` : season.school.name;
+
   const headline = (
     <>
-      <h1 className="next-card-opponent">{season.school.name}</h1>
+      <h1 className="next-card-opponent">{fullName}</h1>
       <p className="filter-line">
         <span>
           {season.school.city}
@@ -830,7 +836,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
             <div className="oh-hub-crest" aria-hidden="true" />
           )}
           <div>
-            <h1 className="oh-hub-name">{season.school.name}</h1>
+            <h1 className="oh-hub-name">{fullName}</h1>
             {/* No win-loss line here: the hub is in front of every sport this
                 school sells, and a football record under the school's name
                 would be a claim about all of them. */}

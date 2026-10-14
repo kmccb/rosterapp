@@ -63,6 +63,21 @@ describe('roster cache plumbing', () => {
     expect(parseCached(JSON.stringify(bad))?.colors).toEqual({ ground: '#c84f0f', accent: '#222222' });
   });
 
+  it('keeps a nickname and a crest plate alongside the colors, and drops only them when they are junk', () => {
+    const base = { season: 2026, players: [], logo: null, schedule: null, league: null };
+    const pair = { ground: '#c84f0f', accent: '#222222' };
+    const read = (extra: Record<string, unknown>) => parseCached(JSON.stringify({ ...base, colors: { ...pair, ...extra } }))?.colors;
+
+    expect(read({ nickname: '  Golden   Bears ', plate: 'ground' })).toEqual({ ...pair, nickname: 'Golden Bears', plate: 'ground' });
+    expect(read({ plate: 'accent' })).toEqual({ ...pair, plate: 'accent' });
+    expect(read({ plate: '#ffffff' })).toEqual({ ...pair, plate: '#ffffff' });
+    // A plate that is neither word nor hex, a blank or overlong nickname: the
+    // pair still paints the page, without them.
+    expect(read({ plate: 'white', nickname: '   ' })).toEqual(pair);
+    expect(read({ nickname: 'x'.repeat(25) })).toEqual(pair);
+    expect(read({ nickname: 7 })).toEqual(pair);
+  });
+
   it('accepts a logo only as a data:image/ URI, defaulting anything else to none', () => {
     const dataUri = 'data:image/jpeg;base64,AAAA';
     const good = { season: 2026, players: [], colors: null, logo: dataUri, schedule: null, league: null };

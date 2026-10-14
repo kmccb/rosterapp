@@ -48,6 +48,9 @@
   height: 44px;
   border-radius: 10px;
   object-fit: cover;
+  /* The plate the seller chose, or nothing: a crest is stored with its
+     backdrop lifted off, so without one it sits on the header's own colour. */
+  background: var(--crest-plate, transparent);
 }
 
 /* The keypad's readout. Nothing on this screen shows what's been tapped
@@ -808,6 +811,7 @@
   height: 40px;
   border-radius: 8px;
   object-fit: cover;
+  background: var(--crest-plate, transparent);
 }
 
 .mg-preview-name {
@@ -982,6 +986,12 @@
   border-radius: 10px;
   object-fit: cover;
   background: var(--surface-2);
+}
+
+/* The empty square above stands in for a crest not sent yet; a real one sits
+   on the chosen plate, or on nothing. */
+img.oh-hub-crest {
+  background: var(--crest-plate, transparent);
 }
 
 .oh-hub-name {
