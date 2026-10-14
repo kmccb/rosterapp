@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { School } from '../../ohio/stateModel';
-import { deriveVars, resizeLogo } from '../look';
+import { deriveVars, lookNotes, resizeLogo } from '../look';
 import { loadSchoolSports, NICKNAME_MAX } from '../rosterStore';
 import { upsertRoster, type RosterRow } from './adminApi';
 import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIso } from './saveArgs';
@@ -156,6 +156,9 @@ export function SchoolPage({
     () => deriveVars({ ground, accent, text, plate, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
     [ground, accent, text, plate, shownLogo],
   );
+  // The preview already shows a color moved to stay readable; this says why it
+  // no longer matches the swatch, rather than refusing the color.
+  const colorNotes = useMemo(() => lookNotes({ ground, accent, text }), [ground, accent, text]);
 
   const lookDirty =
     ground !== (stored?.ground ?? DEFAULT_COLORS.ground) ||
@@ -328,6 +331,7 @@ export function SchoolPage({
                 </button>
               )}
             </div>
+            {colorNotes.length > 0 && <p className="mg-hint">{colorNotes.join('. ')}.</p>}
             <div className="mg-part">
               <div className="mg-part-label">Nickname</div>
               <div className="mg-part-body">

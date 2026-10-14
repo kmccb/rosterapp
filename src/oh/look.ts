@@ -19,38 +19,33 @@
  */
 
 import { liftBackdrop } from './backdrop';
+import { bestInk, contrast, luminance, mix, readable } from './contrast';
+import { plateColor, type CrestPlate } from './plate';
 
-/**
- * What a crest sits on. A crest is stored with its backdrop lifted off, so on
- * its own it floats on the page's ground — which reads well for a tiger on
- * orange and badly for a navy crest on navy. The seller can put it back on a
- * plate: the school's own ground or accent, kept as a word so the plate follows
- * the colors when they change, or any hex at all (white is the usual one).
- */
-export type CrestPlate = 'ground' | 'accent' | string;
+// The plate rule lives in ./plate so the home-screen icon script can share it.
+export { plateColor, type CrestPlate };
 
 /** `text` is optional: a school that never chose one reads in white, as every
  * school did before there was a third color to choose. `plate` is optional the
  * same way: none means the crest sits straight on the page. */
 export type SchoolLook = { ground: string; accent: string; text?: string; plate?: CrestPlate; logo?: string };
 
-/** The plate as a CSS color, or 'transparent' for none — or for a value that is
- * neither of the two words nor a hex, which is treated as no choice at all. */
-export function plateColor(look: Pick<SchoolLook, 'ground' | 'accent' | 'plate'>): string {
-  const { plate } = look;
-  if (plate === 'ground') return look.ground;
-  if (plate === 'accent') return look.accent;
-  return plate && /^#[0-9a-f]{6}$/i.test(plate) ? plate : 'transparent';
-}
+/** Which way round a paid page is painted. Dark — the school's ground behind
+ * light words — is how every page has always looked and stays the default;
+ * light is what a fan can switch to (src/oh/mode.ts). */
+export type Mode = 'dark' | 'light';
 
 /** An element-like target for CSS custom properties — real usage defaults to
  * document.documentElement; tests pass a recording stub, since the vitest
- * environment for this project is `node` and has no DOM. */
+ * environment for this project is `node` and has no DOM. The attribute calls
+ * are optional so a stub that only records styles still serves. */
 export type StyleTarget = {
   style: {
     setProperty(name: string, value: string): void;
     removeProperty(name: string): void;
   };
+  setAttribute?(name: string, value: string): void;
+  removeAttribute?(name: string): void;
 };
 
 const rgba = (hex: string, alpha: number): string => {
@@ -58,18 +53,14 @@ const rgba = (hex: string, alpha: number): string => {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 };
 
-/** Moves a hex color a fraction `t` of the way toward another. */
-const mix = (from: string, to: string, t: number): string => {
-  const a = parseInt(from.slice(1), 16);
-  const b = parseInt(to.slice(1), 16);
-  const chan = (shift: number) => {
-    const av = (a >> shift) & 255;
-    const bv = (b >> shift) & 255;
-    return Math.round(av + (bv - av) * t);
-  };
-  const to2 = (v: number) => v.toString(16).padStart(2, '0');
-  return `#${to2(chan(16))}${to2(chan(8))}${to2(chan(0))}`;
-};
+const isHex = (v: string | undefined): v is string => !!v && /^#[0-9a-f]{6}$/i.test(v);
+
+/** The dark offered for ink on an accent fill when the ground itself is too
+ * light to read there — not pure black, which looks like a hole on a phone. */
+const NEAR_BLACK = '#111111';
+
+/** The attribute on <html> that oh.css keys its light-mode overrides on. */
+export const MODE_ATTR = 'data-oh-mode';
 
 /**
  * Every CSS custom property applyLook sets and clearLook removes. Kept as one
@@ -82,63 +73,187 @@ export const LOOK_VARS = [
   '--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom', '--crest-plate',
 ] as const;
 
+/** The page's background in a mode: the ground itself, or in light mode a
+ * near-white with just enough of the ground in it to still be this school's. */
+export const pageGround = (ground: string, mode: Mode = 'dark'): string =>
+  mode === 'light' ? mix(ground, '#ffffff', 0.94) : ground;
+
+/** How colorful a color is: the spread of its channels, 0 for any grey. */
+const chroma = (hex: string): number => {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  return (Math.max(...c) - Math.min(...c)) / 255;
+};
+
+/** Below this a color reads as a grey, black or white rather than a hue. */
+const NEUTRAL = 0.08;
+/** Closer than this, two colors count as equally colorful. */
+const NEAR_TIE = 0.05;
+
 /**
- * Works out every CSS variable value from the two colors a school's fetch
- * hands over. Pure, so the exact numbers can be pinned in tests rather than
- * eyeballed on a phone.
+ * Which school color the light page carries as its accent — the active tab's
+ * underline, the jersey numbers, the section labels.
+ *
+ * The more colorful of the two, because on near-white a school is known by
+ * its hue: a black ground with an orange accent must come out orange (made
+ * dark enough to read by readable()), not black, or the light page is
+ * anybody's. On a near-tie the ground wins, being the color the school is
+ * painted in. Only when both are greys does it fall back to whichever stands
+ * out more on the light background.
  */
-export function deriveVars(look: SchoolLook): Record<string, string> {
-  const { ground, accent, logo } = look;
-  const chosenText = look.text && /^#[0-9a-f]{6}$/i.test(look.text) ? look.text : null;
+export function lightAccent(ground: string, accent: string, bg: string): string {
+  const g = chroma(ground);
+  const a = chroma(accent);
+  if (g < NEUTRAL && a < NEUTRAL) return contrast(ground, bg) >= contrast(accent, bg) ? ground : accent;
+  return a > g + NEAR_TIE ? accent : ground;
+}
+
+/** The colors the page is painted in, with the ones used for words both as
+ * chosen and as made readable — what deriveVars paints with, and what the
+ * panel's hint reads. */
+type Words = {
+  bg: string;
+  /** The card color, laid over the page at 72% and 90%. */
+  surface: string;
+  text: string;
+  muted: string;
+  accent: string;
+  chosen: { text: string; muted: string; accent: string };
+};
+
+function words(look: SchoolLook, mode: Mode): Words {
+  const { ground, accent } = look;
+  const bg = pageGround(ground, mode);
+  const chosenText = isHex(look.text) ? look.text : null;
 
   // A step up from the ground, the way palette.ts's surface is a step up from
   // its own ground — but built by mixing toward white rather than by a second
-  // HSL pass, since this module only has two colors to work with.
-  const surface = mix(ground, '#ffffff', 0.16);
+  // HSL pass, since this module only has two colors to work with. In light
+  // mode the step up from a near-white page is white itself.
+  const surface = mode === 'light' ? '#ffffff' : mix(ground, '#ffffff', 0.16);
+  // Cards are that surface at 72% over the page, and a word on a card is read
+  // against what that comes out as, not against the surface alone.
+  const grounds = [bg, mix(bg, surface, 0.72)];
+
+  if (mode === 'light') {
+    // A chosen text color was chosen for the ground, and a light page needs
+    // its opposite: near-black, carrying a trace of the ground so it is the
+    // school's black rather than the browser's.
+    const rawText = mix(ground, '#000000', 0.82);
+    const text = readable(rawText, grounds);
+    const rawMuted = mix(text, bg, 0.35);
+    const rawAccent = lightAccent(ground, accent, bg);
+    return {
+      bg,
+      surface,
+      text,
+      muted: readable(rawMuted, grounds),
+      accent: readable(rawAccent, grounds),
+      chosen: { text: rawText, muted: rawMuted, accent: rawAccent },
+    };
+  }
+
+  const rawText = chosenText ?? '#ffffff';
+  const text = readable(rawText, grounds);
   // The second voice — a player's details, a heading over a list. Lightened
   // from the accent when the text is white, as it always was; taken from the
   // chosen text when there is one, a third of the way back toward the ground,
   // because a school that picks dark text on a light ground would otherwise
   // get its details in a pale accent nobody could read.
-  const muted = chosenText ? mix(chosenText, ground, 0.35) : mix(accent, '#ffffff', 0.55);
-  const text = chosenText ?? '#ffffff';
-  // No badge to sample for an ink color here, so the ground stands in — the
-  // same dark that reads against white text reads against the accent too,
-  // for every accent this derivation is asked to lighten toward readability.
-  const accentInk = ground;
+  const rawMuted = chosenText ? mix(text, ground, 0.35) : mix(accent, '#ffffff', 0.55);
 
   return {
-    '--bg': ground,
-    '--chrome': rgba(ground, 0.82),
-    '--surface': rgba(surface, 0.72),
-    '--surface-2': rgba(surface, 0.9),
-    '--line': rgba(muted, 0.24),
-    '--text': text,
-    '--muted': muted,
-    '--accent': accent,
+    bg,
+    surface,
+    text,
+    muted: readable(rawMuted, grounds),
+    accent: readable(accent, grounds),
+    chosen: { text: rawText, muted: rawMuted, accent },
+  };
+}
+
+/**
+ * Works out every CSS variable value from the two colors a school's fetch
+ * hands over. Pure, so the exact numbers can be pinned in tests rather than
+ * eyeballed on a phone.
+ *
+ * The three colors used for words — text, muted and accent — are passed
+ * through readable() against the page and the card surface, so a school
+ * can choose any colors at all and still be read; colors that already work
+ * come through untouched. The ghost numeral and the hairlines are decoration,
+ * and keep the school's colors as chosen.
+ *
+ * Light mode is the same page turned over: a near-white tinted with the
+ * ground, near-black words, and the scrims over the crest built from that
+ * near-white at the same strengths, so the crest is exactly as faint.
+ */
+export function deriveVars(look: SchoolLook, mode: Mode = 'dark'): Record<string, string> {
+  const { ground, logo } = look;
+  const w = words(look, mode);
+  const { bg } = w;
+  // Ink on an accent fill — the active tab, a filled button. The ground was
+  // always the answer and still is when it reads best; an accent the ground
+  // cannot be read on gets near-black or white instead.
+  const accentInk = bestInk(w.accent, [ground, NEAR_BLACK, '#ffffff']);
+
+  return {
+    '--bg': bg,
+    '--chrome': rgba(bg, 0.82),
+    '--surface': rgba(w.surface, 0.72),
+    '--surface-2': rgba(w.surface, 0.9),
+    '--line': rgba(w.chosen.muted, 0.24),
+    '--text': w.text,
+    '--muted': w.muted,
+    '--accent': w.accent,
     '--accent-ink': accentInk,
-    '--ghost': rgba(accent, 0.22),
+    '--ghost': rgba(w.chosen.accent, 0.22),
     '--wallpaper': logo ? `url("${logo}")` : 'none',
-    '--scrim-near': rgba(ground, 0.78),
-    '--scrim-far': rgba(ground, 0.93),
-    '--scrim-top': rgba(ground, 0.72),
-    '--scrim-bottom': rgba(ground, 0.88),
+    '--scrim-near': rgba(bg, 0.78),
+    '--scrim-far': rgba(bg, 0.93),
+    '--scrim-top': rgba(bg, 0.72),
+    '--scrim-bottom': rgba(bg, 0.88),
     '--crest-plate': plateColor(look),
   };
 }
 
-const defaultTarget = (): StyleTarget => document.documentElement as unknown as StyleTarget;
-
-/** Writes every variable deriveVars produces onto the target's style. */
-export function applyLook(look: SchoolLook, target: StyleTarget = defaultTarget()): void {
-  const vars = deriveVars(look);
-  for (const name of LOOK_VARS) target.style.setProperty(name, vars[name]);
+/**
+ * What the panel says under the color pickers when a color was moved to stay
+ * readable. The second voice is derived rather than picked, and a hint about
+ * a color nobody can choose would only puzzle, so it is left out. The color is
+ * never refused: the page shows the adjusted one, and the seller is told why
+ * it looks different from the swatch. Only the dark page is reported — it is
+ * the one the preview shows, and light mode is built rather than chosen.
+ */
+export function lookNotes(look: SchoolLook): string[] {
+  const w = words(look, 'dark');
+  const moved = (label: string, from: string, to: string) =>
+    from.toLowerCase() === to.toLowerCase()
+      ? []
+      : [`${label} ${luminance(to) > luminance(from) ? 'lightened' : 'darkened'} so it reads on the ground`];
+  return [
+    ...moved('Accent', w.chosen.accent, w.accent),
+    // White is the text nobody chose, but a page whose text has turned dark
+    // is the biggest change of all, so it is reported the same.
+    ...moved('Text', w.chosen.text, w.text),
+  ];
 }
 
-/** Removes exactly the variables applyLook can set, leaving the stylesheet's
- * own defaults in charge. */
+const defaultTarget = (): StyleTarget => document.documentElement as unknown as StyleTarget;
+
+/** Writes every variable deriveVars produces onto the target's style, and marks
+ * the mode on it for the few rules oh.css has to turn over by hand. */
+export function applyLook(look: SchoolLook, target: StyleTarget = defaultTarget(), mode: Mode = 'dark'): void {
+  const vars = deriveVars(look, mode);
+  for (const name of LOOK_VARS) target.style.setProperty(name, vars[name]);
+  target.setAttribute?.(MODE_ATTR, mode);
+}
+
+/** Removes exactly what applyLook can set, leaving the stylesheet's own
+ * defaults in charge — the mode mark too, so a free page shown after a paid
+ * one is never left turned light. */
 export function clearLook(target: StyleTarget = defaultTarget()): void {
   for (const name of LOOK_VARS) target.style.removeProperty(name);
+  target.removeAttribute?.(MODE_ATTR);
 }
 
 // ------------------------------------------------------------------ badge

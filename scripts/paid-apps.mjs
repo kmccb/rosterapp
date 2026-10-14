@@ -6,7 +6,7 @@
  * opened the school picker. A school that pays gets better: for each slug in
  * paid-schools.json this writes public/oh/apps/<slug>/ — a manifest that
  * names the school and opens straight onto its page, and icons cut from the
- * crest the seller uploaded, on the school's own ground. The page links them
+ * crest the seller uploaded, on the plate chosen for it or the school's ground. The page links them
  * in once it knows the school is live (src/oh/install.ts).
  *
  * The crest lives in the database, not the repository, so this asks for it —
@@ -28,6 +28,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { icon, liftBackdrop, monogram } from './lib/school-icon.mjs';
+// The page's own rule for the crest's plate, so the icon and the page agree.
+import { iconTile } from '../src/oh/plate.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'public/oh/apps');
@@ -82,16 +84,22 @@ async function main() {
           : null;
       const school = index.find((s) => s.slug === slug);
       const name = school?.name ?? slug;
+      // The tile under the crest is the plate the seller chose in the panel, so
+      // the installed app looks like the crest on the page; with no plate it is
+      // the ground, as it always was. The manifest's colors stay the ground:
+      // they paint the splash screen and the status bar, not the crest.
+      // A monogram is a square of ground already; a plate is only for a crest.
+      const tile = crest ? iconTile({ ground, accent, plate: identity.colors?.plate }) : ground;
       const art = crest ? await liftBackdrop(crest) : await sharp(monogram(name, accent, ground)).png().toBuffer();
 
       const dir = join(outDir, slug);
       mkdirSync(dir, { recursive: true });
       // The maskable one keeps the crest inside the circle Android may cut it
       // to; the rest leave the tenth of a margin Poland's icons do.
-      writeFileSync(join(dir, 'icon-192.png'), await icon(art, ground, 192, 0.1));
-      writeFileSync(join(dir, 'icon-512.png'), await icon(art, ground, 512, 0.1));
-      writeFileSync(join(dir, 'icon-maskable-512.png'), await icon(art, ground, 512, 0.18));
-      writeFileSync(join(dir, 'apple-touch-icon.png'), await icon(art, ground, 180, 0.1));
+      writeFileSync(join(dir, 'icon-192.png'), await icon(art, tile, 192, 0.1));
+      writeFileSync(join(dir, 'icon-512.png'), await icon(art, tile, 512, 0.1));
+      writeFileSync(join(dir, 'icon-maskable-512.png'), await icon(art, tile, 512, 0.18));
+      writeFileSync(join(dir, 'apple-touch-icon.png'), await icon(art, tile, 180, 0.1));
       writeFileSync(
         join(dir, 'manifest.webmanifest'),
         JSON.stringify(
