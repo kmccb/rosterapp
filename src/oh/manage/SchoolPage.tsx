@@ -87,9 +87,15 @@ export function SchoolPage({
   // Both empty until chosen: no nickname after the name, no plate behind the crest.
   const [nickname, setNickname] = useState(stored?.nickname ?? '');
   const [plate, setPlate] = useState(stored?.plate ?? '');
-  const nick = nickname.replace(/\s+/g, ' ').trim();
+  // Custom is a mode of its own, not read off the value: a custom pick that
+  // happens to be pure white must not snap the menu back to White and hide
+  // the picker under the seller's cursor.
+  const [customPlate, setCustomPlate] = useState(false);
+  const squash = (v: string) => v.replace(/\s+/g, ' ').trim();
+  const nick = squash(nickname);
   const colors = { ground, accent, text, ...(nick ? { nickname: nick } : {}), ...(plate ? { plate } : {}) };
-  const plateChoice = PLATES.some((p) => p.value === plate) ? plate : CUSTOM;
+  const plateChoice = customPlate || !PLATES.some((p) => p.value === plate) ? CUSTOM : plate;
+  const isHex = (v: string) => /^#[0-9a-f]{6}$/i.test(v);
   // themeArg's three states: a fresh upload sets it, cleared wipes it, neither keeps it.
   const [logoData, setLogoData] = useState<string | null>(null);
   const [logoCleared, setLogoCleared] = useState(false);
@@ -155,7 +161,7 @@ export function SchoolPage({
     ground !== (stored?.ground ?? DEFAULT_COLORS.ground) ||
     accent !== (stored?.accent ?? DEFAULT_COLORS.accent) ||
     text !== (stored?.text ?? DEFAULT_COLORS.text) ||
-    nick !== (stored?.nickname ?? '') ||
+    nick !== squash(stored?.nickname ?? '') ||
     plate !== (stored?.plate ?? '') ||
     logoData !== null ||
     logoCleared;
@@ -337,7 +343,7 @@ export function SchoolPage({
                 <p className="mg-hint">Shown after the name: “{nick ? `${name} ${nick}` : name}”.</p>
               </div>
             </div>
-            {shownLogo && (
+            {(shownLogo || (hasStoredLogo && !logoCleared)) && (
               <div className="mg-part">
                 <div className="mg-part-label">Crest fill</div>
                 <div className="mg-part-body">
@@ -345,7 +351,12 @@ export function SchoolPage({
                     <select
                       className="mg-input"
                       value={plateChoice}
-                      onChange={(e) => setPlate(e.target.value === CUSTOM ? plate || '#ffffff' : e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setCustomPlate(v === CUSTOM);
+                        // Custom starts from the hex already chosen, else from the ground.
+                        setPlate(v === CUSTOM ? (isHex(plate) ? plate : ground) : v);
+                      }}
                       aria-label="Crest fill"
                     >
                       {PLATES.map((p) => (
@@ -357,7 +368,12 @@ export function SchoolPage({
                     </select>
                     {plateChoice === CUSTOM && (
                       <label className="mg-swatch">
-                        <input type="color" value={plate} onChange={(e) => setPlate(e.target.value)} />
+                        <input
+                          type="color"
+                          value={isHex(plate) ? plate : ground}
+                          onChange={(e) => setPlate(e.target.value)}
+                          aria-label="Custom crest fill"
+                        />
                       </label>
                     )}
                   </div>
