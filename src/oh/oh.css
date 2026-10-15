@@ -709,6 +709,76 @@
   cursor: pointer;
 }
 
+/* The light pickers while the page works its light colors out by itself:
+   still showing what fans get, but plainly not for changing. */
+.mg-look.is-off .mg-swatch {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mg-look.is-off .mg-swatch input {
+  cursor: default;
+}
+
+.mg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mg-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--mg-primary);
+}
+
+.mg-check:focus-within {
+  outline: 2px solid var(--mg-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The preview's caption and its Dark/Light switch on one line. */
+.mg-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mg-seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 8px;
+  background: var(--mg-card);
+}
+
+.mg-seg button {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--mg-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mg-seg button[aria-pressed='true'] {
+  background: var(--mg-primary);
+  color: var(--mg-on-primary);
+}
+
+.mg-seg button:focus-visible {
+  outline: 2px solid var(--mg-focus);
+  outline-offset: 1px;
+}
+
 /* What the parser made of a paste, to be looked at before it is saved. */
 .mg-review {
   max-height: 260px;

@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { School } from '../../ohio/stateModel';
-import { deriveVars, lookNotes, resizeLogo } from '../look';
+import { deriveVars, derivedLight, resizeLogo, type LightColors, type Mode } from '../look';
 import { loadSchoolSports, NICKNAME_MAX } from '../rosterStore';
-import { upsertRoster, type RosterRow } from './adminApi';
+import { upsertRoster, type PanelColors, type RosterRow } from './adminApi';
 import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIso } from './saveArgs';
+import { colorHint, colorsChanged, DEFAULT_COLORS, panelColors } from './lookColors';
 import { capital, longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
 import { SportCard } from './SportCard';
-
-const DEFAULT_COLORS = { ground: '#04043a', accent: '#4fbaf7', text: '#ffffff' };
 
 type Section = 'look' | 'billing';
 
@@ -24,7 +23,7 @@ type Upsert = Parameters<typeof upsertRoster>[0];
 
 /** A row's own facts, sent back unchanged around whichever one is being edited.
  * `p_colors` is the one argument with no "keep", so it is always spelled out. */
-const unchanged = (row: RosterRow, colors: { ground: string; accent: string; text?: string; nickname?: string; plate?: string }): Upsert => ({
+const unchanged = (row: RosterRow, colors: PanelColors): Upsert => ({
   slug: row.school_slug,
   sport: row.sport,
   season: row.season,
@@ -93,7 +92,26 @@ export function SchoolPage({
   const [customPlate, setCustomPlate] = useState(false);
   const squash = (v: string) => v.replace(/\s+/g, ' ').trim();
   const nick = squash(nickname);
-  const colors = { ground, accent, text, ...(nick ? { nickname: nick } : {}), ...(plate ? { plate } : {}) };
+
+  // The light page, chosen or worked out. Unticked, the pickers show the light
+  // page fans get from the dark colors and are disabled; the first tick starts
+  // them from exactly that, so the seller begins from what is already there.
+  // Unticking keeps what was picked on screen, for a change of mind, but a
+  // save then leaves it out and the page goes back to working it out.
+  const [lightOn, setLightOn] = useState(!!stored?.light);
+  const [lightPicked, setLightPicked] = useState<LightColors | null>(stored?.light ?? null);
+  const lightDerived = useMemo(() => derivedLight({ ground, accent, text }), [ground, accent, text]);
+  const lightShown = lightOn && lightPicked ? lightPicked : lightDerived;
+  const light = lightOn ? lightShown : null;
+  const setLight = (key: keyof LightColors, value: string) => setLightPicked({ ...lightShown, [key]: value });
+  const tickLight = (on: boolean) => {
+    if (on && !lightPicked) setLightPicked(lightDerived);
+    setLightOn(on);
+  };
+  const [previewMode, setPreviewMode] = useState<Mode>('dark');
+
+  const lookState = { ground, accent, text, nickname: nick, plate, light };
+  const colors = panelColors(lookState);
   const plateChoice = customPlate || !PLATES.some((p) => p.value === plate) ? CUSTOM : plate;
   const isHex = (v: string) => /^#[0-9a-f]{6}$/i.test(v);
   // themeArg's three states: a fresh upload sets it, cleared wipes it, neither keeps it.
@@ -153,21 +171,21 @@ export function SchoolPage({
 
   const shownLogo = logoData ?? (logoCleared ? null : storedLogo);
   const previewStyle = useMemo(
-    () => deriveVars({ ground, accent, text, plate, logo: shownLogo ?? undefined }) as unknown as CSSProperties,
-    [ground, accent, text, plate, shownLogo],
+    () =>
+      deriveVars(
+        { ground, accent, text, plate, logo: shownLogo ?? undefined, light: light ?? undefined },
+        previewMode,
+      ) as unknown as CSSProperties,
+    [ground, accent, text, plate, shownLogo, light, previewMode],
   );
   // The preview already shows a color moved to stay readable; this says why it
   // no longer matches the swatch, rather than refusing the color.
-  const colorNotes = useMemo(() => lookNotes({ ground, accent, text }), [ground, accent, text]);
+  const colorNote = colorHint(lookState);
+  // A crest kept as a JPEG has a solid square behind it, so no fill can show
+  // through: only crests stored since backdrops were lifted off are clear.
+  const solidCrest = !!shownLogo?.startsWith('data:image/jpeg');
 
-  const lookDirty =
-    ground !== (stored?.ground ?? DEFAULT_COLORS.ground) ||
-    accent !== (stored?.accent ?? DEFAULT_COLORS.accent) ||
-    text !== (stored?.text ?? DEFAULT_COLORS.text) ||
-    nick !== squash(stored?.nickname ?? '') ||
-    plate !== (stored?.plate ?? '') ||
-    logoData !== null ||
-    logoCleared;
+  const lookDirty = colorsChanged(stored, lookState) || logoData !== null || logoCleared;
   const dateDirty = paidThrough !== (latest ?? defaultPaidThrough());
   const noteDirty = note !== storedNote;
   const billingDirty = dateDirty || noteDirty;
@@ -294,19 +312,69 @@ export function SchoolPage({
         <div className="mg-main">
           <section className="mg-card">
             <h2 className="mg-card-title">Look</h2>
+            <div className="mg-part">
+              <div className="mg-part-label">Dark mode</div>
+              <div className="mg-part-body">
+                <div className="mg-look">
+                  <label className="mg-swatch">
+                    <input type="color" value={ground} onChange={(e) => setGround(e.target.value)} />
+                    Ground
+                  </label>
+                  <label className="mg-swatch">
+                    <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
+                    Accent
+                  </label>
+                  <label className="mg-swatch">
+                    <input type="color" value={text} onChange={(e) => setText(e.target.value)} />
+                    Text
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="mg-part">
+              <div className="mg-part-label">Light mode</div>
+              <div className="mg-part-body">
+                <label className="mg-check">
+                  <input type="checkbox" checked={lightOn} onChange={(e) => tickLight(e.target.checked)} />
+                  Choose light colors myself
+                </label>
+                <div className={`mg-look${lightOn ? '' : ' is-off'}`}>
+                  <label className="mg-swatch">
+                    <input
+                      type="color"
+                      value={lightShown.ground}
+                      disabled={!lightOn}
+                      onChange={(e) => setLight('ground', e.target.value)}
+                      aria-label="Light mode ground"
+                    />
+                    Ground
+                  </label>
+                  <label className="mg-swatch">
+                    <input
+                      type="color"
+                      value={lightShown.accent}
+                      disabled={!lightOn}
+                      onChange={(e) => setLight('accent', e.target.value)}
+                      aria-label="Light mode accent"
+                    />
+                    Accent
+                  </label>
+                  <label className="mg-swatch">
+                    <input
+                      type="color"
+                      value={lightShown.text}
+                      disabled={!lightOn}
+                      onChange={(e) => setLight('text', e.target.value)}
+                      aria-label="Light mode text"
+                    />
+                    Text
+                  </label>
+                </div>
+                {!lightOn && <p className="mg-hint">Worked out from the dark colors.</p>}
+              </div>
+            </div>
+            {colorNote && <p className="mg-hint">{colorNote}</p>}
             <div className="mg-look">
-              <label className="mg-swatch">
-                <input type="color" value={ground} onChange={(e) => setGround(e.target.value)} />
-                Ground
-              </label>
-              <label className="mg-swatch">
-                <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
-                Accent
-              </label>
-              <label className="mg-swatch">
-                <input type="color" value={text} onChange={(e) => setText(e.target.value)} />
-                Text
-              </label>
               <label className="mg-btn is-small mg-file">
                 {hasStoredLogo || logoData ? 'Replace crest' : 'Upload a crest'}
                 <input
@@ -331,7 +399,6 @@ export function SchoolPage({
                 </button>
               )}
             </div>
-            {colorNotes.length > 0 && <p className="mg-hint">{colorNotes.join('. ')}.</p>}
             <div className="mg-part">
               <div className="mg-part-label">Nickname</div>
               <div className="mg-part-body">
@@ -382,6 +449,12 @@ export function SchoolPage({
                     )}
                   </div>
                   <p className="mg-hint">What shows through the clear parts of the crest.</p>
+                  {solidCrest && (
+                    <p className="mg-hint">
+                      This crest has a solid background, so a fill won’t show behind it. Upload the crest again to
+                      store it with a clear background.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -536,7 +609,17 @@ export function SchoolPage({
         </div>
 
         <aside className="mg-aside">
-          <p className="mg-hint">How the page will look</p>
+          <div className="mg-preview-bar">
+            <p className="mg-hint">How the page will look</p>
+            {/* Only the preview turns over; the panel itself stays as it is. */}
+            <div className="mg-seg" role="group" aria-label="Preview mode">
+              {(['dark', 'light'] as const).map((m) => (
+                <button key={m} type="button" aria-pressed={previewMode === m} onClick={() => setPreviewMode(m)}>
+                  {m === 'dark' ? 'Dark' : 'Light'}
+                </button>
+              ))}
+            </div>
+          </div>
           {/* The fan page's own variables on a sketch of its header and one
               row — the real arithmetic in these two colors, but only a sketch
               of the page, and the link under it is the page. */}
