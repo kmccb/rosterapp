@@ -31,8 +31,9 @@ const shade = (hex, toward, t) => {
 export async function liftBackdrop(source) {
   const { data, info } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const outcome = lift(data, info.width, info.height);
-  // A crest with no flat backdrop, or one cropped at its edges, is used whole.
-  if (outcome === 'no-flat-backdrop' || outcome === 'cropped') return sharp(source).png().toBuffer();
+  // A crest with no flat backdrop, one cropped at its edges, or one on a dark
+  // backdrop that may share its colour with the crest's own outline, is used whole.
+  if (outcome !== 'lifted' && outcome !== 'already-clear') return sharp(source).png().toBuffer();
   return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).trim().png().toBuffer();
 }
 
