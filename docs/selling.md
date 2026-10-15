@@ -5,63 +5,39 @@ First time? Work through docs/going-live.md before the first sale.
 The system stores a paid-through date and a note. Everything else — the
 pitch, the invoice, the check — happens between people.
 
-The base tier is $200/season. This line is the one place that number lives —
-change it here, and quote whatever it says.
+One team is $400 a season. A whole school — every sport — is $1,200
+a year. A district or conference is quoted. A school's first season is free.
+These lines are the one place those numbers live — change them here and on
+the site (`marketing/index.html`) together, and quote whatever they say.
+
+One roster per sport today: the panel has no separate entry for a second level or for boys’ and girls’ teams of the same sport. Say so before a school assumes otherwise.
 
 ## What to show a prospect
 
-https://roster.scottforge.ai/oh/demo/ — open it on a phone and hand it over.
-No login, no setup, nothing to explain first.
+https://getroster.scottforge.ai — the site. Send this to someone you have not
+met.
 
-It is the **real** Springfield (New Middletown), the school the sales video
-was made for, as its page would look the day it signed up. Black and orange,
-the tiger crest, and three sports — Football, Volleyball, Basketball — each
-opening the way a paying school's does: keypad, roster, schedule.
+https://roster.scottforge.ai/oh/demo/ — the demo. Open it on a phone and hand
+it over. No login, no setup, nothing to explain first.
 
-What is sample and what is real:
+It is Harlow Valley, a school that does not exist, in violet and gold with its
+own crest. Three sports — Football, Volleyball, Basketball — each opening the
+way a paying school's does: keypad, roster, schedule. Football also carries
+scores, a forecast at the next kickoff, and a standings table for a conference
+of five more invented schools.
 
-- **Sample:** the rosters (football starts from the video's players, #24
-  Marcus Bell included), the colors and crest (what the seller would upload),
-  and the volleyball and basketball schedules (what the seller would paste),
-  played against the real MVAC Scarlet schools. No player stats — the app has
-  none, so the demo shows none, whatever the video shows.
-- **Real:** the football schedule, scores and the MVAC Scarlet standings on
-  the League tab. They come from the directory, exactly as a paying school's
-  do, and stay current with its Saturday and Wednesday refreshes. A quiet line
-  in the footer says so: "Sample rosters — the football schedule, scores and
-  standings are real."
+The school is fictional on purpose. For one pitch the demo was the real
+Springfield with sample players on it; the site now sends strangers here, and
+invented players do not belong on a real school's page in front of them. A
+quiet line in the footer says it is all sample data.
 
-This deliberately reverses the rule the old demo kept — no invented players on
-a real school's page — for this one prospect, because the strongest thing the
-demo can show an athletic director is their own season, live. The real
-Springfield page at `/oh/springfield` is untouched: the sample rosters only
-ever appear at `/oh/demo/`. **When Springfield buys, or the pitch moves on,**
-move the demo to the next prospect (change the slug, colors, crest, rosters
-and conference in `scripts/build-demo.mjs`) or back to a fictional school —
-don't leave a former prospect's page dressed with invented players.
+It works with no signal once loaded, and it asks the database and the
+directory for nothing — safe on a school's guest wifi or in a car park.
 
-`springfield-new-middletown` is in `paid-schools.json` so the demo can show
-the real kickoff forecast. That forecast also shows on Springfield's real,
-free page — a free taste of the paid tier. **Take it out of
-`paid-schools.json` if they don't buy.**
+**Maintenance:** the page carries a sport that has results on it forward by whole weeks as it ages, so what has been played and what is coming split at today — but only until that sport's own months run out, and a sport with nothing played yet is never moved. The file generated on 2026-10-13 is right until 17 November. So run `node scripts/build-demo.mjs` and commit `public/oh/demo.json` **by 17 November, again on 1 December, and near the start of each autumn** — and look at the page before any demo that matters. From December to August it shows fixtures and no scores, because nothing in an invented autumn has been played yet. It refuses to write a season that would argue with itself, or a school that turns out to be real, and prints the dates it wrote.
 
-It needs a signal. The rosters and schedules for the other sports are baked
-into the page, and it asks the database for nothing, but the football season,
-the League tab and the forecast are fetched from the directory like any
-school's. On a school's guest wifi that is fine; in a car park with no bars,
-football will not load.
-
-**Maintenance:** football looks after itself. For the pasted sports, the page
-carries a schedule that has results (volleyball, in the autumn) forward by
-whole weeks as it ages, so what has been played and what is coming split at
-today — but only until that sport's own months run out. A schedule with
-nothing played on it (basketball, before November) is never moved; it is
-already dated inside its own season. So run `node scripts/build-demo.mjs` and
-commit `public/oh/demo.json` **twice a year**: near the start of the autumn,
-and again in December once volleyball is over (it rewrites the autumn as next
-year's fixtures and starts basketball from a fortnight ahead). It refuses to
-write a season that would argue with itself or a conference Springfield
-doesn't actually play, and prints the dates it wrote.
+After a re-run that changes how the page looks, re-take the site's
+screenshots: `node scripts/shoot-marketing.mjs` (see README, Deploying). Do not re-take them from a file generated out of season: the pictures are of football, which then has no scores, no forecast and a table of 0–0.
 
 ## Activate a school (the whole job, ~3 minutes)
 
@@ -134,8 +110,8 @@ The Activate form asks which sport. Football's schedule comes free from the
 directory; for anything else, paste the schedule too (date, opponent, time
 columns) — the parser preview shows what it read before you publish. Once a
 school has two sports live, or any live sport that isn't football, its /oh/
-page opens on a hub instead of straight to the roster. Pricing for the
-all-sports package isn't set yet.
+page opens on a hub instead of straight to the roster. The whole-school
+price at the top covers it.
 
 ### Playoff rankings
 

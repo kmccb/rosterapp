@@ -1,13 +1,13 @@
 # rosterapp — working notes for Claude
 
-Three products share this repo and one deployment (Cloudflare Pages at https://roster.scottforge.ai):
+Four things live in this repo; the first three share one deployment (Cloudflare Pages at https://roster.scottforge.ai):
 
 1. **The root PWA** (`/`, `/ysu/`, `/victorychristian/`) — the original "who is #17" app.
    Poland Seminary is the root team; installed on real phones; used offline at games.
 2. **The Ohio directory** (`/oh/`) — every OH school (717), searchable, schedules + scores,
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
-3. **The paid tier** — a school pays (~$200/season, concierge: the seller does everything),
-   its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
+3. **The paid tier** — a school pays ($400/season for one team, $1,200/year for the whole
+   school, first season free; concierge: the seller does everything), its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
    **installs as its own home-screen app**: `scripts/paid-apps.mjs` (first step of `npm run build`,
    fail-soft) asks `school_roster_sports` for each `paid-schools.json` slug and writes
    `public/oh/apps/<slug>/` (manifest opening `/oh/?school=<slug>`, icons from the crest; gitignored,
@@ -18,6 +18,8 @@ Three products share this repo and one deployment (Cloudflare Pages at https://r
    `.mg` styles in `src/oh/oh.css`, one row per school → a school page with Look, a card per
    sport, and Billing — `src/oh/manage/`). Privacy page at
    `/oh/?privacy`. Routing is by query flag — an unknown path falls back to Poland's root page.
+4. **The marketing site** (`marketing/`, https://getroster.scottforge.ai) — one static page,
+   its own Cloudflare Pages project, no build step. Nothing in it touches the three above, except that `src/marketing/site.test.ts` pins the page in the main project's `npm test`.
 
 ## The one rule that outranks everything
 
@@ -163,7 +165,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 728 tests / 54 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 794 tests / 59 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
@@ -192,7 +194,13 @@ Poland's own page — a short address outside that prefix would never reach the 
 football live on `/oh/springfield` (`/oh/?school=springfield-new-middletown`), real 41-player
 MaxPreps roster, orange ground `#c75000`, crest uploaded. It is in `paid-schools.json`, and that
 list now drives its **stats fallback, playoff-region refresh and home-screen app** — never let a
-branch drop it (the `marketing-site` branch, PR #16, does; fix that before merging it).
+branch drop it.
+
+**The demo at `/oh/demo/` is Harlow Valley** (`harlow-valley-demo`), an invented school in an
+invented conference, everything baked into `public/oh/demo.json` — football included — so it
+asks the directory and the database for nothing. It went back to fiction (PR #16) when the
+marketing site at https://getroster.scottforge.ai began pointing strangers at it. It needs a
+re-run of `scripts/build-demo.mjs` by 17 November and on 1 December (`docs/selling.md`).
 
 **Shipped 2026-10-13/14 (PRs #14–#21, all merged to main and deployed):**
 - **#14 MaxPreps season stats** — Stats tab (Leaders/Offense/Defense/Special) + season lines on

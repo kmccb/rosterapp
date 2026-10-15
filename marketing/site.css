@@ -1,0 +1,483 @@
+/*
+ * Roster's marketing page, in ScottForge's colors and type.
+ *
+ * One file, no build. Mobile first: every grid is a single column until there
+ * is room for more, so the page cannot scroll sideways on a small phone.
+ */
+:root {
+  --coal: #0c0b09;
+  --ash: #141210;
+  --soot: #1c1915;
+  --paper: #f2ebdd;
+  --paper-dim: #d4cbb9;
+  --fog: #8a8276;
+  --ember: #e85d2f;
+  --ember-hot: #ff8a3d;
+  --ember-yel: #ffc857;
+  --border: rgba(242, 235, 221, 0.08);
+  --border-hot: rgba(232, 93, 47, 0.35);
+  --f-display: 'Fraunces', Georgia, serif;
+  --f-body: 'Archivo', -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --gutter: clamp(20px, 5vw, 64px);
+  --measure: 1120px;
+  /* Side padding that is the gutter on a phone and grows on a wide screen
+     until the content between the paddings is exactly one measure wide. */
+  --side: max(var(--gutter), calc((100% - var(--measure)) / 2));
+}
+
+[id] {
+  scroll-margin-top: 88px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--coal);
+  color: var(--paper-dim);
+  font: 400 17px/1.6 var(--f-body);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--paper);
+  text-decoration-color: var(--border-hot);
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--ember-hot);
+}
+:focus-visible {
+  outline: 2px solid var(--ember-yel);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--paper);
+  font-family: var(--f-display);
+  font-weight: 450;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(2.9rem, 11vw, 6.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.038em;
+}
+h2 {
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.6em;
+}
+h3 {
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+h1 em,
+h2 em {
+  color: var(--ember);
+  font-style: italic;
+}
+p {
+  margin: 0 0 1em;
+}
+strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.label,
+.eyebrow {
+  margin: 0 0 1.4em;
+  color: var(--ember);
+  font: 500 0.74rem/1.4 var(--f-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.lede {
+  max-width: 34em;
+  font-size: clamp(1.05rem, 2.2vw, 1.22rem);
+}
+.fine {
+  color: var(--fog);
+  font-size: 0.86rem;
+}
+.sub {
+  margin: 2.6em 0 1em;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+.skip:focus {
+  left: var(--gutter);
+  top: 8px;
+  z-index: 10;
+  background: var(--coal);
+  padding: 8px 12px;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  min-height: 44px;
+  padding: 0.75em 1.25em;
+  border: 1px solid var(--border-hot);
+  border-radius: 3px;
+  color: var(--ember-yel);
+  font: 600 0.8rem/1 var(--f-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover {
+  border-color: var(--ember-hot);
+  color: var(--paper);
+}
+.btn-hot {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--coal);
+}
+.btn-hot:hover {
+  background: var(--ember-hot);
+  border-color: var(--ember-hot);
+  color: var(--coal);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 1.8em;
+}
+
+/* -------------------------------------------------------------- top bar */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px var(--side);
+  background: rgba(12, 11, 9, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.mark {
+  color: var(--paper);
+  font: 450 1.35rem/1 var(--f-display);
+  text-decoration: none;
+}
+.by {
+  color: var(--fog);
+  font: 400 0.7rem/1 var(--f-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.bar nav {
+  display: none;
+  gap: 26px;
+  margin-left: auto;
+}
+.bar nav a {
+  color: var(--paper-dim);
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+.bar .btn {
+  margin-left: auto;
+  padding: 0.6em 0.9em;
+}
+
+/* ------------------------------------------------------------- sections */
+
+/* The column is made by padding on the section, not by a max-width on each
+   child, so no later margin shorthand on a child can knock it off center and
+   the hero, bands and footer all share one left edge. */
+.hero,
+.band,
+.foot {
+  padding-inline: var(--side);
+}
+.hero {
+  display: grid;
+  /* minmax(0, …) so a wide child cannot stretch the one column past the screen. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+  padding-block: clamp(48px, 9vw, 110px);
+}
+.hero-words {
+  margin: 0;
+}
+.band {
+  padding-block: clamp(56px, 9vw, 120px);
+  border-top: 1px solid var(--border);
+}
+.band-ash {
+  background: var(--ash);
+}
+
+.two,
+.cards,
+.shots,
+.steps,
+.ticks,
+.faq {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  padding: 0;
+  list-style: none;
+}
+.two {
+  gap: 36px;
+}
+
+.tabs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.tabs div {
+  padding-left: 16px;
+  border-left: 3px solid var(--ember);
+}
+.tabs dt,
+.faq dt {
+  color: var(--paper);
+  font-weight: 600;
+}
+.tabs dd,
+.faq dd {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- phones */
+
+.phone {
+  margin: 0 auto;
+  width: min(100%, 300px);
+}
+.phone img {
+  border: 6px solid var(--soot);
+  border-radius: 34px;
+  background: var(--soot);
+  box-shadow: 0 30px 80px -30px rgba(232, 93, 47, 0.35);
+}
+.phone figcaption {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+.phone figcaption strong {
+  display: block;
+  font: 450 1.2rem/1.3 var(--f-display);
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.card {
+  padding: 26px;
+  background: var(--soot);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.card h3 {
+  margin-bottom: 0.5em;
+}
+.card > :last-child {
+  margin-bottom: 0;
+}
+.card-hot {
+  border-color: var(--ember);
+}
+.num {
+  margin: 0 0 0.1em;
+  color: var(--ember);
+  font: 450 3rem/1 var(--f-display);
+}
+.price {
+  margin: 0 0 0.3em;
+  color: var(--paper);
+  font: 450 clamp(2.4rem, 7vw, 3.2rem) / 1 var(--f-display);
+  letter-spacing: -0.02em;
+}
+.price span {
+  color: var(--fog);
+  font: 400 0.95rem/1 var(--f-body);
+  letter-spacing: 0;
+}
+
+.rest {
+  margin-top: 28px;
+  padding: 28px;
+  border: 1px solid var(--border-hot);
+  border-radius: 6px;
+}
+.rest h3 {
+  margin-bottom: 0.7em;
+}
+.rest > :last-child {
+  margin-bottom: 0;
+}
+.ticks {
+  gap: 10px;
+  margin: 0;
+}
+.ticks li {
+  padding-left: 1.7em;
+  text-indent: -1.7em;
+}
+.ticks li::before {
+  content: '✓';
+  display: inline-block;
+  width: 1.7em;
+  text-indent: 0;
+  color: var(--ember);
+}
+
+.steps {
+  margin: 0;
+}
+.steps li {
+  padding-top: 18px;
+  border-top: 3px solid var(--ember);
+}
+.steps .label {
+  margin-bottom: 0.6em;
+}
+.steps h3 {
+  margin-bottom: 0.4em;
+}
+
+.faq {
+  gap: 0;
+  margin: 0;
+}
+.faq div {
+  display: grid;
+  gap: 6px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+}
+
+.start .contact {
+  margin-top: 1.6em;
+  color: var(--paper);
+  font: 400 0.95rem/1.5 var(--f-mono);
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  justify-content: space-between;
+  padding-block: 28px;
+  border-top: 1px solid var(--border);
+  color: var(--fog);
+  font: 400 0.72rem/1.6 var(--f-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.foot p {
+  margin: 0;
+}
+.foot nav {
+  display: flex;
+  gap: 22px;
+}
+.foot a {
+  color: var(--fog);
+  text-decoration: none;
+}
+.foot a:hover {
+  color: var(--paper);
+}
+
+/* ----------------------------------------------------------- with room */
+
+/* Under 480px the bar needs the room for the button, so the byline goes. */
+@media (max-width: 479px) {
+  .by {
+    display: none;
+  }
+  .bar {
+    gap: 10px;
+  }
+  .bar .btn {
+    padding-inline: 0.8em;
+    letter-spacing: 0.08em;
+  }
+}
+
+@media (min-width: 620px) {
+  .cards,
+  .ticks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .shots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .bar nav {
+    display: flex;
+  }
+  .bar .btn {
+    margin-left: 0;
+    min-height: 40px;
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    align-items: center;
+  }
+  .two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cards-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .faq div {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

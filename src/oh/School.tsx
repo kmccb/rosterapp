@@ -770,18 +770,14 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   /*
    * One quiet line saying what this is.
    *
-   * A prospect looking at the Springfield demo has to be able to tell at a
-   * glance which half is invented, or the first thing they will ask is why
-   * their own roster is wrong — and, just as much, that the football half is
-   * not, because real scores and standings are the strongest thing on the page.
-   * It sits in the footer in the muted voice the rest of the small print uses —
-   * the pitch is that this looks like a real page, and a banner across the
-   * screen would spend the pitch to make the point.
+   * A stranger looking at Harlow Valley has to be able to tell at a glance
+   * that all of it is invented. It sits in the footer in the muted voice the
+   * rest of the small print uses — the pitch is that this looks like a real
+   * page, and a banner across the screen would spend the pitch to make the
+   * point.
    */
   const demoNote = isDemo() ? (
-    <p className="oh-demo-note">
-      Sample rosters — the football schedule, scores and standings are real.
-    </p>
+    <p className="oh-demo-note">Sample school, players, schedules and scores.</p>
   ) : null;
 
   /*
