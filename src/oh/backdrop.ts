@@ -17,7 +17,13 @@
  *  - artwork runs off the edge — the crest was cropped, its ring is open at
  *    the cut, and the flood would pour through into the artwork's own white;
  *  - the corners are already transparent — somebody uploaded a crest that has
- *    no backdrop, and there is nothing to do.
+ *    no backdrop, and there is nothing to do;
+ *  - the backdrop is dark — crests are outlined in black far more often than
+ *    in white, and a black ring touching a black backdrop is one region to the
+ *    flood. Springfield's tiger, kept on black by an older upload, came out of
+ *    the icon builder with its ring and stripes gone. A white or coloured
+ *    backdrop is the common case and the safe one; a dark one is left on, as
+ *    the picture.
  *
  * Pure — RGBA bytes in, the same bytes changed in place — so the panel's upload
  * (a canvas, src/oh/look.ts) and the home-screen icon builder (sharp,
@@ -25,12 +31,15 @@
  * the tests here are the tests for both.
  */
 
-export type Lifted = 'lifted' | 'already-clear' | 'no-flat-backdrop' | 'cropped';
+export type Lifted = 'lifted' | 'already-clear' | 'no-flat-backdrop' | 'cropped' | 'dark-backdrop';
 
 /** How far, in summed RGB, a pixel may be from the corners' colour and still be backdrop. */
 const BACKDROP = 90;
 /** How far the four corners may be from their own average and still be one flat colour. */
 const FLAT = 60;
+/** The backdrop's brightness (0–255, weighted as the eye weights it) below which it is left on:
+ * black, navy, charcoal. A coloured backdrop such as orange is well above it and still lifts. */
+const DARK = 80;
 /** Transparent enough to count as no pixel at all. */
 const CLEAR = 16;
 
@@ -48,6 +57,7 @@ export function liftBackdrop(data: Uint8Array | Uint8ClampedArray, width: number
     data[i + 3] < CLEAR ? 0 : Math.abs(data[i] - bg[0]) + Math.abs(data[i + 1] - bg[1]) + Math.abs(data[i + 2] - bg[2]);
 
   if (corners.some((i) => off(i) > FLAT)) return 'no-flat-backdrop';
+  if (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2] < DARK) return 'dark-backdrop';
 
   let edgeArt = 0;
   for (let x = 0; x < W; x++) edgeArt += Number(off(at(x, 0)) > BACKDROP) + Number(off(at(x, H - 1)) > BACKDROP);

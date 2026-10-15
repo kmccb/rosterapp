@@ -61,6 +61,16 @@ describe('taking a crest’s backdrop off', () => {
     expect(data).toEqual(before);
   });
 
+  it('leaves a dark backdrop on, since a black ring touching it would go with it', () => {
+    // Springfield's case: the crest kept on black, its black ring meeting the black.
+    const onBlack = picture(W, W, (x, y) => (Math.hypot(x - 19.5, y - 19.5) > 14 ? BLACK : crest(x, y)));
+    const before = onBlack.slice();
+    expect(liftBackdrop(onBlack, W, W)).toBe('dark-backdrop');
+    expect(onBlack).toEqual(before);
+    const navy = picture(W, W, (x, y) => (Math.hypot(x - 19.5, y - 19.5) > 14 ? [4, 4, 58, 255] : crest(x, y)));
+    expect(liftBackdrop(navy, W, W)).toBe('dark-backdrop');
+  });
+
   it('has nothing to do for a crest that is already transparent round the outside', () => {
     const data = picture(W, W, (x, y) => (Math.hypot(x - 19.5, y - 19.5) > 14 ? CLEAR : crest(x, y)));
     expect(liftBackdrop(data, W, W)).toBe('already-clear');
