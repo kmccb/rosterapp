@@ -44,6 +44,9 @@
  * fortnight ahead — and before any demo that matters.
  * `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it writes on a
  * day of your choosing. Football is baked like the rest and is re-run with it.
+ * A DEMO_TODAY preview run rewrites the committed files — demo.json and the
+ * stats file, which it deletes out of season — so restore them with a plain
+ * run before committing.
  */
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';

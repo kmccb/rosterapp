@@ -68,13 +68,16 @@ describe('the marketing page', () => {
   });
 
   // Stats from MaxPreps are a thing the app now does, and the page names them.
-  // The rest are still ideas, or another company's product, or a real school.
+  // The rest are still ideas, or another company's product, or a real school —
+  // Tigers is Springfield's mascot, which the demo's header may say but this
+  // page must not. Alt text is read too: a screen reader says it aloud.
   it('promises nothing the app does not do, and names no real school', () => {
+    const said = `${text} ${attrs('alt').join(' ')}`.toLowerCase();
     for (const word of [
       'Hudl', 'Region', 'rSchoolToday', 'ArbiterGame',
-      'DragonFly', 'Presented by', 'sponsor', 'Springfield',
+      'DragonFly', 'Presented by', 'sponsor', 'Springfield', 'Tigers',
     ]) {
-      expect(text.toLowerCase().includes(word.toLowerCase()), word).toBe(false);
+      expect(said.includes(word.toLowerCase()), word).toBe(false);
     }
   });
 

@@ -202,7 +202,7 @@ branch drop it.
 Its sample football stats (Stats tab, season lines, week-by-week card) are
 `public/oh/stats/millbrook-demo-football.json`, written by the same script from the season it
 plays (credited "a sample season"; no file out of season), fetched like a paid school's and never kept in the
-phone; `scripts/maxpreps.mjs`'s sweep of unnamed stats files skips `-demo` slugs so it survives. It was Harlow Valley (violet/gold) until 2026-10-14. It went back to fiction (PR #16) when the
+phone; `scripts/maxpreps.mjs`'s sweep of unnamed stats files skips the demo's own slug (read from `public/oh/demo.json`) so it survives. It was Harlow Valley (violet/gold) until 2026-10-14. It went back to fiction (PR #16) when the
 marketing site at https://getroster.scottforge.ai began pointing strangers at it. It needs a
 re-run of `scripts/build-demo.mjs` by 17 November and on 1 December (`docs/selling.md`).
 
