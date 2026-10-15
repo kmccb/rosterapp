@@ -14,7 +14,7 @@
  * every player. The demo was the real Springfield for one pitch, but a public
  * site sends everyone here, and invented players do not belong on a real
  * school's page in front of strangers. It is dressed the way a paid school
- * like Springfield is — an orange ground, black on it, a nickname after the
+ * like Springfield is — its peach ground, black on it, a nickname after the
  * name — because that is the page a prospect is being shown they could have.
  *
  * Alongside it the script writes public/oh/stats/millbrook-demo-football.json,
@@ -64,17 +64,20 @@ const CITY = 'Millbrook';
 const NICKNAME = 'Tigers';
 
 /*
- * An orange ground with black on it, the way the first paying school's page is
- * dressed, so the demo looks like the product a prospect would actually get.
- * Close to Springfield's orange and deliberately not the same: this school is
- * nobody's. The text is black too, because black reads on this orange where
- * white only just does — look.ts lifts or darkens a chosen text color to keep it
- * readable, so the third color is chosen rather than left to the white default.
- * No light set: like Springfield's, the light page is worked out from these.
+ * Springfield's own look, color for color, so the demo is the page the first
+ * paying school actually has: a peach ground, near-black accent, black text,
+ * and no light set or crest fill of its own (Springfield's stored colors carry
+ * neither; look.ts works the other mode out from these three). Each is moved a
+ * shade off Springfield's — ground #ffbf94, accent #292929 — so this school is
+ * nobody's; black text is left black, there being no shade of it that is
+ * anybody's in particular.
  */
-const GROUND = '#c65a12';
-const ACCENT = '#1a1a1a';
+const GROUND = '#ffc29a';
+const ACCENT = '#2b2b2b';
 const TEXT = '#000000';
+/* The crest's own orange: deeper than the ground, so the roundel stands off
+   the page it sits on and still reads as the school's color. */
+const CREST_ORANGE = '#e8742a';
 
 /*
  * Every school on the demo page is invented, conference rivals included. The
@@ -115,17 +118,17 @@ const realSlugs = new Set((index.schools ?? index).map((s) => s.slug));
  * alphabet is what makes that safe. The letters are paths rather than <text>
  * so the output does not depend on the fonts of the machine that runs this.
  *
- * Black outside, then an orange ring, so the badge keeps its edge on the
- * orange page it sits on; "MT" in orange on black inside. Not a tiger: the
+ * A black edge and a black ring with "MT" in black on orange inside, so the
+ * badge keeps its edge on the peach page; the page also draws it, faint, as
+ * its watermark, as it does any school's crest. Not a tiger: the
  * tiger is Springfield's own mark (docs/design/springfield-video), and a
  * monogram is what an invented school can honestly wear.
  */
 const crestSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="256" fill="${ACCENT}"/>
-  <circle cx="256" cy="256" r="236" fill="${GROUND}"/>
-  <circle cx="256" cy="256" r="218" fill="${ACCENT}"/>
-  <circle cx="256" cy="256" r="198" fill="none" stroke="${GROUND}" stroke-width="7"/>
-  <g fill="${GROUND}" transform="translate(256 256) scale(0.84) translate(-256 -256)">
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  <circle cx="256" cy="256" r="236" fill="${CREST_ORANGE}"/>
+  <circle cx="256" cy="256" r="212" fill="none" stroke="#000000" stroke-width="8"/>
+  <g fill="#000000" transform="translate(256 256) scale(0.84) translate(-256 -256)">
     <path d="M92 362 v-212 h44 l50 120 l50 -120 h44 v212 h-40 v-136 l-40 96 h-28 l-40 -96 v136 z"/>
     <path d="M296 150 h124 v40 h-42 v172 h-40 v-172 h-42 z"/>
   </g>
@@ -1048,9 +1051,9 @@ const stats = playedGames.length
   ? {
       slug: SLUG,
       sport: 'football',
-      // Printed under the tab as "Season stats from …". Not "MaxPreps": none of
-      // this came from there, and the page should not say it did.
-      source: 'Sample',
+      // Printed under the tab as "Season stats from …", so this reads "Season
+      // stats from a sample season". Not "MaxPreps": none of it came from there.
+      source: 'a sample season',
       // No day. The page carries the demo's season forward a week at a time
       // (src/oh/demo.ts) and nothing carries this file with it, so a baked date
       // would be "updated Oct 10" under a schedule showing games into November.

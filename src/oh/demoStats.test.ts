@@ -54,7 +54,7 @@ describe('the demo’s sample stats', () => {
     expect(stats!.snapshots).toHaveLength(raw.snapshots.length);
     expect(raw.slug).toBe(demo.slug);
     expect(raw.sport).toBe('football');
-    expect(stats!.source).toBe('Sample');
+    expect(stats!.source).toBe('a sample season');
   });
 
   it.runIf(hasFile)('cover the games the demo has played, no more', () => {

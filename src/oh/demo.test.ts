@@ -27,7 +27,7 @@ const directoryIndex = () =>
   };
 
 /** What the generator dresses Millbrook in, as the validators hand it back. */
-const MILLBROOK_COLORS = { ground: '#c65a12', accent: '#1a1a1a', text: '#000000', nickname: 'Tigers' };
+const MILLBROOK_COLORS = { ground: '#ffc29a', accent: '#2b2b2b', text: '#000000', nickname: 'Tigers' };
 
 /** The invented conference, by the slugs the generator gives it. */
 const RIVALS = [
@@ -160,10 +160,11 @@ describe('the committed file', () => {
 
   it('wears its own colors and a crest the database would have accepted', () => {
     const raw = committed() as { colors: unknown; logo: string };
-    // Orange and black, like the paying school it is modelled on — and not
-    // that school's own orange.
+    // Springfield's peach and black, a shade off — the look of the paying
+    // school it is modelled on, and not that school's own colors.
     expect(raw.colors).toEqual(MILLBROOK_COLORS);
-    expect((raw.colors as { ground: string }).ground).not.toBe('#c75000');
+    expect((raw.colors as { ground: string }).ground).not.toBe('#ffbf94');
+    expect((raw.colors as { accent: string }).accent).not.toBe('#292929');
     expect(raw.logo).toMatch(/^data:image\/png;base64,/);
     expect(raw.logo.length).toBeLessThan(500_000);
   });

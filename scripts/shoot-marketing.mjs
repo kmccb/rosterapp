@@ -47,9 +47,11 @@ for (const channel of ['msedge', 'chrome']) {
 }
 if (!browser) throw new Error('neither Edge nor Chrome could be started');
 
-// Dark, which is the school's own colors: the page follows the phone's setting
-// (src/oh/mode.ts), and a headless browser says "light" unless told otherwise.
-const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2, colorScheme: 'dark' });
+// Light, said outright: the page follows the phone's setting (src/oh/mode.ts),
+// and light is what a phone shows in daylight and what Springfield's page — the
+// one the demo is dressed after — is seen in. Left unsaid, a machine set to dark
+// would shoot the other look.
+const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2, colorScheme: 'light' });
 await page.goto(`${ORIGIN}/oh/demo/`, { waitUntil: 'networkidle' });
 
 const save = async (name) => {

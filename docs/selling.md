@@ -21,7 +21,7 @@ https://roster.scottforge.ai/oh/demo/ — the demo. Open it on a phone and hand
 it over. No login, no setup, nothing to explain first.
 
 It is Millbrook — "Millbrook Tigers" in its header — a school that does not
-exist, in orange and black with its own MT crest, dressed the way a paying
+exist, in Springfield's peach and black with its own MT crest, dressed the way a paying
 school's page is. Three sports — Football, Volleyball, Basketball — each
 opening the way a paying school's does: keypad, roster, schedule. Football
 also carries scores, a forecast at the next kickoff, a standings table for a
@@ -29,7 +29,7 @@ conference of five more invented schools, and a Stats tab: sample season
 stats for the invented players, with leaders and a player card that goes week
 by week. They live in `public/oh/stats/millbrook-demo-football.json`, written
 by the same script and in the same shape the MaxPreps job writes for a real
-school; the tab credits them to "Sample", not MaxPreps.
+school; the tab reads "Season stats from a sample season", not MaxPreps.
 
 The school is fictional on purpose. For one pitch the demo was the real
 Springfield with sample players on it; the site now sends strangers here, and

@@ -196,12 +196,12 @@ MaxPreps roster, orange ground `#c75000`, crest uploaded. It is in `paid-schools
 list now drives its **stats fallback, playoff-region refresh and home-screen app** — never let a
 branch drop it.
 
-**The demo at `/oh/demo/` is Millbrook Tigers** (`millbrook-demo`, orange `#c65a12` and black,
-MT crest, nickname "Tigers"), an invented school in an invented conference, everything baked into
+**The demo at `/oh/demo/` is Millbrook Tigers** (`millbrook-demo`, Springfield's look a shade off: peach ground
+`#ffc29a`, accent `#2b2b2b`, text `#000000`, nickname "Tigers", black-on-orange MT crest), an invented school in an invented conference, everything baked into
 `public/oh/demo.json` — football included — so it asks the directory and the database for nothing.
 Its sample football stats (Stats tab, season lines, week-by-week card) are
 `public/oh/stats/millbrook-demo-football.json`, written by the same script from the season it
-plays (source "Sample"; no file out of season), fetched like a paid school's and never kept in the
+plays (credited "a sample season"; no file out of season), fetched like a paid school's and never kept in the
 phone; `scripts/maxpreps.mjs`'s sweep of unnamed stats files skips `-demo` slugs so it survives. It was Harlow Valley (violet/gold) until 2026-10-14. It went back to fiction (PR #16) when the
 marketing site at https://getroster.scottforge.ai began pointing strangers at it. It needs a
 re-run of `scripts/build-demo.mjs` by 17 November and on 1 December (`docs/selling.md`).
