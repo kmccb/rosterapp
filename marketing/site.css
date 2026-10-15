@@ -299,14 +299,71 @@ strong {
 /* --------------------------------------------------------------- phones */
 
 .phone {
+  position: relative;
   margin: 0 auto;
   width: min(100%, 300px);
+  /* The frame below is sized in cqi, hundredths of this figure's width, so
+     it keeps an iPhone's proportions at whatever size the grid gives it. */
+  container-type: inline-size;
 }
-.phone img {
-  border: 6px solid var(--soot);
-  border-radius: 34px;
-  background: var(--soot);
-  box-shadow: 0 30px 80px -30px rgba(232, 93, 47, 0.35);
+
+/* An iPhone drawn around each screen. The pictures are whole phone screens,
+   status bar and home bar already on them (scripts/shoot-marketing.mjs); this
+   is the hardware: a titanium band, a black bezel, the buttons on its sides,
+   a sheen of glass, and a shadow that falls the way a studio light makes it. */
+.device {
+  position: relative;
+  padding: 1.1cqi;
+  border-radius: 17.6cqi;
+  background: linear-gradient(140deg, #9a948c, #e4dfd7 18%, #6e6a64 45%, #c9c3ba 75%, #7c7770);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 24px 44px -18px rgba(0, 0, 0, 0.8),
+    0 60px 110px -40px rgba(232, 93, 47, 0.32);
+}
+.device img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2.6cqi solid #050505;
+  border-radius: 16.5cqi;
+  background: #050505;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+/* Glass catching the light across the top-left of the screen. */
+.device::after {
+  content: '';
+  position: absolute;
+  inset: 3.7cqi;
+  border-radius: 13.9cqi;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 32%, transparent 48%);
+  pointer-events: none;
+}
+/* The buttons: on the left the action button and the volume pair, drawn as
+   one bar and two copies of its shadow; on the right the side button. */
+.device::before,
+.phone::after {
+  content: '';
+  position: absolute;
+  width: 1cqi;
+  border-radius: 0.6cqi;
+  z-index: -1;
+}
+.device::before {
+  left: -0.7cqi;
+  top: 30cqi;
+  height: 10cqi;
+  background: #8a857e;
+  box-shadow:
+    0 16cqi 0 0 #8a857e,
+    0 31cqi 0 0 #8a857e;
+}
+.phone::after {
+  right: -0.7cqi;
+  top: 46cqi;
+  height: 22cqi;
+  background: #8a857e;
 }
 .phone figcaption {
   margin-top: 16px;
@@ -330,6 +387,13 @@ strong {
 }
 .card > :last-child {
   margin-bottom: 0;
+}
+.card .ico {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 16px;
+  color: var(--ember);
 }
 .card-hot {
   border-color: var(--ember);
@@ -437,6 +501,722 @@ strong {
   color: var(--paper);
 }
 
+/* ----------------------------------------------------------------- tour */
+
+/* The phone stays put while the steps scroll past it: beside them on a wide
+   screen, above them on a phone, where the words pass under its shelf. */
+.tour {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 8px;
+}
+.tour-stage {
+  position: sticky;
+  top: 64px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 12px 0 28px;
+  background: linear-gradient(var(--coal) 82%, rgba(12, 11, 9, 0));
+}
+.tour .phone {
+  width: min(300px, 24svh);
+}
+.tour-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tour-step {
+  min-height: 72svh;
+  padding: 8px 0 0;
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.tour-step.on {
+  opacity: 1;
+}
+.tour-step h3 {
+  margin-bottom: 0.5em;
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  line-height: 1.12;
+}
+.tour-step p:last-child {
+  max-width: 28em;
+}
+.tour-step .label {
+  margin-bottom: 0.9em;
+}
+/* A last stretch with no step of its own, so the final screen is held
+   for a moment before the phone scrolls away. */
+.tour-steps::after {
+  content: '';
+  display: block;
+  height: 45svh;
+}
+.tour-caption {
+  display: none;
+}
+
+/* With the script running, a phone stacks the steps under the pinned stage
+   and reads them out in the caption below the screen instead. */
+@media (max-width: 899px) {
+  .tour.live .tour-stage,
+  .tour.live .tour-steps {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .tour.live .tour-stage {
+    align-self: start;
+    height: calc(100svh - 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    padding: 0;
+    background: var(--coal);
+  }
+  .tour.live .phone {
+    width: min(280px, 30svh);
+    margin: 0 auto;
+  }
+  .tour.live .tour-caption {
+    display: block;
+    min-height: 10.5em;
+  }
+  .tour.live .tour-caption h3 {
+    margin-bottom: 0.4em;
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+  .tour.live .tour-caption .label {
+    margin-bottom: 0.7em;
+  }
+  .tour.live .tour-caption p:last-child {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+  .tour.live .tour-step {
+    min-height: 80svh;
+    opacity: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .tour {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+  }
+  .tour-stage {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    top: 0;
+    height: 100svh;
+    padding: 0;
+    background: none;
+  }
+  .tour .phone {
+    width: min(300px, 38svh);
+  }
+  .tour-steps {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  /* Each step's words wait at the phone's middle while its screen plays,
+     then the next step's push them on. */
+  .tour-step {
+    min-height: 100svh;
+    padding: 34svh 0 0;
+  }
+  .tour-words {
+    position: sticky;
+    top: 40svh;
+  }
+}
+
+/* The screen inside the bezel, for a phone that holds a live page rather
+   than a picture: the same corners as .device img. */
+.device .bezel {
+  padding: 2.6cqi;
+  border-radius: 16.5cqi;
+  background: #050505;
+}
+.screen {
+  --k: 0.707;
+  position: relative;
+  aspect-ratio: 393 / 852;
+  overflow: hidden;
+  border-radius: 13.9cqi;
+  background: #ffc29a;
+}
+.screen > img {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+/* ------------------------------------------------- the app, as drawn */
+
+/* Drawn at the phone's own 393 × 852 points and scaled to the screen, so
+   every size below is the app's, read off the demo. Inter stands in for
+   the San Francisco an iPhone would set it in. */
+.t-app {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 393px;
+  height: 852px;
+  overflow: hidden;
+  transform: scale(var(--k));
+  transform-origin: 0 0;
+  background: #ffc29a;
+  color: #000;
+  font: 400 15px/1.35 'Inter', system-ui, -apple-system, sans-serif;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+.t-app::before {
+  content: 'MT';
+  position: absolute;
+  left: -18px;
+  top: 300px;
+  color: rgba(0, 0, 0, 0.035);
+  font: 400 420px/1 'Anton', sans-serif;
+}
+.t-app b,
+.t-app strong {
+  color: inherit;
+}
+.t-status {
+  position: relative;
+  height: 59px;
+}
+.t-time {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  width: 133px;
+  text-align: center;
+  font: 600 17px/22px 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+}
+.t-island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  width: 126px;
+  height: 37px;
+  margin-left: -63px;
+  border-radius: 19px;
+  background: #000;
+}
+.t-icons {
+  position: absolute;
+  top: 23px;
+  right: 26px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.t-home {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 139px;
+  height: 5px;
+  margin-left: -69.5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.88);
+}
+.t-view {
+  position: absolute;
+  inset: 59px 0 0;
+}
+.t-view.enter {
+  animation: t-in 0.32s ease-out;
+}
+@keyframes t-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+
+.t-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding: 0 12px;
+}
+.t-crest {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2.5px solid #1d1d1d;
+  border-radius: 50%;
+  background: #e8742a;
+  color: #111;
+  font: 400 15px/1 'Anton', sans-serif;
+}
+.t-school {
+  color: rgba(0, 0, 0, 0.72);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+.t-sun {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  border-radius: 10px;
+}
+.t-head.hub {
+  height: 72px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.t-head.hub .t-crest {
+  width: 40px;
+  height: 40px;
+  font-size: 19px;
+}
+.t-head.hub .t-school {
+  letter-spacing: 0;
+}
+.t-head.hub strong {
+  display: block;
+  color: #000;
+  font-size: 18px;
+}
+.t-head.hub small {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+.t-back {
+  padding: 2px 12px 10px;
+  font-size: 17px;
+}
+.t-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.13);
+}
+.t-tabs span {
+  position: relative;
+  flex: 1;
+  padding: 11px 0 13px;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+}
+.t-tabs .on {
+  color: #000;
+  font-weight: 600;
+}
+.t-tabs .on::after {
+  content: '';
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: -1px;
+  height: 3px;
+  background: #2b2b2b;
+}
+.t-body {
+  padding: 12px 14px;
+}
+.t-hint {
+  margin: 48px 0 0;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 16px;
+  text-align: center;
+}
+.t-count {
+  margin: 4px 2px 10px;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 13px;
+}
+.t-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding: 11px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.t-card b {
+  min-width: 46px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+.t-card strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+}
+.t-card small,
+.t-row small {
+  display: block;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 13px;
+}
+.t-card.big {
+  padding: 18px 18px;
+}
+.t-card.big b {
+  font-size: 40px;
+}
+.t-card.big strong {
+  font-size: 21px;
+}
+.t-pad {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.13);
+}
+.t-pad span {
+  display: grid;
+  place-items: center;
+  height: 68px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 30px;
+  font-weight: 500;
+  transition: background 0.15s, transform 0.15s;
+}
+.t-pad .small {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 17px;
+}
+.t-pad .down {
+  background: rgba(0, 0, 0, 0.13);
+  transform: scale(0.96);
+}
+.t-tap {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.16);
+  animation: t-tap 0.6s ease-out;
+}
+@keyframes t-tap {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+.t-search {
+  display: flex;
+  gap: 8px;
+}
+.t-input,
+.t-btn {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 16px;
+}
+.t-input {
+  flex: 1;
+  color: rgba(0, 0, 0, 0.45);
+}
+.t-input.typed {
+  color: #000;
+}
+.t-input i {
+  width: 2px;
+  height: 20px;
+  margin-left: 1px;
+  background: #2b6fd1;
+  animation: t-caret 1s steps(1) infinite;
+}
+@keyframes t-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.t-btn {
+  font-weight: 600;
+}
+.t-chips {
+  display: flex;
+  margin: 10px 0 8px;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  border-radius: 12px;
+}
+.t-chips span {
+  flex: 1;
+  height: 40px;
+  border-radius: 9px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+.t-chips .on {
+  background: #000;
+  color: #fff;
+}
+.t-chips.seg {
+  margin-top: 0;
+}
+.t-list {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.t-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.t-row b {
+  width: 34px;
+  font-size: 25px;
+  font-weight: 800;
+  text-align: right;
+}
+.t-row strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+}
+.t-row em {
+  margin-left: auto;
+  color: rgba(0, 0, 0, 0.66);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+.t-tiles {
+  display: grid;
+}
+.t-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 136px;
+  padding: 0 20px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.05);
+  transition: background 0.2s;
+}
+.t-tile.later {
+  background: none;
+}
+.t-tile.down {
+  background: rgba(0, 0, 0, 0.15);
+}
+.t-tile strong {
+  display: block;
+  font: 400 44px/1 'Anton', sans-serif;
+  text-transform: uppercase;
+}
+.t-tile small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(0, 0, 0, 0.66);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.t-tile.later strong {
+  color: rgba(0, 0, 0, 0.5);
+}
+.t-ico {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  margin-top: -75px;
+  color: rgba(0, 0, 0, 0.11);
+}
+.t-next {
+  padding: 14px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.t-next h4 {
+  margin: 4px 0 2px;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.t-next p {
+  margin: 0 0 4px;
+}
+.t-next b {
+  font-size: 17px;
+  font-weight: 800;
+}
+.t-when {
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 15px;
+}
+.t-wx {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px !important;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.t-wx b {
+  font-size: 19px;
+}
+.t-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.t-kicker.sec {
+  margin: 14px 2px 6px;
+  color: rgba(0, 0, 0, 0.7);
+}
+.t-game,
+.t-card.stat {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s, transform 0.35s;
+}
+.t-game.in,
+.t-card.stat.in {
+  opacity: 1;
+  transform: none;
+}
+.t-game {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+}
+.t-date {
+  width: 40px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+.t-date small {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+.t-res {
+  margin-left: auto;
+  font-weight: 600;
+}
+.t-res i {
+  margin-right: 6px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 11px;
+  font-style: normal;
+  vertical-align: 2px;
+}
+.t-res .W {
+  background: #2f9e62;
+}
+.t-res .L {
+  background: #d9534f;
+}
+.t-card.stat {
+  padding: 9px 16px;
+}
+.t-card.stat b {
+  font-size: 30px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-view.enter,
+  .t-tap,
+  .t-input i {
+    animation: none;
+  }
+  .t-game,
+  .t-card.stat,
+  .tour-step {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------- add-on */
+
+.addon {
+  display: grid;
+  gap: 18px 40px;
+  margin-top: 20px;
+  padding: 26px;
+  border: 1px dashed var(--border-hot);
+  border-radius: 6px;
+  background: linear-gradient(120deg, rgba(232, 93, 47, 0.08), rgba(232, 93, 47, 0) 60%);
+}
+.addon .label {
+  margin-bottom: 0.8em;
+}
+.addon h3 {
+  margin-bottom: 0.5em;
+}
+.addon p:last-child {
+  margin-bottom: 0;
+}
+.addon-prices {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+.addon-prices .price {
+  margin: 0;
+  font-size: clamp(1.9rem, 5vw, 2.4rem);
+}
+.addon-prices .or {
+  margin: 0;
+  color: var(--fog);
+  font: 500 0.74rem/1.4 var(--f-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+@media (min-width: 900px) {
+  .addon {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
 /* ----------------------------------------------------------- with room */
 
 /* Under 480px the bar needs the room for the button, so the byline goes. */
@@ -485,6 +1265,11 @@ strong {
   .hero {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
     align-items: center;
+  }
+  /* The hero phone turned a little toward the words, the way a product is
+     set on a page of apple.com. */
+  .hero .phone {
+    transform: perspective(1800px) rotateY(-16deg) rotateX(4deg) rotateZ(1deg);
   }
   .two {
     grid-template-columns: repeat(2, minmax(0, 1fr));

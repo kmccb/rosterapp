@@ -6,8 +6,8 @@ Four things live in this repo; the first three share one deployment (Cloudflare 
    Poland Seminary is the root team; installed on real phones; used offline at games.
 2. **The Ohio directory** (`/oh/`) — every OH school (717), searchable, schedules + scores,
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
-3. **The paid tier** — a school pays ($400/season for one team, $1,200/year for the whole
-   school, first season free; concierge: the seller does everything), its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
+3. **The paid tier** — a school pays ($400/season for one team, $1,800/year for the whole
+   school, first season free; Stats an add-on at $150/sport/season or $600/year for every sport with stats; concierge: the seller does everything), its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
    **installs as its own home-screen app**: `scripts/paid-apps.mjs` (first step of `npm run build`,
    fail-soft) asks `school_roster_sports` for each `paid-schools.json` slug and writes
    `public/oh/apps/<slug>/` (manifest opening `/oh/?school=<slug>`, icons from the crest; gitignored,
