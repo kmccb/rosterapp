@@ -398,6 +398,10 @@ if (dbRows && existsSync(statsDir)) {
     // Only a file this script wrote, under the name it would have written it.
     if (!plainName(kept?.slug) || !plainName(kept?.sport) || name !== `${kept.slug}-${kept.sport}.json`) continue;
     if (wanted.has(keyOf(kept))) continue;
+    // The demo's sample stats are scripts/build-demo.mjs's, not this script's:
+    // no database row or file names them, and they must outlive every run.
+    // Every demo slug ends -demo, and that script refuses one that is real.
+    if (kept.slug.endsWith('-demo')) continue;
     rmSync(join(statsDir, name), { force: true });
     rmSync(join(leagueDir, name), { force: true });
     console.log(`${keyOf(kept)}: no stats link in the database or the file — stats file taken down`);
