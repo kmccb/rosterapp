@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { contrast, mix } from './contrast';
-import { applyLook, clearLook, deriveVars, lightAccent, lookNotes, LOOK_VARS, plateColor, resizeLogo, type StyleTarget } from './look';
+import {
+  applyLook,
+  clearLook,
+  deriveVars,
+  derivedLight,
+  lightAccent,
+  lookGround,
+  lookNotes,
+  LOOK_VARS,
+  plateColor,
+  resizeLogo,
+  type StyleTarget,
+} from './look';
 
 const hexChannels = (hex: string): [number, number, number] => {
   const n = parseInt(hex.slice(1), 16);
@@ -300,5 +312,72 @@ describe('light mode', () => {
     clearLook(target);
     expect(attrs.size).toBe(0);
     expect(props.size).toBe(0);
+  });
+});
+
+describe('light colors the seller chose', () => {
+  const orange = { ground: '#c75000', accent: '#111111', plate: 'ground', logo: 'data:image/png;base64,AAAA' };
+  const light = { ground: '#fff4ec', accent: '#a33f00', text: '#1a1a1a' };
+  const chosen = { ...orange, light };
+  const cards = (bg: string) => [bg, mix(bg, mix(bg, '#ffffff', 0.16), 0.72)];
+  const worst = (fg: string, bg: string) => Math.min(...cards(bg).map((g) => contrast(fg, g)));
+
+  it('leaves the dark page exactly as it was', () => {
+    expect(deriveVars(chosen)).toEqual(deriveVars(orange));
+    expect(deriveVars(chosen, 'dark')).toEqual(deriveVars(orange, 'dark'));
+    expect(lookNotes(chosen)).toEqual(lookNotes(orange));
+  });
+
+  it('paints the light page from them the way the dark page is painted from its own', () => {
+    const vars = deriveVars(chosen, 'light');
+    const asDark = deriveVars({ ground: light.ground, accent: light.accent, text: light.text, logo: orange.logo }, 'dark');
+    for (const name of LOOK_VARS) {
+      if (name === '--crest-plate') continue;
+      expect(vars[name], name).toBe(asDark[name]);
+    }
+    expect(vars['--bg']).toBe('#fff4ec');
+    expect(vars['--text']).toBe('#1a1a1a');
+    expect(vars['--accent']).toBe('#a33f00');
+  });
+
+  it('keeps the crest’s fill on the dark colors, as the home-screen icon has it', () => {
+    expect(deriveVars(chosen, 'light')['--crest-plate']).toBe('#c75000');
+  });
+
+  it('still keeps every word readable, and says what it moved', () => {
+    const pale = { ...orange, light: { ground: '#ffffff', accent: '#ffe066', text: '#dddddd' } };
+    const vars = deriveVars(pale, 'light');
+    for (const name of ['--text', '--muted', '--accent'] as const) {
+      expect(worst(vars[name], vars['--bg']), name).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(lookNotes(pale, 'light')).toEqual([
+      'Accent darkened so it reads on the ground',
+      'Text darkened so it reads on the ground',
+    ]);
+  });
+
+  it('works the light page out as before when there is no whole set', () => {
+    const derived = deriveVars(orange, 'light');
+    expect(deriveVars({ ...orange, light: undefined }, 'light')).toEqual(derived);
+    expect(deriveVars({ ...orange, light: { ...light, text: 'black' } }, 'light')).toEqual(derived);
+    // Nothing chosen, nothing to explain.
+    expect(lookNotes(orange, 'light')).toEqual([]);
+  });
+
+  it('starts the pickers from the light page fans already see', () => {
+    const start = derivedLight(orange);
+    const vars = deriveVars(orange, 'light');
+    expect(start).toEqual({ ground: vars['--bg'], accent: vars['--accent'], text: vars['--text'] });
+    // And a set chosen as it started paints the same words fans already read.
+    const same = deriveVars({ ...orange, light: start }, 'light');
+    expect(same['--bg']).toBe(vars['--bg']);
+    expect(same['--text']).toBe(vars['--text']);
+    expect(same['--accent']).toBe(vars['--accent']);
+  });
+
+  it('tints the address bar with the chosen light ground', () => {
+    expect(lookGround(chosen, 'light')).toBe('#fff4ec');
+    expect(lookGround(orange, 'light')).toBe(mix('#c75000', '#ffffff', 0.94));
+    expect(lookGround(chosen)).toBe('#c75000');
   });
 });

@@ -78,6 +78,23 @@ describe('roster cache plumbing', () => {
     expect(read({ nickname: 7 })).toEqual(pair);
   });
 
+  it('keeps a whole light set, and drops only it when any of its three is junk or missing', () => {
+    const base = { season: 2026, players: [], logo: null, schedule: null, league: null };
+    const dark = { ground: '#c84f0f', accent: '#222222', text: '#ffffff', nickname: 'Tigers', plate: 'ground' };
+    const light = { ground: '#fff4ec', accent: '#a33f00', text: '#1a1a1a' };
+    const read = (l: unknown) => parseCached(JSON.stringify({ ...base, colors: { ...dark, light: l } }))?.colors;
+
+    expect(read(light)).toEqual({ ...dark, light });
+    // Anything that came along with it is not kept.
+    expect(read({ ...light, plate: '#ffffff' })).toEqual({ ...dark, light });
+    // Junk, half a set, or not an object at all: the dark colors still paint
+    // the page and the light one is worked out from them.
+    expect(read({ ...light, accent: 'orange' })).toEqual(dark);
+    expect(read({ ground: '#fff4ec', accent: '#a33f00' })).toEqual(dark);
+    expect(read('#ffffff')).toEqual(dark);
+    expect(read(null)).toEqual(dark);
+  });
+
   it('accepts a logo only as a data:image/ URI, defaulting anything else to none', () => {
     const dataUri = 'data:image/jpeg;base64,AAAA';
     const good = { season: 2026, players: [], colors: null, logo: dataUri, schedule: null, league: null };
