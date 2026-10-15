@@ -20,11 +20,16 @@ met.
 https://roster.scottforge.ai/oh/demo/ — the demo. Open it on a phone and hand
 it over. No login, no setup, nothing to explain first.
 
-It is Harlow Valley, a school that does not exist, in violet and gold with its
-own crest. Three sports — Football, Volleyball, Basketball — each opening the
-way a paying school's does: keypad, roster, schedule. Football also carries
-scores, a forecast at the next kickoff, and a standings table for a conference
-of five more invented schools.
+It is Millbrook — "Millbrook Tigers" in its header — a school that does not
+exist, in Springfield's peach and black with its own MT crest, dressed the way a paying
+school's page is. Three sports — Football, Volleyball, Basketball — each
+opening the way a paying school's does: keypad, roster, schedule. Football
+also carries scores, a forecast at the next kickoff, a standings table for a
+conference of five more invented schools, and a Stats tab: sample season
+stats for the invented players, with leaders and a player card that goes week
+by week. They live in `public/oh/stats/millbrook-demo-football.json`, written
+by the same script and in the same shape the MaxPreps job writes for a real
+school; the tab reads "Season stats from a sample season", not MaxPreps.
 
 The school is fictional on purpose. For one pitch the demo was the real
 Springfield with sample players on it; the site now sends strangers here, and
@@ -34,7 +39,7 @@ quiet line in the footer says it is all sample data.
 It works with no signal once loaded, and it asks the database and the
 directory for nothing — safe on a school's guest wifi or in a car park.
 
-**Maintenance:** the page carries a sport that has results on it forward by whole weeks as it ages, so what has been played and what is coming split at today — but only until that sport's own months run out, and a sport with nothing played yet is never moved. The file generated on 2026-10-13 is right until 17 November. So run `node scripts/build-demo.mjs` and commit `public/oh/demo.json` **by 17 November, again on 1 December, and near the start of each autumn** — and look at the page before any demo that matters. From December to August it shows fixtures and no scores, because nothing in an invented autumn has been played yet. It refuses to write a season that would argue with itself, or a school that turns out to be real, and prints the dates it wrote.
+**Maintenance:** the page carries a sport that has results on it forward by whole weeks as it ages, so what has been played and what is coming split at today — but only until that sport's own months run out, and a sport with nothing played yet is never moved. The file generated on 2026-10-14 is right through 17 November and first goes stale on 18 November, when volleyball cannot move past November and its 17 November match is left unscored in the past (football follows on 21 November, basketball's opener on 28 November). So run `node scripts/build-demo.mjs` and commit `public/oh/demo.json` and the stats file **by 17 November, again on 1 December, and near the start of each autumn** — and look at the page before any demo that matters. From December to August it shows fixtures and no scores, because nothing in an invented autumn has been played yet — and no Stats tab, because it then removes the stats file (commit the removal). It refuses to write a season that would argue with itself, or a school that turns out to be real, and prints the dates it wrote.
 
 After a re-run that changes how the page looks, re-take the site's
 screenshots: `node scripts/shoot-marketing.mjs` (see README, Deploying). Do not re-take them from a file generated out of season: the pictures are of football, which then has no scores, no forecast and a table of 0–0.

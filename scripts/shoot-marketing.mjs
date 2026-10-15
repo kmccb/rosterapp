@@ -12,7 +12,11 @@
  * SHOOT_ORIGIN overrides the default http://localhost:4173 if the preview is
  * served elsewhere. Look at the Schedule picture afterwards: its "Coming up"
  * dates come from the demo's baked calendar, so a picture taken late in a
- * season can look stale.
+ * season can look stale. The Stats picture needs the demo's sample stats file,
+ * which scripts/build-demo.mjs writes only while football is in season — shot
+ * out of season, the demo has no Stats tab and this script stops at it.
+ * The screens are taken with the school's own colors on (the app's dark mode),
+ * the way Springfield's page looks with them, not the near-white light page.
  *
  * playwright-core is not a dependency of this repo on purpose: the guarded
  * build installs from package-lock.json, and a screenshot tool has no business
@@ -45,7 +49,12 @@ for (const channel of ['msedge', 'chrome']) {
 }
 if (!browser) throw new Error('neither Edge nor Chrome could be started');
 
-const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2 });
+// The mode that paints the school's own colors (src/oh/mode.ts calls it dark):
+// the screens should show the school's colors, the way Springfield's page looks
+// with them on — its peach ground and black type. The light page washes the
+// ground nearly to white and loses the brand. Said outright, because the page
+// follows the phone's setting and a headless browser reports light.
+const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2, colorScheme: 'dark' });
 await page.goto(`${ORIGIN}/oh/demo/`, { waitUntil: 'networkidle' });
 
 const save = async (name) => {
@@ -62,7 +71,7 @@ for (const digit of ['2', '4']) {
 }
 const lookup = await save('lookup');
 
-for (const tab of ['Team', 'Schedule', 'League']) {
+for (const tab of ['Team', 'Schedule', 'League', 'Stats']) {
   await page.getByRole('button', { name: tab, exact: true }).click();
   await save(tab.toLowerCase());
 }

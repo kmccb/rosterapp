@@ -388,6 +388,14 @@ for (const team of teams) {
  */
 if (dbRows && existsSync(statsDir)) {
   const wanted = new Set([...dbNamed, ...fileTeams.map(keyOf)]);
+  // A missing or unreadable demo file spares nothing, rather than failing the run.
+  let demoSlug = null;
+  try {
+    const slug = readJson(join(root, 'public/oh/demo.json'))?.slug;
+    demoSlug = typeof slug === 'string' && slug ? slug : null;
+  } catch {
+    demoSlug = null;
+  }
   for (const name of readdirSync(statsDir).filter((n) => n.endsWith('.json'))) {
     let kept;
     try {
@@ -398,6 +406,10 @@ if (dbRows && existsSync(statsDir)) {
     // Only a file this script wrote, under the name it would have written it.
     if (!plainName(kept?.slug) || !plainName(kept?.sport) || name !== `${kept.slug}-${kept.sport}.json`) continue;
     if (wanted.has(keyOf(kept))) continue;
+    // The demo's sample stats are scripts/build-demo.mjs's, not this script's:
+    // no database row or file names them, and they must outlive every run.
+    // Only the demo school's own slug, read from the file that script writes.
+    if (kept.slug === demoSlug) continue;
     rmSync(join(statsDir, name), { force: true });
     rmSync(join(leagueDir, name), { force: true });
     console.log(`${keyOf(kept)}: no stats link in the database or the file — stats file taken down`);

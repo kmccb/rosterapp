@@ -279,6 +279,23 @@ strong {
   margin: 0;
 }
 
+/* A small mark after a feature's name for one that not every school gets —
+   Stats needs the team to keep its numbers on MaxPreps. It sits on the
+   word's line in whatever heading font is around it, so it sets its own. */
+.tag {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.2em 0.5em 0.15em;
+  border: 1px solid var(--ember);
+  border-radius: 3px;
+  color: var(--ember-hot);
+  font: 500 0.62rem/1.2 var(--f-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  vertical-align: 0.2em;
+  white-space: nowrap;
+}
+
 /* --------------------------------------------------------------- phones */
 
 .phone {
@@ -441,11 +458,19 @@ strong {
   .ticks {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* Four phones: two by two until all four fit across without shrinking
+     the screens past reading. */
   .shots {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .shots {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

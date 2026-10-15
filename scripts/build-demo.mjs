@@ -10,16 +10,22 @@
  * volleyball score dated next week is the single most visible way for this page
  * to look broken.
  *
- * The school is Harlow Valley, invented, and so are its rivals and every player.
- * The demo was the real Springfield for one pitch, but a public site sends
- * everyone here, and invented players do not belong on a real school's page in
- * front of strangers. What the file does NOT carry is as deliberate as what it
- * does:
+ * The school is Millbrook (the Tigers), invented, and so are its rivals and
+ * every player. The demo was the real Springfield for one pitch, but a public
+ * site sends everyone here, and invented players do not belong on a real
+ * school's page in front of strangers. It is dressed the way a paid school
+ * like Springfield is — its peach ground, black on it, a nickname after the
+ * name — because that is the page a prospect is being shown they could have.
  *
- *  - No stats. The app has no such thing, and a demo that promised it would be
- *    selling something that does not exist.
+ * Alongside it the script writes public/oh/stats/millbrook-demo-football.json,
+ * a season of invented stats for the invented football squad, in exactly the
+ * shape scripts/maxpreps.mjs commits for a real school — so the Stats tab, the
+ * season line on Lookup and the player card's week by week all draw on the
+ * demo the way they draw on a paid page. Every number is made up here; the file
+ * says so in its `source`.
  *
- * Run by hand — `node scripts/build-demo.mjs` — then commit public/oh/demo.json.
+ * Run by hand — `node scripts/build-demo.mjs` — then commit public/oh/demo.json
+ * and the stats file.
  * It is not part of `npm run build` and must not become part of it: it
  * rasterizes a crest through sharp, and the guarded build has no business doing
  * that.
@@ -38,9 +44,12 @@
  * fortnight ahead — and before any demo that matters.
  * `DEMO_TODAY=2027-02-10 node scripts/build-demo.mjs` shows what it writes on a
  * day of your choosing. Football is baked like the rest and is re-run with it.
+ * A DEMO_TODAY preview run rewrites the committed files — demo.json and the
+ * stats file, which it deletes out of season — so restore them with a plain
+ * run before committing.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -50,17 +59,28 @@ const readJson = (path) => JSON.parse(readFileSync(join(root, path), 'utf8'));
 
 // ------------------------------------------------------------------ identity
 
-const SLUG = 'harlow-valley-demo';
-const NAME = 'Harlow Valley';
-const CITY = 'Harlow';
+const SLUG = 'millbrook-demo';
+const NAME = 'Millbrook';
+const CITY = 'Millbrook';
+/* Said after the name in the page's headers — "Millbrook Tigers" — the way a
+   seller's nickname is on a paid school's page (rosterStore.ts, SchoolColors). */
+const NICKNAME = 'Tigers';
 
 /*
- * A deep violet ground with a bright gold on it. look.ts builds the whole page
- * out of these two by mixing toward white, so a ground with real chroma gives
- * the hub's bands something to be, where a near-black leaves them all one dark.
+ * Springfield's own look, color for color, so the demo is the page the first
+ * paying school actually has: a peach ground, near-black accent, black text,
+ * and no light set or crest fill of its own (Springfield's stored colors carry
+ * neither; look.ts works the other mode out from these three). Each is moved a
+ * shade off Springfield's — ground #ffbf94, accent #292929 — so this school is
+ * nobody's; black text is left black, there being no shade of it that is
+ * anybody's in particular.
  */
-const GROUND = '#2f1466';
-const ACCENT = '#f5b63d';
+const GROUND = '#ffc29a';
+const ACCENT = '#2b2b2b';
+const TEXT = '#000000';
+/* The crest's own orange: deeper than the ground, so the roundel stands off
+   the page it sits on and still reads as the school's color. */
+const CREST_ORANGE = '#e8742a';
 
 /*
  * Every school on the demo page is invented, conference rivals included. The
@@ -100,14 +120,20 @@ const realSlugs = new Set((index.schools ?? index).map((s) => s.slug));
  * raster types — the value is substituted into a CSS url(), and the narrow
  * alphabet is what makes that safe. The letters are paths rather than <text>
  * so the output does not depend on the fonts of the machine that runs this.
+ *
+ * A black edge and a black ring with "MT" in black on orange inside, so the
+ * badge keeps its edge on the peach page; the page also draws it, faint, as
+ * its watermark, as it does any school's crest. Not a tiger: the
+ * tiger is Springfield's own mark (docs/design/springfield-video), and a
+ * monogram is what an invented school can honestly wear.
  */
 const crestSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="256" fill="${ACCENT}"/>
-  <circle cx="256" cy="256" r="230" fill="${GROUND}"/>
-  <circle cx="256" cy="256" r="206" fill="none" stroke="${ACCENT}" stroke-width="9"/>
-  <g fill="${ACCENT}">
-    <path d="M117 150 h38 v72 h48 v-72 h38 v212 h-38 v-100 h-48 v100 h-38 z"/>
-    <path d="M257 150 h42 l27 148 l27 -148 h42 l-48 212 h-42 z"/>
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  <circle cx="256" cy="256" r="236" fill="${CREST_ORANGE}"/>
+  <circle cx="256" cy="256" r="212" fill="none" stroke="#000000" stroke-width="8"/>
+  <g fill="#000000" transform="translate(256 256) scale(0.84) translate(-256 -256)">
+    <path d="M92 362 v-212 h44 l50 120 l50 -120 h44 v212 h-40 v-136 l-40 96 h-28 l-40 -96 v136 z"/>
+    <path d="M296 150 h124 v40 h-42 v172 h-40 v-172 h-42 z"/>
   </g>
 </svg>`;
 
@@ -264,7 +290,7 @@ const WEEKS = Array.from({ length: TOTAL_WEEKS }, (_, i) =>
 /*
  * Five rounds, every pair meeting once, in weeks 3 to 7. Written out because
  * the scores are chosen: a demo where the school being sold to wins everything
- * reads as a brochure, so Harlow Valley loses one here and two outside.
+ * reads as a brochure, so Millbrook loses one here and two outside.
  * Indexes are into MEMBERS; `h` is the home side.
  */
 const ROUNDS = [
@@ -525,7 +551,7 @@ const BASKETBALL = [
  * Volleyball: the conference twice over, Tuesdays and Thursdays from late
  * August. In season it is ten matches played and four to come — enough results
  * for a record and enough fixtures for the page to be about something — and
- * Harlow Valley loses three, because a demo where the school being sold to wins
+ * Millbrook loses three, because a demo where the school being sold to wins
  * everything reads as a brochure.
  */
 const VB_TIME = '6:30 PM';
@@ -605,7 +631,7 @@ const demo = {
   // stood then rather than as it stands whenever the suite happens to run.
   generatedOn: iso(TODAY),
   school: { slug: SLUG, name: NAME, city: CITY },
-  colors: { ground: GROUND, accent: ACCENT },
+  colors: { ground: GROUND, accent: ACCENT, text: TEXT, nickname: NICKNAME },
   logo: LOGO,
   // The order the hub is handed; sortSportsForNow reorders it by the calendar.
   sportNames: ['football', 'volleyball', 'basketball'],
@@ -747,10 +773,393 @@ if (quarrels.length) {
   throw new Error('the calendar contradicts src/oh/sportSeasons.ts');
 }
 
+// ------------------------------------------------------------------ the stats
+
+/*
+ * A season of football stats for the invented squad, game by game.
+ *
+ * Made the way the season was played rather than as totals picked out of the
+ * air, for two reasons. The player card subtracts one copy of the totals from
+ * the next to show a week (src/maxpreps/weeks.ts), so the copies have to be
+ * real running sums of real games. And a prospect who knows football will
+ * check one against the other: Millbrook's touchdowns and kicks add up to the
+ * points on its own schedule, every catch is a completion somebody threw, and
+ * the long run is a run somebody made.
+ *
+ * The numbers come from a fixed seed, so a re-run on the same day writes the
+ * same file and a diff shows only what the calendar moved.
+ */
+
+/* mulberry32: small, seedable, and enough for dice. */
+const seeded = (seed) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const rand = seeded(2026);
+const between = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
+const pick = (weights) => {
+  const total = weights.reduce((s, [, w]) => s + w, 0);
+  let r = rand() * total;
+  for (const [who, w] of weights) {
+    r -= w;
+    if (r < 0) return who;
+  }
+  return weights[weights.length - 1][0];
+};
+
+const byNumber = new Map(FOOTBALL.map((p) => [p.number, p]));
+const nameOf = (number) => {
+  const p = byNumber.get(number);
+  if (!p) throw new Error(`#${number} is not on the football roster`);
+  return `${p.firstName} ${p.lastName}`;
+};
+
+/* The fields scripts/maxpreps.mjs keeps per category, in the print page's order. */
+const FIELDS = {
+  passing: ['games', 'cmp', 'att', 'yds', 'cmpPct', 'ydsPerGame', 'td', 'int', 'lng', 'rating'],
+  rushing: ['games', 'carries', 'yds', 'ydsPerCarry', 'ydsPerGame', 'lng', 'td'],
+  receiving: ['games', 'rec', 'yds', 'ydsPerRec', 'ydsPerGame', 'lng', 'td'],
+  defense: ['games', 'solo', 'assist', 'tackles', 'tfl', 'sacks', 'ff', 'fumRec', 'int'],
+  kicking: ['games', 'xpMade', 'xpAtt', 'fgMade', 'fgAtt', 'lng', 'pts'],
+  punting: ['games', 'punts', 'yds', 'ydsPerPunt', 'lng', 'in20'],
+  kickReturn: ['games', 'returns', 'yds', 'ydsPerReturn', 'lng'],
+  puntReturn: ['games', 'returns', 'yds', 'ydsPerReturn', 'lng'],
+};
+/* What adds up game to game — the same table src/maxpreps/weeks.ts subtracts with. */
+const COUNTING = {
+  passing: ['cmp', 'att', 'yds', 'td', 'int'],
+  rushing: ['carries', 'yds', 'td'],
+  receiving: ['rec', 'yds', 'td'],
+  defense: ['tackles', 'solo', 'assist', 'sacks', 'tfl', 'int', 'ff', 'fumRec'],
+  kicking: ['xpMade', 'xpAtt', 'fgMade', 'fgAtt', 'pts'],
+  punting: ['punts', 'yds', 'in20'],
+  kickReturn: ['returns', 'yds'],
+  puntReturn: ['returns', 'yds'],
+};
+/* MaxPreps leaves a defender's empty columns blank rather than printing zeros,
+   and the card prints whatever is there — "0 sacks" under every tackle line
+   would be noise. */
+const DEFENSE_OPTIONAL = new Set(['assist', 'tfl', 'sacks', 'ff', 'fumRec', 'int']);
+
+/** One play's yards: mostly short, now and then a long one. */
+const carryYards = () => {
+  const r = rand();
+  if (r < 0.04) return between(30, 64);
+  if (r < 0.15) return between(10, 24);
+  return between(-2, 9);
+};
+const catchYards = () => (rand() < 0.14 ? between(20, 58) : between(4, 17));
+
+/** Defenders, by how often each makes a tackle in a game, and what else they do. */
+const DEFENDERS = [
+  ['44', 8.5, 'front'], ['33', 7, 'front'], ['22', 6, 'front'], ['10', 5.5, 'front'],
+  ['24', 4, 'front'], ['20', 4.5, 'back'], ['50', 4, 'line'], ['55', 3.5, 'line'],
+  ['75', 3.5, 'line'], ['88', 3, 'line'], ['15', 2.5, 'line'], ['64', 2, 'line'],
+  ['21', 3, 'back'], ['3', 2.5, 'back'], ['8', 2.5, 'back'], ['1', 2, 'back'], ['14', 1.5, 'back'],
+];
+const RECEIVERS = [['3', 28], ['11', 22], ['13', 16], ['4', 12], ['7', 10], ['15', 6], ['5', 6]];
+/* Carries per game for each back: a range, and how often he scores a rushing touchdown. */
+const RUSHERS = [['24', 15, 22, 50], ['5', 6, 11, 20], ['12', 3, 8, 15], ['9', 2, 6, 10], ['6', 0, 4, 5]];
+
+/** One game, as each player's counting numbers in each category plus his long plays. */
+function playGame(us, them) {
+  const line = new Map();
+  const add = (number, category, values) => {
+    const key = `${number}|${category}`;
+    const now = line.get(key) ?? { number, category, values: {} };
+    for (const [field, n] of Object.entries(values)) {
+      now.values[field] = field === 'lng' ? Math.max(now.values[field] ?? 0, n) : (now.values[field] ?? 0) + n;
+    }
+    line.set(key, now);
+  };
+
+  // The points on the schedule, taken apart: every 7 a touchdown and its kick,
+  // a 6 left over a touchdown whose kick missed, a 3 a field goal.
+  let tds = Math.floor(us / 7);
+  let rest = us % 7;
+  let missed = 0;
+  if (rest === 6) { tds += 1; missed = 1; rest = 0; }
+  const fgs = Math.floor(rest / 3);
+  if (rest % 3) throw new Error(`${us} points do not come apart into touchdowns and field goals`);
+
+  // Touchdowns: about two in five through the air.
+  let passTds = 0;
+  let rushTds = 0;
+  for (let i = 0; i < tds; i++) {
+    if (rand() < 0.4) passTds += 1;
+    else rushTds += 1;
+  }
+
+  // The quarterbacks. Owen Carter, the backup, throws in about a third of games.
+  const throws = [['12', between(13, 23)]];
+  if (rand() < 0.35) throws.push(['1', between(1, 4)]);
+  throws.forEach(([qb, att], i) => {
+    let cmp = Math.round(att * (0.48 + rand() * 0.2));
+    const td = i === 0 ? passTds : 0;
+    cmp = Math.max(cmp, td);
+    let yds = 0;
+    let lng = 0;
+    const caught = [];
+    for (let c = 0; c < cmp; c++) {
+      const who = pick(RECEIVERS);
+      const gain = catchYards();
+      yds += gain;
+      lng = Math.max(lng, gain);
+      caught.push(who);
+      add(who, 'receiving', { rec: 1, yds: gain, lng: gain });
+    }
+    // A touchdown goes to somebody who caught a ball in this game.
+    for (let t = 0; t < td; t++) add(caught[between(0, caught.length - 1)], 'receiving', { td: 1 });
+    const int = i === 0 ? (rand() < 0.3 ? 1 : 0) + (rand() < 0.08 ? 1 : 0) : 0;
+    add(qb, 'passing', { cmp, att, yds, td, int, lng });
+  });
+
+  // The backs, and the rushing touchdowns among whoever carried.
+  const carried = [];
+  for (const [who, lo, hi, scoreWeight] of RUSHERS) {
+    const carries = between(lo, hi);
+    if (!carries) continue;
+    let yds = 0;
+    let lng = 0;
+    for (let c = 0; c < carries; c++) {
+      const gain = who === '12' ? between(-6, 12) : carryYards();
+      yds += gain;
+      lng = Math.max(lng, gain);
+    }
+    // A night of lost yardage is real football, but it would make a week on
+    // the card a negative number and the season total go backwards, which the
+    // check below refuses. A back who got nowhere is written as no gain.
+    add(who, 'rushing', { carries, yds: Math.max(0, yds), lng });
+    carried.push([who, scoreWeight]);
+  }
+  for (let t = 0; t < rushTds; t++) add(pick(carried), 'rushing', { td: 1 });
+
+  // The kicker: every extra point tried, a missed one now and then, and a
+  // field goal tried and missed in about a quarter of games.
+  const fgLong = Array.from({ length: fgs }, () => between(22, 41));
+  const fgAtt = fgs + (rand() < 0.25 ? 1 : 0);
+  add('18', 'kicking', {
+    xpMade: tds - missed,
+    xpAtt: tds,
+    fgMade: fgs,
+    fgAtt,
+    lng: fgLong.length ? Math.max(...fgLong) : 0,
+    pts: tds - missed + 3 * fgs,
+  });
+  const punts = between(2, 5);
+  let puntYds = 0;
+  let puntLng = 0;
+  let in20 = 0;
+  for (let p = 0; p < punts; p++) {
+    const y = between(27, 46);
+    puntYds += y;
+    puntLng = Math.max(puntLng, y);
+    if (rand() < 0.25) in20 += 1;
+  }
+  add('18', 'punting', { punts, yds: puntYds, lng: puntLng, in20 });
+
+  // Kickoffs come back after the other side scores.
+  const kicks = Math.max(1, Math.round(them / 7)) + (rand() < 0.5 ? 1 : 0);
+  for (let k = 0; k < kicks; k++) {
+    const y = rand() < 0.08 ? between(40, 72) : between(10, 28);
+    add(rand() < 0.6 ? '8' : '5', 'kickReturn', { returns: 1, yds: y, lng: y });
+  }
+  const puntBacks = between(0, 3);
+  for (let p = 0; p < puntBacks; p++) {
+    const y = between(0, 14);
+    add('3', 'puntReturn', { returns: 1, yds: y, lng: y });
+  }
+
+  // The defense: tackles around each player's own rate, about three in five
+  // of them made alone, and the rarer things by where he lines up.
+  const theirPicks = between(0, 2) === 2 ? 1 : 0;
+  for (const [who, rate, spot] of DEFENDERS) {
+    const tackles = Math.max(0, Math.round(rate * (0.5 + rand())));
+    if (!tackles) continue;
+    const solo = Math.min(tackles, Math.round(tackles * (0.5 + rand() * 0.25)));
+    const extra = {};
+    if (spot !== 'back' && rand() < (spot === 'line' ? 0.35 : 0.3)) extra.tfl = between(1, 2);
+    if (spot !== 'back' && rand() < (spot === 'line' ? 0.22 : 0.12)) extra.sacks = 1;
+    if (rand() < 0.04) extra.ff = 1;
+    if (rand() < 0.04) extra.fumRec = 1;
+    add(who, 'defense', { solo, assist: tackles - solo, tackles, ...extra });
+  }
+  if (theirPicks) add(pick([['20', 3], ['21', 2], ['3', 2], ['1', 1], ['8', 1]]), 'defense', { int: 1 });
+
+  return line;
+}
+
+const round1 = (n) => Math.round(n * 10) / 10;
+
+/** The NFL passer rating, which is the one MaxPreps prints. */
+const passerRating = ({ cmp, att, yds, td, int }) => {
+  if (!att) return 0;
+  const clamp = (x) => Math.min(2.375, Math.max(0, x));
+  const parts = [(cmp / att - 0.3) * 5, (yds / att - 3) * 0.25, (td / att) * 20, 2.375 - (int / att) * 25];
+  return round1((parts.map(clamp).reduce((a, b) => a + b, 0) / 6) * 100);
+};
+
+/** Running totals as the print page shows them: counts, games, longs, and the averages worked out again. */
+function totalsAfter(games) {
+  const sums = new Map();
+  for (const game of games) {
+    for (const [key, { number, category, values }] of game) {
+      const now = sums.get(key) ?? { number, category, games: 0, values: {} };
+      now.games += 1;
+      for (const [field, n] of Object.entries(values)) {
+        now.values[field] = field === 'lng' ? Math.max(now.values[field] ?? 0, n) : (now.values[field] ?? 0) + n;
+      }
+      sums.set(key, now);
+    }
+  }
+  const order = Object.keys(FIELDS);
+  const rows = [...sums.values()].sort(
+    (a, b) => order.indexOf(a.category) - order.indexOf(b.category) || Number(a.number) - Number(b.number),
+  );
+  return rows.map(({ number, category, games: played, values: v }) => {
+    const derived = {
+      games: played,
+      ydsPerGame: round1((v.yds ?? 0) / played),
+      cmpPct: v.att ? round1((100 * v.cmp) / v.att) : 0,
+      rating: passerRating({ td: 0, int: 0, ...v }),
+      ydsPerCarry: v.carries ? round1(v.yds / v.carries) : 0,
+      ydsPerRec: v.rec ? round1(v.yds / v.rec) : 0,
+      ydsPerPunt: v.punts ? round1(v.yds / v.punts) : 0,
+      ydsPerReturn: v.returns ? round1(v.yds / v.returns) : 0,
+    };
+    const values = {};
+    for (const field of FIELDS[category]) {
+      const n = field in v ? v[field] : field in derived ? derived[field] : 0;
+      if (category === 'defense' && DEFENSE_OPTIONAL.has(field) && !n) continue;
+      values[field] = n;
+    }
+    return { name: nameOf(number), number, category, values };
+  });
+}
+
+/*
+ * Only the games already played, in the order they were played. Out of season
+ * that is none, and then there is no stats file at all: the app reads a missing
+ * file as a school with no stats yet (no Stats tab, no season lines), which is
+ * what a real school's page looks like before its first game.
+ */
+const playedGames = seasons[SLUG].games.filter((g) => g.result).sort((a, b) => a.week - b.week);
+const gameLines = playedGames.map((g) => playGame(g.result.us, g.result.them));
+const snapshots = gameLines.map((_, i) => ({ games: i + 1, rows: totalsAfter(gameLines.slice(0, i + 1)) }));
+
+const STATS_PATH = `public/oh/stats/${SLUG}-football.json`;
+const stats = playedGames.length
+  ? {
+      slug: SLUG,
+      sport: 'football',
+      // Printed under the tab as "Season stats from …", so this reads "Season
+      // stats from a sample season". Not "MaxPreps": none of it came from there.
+      source: 'a sample season',
+      // No day. The page carries the demo's season forward a week at a time
+      // (src/oh/demo.ts) and nothing carries this file with it, so a baked date
+      // would be "updated Oct 10" under a schedule showing games into November.
+      // The tab prints the credit without a day when there is none.
+      updated: '',
+      games: playedGames.length,
+      rows: snapshots[snapshots.length - 1].rows,
+      snapshots,
+    }
+  : null;
+
+/*
+ * The fourth check, on the stats: that the page will show every row of them,
+ * and that the player card's weeks can be worked out of them.
+ *
+ *  - every row is somebody on the football roster, by the exact name and
+ *    number the page matches on (matchTeamStats in src/oh/teamStats.ts);
+ *  - the season's games are the games Millbrook has played;
+ *  - no copy of the totals goes down in any counting number, games or long
+ *    play — a week is the difference of two copies, and a negative week is a
+ *    file that was not made by playing games. The averages are left out of
+ *    this: yards a carry can fall after a bad night, and should;
+ *  - the file passes the rules src/oh/teamStats.ts reads it by.
+ */
+const statFaults = [];
+if (stats) {
+  const KNOWN = new Set(Object.keys(FIELDS));
+  const shapeOk = (rows) =>
+    rows.length > 0 &&
+    rows.every(
+      (r) =>
+        typeof r.name === 'string' &&
+        r.name.trim() &&
+        typeof r.number === 'string' &&
+        KNOWN.has(r.category) &&
+        Object.keys(r.values).length > 0 &&
+        Object.values(r.values).every((n) => typeof n === 'number' && Number.isFinite(n)),
+    );
+  if (!shapeOk(stats.rows)) statFaults.push('the totals are not rows the page would read');
+  for (const s of stats.snapshots) {
+    if (!Number.isInteger(s.games) || s.games < 1 || !shapeOk(s.rows)) {
+      statFaults.push(`the copy after game ${s.games} is not one the page would read`);
+    }
+  }
+  for (const r of [...stats.rows, ...stats.snapshots.flatMap((s) => s.rows)]) {
+    const p = byNumber.get(r.number);
+    if (!p || `${p.firstName} ${p.lastName}` !== r.name) {
+      statFaults.push(`${r.name} #${r.number} is not on the football roster`);
+    }
+    if (r.values.games > stats.games) statFaults.push(`${r.name} has played more games than the team`);
+  }
+  if (stats.games !== PLAYED_WEEKS) {
+    statFaults.push(`the stats cover ${stats.games} games and the season has ${PLAYED_WEEKS} played`);
+  }
+  const last = stats.snapshots[stats.snapshots.length - 1];
+  if (last.games !== stats.games || JSON.stringify(last.rows) !== JSON.stringify(stats.rows)) {
+    statFaults.push('the latest copy is not the season totals');
+  }
+  const value = (rows, r, field) =>
+    rows.find((o) => o.name === r.name && o.category === r.category)?.values[field] ?? 0;
+  for (let i = 1; i < stats.snapshots.length; i++) {
+    const before = stats.snapshots[i - 1];
+    const after = stats.snapshots[i];
+    if (after.games <= before.games) statFaults.push(`copy ${i} does not move the games count on`);
+    for (const r of before.rows) {
+      for (const field of [...COUNTING[r.category], 'games', 'lng']) {
+        if (value(after.rows, r, field) < value(before.rows, r, field)) {
+          statFaults.push(`${r.name}'s ${r.category} ${field} goes down after game ${after.games}`);
+        }
+      }
+    }
+  }
+  // Every point on the schedule is a kick or a touchdown somebody scored.
+  const scored = playedGames.reduce((s, g) => s + g.result.us, 0);
+  const sum = (category, field) =>
+    stats.rows.filter((r) => r.category === category).reduce((s, r) => s + (r.values[field] ?? 0), 0);
+  const touchdowns = sum('rushing', 'td') + sum('receiving', 'td');
+  if (sum('passing', 'td') !== sum('receiving', 'td')) statFaults.push('passing and receiving touchdowns disagree');
+  if (6 * touchdowns + sum('kicking', 'pts') !== scored) {
+    statFaults.push(`the stats score ${6 * touchdowns + sum('kicking', 'pts')} points and the schedule ${scored}`);
+  }
+}
+if (statFaults.length) {
+  for (const f of statFaults) console.error(`  ${f}`);
+  throw new Error('the sample stats do not describe the season the demo played');
+}
+
+// ------------------------------------------------------------------ writing
+
 const out = join(root, 'public/oh/demo.json');
 writeFileSync(out, `${JSON.stringify(demo, null, 2)}\n`);
 
+const statsOut = join(root, STATS_PATH);
+if (stats) {
+  mkdirSync(dirname(statsOut), { recursive: true });
+  // Indented by one, as scripts/maxpreps.mjs writes a real school's.
+  writeFileSync(statsOut, `${JSON.stringify(stats, null, 1)}\n`);
+} else {
+  rmSync(statsOut, { force: true });
+}
+
 const kb = (n) => `${(n / 1024).toFixed(1)} kB`;
+const statSize = (s) => `${JSON.stringify(s, null, 1)}\n`.length;
 const spread = (dates) =>
   dates.length ? `${dates[0]} → ${dates[dates.length - 1]} (${dates.length} games)` : 'none';
 
@@ -767,6 +1176,11 @@ console.log(`  played  ${spread(dated.filter(([, , s]) => s).map(([, d]) => d).s
 console.log(`  ahead   ${spread(dated.filter(([, , s]) => !s).map(([, d]) => d).sort())}`);
 console.log(
   `  football: ${PLAYED_WEEKS} of ${TOTAL_WEEKS} played, ${NAME} ${seasons[SLUG].record.won}–${seasons[SLUG].record.lost}, last game ${WEEKS[TOTAL_WEEKS - 1]}`,
+);
+console.log(
+  stats
+    ? `  stats: ${stats.rows.length} rows over ${stats.games} games, ${stats.snapshots.length} copies, ${kb(statSize(stats))} → ${STATS_PATH}`
+    : `  stats: none, nothing played yet (${STATS_PATH} removed)`,
 );
 /*
  * What the page does with this file from here on: src/oh/demo.ts moves a
