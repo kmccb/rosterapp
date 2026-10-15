@@ -299,14 +299,71 @@ strong {
 /* --------------------------------------------------------------- phones */
 
 .phone {
+  position: relative;
   margin: 0 auto;
   width: min(100%, 300px);
+  /* The frame below is sized in cqi, hundredths of this figure's width, so
+     it keeps an iPhone's proportions at whatever size the grid gives it. */
+  container-type: inline-size;
 }
-.phone img {
-  border: 6px solid var(--soot);
-  border-radius: 34px;
-  background: var(--soot);
-  box-shadow: 0 30px 80px -30px rgba(232, 93, 47, 0.35);
+
+/* An iPhone drawn around each screen. The pictures are whole phone screens,
+   status bar and home bar already on them (scripts/shoot-marketing.mjs); this
+   is the hardware: a titanium band, a black bezel, the buttons on its sides,
+   a sheen of glass, and a shadow that falls the way a studio light makes it. */
+.device {
+  position: relative;
+  padding: 1.1cqi;
+  border-radius: 17.6cqi;
+  background: linear-gradient(140deg, #9a948c, #e4dfd7 18%, #6e6a64 45%, #c9c3ba 75%, #7c7770);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 24px 44px -18px rgba(0, 0, 0, 0.8),
+    0 60px 110px -40px rgba(232, 93, 47, 0.32);
+}
+.device img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2.6cqi solid #050505;
+  border-radius: 16.5cqi;
+  background: #050505;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+/* Glass catching the light across the top-left of the screen. */
+.device::after {
+  content: '';
+  position: absolute;
+  inset: 3.7cqi;
+  border-radius: 13.9cqi;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 32%, transparent 48%);
+  pointer-events: none;
+}
+/* The buttons: on the left the action button and the volume pair, drawn as
+   one bar and two copies of its shadow; on the right the side button. */
+.device::before,
+.phone::after {
+  content: '';
+  position: absolute;
+  width: 1cqi;
+  border-radius: 0.6cqi;
+  z-index: -1;
+}
+.device::before {
+  left: -0.7cqi;
+  top: 30cqi;
+  height: 10cqi;
+  background: #8a857e;
+  box-shadow:
+    0 16cqi 0 0 #8a857e,
+    0 31cqi 0 0 #8a857e;
+}
+.phone::after {
+  right: -0.7cqi;
+  top: 46cqi;
+  height: 22cqi;
+  background: #8a857e;
 }
 .phone figcaption {
   margin-top: 16px;
@@ -485,6 +542,11 @@ strong {
   .hero {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
     align-items: center;
+  }
+  /* The hero phone turned a little toward the words, the way a product is
+     set on a page of apple.com. */
+  .hero .phone {
+    transform: perspective(1800px) rotateY(-16deg) rotateX(4deg) rotateZ(1deg);
   }
   .two {
     grid-template-columns: repeat(2, minmax(0, 1fr));
