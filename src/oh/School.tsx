@@ -23,7 +23,7 @@ import {
   type SchoolRoster,
 } from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
-import { applyLook, clearLook, pageGround } from './look';
+import { applyLook, clearLook, lookGround, type LightColors } from './look';
 import { useMode } from './mode';
 import { ModeButton } from './ModeButton';
 import { SportGlyph } from './SportGlyph';
@@ -445,6 +445,15 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const plate = look?.colors?.plate ?? null;
   const nickname = look?.colors?.nickname ?? null;
   const crest = look?.logo ?? null;
+  // The seller's own light page, if there is one, flattened to its three
+  // values for the same reason as the rest: an equal set must not repaint.
+  const lightGround = look?.colors?.light?.ground ?? null;
+  const lightAccent = look?.colors?.light?.accent ?? null;
+  const lightText = look?.colors?.light?.text ?? null;
+  const light = useMemo<LightColors | undefined>(
+    () => (lightGround && lightAccent && lightText ? { ground: lightGround, accent: lightAccent, text: lightText } : undefined),
+    [lightGround, lightAccent, lightText],
+  );
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
   // lives on body::before, outside this component's own tree — so it has to
@@ -468,9 +477,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [mode, toggleMode] = useMode();
   useEffect(() => {
     if (!ground || !accent) return;
-    applyLook({ ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined }, undefined, mode);
+    applyLook(
+      { ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined, light },
+      undefined,
+      mode,
+    );
     return () => clearLook();
-  }, [ground, accent, text, plate, crest, mode]);
+  }, [ground, accent, text, plate, crest, mode, light]);
 
   // A school that is live on the paid tier installs as itself — its name, its
   // crest, straight onto its page (src/oh/install.ts). The identity answering
@@ -481,8 +494,8 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   useEffect(() => {
     if (!paidLive || !schoolName || isDemo()) return;
     // The browser bar takes the page's own background, light or dark.
-    return installAs(slug, schoolName, ground && pageGround(ground, mode));
-  }, [slug, paidLive, schoolName, ground, mode]);
+    return installAs(slug, schoolName, ground && accent && lookGround({ ground, accent, light }, mode));
+  }, [slug, paidLive, schoolName, ground, accent, mode, light]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.

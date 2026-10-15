@@ -26,6 +26,9 @@ export type SchoolColors = {
   nickname?: string;
   /** What the crest sits on: 'ground', 'accent' or a hex. None: straight on the page. */
   plate?: string;
+  /** The light page's own three colors, chosen by the seller. None: worked
+   * out from the dark ones above, as every light page was at first. */
+  light?: { ground: string; accent: string; text: string };
 } | null;
 /** The conference the school told us about: a name to head the table with and
  * the directory slugs of everyone in it. Nobody scrapes this — it arrives
@@ -74,10 +77,21 @@ const HEX = /^#[0-9a-f]{6}$/i;
  * name and it still fit a phone's header. The panel's box stops at the same length. */
 export const NICKNAME_MAX = 24;
 
+/** A light set is all three colors or nothing: a page painted from two chosen
+ * colors and one guessed would be a look nobody picked. */
+const validLight = (v: unknown): { light: { ground: string; accent: string; text: string } } | Record<string, never> => {
+  if (!v || typeof v !== 'object') return {};
+  const l = v as Partial<Record<'ground' | 'accent' | 'text', unknown>>;
+  const hex = (x: unknown): x is string => typeof x === 'string' && HEX.test(x);
+  return hex(l.ground) && hex(l.accent) && hex(l.text)
+    ? { light: { ground: l.ground, accent: l.accent, text: l.text } }
+    : {};
+};
+
 const validColors = (v: unknown): SchoolColors => {
   if (v === null || v === undefined) return null;
   if (typeof v !== 'object') return null;
-  const c = v as Partial<{ ground: unknown; accent: unknown; text: unknown; nickname: unknown; plate: unknown }>;
+  const c = v as Partial<{ ground: unknown; accent: unknown; text: unknown; nickname: unknown; plate: unknown; light: unknown }>;
   const nickname = typeof c.nickname === 'string' ? c.nickname.replace(/\s+/g, ' ').trim() : '';
   return typeof c.ground === 'string' &&
     typeof c.accent === 'string' &&
@@ -93,6 +107,9 @@ const validColors = (v: unknown): SchoolColors => {
         ...(typeof c.plate === 'string' && (c.plate === 'ground' || c.plate === 'accent' || HEX.test(c.plate))
           ? { plate: c.plate }
           : {}),
+        // Junk here drops only the light set, and the page falls back to
+        // working its light look out from the dark pair as before.
+        ...validLight(c.light),
       }
     : null;
 };

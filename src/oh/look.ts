@@ -25,10 +25,23 @@ import { plateColor, type CrestPlate } from './plate';
 // The plate rule lives in ./plate so the home-screen icon script can share it.
 export { plateColor, type CrestPlate };
 
+/** The three colors a seller can choose for the light page. All three or
+ * none: a light page is worked out from the dark colors unless somebody chose
+ * it whole. */
+export type LightColors = { ground: string; accent: string; text: string };
+
 /** `text` is optional: a school that never chose one reads in white, as every
  * school did before there was a third color to choose. `plate` is optional the
- * same way: none means the crest sits straight on the page. */
-export type SchoolLook = { ground: string; accent: string; text?: string; plate?: CrestPlate; logo?: string };
+ * same way: none means the crest sits straight on the page. `light` is the
+ * seller's own light page; none means it is derived from the dark colors. */
+export type SchoolLook = {
+  ground: string;
+  accent: string;
+  text?: string;
+  plate?: CrestPlate;
+  logo?: string;
+  light?: LightColors;
+};
 
 /** Which way round a paid page is painted. Dark — the school's ground behind
  * light words — is how every page has always looked and stays the default;
@@ -55,6 +68,22 @@ const rgba = (hex: string, alpha: number): string => {
 
 const isHex = (v: string | undefined): v is string => !!v && /^#[0-9a-f]{6}$/i.test(v);
 
+/** The light colors the seller chose, or null when there is no whole set —
+ * half a set is never painted, the same rule the stored colors follow. */
+const chosenLight = (look: SchoolLook): LightColors | null => {
+  const l = look.light;
+  return l && isHex(l.ground) && isHex(l.accent) && isHex(l.text) ? l : null;
+};
+
+/** The colors a mode is painted from. A light page the seller chose is painted
+ * exactly as the dark page is, from its own three colors, so it gets the same
+ * surfaces, the same second voice and the same readability floor; only a
+ * light page nobody chose is worked out by turning the dark one over. */
+const sourceFor = (look: SchoolLook, mode: Mode): { look: SchoolLook; mode: Mode } => {
+  const light = mode === 'light' ? chosenLight(look) : null;
+  return light ? { look: { ...look, ...light, light: undefined }, mode: 'dark' } : { look, mode };
+};
+
 /** The dark offered for ink on an accent fill when the ground itself is too
  * light to read there — not pure black, which looks like a hole on a phone. */
 const NEAR_BLACK = '#111111';
@@ -77,6 +106,13 @@ export const LOOK_VARS = [
  * near-white with just enough of the ground in it to still be this school's. */
 export const pageGround = (ground: string, mode: Mode = 'dark'): string =>
   mode === 'light' ? mix(ground, '#ffffff', 0.94) : ground;
+
+/** The page's background for a whole look: the seller's own light ground when
+ * one was chosen, else pageGround's. What the address bar is tinted with. */
+export const lookGround = (look: SchoolLook, mode: Mode = 'dark'): string => {
+  const src = sourceFor(look, mode);
+  return pageGround(src.look.ground, src.mode);
+};
 
 /** How colorful a color is: the spread of its channels, 0 for any grey. */
 const chroma = (hex: string): number => {
@@ -188,8 +224,12 @@ function words(look: SchoolLook, mode: Mode): Words {
  * near-white at the same strengths, so the crest is exactly as faint.
  */
 export function deriveVars(look: SchoolLook, mode: Mode = 'dark'): Record<string, string> {
-  const { ground, logo } = look;
-  const w = words(look, mode);
+  const { logo } = look;
+  // The crest's plate is left out of this on purpose: it is the crest's own
+  // fill, read from the dark colors in either mode, as the home-screen icon is.
+  const src = sourceFor(look, mode);
+  const { ground } = src.look;
+  const w = words(src.look, src.mode);
   const { bg } = w;
   // Ink on an accent fill — the active tab, a filled button. The ground was
   // always the answer and still is when it reads best; an accent the ground
@@ -217,15 +257,28 @@ export function deriveVars(look: SchoolLook, mode: Mode = 'dark'): Record<string
 }
 
 /**
+ * The light page as fans see it when nobody chose one: its background, and
+ * its words as made readable. The panel starts the light pickers from this,
+ * so a seller who ticks the box begins from the page fans already have.
+ */
+export function derivedLight(look: SchoolLook): LightColors {
+  const w = words({ ...look, light: undefined }, 'light');
+  return { ground: w.bg, accent: w.accent, text: w.text };
+}
+
+/**
  * What the panel says under the color pickers when a color was moved to stay
  * readable. The second voice is derived rather than picked, and a hint about
  * a color nobody can choose would only puzzle, so it is left out. The color is
  * never refused: the page shows the adjusted one, and the seller is told why
- * it looks different from the swatch. Only the dark page is reported — it is
- * the one the preview shows, and light mode is built rather than chosen.
+ * it looks different from the swatch. A light page is reported only when the
+ * seller chose it: one worked out from the dark colors has no swatch for a
+ * note to explain.
  */
-export function lookNotes(look: SchoolLook): string[] {
-  const w = words(look, 'dark');
+export function lookNotes(look: SchoolLook, mode: Mode = 'dark'): string[] {
+  if (mode === 'light' && !chosenLight(look)) return [];
+  const src = sourceFor(look, mode);
+  const w = words(src.look, src.mode);
   const moved = (label: string, from: string, to: string) =>
     from.toLowerCase() === to.toLowerCase()
       ? []
