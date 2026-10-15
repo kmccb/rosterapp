@@ -192,7 +192,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 **Springfield (New Middletown) is the first real school, activated by the seller 2026-10-13/14** —
 football live on `/oh/springfield` (`/oh/?school=springfield-new-middletown`), real 41-player
-MaxPreps roster, orange ground `#c75000`, crest uploaded. It is in `paid-schools.json`, and that
+MaxPreps roster, peach ground `#ffbf94`, accent `#292929`, black text, nickname "Tigers", crest uploaded. It is in `paid-schools.json`, and that
 list now drives its **stats fallback, playoff-region refresh and home-screen app** — never let a
 branch drop it.
 

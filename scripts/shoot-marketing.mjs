@@ -15,6 +15,8 @@
  * season can look stale. The Stats picture needs the demo's sample stats file,
  * which scripts/build-demo.mjs writes only while football is in season — shot
  * out of season, the demo has no Stats tab and this script stops at it.
+ * The screens are taken with the school's own colors on (the app's dark mode),
+ * the way Springfield's page looks with them, not the near-white light page.
  *
  * playwright-core is not a dependency of this repo on purpose: the guarded
  * build installs from package-lock.json, and a screenshot tool has no business
@@ -47,11 +49,12 @@ for (const channel of ['msedge', 'chrome']) {
 }
 if (!browser) throw new Error('neither Edge nor Chrome could be started');
 
-// Light, said outright: the page follows the phone's setting (src/oh/mode.ts),
-// and light is what a phone shows in daylight and what Springfield's page — the
-// one the demo is dressed after — is seen in. Left unsaid, a machine set to dark
-// would shoot the other look.
-const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2, colorScheme: 'light' });
+// The mode that paints the school's own colors (src/oh/mode.ts calls it dark):
+// the screens should show the school's colors, the way Springfield's page looks
+// with them on — its peach ground and black type. The light page washes the
+// ground nearly to white and loses the brand. Said outright, because the page
+// follows the phone's setting and a headless browser reports light.
+const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 2, colorScheme: 'dark' });
 await page.goto(`${ORIGIN}/oh/demo/`, { waitUntil: 'networkidle' });
 
 const save = async (name) => {
