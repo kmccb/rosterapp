@@ -5,8 +5,13 @@ First time? Work through docs/going-live.md before the first sale.
 The system stores a paid-through date and a note. Everything else — the
 pitch, the invoice, the check — happens between people.
 
-One team is $400 a season. A whole school — every sport — is $1,200
+One team is $400 a season. A whole school — every sport — is $1,800
 a year. A district or conference is quoted. A school's first season is free.
+Stats are an add-on: $150 per sport per season, or $600 a year for every
+sport that keeps stats. They come from wherever the team keeps them —
+MaxPreps (football runs on its own, below), Hudl, or the coach's spreadsheet —
+and only football from MaxPreps is built today, so set the source up with the
+coach before promising another sport a Stats tab.
 These lines are the one place those numbers live — change them here and on
 the site (`marketing/index.html`) together, and quote whatever they say.
 

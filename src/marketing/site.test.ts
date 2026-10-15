@@ -60,21 +60,23 @@ describe('the marketing page', () => {
 
   it('quotes the prices docs/selling.md quotes', () => {
     expect(text).toMatch(/\$400\s*\/ season/);
-    expect(text).toMatch(/\$1,200\s*\/ year/);
+    expect(text).toMatch(/\$1,800\s*\/ year/);
+    expect(text).toMatch(/\$150\s*\/ sport \/ season/);
+    expect(text).toMatch(/\$600\s*\/ year, every sport with stats/);
     expect(text).toMatch(/first season is free/i);
     const selling = readFileSync(new URL('../../docs/selling.md', import.meta.url), 'utf8');
-    expect(selling).toContain('$400');
-    expect(selling).toContain('$1,200');
+    for (const price of ['$400', '$1,800', '$150', '$600']) expect(selling).toContain(price);
   });
 
-  // Stats from MaxPreps are a thing the app now does, and the page names them.
+  // Stats are an add-on the seller sets up from wherever a team keeps them —
+  // MaxPreps, Hudl or a spreadsheet — so the page may name those sources.
   // The rest are still ideas, or another company's product, or a real school —
   // Tigers is Springfield's mascot, which the demo's header may say but this
   // page must not. Alt text is read too: a screen reader says it aloud.
   it('promises nothing the app does not do, and names no real school', () => {
     const said = `${text} ${attrs('alt').join(' ')}`.toLowerCase();
     for (const word of [
-      'Hudl', 'Region', 'rSchoolToday', 'ArbiterGame',
+      'Region', 'rSchoolToday', 'ArbiterGame',
       'DragonFly', 'Presented by', 'sponsor', 'Springfield', 'Tigers',
     ]) {
       expect(said.includes(word.toLowerCase()), word).toBe(false);
