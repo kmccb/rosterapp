@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 14,
+ "division": "IV",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Shelby",
+   "city": "Shelby",
+   "average": 19.825,
+   "qualifying": true,
+   "slug": "shelby-shelby"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Ottawa-Glandorf",
+   "city": "Ottawa",
+   "average": 17.5625,
+   "qualifying": true,
+   "slug": "ottawa-glandorf-ottawa"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Clear Fork",
+   "city": "Bellville",
+   "average": 15.6,
+   "qualifying": true,
+   "slug": "clear-fork-bellville"
+  },
+  {
+   "rank": "4",
+   "record": "8-0",
+   "school": "Perkins",
+   "city": "Sandusky",
+   "average": 14.975,
+   "qualifying": true,
+   "slug": "perkins-sandusky"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Otsego",
+   "city": "Tontogany",
+   "average": 12.1125,
+   "qualifying": true,
+   "slug": "otsego-tontogany"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Firelands",
+   "city": "Oberlin",
+   "average": 9.6856,
+   "qualifying": true,
+   "slug": "firelands-oberlin"
+  },
+  {
+   "rank": "7",
+   "record": "4-4",
+   "school": "Rossford",
+   "city": "Rossford",
+   "average": 7.3375,
+   "qualifying": true,
+   "slug": "rossford-rossford"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Bellevue",
+   "city": "Bellevue",
+   "average": 7.15,
+   "qualifying": true,
+   "slug": "bellevue-bellevue"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Lake",
+   "city": "Millbury",
+   "average": 7.1125,
+   "qualifying": true,
+   "slug": "lake-millbury"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Van Wert",
+   "city": "Van Wert",
+   "average": 6.5,
+   "qualifying": true,
+   "slug": "van-wert-van-wert"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Buckeye",
+   "city": "Medina",
+   "average": 6.4104,
+   "qualifying": true,
+   "slug": "buckeye-medina"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Highland",
+   "city": "Marengo",
+   "average": 5.9375,
+   "qualifying": true,
+   "slug": "highland-marengo"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Upper Sandusky",
+   "city": "Upper Sandusky",
+   "average": 5.9125,
+   "qualifying": false,
+   "slug": "upper-sandusky-upper-sandusky"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Benjamin Logan",
+   "city": "Bellefontaine",
+   "average": 5.5739,
+   "qualifying": false,
+   "slug": "benjamin-logan-bellefontaine"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Clyde",
+   "city": "Clyde",
+   "average": 5.3453,
+   "qualifying": false,
+   "slug": "clyde-clyde"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Elida",
+   "city": "Elida",
+   "average": 4.25,
+   "qualifying": false,
+   "slug": "elida-elida"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Kenton",
+   "city": "Kenton",
+   "average": 3.4125,
+   "qualifying": false,
+   "slug": "kenton-kenton"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Napoleon",
+   "city": "Napoleon",
+   "average": 2.5375,
+   "qualifying": false,
+   "slug": "napoleon-napoleon"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Wauseon",
+   "city": "Wauseon",
+   "average": 2.425,
+   "qualifying": false,
+   "slug": "wauseon-wauseon"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Bay",
+   "city": "Bay Village",
+   "average": 2.1,
+   "qualifying": false,
+   "slug": "bay-bay-village"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Brookside",
+   "city": "Sheffield",
+   "average": 2.0341,
+   "qualifying": false,
+   "slug": "brookside-sheffield"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Bryan",
+   "city": "Bryan",
+   "average": 1.8625,
+   "qualifying": false,
+   "slug": "bryan-bryan"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Clearview",
+   "city": "Lorain",
+   "average": 0.8535,
+   "qualifying": false,
+   "slug": "clearview-lorain"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Fostoria",
+   "city": "Fostoria",
+   "average": 0,
+   "qualifying": false,
+   "slug": "fostoria-fostoria"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "River Valley",
+   "city": "Caledonia",
+   "average": 0,
+   "qualifying": false,
+   "slug": "river-valley-caledonia"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

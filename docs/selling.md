@@ -42,16 +42,32 @@ screenshots: `node scripts/shoot-marketing.mjs` (see README, Deploying). Do not 
 ## Activate a school (the whole job, ~3 minutes)
 
 1. Open https://roster.scottforge.ai/oh/?manage and sign in (email link).
-2. "+ Activate a school" → search the school → paste their roster
-   spreadsheet → check the parsed list reads right. Or a CSV file, above
-   the paste box — it fills the paste box the same way and gets the same
-   review.
-3. Pick their two colors. Set paid-through (defaults to Feb 1 after the
-   season). Put the payment in the note: "check #1042, J. Smith, boosters".
-4. **Publish.** Their /oh/ page has the keypad that second.
+2. **Activate a school** → search the school → pick it. Its page opens on
+   a first sport card: choose the sport, paste their roster spreadsheet (or
+   **Import a CSV**, which fills the same box and gets the same review) and
+   check the parsed list reads right.
+3. On the same page set **Look** (their two colors and the crest) and
+   **Billing** (paid-through, which defaults to Feb 1 after the season, and
+   the payment in the note: "check #1042, J. Smith, boosters"). For a new
+   school these are saved with the first sport.
+4. **Save and publish** on the sport card. Their /oh/ page has the keypad
+   that second. Save unpublished instead if the check hasn't cleared.
 
-Save unpublished instead if the check hasn't cleared — publishing later is
-the same screen.
+After that, Look and Billing each have their own Save, and write to every
+   sport at once. Renew a year moves the date on.
+
+The school list is the dashboard: one line per school, worst first — a
+refused sheet, then expired, then live, then unpublished.
+
+### On a phone's home screen
+
+A live paid school installs as its own app: "Add to Home Screen" (Share →
+Add to Home Screen on an iPhone) from its page gives the crest as the icon,
+the school's name under it, and opens straight onto the school. The icons are
+made from the crest at every deploy, so a new crest reaches them within six
+hours. The school has to be in `paid-schools.json` for this, as for the
+forecast. A crest uploaded on a white square installs as a white square —
+the icon builder lifts a flat backdrop off a crest uploaded whole, so upload the full crest (not one cropped at its edges) for the best icon.
 
 ### The school's address
 
@@ -97,12 +113,37 @@ school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. The whole-school
 price at the top covers it.
 
+### Playoff rankings
+
+A paid football page shows its playoff region on the League tab — Division,
+Region, every team's Harbin average, the school's own row picked out — with
+nothing to set up. It refreshes with the directory, Saturday and Wednesday.
+Two things to know: add the school to `paid-schools.json` (that list is which
+regions get refreshed), and if the refresh warns that a school "is not in the
+regions index", run `node scripts/build-regions.mjs --all` once and commit.
+Run that each August too, when the regions are redrawn.
+
+### Past results
+
+A paid football page's Schedule tab gives each opponent's all-time record back
+to 2011. That comes from a committed file per school, written by hand: after
+adding the school to `paid-schools.json`, run `node scripts/build-history.mjs`
+and commit `public/oh/history/`. Until then the page simply shows this season's
+meetings and no all-time line. Each winter, bump `TO` in the script to the
+season just finished and run it again.
+
 ### The conference
 
 On a football activation, ask which conference the school plays in and who
 else is in it — that's the whole input the League tab's standings run on;
 everything else (who played whom, who won) already lives in the directory
-data. Type the conference name and pick the member schools in the panel.
+data. Type the conference name and pick the *other* member schools in the
+panel; the school itself is in its own table without being picked.
+
+If the school's stats come from MaxPreps, don't type anything: once the stats
+job has run for it, the Conference section offers **Fill from MaxPreps** — the
+conference as MaxPreps lists it, already matched to our schools. Check the
+list (it says so if it couldn't place one), then save the card.
 
 Re-picking members **replaces** the stored list, it doesn't add to it — the
 panel has no way to show what's already saved, so treat every save here as
@@ -134,6 +175,40 @@ calendar itself writes it — for Eventlink that reads like
 passing sample in `src/sync/fixtures/` — today that's ScheduleStar and
 Eventlink; anything else, paste the schedule by hand as before.
 
+### Season stats from MaxPreps (football)
+
+If the coach keeps stats on MaxPreps, the school's football page gets a Stats
+tab (Leaders, Offense, Defense, Special) and each Lookup hit shows that
+player's season. Nobody types anything after setup.
+
+1. Open the team's football page on MaxPreps and copy its address
+   (`https://www.maxpreps.com/oh/<town>/<school>/football/`).
+2. In the panel, open the school, open Football, and paste it into
+   **Stats** → Set. (The Print link at the bottom of the team's Stats page
+   also works, but then the conference can't be filled in from MaxPreps.) (Needs migration 0009. Until it is applied, add the
+   school to `maxpreps-teams.json` and `paid-schools.json` instead.) The next
+   scheduled run writes the stats file; to have it at once, run the "Refresh
+   season stats from MaxPreps" workflow by hand.
+3. For MaxPreps' roster as a CSV: add the school to `maxpreps-teams.json` with
+   its stats and roster addresses, and to `paid-schools.json`, and run
+   `node scripts/maxpreps.mjs --roster`. The CSV lands in `scripts/data/`,
+   which is not committed. (Without the `paid-schools.json` line a local run
+   skips the school and removes its local stats file.)
+4. Give the CSV to the sport's **Import a CSV** in the panel, if the school
+   wants MaxPreps' roster rather than its own sheet.
+
+After that `.github/workflows/maxpreps.yml` looks on Saturday, Sunday, Monday
+and Wednesday mornings and commits only when the numbers moved. A run that
+cannot read the page leaves last week's numbers up and fails, and GitHub's
+failed-workflow email is the alert. Stats attach to players by full name, or
+by jersey number when the surname agrees, so a player whose name and number
+both differ from MaxPreps is simply missing from the tab — fix the roster.
+Two players with the same surname and first initial get no stats at all, on
+purpose. When a school comes down, take it out of `paid-schools.json` and the
+next run removes its stats. Tell the AD this is where the numbers
+come from: MaxPreps asks crawlers to stay off its print pages, and this reads
+one a few times a week for his team only, at his say-so.
+
 ### When an email arrives
 
 The reason is in the subject line and the body. Fans still see the last
@@ -143,20 +218,22 @@ sends "Syncing again."
 
 ## Mid-season changes
 
-Text arrives: "#7 is now #12." Open the school in the panel, paste the
-corrected spreadsheet (it replaces the roster), Publish. Editing only the
-date or note without a new paste keeps the roster as it is.
+Text arrives: "#7 is now #12." Open the school in the panel, open the sport,
+paste the corrected spreadsheet (it replaces the roster), Save. Saving with
+nothing pasted keeps the roster as it is.
 
 ## Renewals
 
 Rosters go dark on their paid-through date on their own. Next July: open the
 panel, every school shows its date; invoice the expiring ones; extend the
-date when the check arrives.
+date when the check arrives — Billing → Renew a year → Save billing moves
+every sport at once.
 
 ## Coming down
 
-"Save unpublished" hides a roster instantly (row kept). "Delete this roster"
-removes it entirely. A school's removal request is honored same-day, per the
+"Unpublish" on a sport hides it instantly (row kept); "Take this school
+down" under Billing unpublishes every sport at once. "Delete this sport"
+removes a sport's roster and schedule entirely. A school's removal request is honored same-day, per the
 privacy page.
 
 A linked sheet or calendar keeps syncing — and can keep emailing you about a

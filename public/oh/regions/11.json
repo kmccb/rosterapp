@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 11,
+ "division": "III",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "6-2",
+   "school": "Steubenville",
+   "city": "Steubenville",
+   "average": 19.0757,
+   "qualifying": true,
+   "slug": "steubenville-steubenville"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Licking Valley",
+   "city": "Newark",
+   "average": 17.8125,
+   "qualifying": true,
+   "slug": "licking-valley-newark"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Granville",
+   "city": "Granville",
+   "average": 15.375,
+   "qualifying": true,
+   "slug": "granville-granville"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "East",
+   "city": "Columbus",
+   "average": 15.025,
+   "qualifying": true,
+   "slug": "east-columbus"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Jonathan Alder",
+   "city": "Plain City",
+   "average": 14.9501,
+   "qualifying": true,
+   "slug": "jonathan-alder-plain-city"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Dover",
+   "city": "Dover",
+   "average": 14.1625,
+   "qualifying": true,
+   "slug": "dover-dover"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "Sheridan",
+   "city": "Thornville",
+   "average": 13.925,
+   "qualifying": true,
+   "slug": "sheridan-thornville"
+  },
+  {
+   "rank": "8",
+   "record": "7-1",
+   "school": "Athens",
+   "city": "The Plains",
+   "average": 12.8875,
+   "qualifying": true,
+   "slug": "athens-the-plains"
+  },
+  {
+   "rank": "9",
+   "record": "8-0",
+   "school": "South",
+   "city": "Columbus",
+   "average": 12.6875,
+   "qualifying": true,
+   "slug": "south-columbus"
+  },
+  {
+   "rank": "10",
+   "record": "8-0",
+   "school": "Linden McKinley",
+   "city": "Columbus",
+   "average": 11.9,
+   "qualifying": true,
+   "slug": "linden-mckinley-columbus"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Zanesville",
+   "city": "Zanesville",
+   "average": 9.525,
+   "qualifying": true,
+   "slug": "zanesville-zanesville"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Jackson",
+   "city": "Jackson",
+   "average": 9.4,
+   "qualifying": true,
+   "slug": "jackson-jackson"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "New Philadelphia",
+   "city": "New Philadelphia",
+   "average": 7.8125,
+   "qualifying": false,
+   "slug": "new-philadelphia-new-philadelphia"
+  },
+  {
+   "rank": "14",
+   "record": "5-3",
+   "school": "Tri-Valley",
+   "city": "Dresden",
+   "average": 7.75,
+   "qualifying": false,
+   "slug": "tri-valley-dresden"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Maysville",
+   "city": "Zanesville",
+   "average": 6.4125,
+   "qualifying": false,
+   "slug": "maysville-zanesville"
+  },
+  {
+   "rank": "16",
+   "record": "4-4",
+   "school": "Bloom-Carroll",
+   "city": "Carroll",
+   "average": 6.3125,
+   "qualifying": false,
+   "slug": "bloom-carroll-carroll"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Bishop Hartley",
+   "city": "Columbus",
+   "average": 6.1995,
+   "qualifying": false,
+   "slug": "bishop-hartley-columbus"
+  },
+  {
+   "rank": "18",
+   "record": "4-4",
+   "school": "Bexley",
+   "city": "Columbus",
+   "average": 5.925,
+   "qualifying": false,
+   "slug": "bexley-columbus"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Beechcroft",
+   "city": "Columbus",
+   "average": 5.125,
+   "qualifying": false,
+   "slug": "beechcroft-columbus"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Warren",
+   "city": "Vincent",
+   "average": 3.7317,
+   "qualifying": false,
+   "slug": "warren-vincent"
+  },
+  {
+   "rank": "21",
+   "record": "3-5",
+   "school": "Gallia Academy",
+   "city": "Gallipolis",
+   "average": 3.7168,
+   "qualifying": false,
+   "slug": "gallia-academy-gallipolis"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "KIPP Columbus",
+   "city": "Columbus",
+   "average": 2.2125,
+   "qualifying": false,
+   "slug": "kipp-columbus-columbus"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Centennial",
+   "city": "Columbus",
+   "average": 0.75,
+   "qualifying": false,
+   "slug": "centennial-columbus"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Eastmoor Academy",
+   "city": "Columbus",
+   "average": 0,
+   "qualifying": false,
+   "slug": "eastmoor-academy-columbus"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Marietta",
+   "city": "Marietta",
+   "average": 0,
+   "qualifying": false,
+   "slug": "marietta-marietta"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

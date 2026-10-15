@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 12,
+ "division": "III",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Bellbrook",
+   "city": "Bellbrook",
+   "average": 22.4,
+   "qualifying": true,
+   "slug": "bellbrook-bellbrook"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Tippecanoe",
+   "city": "Tipp City",
+   "average": 18.9375,
+   "qualifying": true,
+   "slug": "tippecanoe-tipp-city"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Chillicothe",
+   "city": "Chillicothe",
+   "average": 18.6,
+   "qualifying": true,
+   "slug": "chillicothe-chillicothe"
+  },
+  {
+   "rank": "4",
+   "record": "8-0",
+   "school": "Hughes",
+   "city": "Cincinnati",
+   "average": 15.9125,
+   "qualifying": true,
+   "slug": "hughes-cincinnati"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Archbishop McNicholas",
+   "city": "Cincinnati",
+   "average": 15.7875,
+   "qualifying": true,
+   "slug": "archbishop-mcnicholas-cincinnati"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Miami Trace",
+   "city": "Washington Court House",
+   "average": 15.425,
+   "qualifying": true,
+   "slug": "miami-trace-washington-court-house"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "Northwest",
+   "city": "Cincinnati",
+   "average": 15.325,
+   "qualifying": true,
+   "slug": "northwest-cincinnati"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "Unioto",
+   "city": "Chillicothe",
+   "average": 15.1547,
+   "qualifying": true,
+   "slug": "unioto-chillicothe"
+  },
+  {
+   "rank": "9",
+   "record": "8-0",
+   "school": "Goshen",
+   "city": "Goshen",
+   "average": 13.675,
+   "qualifying": true,
+   "slug": "goshen-goshen"
+  },
+  {
+   "rank": "10",
+   "record": "6-2",
+   "school": "Indian Hill",
+   "city": "Cincinnati",
+   "average": 11.2551,
+   "qualifying": true,
+   "slug": "indian-hill-cincinnati"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Archbishop Alter",
+   "city": "Kettering",
+   "average": 10.95,
+   "qualifying": true,
+   "slug": "archbishop-alter-kettering"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Monroe",
+   "city": "Monroe",
+   "average": 8.779,
+   "qualifying": true,
+   "slug": "monroe-monroe"
+  },
+  {
+   "rank": "13",
+   "record": "2-6",
+   "school": "Chaminade Julienne",
+   "city": "Dayton",
+   "average": 4.5,
+   "qualifying": false,
+   "slug": "chaminade-julienne-dayton"
+  },
+  {
+   "rank": "14",
+   "record": "2-6",
+   "school": "Mount Healthy",
+   "city": "Cincinnati",
+   "average": 4.15,
+   "qualifying": false,
+   "slug": "mount-healthy-cincinnati"
+  },
+  {
+   "rank": "15",
+   "record": "2-5",
+   "school": "Ponitz Tech",
+   "city": "Dayton",
+   "average": 3.2978,
+   "qualifying": false,
+   "slug": "ponitz-tech-dayton"
+  },
+  {
+   "rank": "16",
+   "record": "2-6",
+   "school": "Archbishop Carroll",
+   "city": "Dayton",
+   "average": 2.8902,
+   "qualifying": false,
+   "slug": "archbishop-carroll-dayton"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Bellefontaine",
+   "city": "Bellefontaine",
+   "average": 2.4875,
+   "qualifying": false,
+   "slug": "bellefontaine-bellefontaine"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "Greenville",
+   "city": "Greenville",
+   "average": 2.0375,
+   "qualifying": false,
+   "slug": "greenville-greenville"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Bethel",
+   "city": "Tipp City",
+   "average": 1.9875,
+   "qualifying": false,
+   "slug": "bethel-tipp-city"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Western Brown",
+   "city": "Mount Orab",
+   "average": 1.8295,
+   "qualifying": false,
+   "slug": "western-brown-mount-orab"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Batavia",
+   "city": "Batavia",
+   "average": 1.5125,
+   "qualifying": false,
+   "slug": "batavia-batavia"
+  },
+  {
+   "rank": "22t",
+   "record": "1-7",
+   "school": "Tecumseh",
+   "city": "New Carlisle",
+   "average": 0.5625,
+   "qualifying": false,
+   "slug": "tecumseh-new-carlisle"
+  },
+  {
+   "rank": "22t",
+   "record": "1-7",
+   "school": "Thurgood Marshall",
+   "city": "Dayton",
+   "average": 0.5625,
+   "qualifying": false,
+   "slug": "thurgood-marshall-dayton"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Franklin",
+   "city": "Franklin",
+   "average": 0,
+   "qualifying": false,
+   "slug": "franklin-franklin"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Hillsboro",
+   "city": "Hillsboro",
+   "average": 0,
+   "qualifying": false,
+   "slug": "hillsboro-hillsboro"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "West Carrollton",
+   "city": "West Carrollton",
+   "average": 0,
+   "qualifying": false,
+   "slug": "west-carrollton-west-carrollton"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

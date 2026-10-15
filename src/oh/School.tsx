@@ -1,10 +1,19 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
+import { installAs } from './install';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
+import { averageLabel, dayLabel, loadRegion, type RegionTable } from './regions';
+import { PlayerSheet } from './PlayerSheet';
+import { StatsTab } from './StatsTab';
+import { ScheduleTab } from './ScheduleTab';
+import { weeksFrom } from '../maxpreps/weeks';
+import { playerKey } from '../stats/statsMatch';
+import type { Player } from '../types';
+import { loadTeamStats, matchTeamStats, type TeamStats } from './teamStats';
 import {
   keptSchoolSports,
   loadSchoolRoster,
@@ -14,7 +23,9 @@ import {
   type SchoolRoster,
 } from './rosterStore';
 import type { ScheduleRow } from './scheduleParse';
-import { applyLook, clearLook } from './look';
+import { applyLook, clearLook, lookGround, type LightColors } from './look';
+import { useMode } from './mode';
+import { ModeButton } from './ModeButton';
 import { SportGlyph } from './SportGlyph';
 import { hubSports, inSeason, seasonNote, sortSportsForNow, sportLabel } from './sportSeasons';
 import {
@@ -155,7 +166,7 @@ function Forecast({ weather }: { weather: FixtureWeather }) {
   );
 }
 
-type SchoolTab = 'lookup' | 'team' | 'schedule' | 'league';
+type SchoolTab = 'lookup' | 'team' | 'schedule' | 'stats' | 'league';
 
 const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'lookup', label: 'Lookup' },
@@ -163,9 +174,14 @@ const SCHOOL_TABS: Array<{ id: SchoolTab; label: string }> = [
   { id: 'schedule', label: 'Schedule' },
 ];
 
-/** Only a football row with a conference on it gets this fourth tab, so it
- * hangs on the end of the three rather than living among them. */
+/** Only football gets this tab, and only with something to put on it — a
+ * conference the seller filled in, or the school's playoff region — so it
+ * hangs on the end of the rest rather than living among them. */
 const LEAGUE_TAB: { id: SchoolTab; label: string } = { id: 'league', label: 'League' };
+
+/** Only a sport with a stats file whose names are on the roster gets this one.
+ * It sits where Poland's does, after Schedule and before League. */
+const STATS_TAB: { id: SchoolTab; label: string } = { id: 'stats', label: 'Stats' };
 
 /**
  * The frame every state of this page hangs in.
@@ -214,6 +230,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [failed, setFailed] = useState(false);
   const [roster, setRoster] = useState<SchoolRoster | null>(null);
   const [tab, setTab] = useState<SchoolTab>('lookup');
+  // The player whose card is open. It is drawn over the page rather than in
+  // place of the tab, so the tab underneath keeps its search, its filters and
+  // where it was scrolled to, and Back returns to exactly that. A change of
+  // school or sport closes it.
+  const [openPlayer, setOpenPlayer] = useState<Player | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
   // null is not "no sports" — it is "couldn't ask": offline on a first visit,
   // or a deploy running ahead of the migration behind the sports door. The
   // site falls back to the football-only page it was, rather than showing a
@@ -228,11 +250,20 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const [identity, setIdentity] = useState<SchoolIdentity | null>(null);
   const [sportsSettled, setSportsSettled] = useState(false);
   const [sport, setSport] = useState<string | null>(null);
+  useEffect(() => setOpenPlayer(null), [slug, sport]);
+  // The phone's own back button closes a card rather than leaving the page:
+  // opening one adds a history entry, and going back from it lands here.
+  useEffect(() => {
+    const onPop = () => setOpenPlayer(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   // Whether the roster behind the chosen sport has been asked for yet. A tile
   // tap sets the sport and the effect below clears the roster, so without
   // this the next render is the hub the reader just tapped out of — nothing
   // happens on screen until the network answers.
   const [rosterFetch, setRosterFetch] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   // The table the network built, and the member list it was built for. The key
   // is what stops a re-entry into the tab refetching ten school files, and what
   // stops a previous school's table flashing up under this school's conference
@@ -410,7 +441,19 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   const look = lookFor(roster, identity);
   const ground = look?.colors?.ground ?? null;
   const accent = look?.colors?.accent ?? null;
+  const text = look?.colors?.text ?? null;
+  const plate = look?.colors?.plate ?? null;
+  const nickname = look?.colors?.nickname ?? null;
   const crest = look?.logo ?? null;
+  // The seller's own light page, if there is one, flattened to its three
+  // values for the same reason as the rest: an equal set must not repaint.
+  const lightGround = look?.colors?.light?.ground ?? null;
+  const lightAccent = look?.colors?.light?.accent ?? null;
+  const lightText = look?.colors?.light?.text ?? null;
+  const light = useMemo<LightColors | undefined>(
+    () => (lightGround && lightAccent && lightText ? { ground: lightGround, accent: lightAccent, text: lightText } : undefined),
+    [lightGround, lightAccent, lightText],
+  );
 
   // The look lifecycle. Applied to document.documentElement — the wallpaper
   // lives on body::before, outside this component's own tree — so it has to
@@ -425,14 +468,34 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   // only once football had loaded. Now the hub is dressed and the sport page
   // inherits rather than flashing.
   //
-  // Keyed on the three values rather than on the objects holding them, so a
+  // Keyed on the values rather than on the objects holding them, so a
   // refetch that agrees with what is already on screen does not strobe the
   // page through the default theme and back.
+  //
+  // The mode is part of the look: a fan's light/dark choice repaints the page
+  // through the same door, and is taken down with it.
+  const [mode, toggleMode] = useMode();
   useEffect(() => {
     if (!ground || !accent) return;
-    applyLook({ ground, accent, logo: crest ?? undefined });
+    applyLook(
+      { ground, accent, text: text ?? undefined, plate: plate ?? undefined, logo: crest ?? undefined, light },
+      undefined,
+      mode,
+    );
     return () => clearLook();
-  }, [ground, accent, crest]);
+  }, [ground, accent, text, plate, crest, mode, light]);
+
+  // A school that is live on the paid tier installs as itself — its name, its
+  // crest, straight onto its page (src/oh/install.ts). The identity answering
+  // with any sport is what says it is live; the demo is not a school anybody
+  // should be putting on a home screen.
+  const schoolName = season?.school.name ?? null;
+  const paidLive = (identity?.sports.length ?? 0) > 0;
+  useEffect(() => {
+    if (!paidLive || !schoolName || isDemo()) return;
+    // The browser bar takes the page's own background, light or dark.
+    return installAs(slug, schoolName, ground && accent && lookGround({ ground, accent, light }, mode));
+  }, [slug, paidLive, schoolName, ground, accent, mode, light]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.
@@ -447,6 +510,97 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
    * seller would make one forgotten tap a way to publish a table the paying
    * school is missing from.
    */
+  // Season stats ride on a roster: they are part of the paid page, and without
+  // names to hang them on there is nothing to print. Asked for once a roster
+  // has landed, and thrown away with it — the flag is the roster effect's, for
+  // the roster effect's reason, since volleyball's answer must not arrive late
+  // onto basketball's page.
+  const hasRoster = roster !== null;
+  useEffect(() => {
+    setTeamStats(null);
+    if (!hasRoster || !sport) return;
+    let current = true;
+    loadTeamStats(slug, sport)
+      .then((s) => {
+        if (current) setTeamStats(s);
+      })
+      .catch(() => {
+        /* no stats is the ordinary case */
+      });
+    return () => {
+      current = false;
+    };
+  }, [slug, sport, hasRoster]);
+
+  // The playoff rankings, for football on a paid page — the same terms the
+  // stats come on, and fetched the same way. Every school in the state is in
+  // the committed files; which pages draw them is decided here.
+  const [region, setRegion] = useState<RegionTable | null>(null);
+  useEffect(() => {
+    setRegion(null);
+    if (!hasRoster || sport !== 'football') return;
+    let current = true;
+    loadRegion(slug)
+      .then((r) => {
+        if (current) setRegion(r);
+      })
+      .catch(() => {
+        /* no rankings is no table, not a fault */
+      });
+    return () => {
+      current = false;
+    };
+  }, [slug, sport, hasRoster]);
+
+  // Matched against the roster this page actually has, so a row for somebody
+  // the roster does not carry is left out rather than shown unnamed. Null when
+  // nothing matched: a tab with nobody in it is worse than no tab.
+  const statTotals = useMemo(() => {
+    if (!roster || !teamStats) return null;
+    const byPlayer = matchTeamStats(teamStats.rows, roster.players);
+    return Object.keys(byPlayer).length > 0 ? byPlayer : null;
+  }, [roster, teamStats]);
+
+  /*
+   * The season a game at a time, for the card: the stats job's copies of the
+   * totals after each game, less the one before (src/maxpreps/weeks.ts), each
+   * week named for the game the directory says was played. Matched to the
+   * roster the same way the totals are, so a card and the Stats tab can never
+   * disagree about whose numbers are whose.
+   */
+  const weeks = useMemo(() => {
+    if (!roster || !teamStats?.snapshots.length || sport !== 'football') return [];
+    const scored = (season?.games ?? [])
+      .filter((g) => g.result)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((g) => ({ date: g.date, opponent: g.opponent }));
+    // A week is named for a game only when the two sources agree how many have
+    // been played. A forfeit, or a score one side has and the other has not
+    // yet, would otherwise shift every name after it by one; a week called
+    // "Game 9" is less helpful than one called "McDonald" but it is not wrong.
+    const latest = Math.max(...teamStats.snapshots.map((s) => s.games));
+    const played = scored.length === latest ? scored : [];
+    return weeksFrom(teamStats.snapshots, played).map((week) => ({
+      week,
+      byPlayer: matchTeamStats(week.rows, roster.players),
+    }));
+  }, [roster, teamStats, season, sport]);
+
+  // Only a school with season stats has a card worth opening; the rest keep
+  // their rows as the plain lists they always were.
+  const showCard = (p: Player) => {
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    history.pushState({ ohCard: true }, '');
+    setOpenPlayer(p);
+  };
+  const closeCard = () => {
+    if ((history.state as { ohCard?: boolean } | null)?.ohCard) history.back();
+    else setOpenPlayer(null);
+    // Focus goes back to the row that opened it, not to the top of the page.
+    requestAnimationFrame(() => opener.current?.focus());
+  };
+  const openCard = statTotals ? showCard : undefined;
+
   const conference = sport === 'football' ? (roster?.league ?? null) : null;
   const members = useMemo(
     () => (conference ? [...new Set([slug, ...conference.members])] : []),
@@ -566,9 +720,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     );
   }
 
+  // "Springfield Tigers" where the seller gave the nickname. The directory
+  // only knows the school's name, so a free page never has one.
+  const fullName = nickname ? `${season.school.name} ${nickname}` : season.school.name;
+
   const headline = (
     <>
-      <h1 className="next-card-opponent">{season.school.name}</h1>
+      <h1 className="next-card-opponent">{fullName}</h1>
       <p className="filter-line">
         <span>
           {season.school.city}
@@ -588,6 +746,25 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     </div>
   ) : (
     headline
+  );
+
+  /*
+   * A paid school's sport page is headed the way Poland's app is: one small
+   * muted uppercase line, "SPRINGFIELD TIGERS", in Poland's own `.title`, and
+   * nothing under it, so the keys and the hits get the height the big name and
+   * the town-and-record line used to take — Poland's header carries no record
+   * either; the results are the Schedule tab's to tell. The crest rides beside the line at the line's own scale, on the
+   * plate the seller chose, so it reads as the school's mark rather than a
+   * picture. A free directory page keeps the big name and the town: among 717
+   * schools, several of them Springfields, the town is how a reader knows they
+   * found the right one, and a free page has no nickname to tell them apart.
+   */
+  const titleLine = (
+    <div className="oh-title-row">
+      {crest && <img className="oh-title-crest" src={crest} alt="" />}
+      <h1 className="title">{fullName}</h1>
+      <ModeButton mode={mode} onToggle={toggleMode} />
+    </div>
   );
 
   /*
@@ -695,12 +872,13 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
             <div className="oh-hub-crest" aria-hidden="true" />
           )}
           <div>
-            <h1 className="oh-hub-name">{season.school.name}</h1>
+            <h1 className="oh-hub-name">{fullName}</h1>
             {/* No win-loss line here: the hub is in front of every sport this
                 school sells, and a football record under the school's name
                 would be a claim about all of them. */}
             <p className="oh-hub-city">{season.school.city}, Ohio</p>
           </div>
+          <ModeButton mode={mode} onToggle={toggleMode} />
         </div>
 
         <div className="oh-hub-body">
@@ -835,13 +1013,17 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   const head = (
     <>
-      <div className="oh-school-head">{nameBlock}</div>
+      {/* Only a page with a roster gets Poland's line. A paid school's sport
+          with no roster of its own (a volleyball-only school's football page,
+          or a roster that failed to load) is the free single scroll, and the
+          record under the big name is the only place that page shows it. */}
+      {look && roster ? titleLine : <div className="oh-school-head">{nameBlock}</div>}
 
       {back}
 
       {roster && (
         <nav className="tabs oh-school-tabs" aria-label="Sections">
-          {(conference ? [...SCHOOL_TABS, LEAGUE_TAB] : SCHOOL_TABS).map((t) => (
+          {[...SCHOOL_TABS, ...(statTotals ? [STATS_TAB] : []), ...(conference || region ? [LEAGUE_TAB] : [])].map((t) => (
             <button
               key={t.id}
               type="button"
@@ -859,6 +1041,18 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
 
   return (
     <Frame head={head}>
+      {roster && openPlayer && (
+        <div className="oh-sheet" role="dialog" aria-modal="true" aria-label={`#${openPlayer.number} ${openPlayer.firstName} ${openPlayer.lastName}`}>
+          <div className="screen">
+            <PlayerSheet
+              player={openPlayer}
+              season={statTotals?.[playerKey(openPlayer)]}
+              weeks={weeks.map((w) => ({ week: w.week, stats: w.byPlayer[playerKey(openPlayer)] }))}
+              onBack={closeCard}
+            />
+          </div>
+        </div>
+      )}
       {roster ? (
         tab === 'lookup' ? (
           /*
@@ -868,22 +1062,83 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
            * exactly the pieces that column expects, so the arrangement is
            * the same one Poland's Lookup screen has always used.
            *
-           * The footer rows go *inside* the tab rather than under it, because
-           * below the keys there is nothing — the pad owns the bottom of the
-           * screen now. Poland has no footer on its own Lookup screen and does
-           * not need one, but this is a public page and Lookup is where every
-           * paid school lands, so the privacy notice has to stay reachable
-           * without first tapping through to another tab.
+           * No footer here, as on Poland's own Lookup screen: the owner wants
+           * the keys and the hits alone. The privacy notice and the way to
+           * another school stay at the foot of every other tab.
            */
           <div className="lookup oh-lookup">
-            <LookupTab players={roster.players} footer={footer} />
+            <LookupTab players={roster.players} onSelect={openCard} />
           </div>
         ) : (
           <div className="screen">
             {tab === 'team' && (
               <div className="oh-roster">
-                <TeamTab players={roster.players} />
+                <TeamTab players={roster.players} onSelect={openCard} />
               </div>
+            )}
+            {tab === 'stats' && statTotals && teamStats && (
+              <StatsTab
+                players={roster.players}
+                totals={statTotals}
+                updated={teamStats.updated}
+                source={teamStats.source}
+                onSelect={(key) => {
+                  const p = roster.players.find((x) => playerKey(x) === key);
+                  if (p) showCard(p);
+                }}
+              />
+            )}
+            {/* The playoff picture, which in Ohio is a region's points table and
+                not a conference's. It goes first: in October "are we in" is
+                the question, and the conference table answers a different one.
+                Poland's League tab draws the same table from the same source;
+                this is that table's markup over this page's own data. */}
+            {tab === 'league' && region && (
+              <>
+                <div className="group-head">
+                  Division {region.division}, Region {region.region}
+                </div>
+                {(region.caption || region.fetched) && (
+                  <p className="filter-line">
+                    <span>
+                      {[region.caption, dayLabel(region.fetched) && `as of ${dayLabel(region.fetched)}`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </p>
+                )}
+                <table className="table-lite">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>School</th>
+                      <th>W–L</th>
+                      <th>Avg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {region.rows.map((r, i) => (
+                      <tr
+                        key={r.slug ?? `${r.school}-${i}`}
+                        className={
+                          [r.slug === slug ? 'is-us' : '', r.qualifying ? 'is-in' : ''].filter(Boolean).join(' ') ||
+                          undefined
+                        }
+                      >
+                        <td>
+                          {r.rank}
+                          {/* The dot is CSS content, which a screen reader
+                              does not announce. This says it in words. */}
+                          {r.qualifying && <span className="visually-hidden">, in a playoff place</span>}
+                        </td>
+                        <td>{r.school}</td>
+                        <td>{r.record.replace('-', '–')}</td>
+                        <td>{averageLabel(r.average)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
             )}
             {tab === 'league' && conference && (
               <>
@@ -939,7 +1194,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
                     school in the state has. Any other sport can only show what
                     was pasted for it. */}
                 {sport === 'football' ? (
-                  schedule
+                  <ScheduleTab slug={slug} season={season} weather={weather} crest={crest} />
                 ) : roster.schedule ? (
                   <PastedSchedule rows={roster.schedule} />
                 ) : (

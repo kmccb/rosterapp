@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 20,
+ "division": "V",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Graham Local",
+   "city": "St Paris",
+   "average": 16.575,
+   "qualifying": true,
+   "slug": "graham-local-st-paris"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Williamsburg",
+   "city": "Williamsburg",
+   "average": 15.325,
+   "qualifying": true,
+   "slug": "williamsburg-williamsburg"
+  },
+  {
+   "rank": "3",
+   "record": "4-3",
+   "school": "Summit Country Day",
+   "city": "Cincinnati",
+   "average": 10.7737,
+   "qualifying": true,
+   "slug": "summit-country-day-cincinnati"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Waynesville",
+   "city": "Waynesville",
+   "average": 10.5125,
+   "qualifying": true,
+   "slug": "waynesville-waynesville"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Miami East",
+   "city": "Casstown",
+   "average": 10.4,
+   "qualifying": true,
+   "slug": "miami-east-casstown"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Arcanum",
+   "city": "Arcanum",
+   "average": 10.0689,
+   "qualifying": true,
+   "slug": "arcanum-arcanum"
+  },
+  {
+   "rank": "7",
+   "record": "4-4",
+   "school": "Bishop Fenwick",
+   "city": "Franklin",
+   "average": 10.0125,
+   "qualifying": true,
+   "slug": "bishop-fenwick-franklin"
+  },
+  {
+   "rank": "8",
+   "record": "5-2",
+   "school": "West Liberty-Salem",
+   "city": "West Liberty",
+   "average": 8.0257,
+   "qualifying": true,
+   "slug": "west-liberty-salem-west-liberty"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Dayton Christian",
+   "city": "Miamisburg",
+   "average": 7.375,
+   "qualifying": true,
+   "slug": "dayton-christian-miamisburg"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Greeneview",
+   "city": "Jamestown",
+   "average": 7.298,
+   "qualifying": true,
+   "slug": "greeneview-jamestown"
+  },
+  {
+   "rank": "11",
+   "record": "6-2",
+   "school": "Gamble Montessori",
+   "city": "Cincinnati",
+   "average": 6.9942,
+   "qualifying": true,
+   "slug": "gamble-montessori-cincinnati"
+  },
+  {
+   "rank": "12",
+   "record": "5-2",
+   "school": "Greenon",
+   "city": "Enon",
+   "average": 6.9583,
+   "qualifying": true,
+   "slug": "greenon-enon"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Carlisle",
+   "city": "Carlisle",
+   "average": 6.85,
+   "qualifying": false,
+   "slug": "carlisle-carlisle"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Brookville",
+   "city": "Brookville",
+   "average": 6.175,
+   "qualifying": false,
+   "slug": "brookville-brookville"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Mariemont",
+   "city": "Cincinnati",
+   "average": 6.1375,
+   "qualifying": false,
+   "slug": "mariemont-cincinnati"
+  },
+  {
+   "rank": "16",
+   "record": "6-2",
+   "school": "Preble Shawnee",
+   "city": "Camden",
+   "average": 5.8428,
+   "qualifying": false,
+   "slug": "preble-shawnee-camden"
+  },
+  {
+   "rank": "17",
+   "record": "4-4",
+   "school": "Blanchester",
+   "city": "Blanchester",
+   "average": 5.125,
+   "qualifying": false,
+   "slug": "blanchester-blanchester"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Clermont Northeastern",
+   "city": "Batavia",
+   "average": 4.7883,
+   "qualifying": false,
+   "slug": "clermont-northeastern-batavia"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Purcell Marian",
+   "city": "Cincinnati",
+   "average": 4.25,
+   "qualifying": false,
+   "slug": "purcell-marian-cincinnati"
+  },
+  {
+   "rank": "20",
+   "record": "4-4",
+   "school": "Madeira",
+   "city": "Cincinnati",
+   "average": 4.2003,
+   "qualifying": false,
+   "slug": "madeira-cincinnati"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Milton-Union",
+   "city": "West Milton",
+   "average": 1.9875,
+   "qualifying": false,
+   "slug": "milton-union-west-milton"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Bethel-Tate",
+   "city": "Bethel",
+   "average": 1.642,
+   "qualifying": false,
+   "slug": "bethel-tate-bethel"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "East Clinton",
+   "city": "Sabina",
+   "average": 0,
+   "qualifying": false,
+   "slug": "east-clinton-sabina"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "Madison",
+   "city": "Middletown",
+   "average": 0,
+   "qualifying": false,
+   "slug": "madison-middletown"
+  },
+  {
+   "rank": "23t",
+   "record": "0-8",
+   "school": "Northwestern",
+   "city": "Springfield",
+   "average": 0,
+   "qualifying": false,
+   "slug": "northwestern-springfield"
+  },
+  {
+   "rank": "23t",
+   "record": "0-5",
+   "school": "Stivers",
+   "city": "Dayton",
+   "average": 0,
+   "qualifying": false,
+   "slug": "stivers-dayton"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

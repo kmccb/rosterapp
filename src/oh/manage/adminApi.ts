@@ -9,12 +9,25 @@ import type { ScheduleRow } from '../scheduleParse';
 import type { Preview } from '../../sync/run';
 import type { SourceSide, SyncState } from '../../sync/types';
 
+/** A school's colors as the panel writes them: the dark pair and text, the
+ * nickname and crest fill that ride with them, and the light set when the
+ * seller chose one. `p_colors` replaces the whole object, so whatever is left
+ * out of a save is gone from the row. */
+export type PanelColors = {
+  ground: string;
+  accent: string;
+  text?: string;
+  nickname?: string;
+  plate?: string;
+  light?: { ground: string; accent: string; text: string };
+};
+
 export type RosterRow = {
   school_slug: string;
   sport: string;
   season: number;
   player_count: number;
-  colors: { ground: string; accent: string } | null;
+  colors: PanelColors | null;
   has_logo: boolean;
   has_schedule: boolean;
   has_league: boolean;
@@ -27,6 +40,8 @@ export type RosterRow = {
   schedule_source_url?: string | null;
   schedule_source_filter?: string | null;
   sync_state?: SyncState;
+  /** Set by migration 0009; absent from a database that doesn't have it yet. */
+  stats_source_url?: string | null;
 };
 
 const signed = async (): Promise<string> => {
@@ -44,7 +59,7 @@ export const upsertRoster = async (row: {
   season: number;
   /** null means keep the stored roster — the renewal case. */
   players: unknown[] | null;
-  colors: { ground: string; accent: string } | null;
+  colors: PanelColors | null;
   /** null keeps the stored theme (renewal case), {} clears it, {logo} sets it. */
   theme: { logo: string } | Record<string, never> | null;
   /** null keeps the stored schedule (renewal case), [] clears it, rows set it. */
@@ -128,3 +143,22 @@ export const checkSource = (r: { kind: SourceSide; url: string; filter: string |
 
 export const syncNow = (slug: string, sport: string, season: number) =>
   callSync<{ state: SyncState }>({ action: 'sync', slug, sport, season });
+
+/*
+ * Where a sport's season stats come from — today a team's own page on
+ * MaxPreps, or its printable stats page, read by scripts/maxpreps.mjs on a
+ * schedule. null clears it, and
+ * the next scheduled run takes the school's stats file down. Migration 0009.
+ */
+export const setStatsSource = async (r: {
+  slug: string;
+  sport: string;
+  season: number;
+  url: string | null;
+}): Promise<void> => {
+  await rpc<null>(
+    'school_roster_set_stats_source',
+    { p_slug: r.slug, p_sport: r.sport, p_season: r.season, p_url: r.url },
+    await signed(),
+  );
+};

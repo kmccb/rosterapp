@@ -1,0 +1,252 @@
+{
+ "year": 2026,
+ "region": 19,
+ "division": "V",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Ironton",
+   "city": "Ironton",
+   "average": 24.2219,
+   "qualifying": true,
+   "slug": "ironton-ironton"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "Columbus Academy",
+   "city": "Gahanna",
+   "average": 17.1625,
+   "qualifying": true,
+   "slug": "columbus-academy-gahanna"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Fort Frye",
+   "city": "Beverly",
+   "average": 15.2891,
+   "qualifying": true,
+   "slug": "fort-frye-beverly"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "South Point",
+   "city": "South Point",
+   "average": 11.975,
+   "qualifying": true,
+   "slug": "south-point-south-point"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Worthington Christian",
+   "city": "Worthington",
+   "average": 11.85,
+   "qualifying": true,
+   "slug": "worthington-christian-worthington"
+  },
+  {
+   "rank": "6",
+   "record": "5-3",
+   "school": "Meigs",
+   "city": "Pomeroy",
+   "average": 9.0125,
+   "qualifying": true,
+   "slug": "meigs-pomeroy"
+  },
+  {
+   "rank": "7",
+   "record": "5-3",
+   "school": "Fairland",
+   "city": "Proctorville",
+   "average": 8.4936,
+   "qualifying": true,
+   "slug": "fairland-proctorville"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Wheelersburg",
+   "city": "Wheelersburg",
+   "average": 7.8375,
+   "qualifying": true,
+   "slug": "wheelersburg-wheelersburg"
+  },
+  {
+   "rank": "9",
+   "record": "5-3",
+   "school": "Piketon",
+   "city": "Piketon",
+   "average": 7,
+   "qualifying": true,
+   "slug": "piketon-piketon"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Ridgewood",
+   "city": "West Lafayette",
+   "average": 6.7181,
+   "qualifying": true,
+   "slug": "ridgewood-west-lafayette"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Vinton County",
+   "city": "McArthur",
+   "average": 5.7125,
+   "qualifying": true,
+   "slug": "vinton-county-mcarthur"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Logan Elm",
+   "city": "Circleville",
+   "average": 4.675,
+   "qualifying": true,
+   "slug": "logan-elm-circleville"
+  },
+  {
+   "rank": "13",
+   "record": "3-5",
+   "school": "Portsmouth",
+   "city": "Portsmouth",
+   "average": 4.2247,
+   "qualifying": false,
+   "slug": "portsmouth-portsmouth"
+  },
+  {
+   "rank": "14",
+   "record": "2-6",
+   "school": "Africentric Early College",
+   "city": "Columbus",
+   "average": 3.8,
+   "qualifying": false,
+   "slug": "africentric-early-college-columbus"
+  },
+  {
+   "rank": "15",
+   "record": "2-6",
+   "school": "Utica",
+   "city": "Utica",
+   "average": 3.325,
+   "qualifying": false,
+   "slug": "utica-utica"
+  },
+  {
+   "rank": "16",
+   "record": "2-6",
+   "school": "Dawson-Bryant",
+   "city": "Coal Grove",
+   "average": 3.3189,
+   "qualifying": false,
+   "slug": "dawson-bryant-coal-grove"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Coshocton",
+   "city": "Coshocton",
+   "average": 3.025,
+   "qualifying": false,
+   "slug": "coshocton-coshocton"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Grove City Christian",
+   "city": "Grove City",
+   "average": 2.7266,
+   "qualifying": false,
+   "slug": "grove-city-christian-grove-city"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Meadowbrook",
+   "city": "Byesville",
+   "average": 2.5875,
+   "qualifying": false,
+   "slug": "meadowbrook-byesville"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Amanda-Clearcreek",
+   "city": "Amanda",
+   "average": 2.55,
+   "qualifying": false,
+   "slug": "amanda-clearcreek-amanda"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Fairbanks",
+   "city": "Milford Center",
+   "average": 2.4681,
+   "qualifying": false,
+   "slug": "fairbanks-milford-center"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Westfall",
+   "city": "Williamsport",
+   "average": 2.4021,
+   "qualifying": false,
+   "slug": "westfall-williamsport"
+  },
+  {
+   "rank": "23",
+   "record": "2-6",
+   "school": "Morgan",
+   "city": "McConnelsville",
+   "average": 2.2,
+   "qualifying": false,
+   "slug": "morgan-mcconnelsville"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Chesapeake",
+   "city": "Chesapeake",
+   "average": 2.0486,
+   "qualifying": false,
+   "slug": "chesapeake-chesapeake"
+  },
+  {
+   "rank": "25",
+   "record": "2-6",
+   "school": "River Valley",
+   "city": "Bidwell",
+   "average": 1.8125,
+   "qualifying": false,
+   "slug": "river-valley-bidwell"
+  },
+  {
+   "rank": "26",
+   "record": "2-6",
+   "school": "Wellston",
+   "city": "Wellston",
+   "average": 1.6375,
+   "qualifying": false,
+   "slug": "wellston-wellston"
+  },
+  {
+   "rank": "27",
+   "record": "0-8",
+   "school": "River View",
+   "city": "Warsaw",
+   "average": 0,
+   "qualifying": false,
+   "slug": "river-view-warsaw"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

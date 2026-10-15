@@ -48,21 +48,36 @@
   height: 44px;
   border-radius: 10px;
   object-fit: cover;
+  /* The plate the seller chose, or nothing: a crest is stored with its
+     backdrop lifted off, so without one it sits on the header's own colour. */
+  background: var(--crest-plate, transparent);
 }
 
-/* The keypad's readout. Nothing on this screen shows what's been tapped
-   except this line, so it has to carry the same weight ../styles.css gives
-   its own big digit display, `.empty-number` — large, bold, steady — rather
-   than sit there as plain paragraph text underneath a segmented control. */
-.oh-query {
-  min-height: 1em;
-  margin: 4px 0 12px;
-  font-size: 56px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
+/* A paid sport page's header: Poland's own `.title` line with the crest
+   beside it. The row takes the title's bottom margin so the gap above the
+   tabs is exactly Poland's whether or not there is a crest, and the crest is
+   sized to the line — a 15px cap height wants a badge, not a logo. */
+.oh-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.oh-title-row > .title {
+  margin: 0;
+  min-width: 0;
+}
+
+.oh-title-crest {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  /* Contain, not cover: the crest is stored padded to a square with its
+     backdrop lifted off, so nothing of it should be cropped to fit. */
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
 }
 
 .oh-school-head {
@@ -108,37 +123,25 @@
   padding: 0 var(--screen-pad, 14px);
 }
 
-/* The readout is one line and always the same line. It never gives ground. */
-.oh-lookup > .oh-query {
-  flex: none;
-}
-
-/* Everything between the readout and the keys: the hits, the "nobody wears
-   that" line, and the footer rows. It takes all the height the readout and the
-   pad leave, and it is the only part that scrolls — one player or twenty-two,
-   the keys do not move. */
+/* Everything above the keys: the hits, the "nobody wears that" line, and the
+   footer rows. It takes all the height the pad leaves, and it is the only part
+   that scrolls — one player or twenty-two, the keys do not move. The top
+   padding is .results' own, so the count sits as far under the tabs as
+   Poland's does. */
 .oh-lookup > .oh-lookup-body {
   flex: 1;
   min-height: 0;
+  padding-top: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
 }
 
-/* The way out of the school, and the privacy notice. They belong at the foot
-   of what is on screen rather than floating under a single search hit, so with
-   room to spare they take it; with the hits overflowing, the auto margin
-   collapses and they sit where they always would, after the last row. */
-.oh-lookup-foot {
-  margin-top: auto;
-  padding-top: 14px;
-}
-
 .oh-lookup > .keypad {
-  /* With no hits at all — the state this screen opens in — nothing above the
-     keys wants the leftover height, and without somewhere for it to go the
-     pad would ride up under the readout. An auto margin takes it. */
+  /* The body takes the leftover height now, so this is only a backstop: were
+     it ever to stop flexing, the pad still keeps to the bottom of the screen
+     rather than riding up under the tabs. An auto margin takes the slack. */
   margin-top: auto;
   /* The keys are chrome and run to both edges, the way they do in the root
      app, so they come back out through the column's side padding. Their own
@@ -149,61 +152,359 @@
 
 /* ------------------------------------------------------------- manage */
 
-/* The seller's screens. Plain and dense on purpose — one person uses these,
-   on a phone, often standing next to the person paying. */
-.mg-paste {
+/* The seller's screens, in their own clothes.
+ *
+ * Everything else in this file dresses a fan page: a phone-wide column in a
+ * school's colors over its crest. The panel is the opposite job — one person
+ * at a laptop reading a table and filling in forms — and for its first year
+ * it borrowed the fan page's parts anyway, which made every button a schedule
+ * row. So `.mg` lays its own sheet over the page, edge to edge, and nothing
+ * inside it reads a fan-page variable: the names below are the panel's, and a
+ * school's colors cannot leak into the tool that sets them. The one exception
+ * is `.mg-preview`, which exists to show those colors and takes them inline.
+ *
+ * Fixed and full-bleed because body::before draws a crest behind every page of
+ * this bundle; the sheet has to cover it rather than sit on it.
+ */
+.mg {
+  --mg-bg: #f5f4f0;
+  --mg-card: #ffffff;
+  --mg-line: #dedbd3;
+  --mg-line-strong: #bdb9ae;
+  --mg-text: #1d1c19;
+  --mg-muted: #6a675f;
+  --mg-primary: #1d1c19;
+  --mg-on-primary: #ffffff;
+  --mg-hover: #efede7;
+  --mg-danger: #a3271f;
+  --mg-danger-bg: #fbeceb;
+  --mg-ok: #1f6b3a;
+  --mg-ok-bg: #e6f3ea;
+  --mg-warn: #7a4a05;
+  --mg-warn-bg: #fbefd8;
+  --mg-focus: #2c6fd1;
+
+  /* Native parts — the date picker, a select's list — follow this. */
+  color-scheme: light;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  overflow-y: auto;
+  background: var(--mg-bg);
+  color: var(--mg-text);
+  font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mg {
+    --mg-bg: #161614;
+    --mg-card: #201f1c;
+    --mg-line: #35332e;
+    --mg-line-strong: #55524a;
+    --mg-text: #f1efe9;
+    --mg-muted: #a5a197;
+    --mg-primary: #f1efe9;
+    --mg-on-primary: #161614;
+    --mg-hover: #2a2925;
+    --mg-danger: #f0958d;
+    --mg-danger-bg: #3a1c19;
+    --mg-ok: #8fd3a5;
+    --mg-ok-bg: #1b3324;
+    --mg-warn: #ecc27a;
+    --mg-warn-bg: #3a2c10;
+    --mg-focus: #7fb0f5;
+
+    color-scheme: dark;
+  }
+}
+
+.mg *,
+.mg *::before,
+.mg *::after {
+  box-sizing: border-box;
+}
+
+.mg-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+.mg-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.mg-sub {
+  margin: 4px 0 0;
+  color: var(--mg-muted);
+}
+
+.mg a,
+.mg-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mg-text);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--mg-line-strong);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.mg a:hover,
+.mg-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.mg-crumbs {
+  margin-bottom: 14px;
+}
+
+.mg-school-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mg-signin {
+  max-width: 460px;
+  margin: 12vh auto 0;
+}
+
+.mg-signin .mg-inline {
+  margin-top: 16px;
+}
+
+/* ---- controls */
+
+.mg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 8px;
+  background: var(--mg-card);
+  color: var(--mg-text);
+  font: inherit;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mg-btn:hover:not(:disabled) {
+  background: var(--mg-hover);
+}
+
+.mg-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mg-btn.is-small {
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 14px;
+}
+
+/* The one thing a section is for. At most one of these shows per card. */
+.mg-btn.is-primary {
+  border-color: var(--mg-primary);
+  background: var(--mg-primary);
+  color: var(--mg-on-primary);
+}
+
+.mg-btn.is-primary:hover:not(:disabled) {
+  background: var(--mg-primary);
+  opacity: 0.88;
+}
+
+.mg-btn.is-quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--mg-muted);
+}
+
+.mg-btn.is-quiet:hover:not(:disabled) {
+  color: var(--mg-text);
+}
+
+/* Outlined, never filled: it should be findable and hard to press by reflex. */
+.mg-btn.is-danger {
+  border-color: transparent;
+  background: none;
+  color: var(--mg-danger);
+}
+
+.mg-btn.is-danger:hover:not(:disabled) {
+  background: var(--mg-danger-bg);
+}
+
+/* A file input wearing a button: the input itself is unstylable, so the label
+   is what is seen and the input sits invisibly inside it, still focusable. */
+.mg-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.mg-file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.mg-input {
   width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 8px;
+  background: var(--mg-card);
+  color: var(--mg-text);
   font: inherit;
 }
 
-.mg-review {
-  max-height: 40vh;
-  overflow-y: auto;
-  margin-top: 6px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+.mg-input::placeholder {
+  color: var(--mg-muted);
+  opacity: 0.8;
 }
 
-/* Rows the paste couldn't turn into a player — shown so the seller can fix
-   the source line, not chase a headcount mismatch by eye. */
-.mg-skip {
-  margin-top: 6px;
+.mg-paste {
+  min-height: 92px;
+  font: 13px/1.5 ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  resize: vertical;
 }
 
-.mg-skip-row {
-  padding: 2px 2px;
-  color: var(--muted);
+.mg-date {
+  width: auto;
+}
+
+.mg :is(.mg-btn, .mg-input, .mg-link, .mg-hit, .mg-chip, .mg-card-head, .mg-list-row, a):focus-visible,
+.mg-file:focus-within,
+.mg-swatch:focus-within {
+  outline: 2px solid var(--mg-focus);
+  outline-offset: 2px;
+}
+
+.mg-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mg-spacer {
+  flex: 1;
+}
+
+.mg-hint {
+  margin: 0;
+  color: var(--mg-muted);
   font-size: 13px;
 }
 
-.mg-review-row {
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--line);
+.mg-state {
+  margin: 0;
 }
 
-/* The conference builder. The two inputs and the search hits are the same
-   controls the rest of this screen uses; all this adds is room around the
-   block, so it doesn't read as a continuation of the paste box above it. */
-.mg-league {
-  margin: 12px 0;
+.mg-url {
+  overflow-wrap: anywhere;
 }
 
-/* A picked member, in the review list's clothes but tappable to take it back
-   out again. A button carries none of a div's layout, so the row's own look
-   has to be restated here — everything else comes from .mg-review-row. */
-.mg-member {
+.mg-error {
+  margin: 0;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: var(--mg-danger-bg);
+  color: var(--mg-danger);
+  font-size: 14px;
+}
+
+.mg-banner {
+  margin-bottom: 14px;
+}
+
+.mg-saved {
+  color: var(--mg-ok);
+  font-size: 14px;
+}
+
+.mg-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--mg-hover);
+  color: var(--mg-muted);
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.mg-pill.is-live {
+  background: var(--mg-ok-bg);
+  color: var(--mg-ok);
+}
+
+.mg-pill.is-attention {
+  background: var(--mg-warn-bg);
+  color: var(--mg-warn);
+}
+
+.mg-pill.is-expired {
+  background: var(--mg-danger-bg);
+  color: var(--mg-danger);
+}
+
+/* ---- the list of schools */
+
+.mg-toolbar {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--mg-line);
+  border-radius: 12px;
+  background: var(--mg-card);
+}
+
+.mg-list {
+  gap: 0;
+  padding: 4px 0;
+}
+
+/* A table in everything but the element: each row is one button, so the whole
+   line opens the school and a keyboard reaches it in one stop. */
+.mg-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr) 120px 120px;
+  align-items: start;
+  gap: 16px;
   width: 100%;
-  border-width: 0 0 1px 0;
+  padding: 13px 20px;
+  border: 0;
+  border-top: 1px solid var(--mg-line);
   background: none;
   color: inherit;
   font: inherit;
@@ -211,92 +512,476 @@
   cursor: pointer;
 }
 
-.mg-colors {
-  display: flex;
-  gap: 16px;
-  margin: 12px 0;
+.mg-list-row:hover {
+  background: var(--mg-hover);
 }
 
-.mg-colors label,
-.mg-field {
+.mg-list-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mg-list-row > span > .mg-pill {
+  align-self: flex-start;
+}
+
+.mg-list-head {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  border-top: 0;
+  color: var(--mg-muted);
+  font-size: 13px;
+  cursor: default;
+}
+
+.mg-list-head:hover {
+  background: none;
+}
+
+.mg-list-name {
+  font-weight: 600;
+}
+
+.mg-list-problem {
+  color: var(--mg-warn);
+  font-size: 13px;
+}
+
+.mg-empty {
+  padding: 18px 20px;
+}
+
+.mg-hits {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--mg-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mg-hit {
+  padding: 10px 14px;
+  border: 0;
+  border-top: 1px solid var(--mg-line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mg-list > .mg-hit {
+  padding: 12px 20px;
+}
+
+.mg-hit:first-child {
+  border-top: 0;
+}
+
+.mg-hit:hover {
+  background: var(--mg-hover);
+}
+
+/* ---- a school */
+
+.mg-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 24px;
+}
+
+.mg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Rides down the page beside the cards, so the colors being picked and the
+   page they make are on screen together however long the form gets. */
+.mg-aside {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mg-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+/* A sport's heading is the whole top of its card, and the switch that opens it. */
+.mg-card-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--muted);
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mg-card-head::after {
+  content: '▾';
+  color: var(--mg-muted);
+}
+
+.mg-card.is-closed .mg-card-head::after {
+  content: '▸';
+}
+
+.mg-card-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--mg-muted);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mg-part {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mg-line);
+}
+
+.mg-part-label {
+  padding-top: 1px;
+  color: var(--mg-muted);
   font-size: 14px;
 }
 
-/* A linked sheet or calendar: a stack of status, link, buttons and preview,
-   not one row of label and control like .mg-field — on that, a full CSV
-   link and a 60-row preview squeezed side by side into a single line. */
+.mg-part-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mg-part-body > :is(.mg-input, .mg-inline, .mg-review, .mg-hits, .mg-source) {
+  width: 100%;
+}
+
+.mg-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mg-line);
+}
+
+.mg-look {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.mg-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mg-swatch input {
+  width: 38px;
+  height: 38px;
+  padding: 2px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 8px;
+  background: var(--mg-card);
+  cursor: pointer;
+}
+
+/* The light pickers while the page works its light colors out by itself:
+   still showing what fans get, but plainly not for changing. */
+.mg-look.is-off .mg-swatch {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mg-look.is-off .mg-swatch input {
+  cursor: default;
+}
+
+.mg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mg-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--mg-primary);
+}
+
+.mg-check:focus-within {
+  outline: 2px solid var(--mg-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The preview's caption and its Dark/Light switch on one line. */
+.mg-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mg-seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 8px;
+  background: var(--mg-card);
+}
+
+.mg-seg button {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--mg-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mg-seg button[aria-pressed='true'] {
+  background: var(--mg-primary);
+  color: var(--mg-on-primary);
+}
+
+.mg-seg button:focus-visible {
+  outline: 2px solid var(--mg-focus);
+  outline-offset: 1px;
+}
+
+/* What the parser made of a paste, to be looked at before it is saved. */
+.mg-review {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--mg-line);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.mg-review-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 11px;
+  border-top: 1px solid var(--mg-line);
+}
+
+.mg-review-row:first-child {
+  border-top: 0;
+}
+
+/* Rows the paste couldn't turn into a player — shown so the seller can fix
+   the source line, not chase a headcount mismatch by eye. */
+.mg-skip {
+  color: var(--mg-warn);
+  font-size: 13px;
+}
+
+.mg-skip-row {
+  padding: 1px 0;
+}
+
 .mg-source {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 8px;
-  margin: 16px 0;
-  color: var(--muted);
-  font-size: 14px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: var(--mg-bg);
 }
 
-.mg-source .fixture-sub {
-  overflow-wrap: anywhere;
+.mg-source > .mg-input {
+  width: 100%;
 }
 
-.mg-logo {
+.mg-chips {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 12px 0;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
-.mg-logo-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid var(--line);
+/* A conference member; pressing it takes it back out. */
+.mg-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--mg-line-strong);
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-/* The live look preview: a mini next-card mock styled with the pickers'
-   current colors via inline custom properties, so the seller can see the
-   derived palette without leaving this screen. */
+.mg-chip:hover {
+  border-color: var(--mg-danger);
+  color: var(--mg-danger);
+}
+
+/* ---- the preview
+ *
+ * The one place a school's colors are allowed in. `deriveVars` puts the fan
+ * page's variables on this element inline, and the rules below read those and
+ * not the panel's, so what is drawn is the fan page's own arithmetic — the
+ * same surface tint, the same muted text — in miniature.
+ */
 .mg-preview {
-  margin: 12px 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  padding: 16px 14px 14px;
+  border-radius: 14px;
+  /* The crest behind it all, under the school's own dark — the same two
+     layers body::before and body::after lay on the real page, so the
+     watermark shows here as faintly as it will there. */
+  background:
+    linear-gradient(var(--scrim-near), var(--scrim-far)),
+    var(--wallpaper) center / cover no-repeat,
+    var(--bg);
+  color: var(--text);
 }
 
-.mg-preview-strip {
+.mg-preview-head {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 56px;
-  padding: 0 10px;
-  border-radius: 10px;
+}
+
+.mg-preview-crest {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--crest-plate, transparent);
+}
+
+.mg-preview-name {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.mg-preview-city {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.mg-preview-tabs {
+  display: flex;
+  gap: 14px;
+  margin: 14px 0 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mg-preview-tabs span {
+  padding-bottom: 6px;
+}
+
+.mg-preview-tabs .is-on {
+  border-bottom: 2px solid var(--accent);
+  color: var(--text);
+}
+
+.mg-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
   background: var(--surface);
 }
 
-.mg-preview-swatch {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+.mg-preview-number {
+  min-width: 34px;
+  color: var(--accent);
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
 }
 
-.mg-preview-surface {
-  background: var(--surface-2);
-}
-
-.mg-preview-accent {
-  background: var(--accent);
-}
-
-.mg-preview-text {
-  color: var(--text);
+.mg-preview-player {
+  display: block;
   font-weight: 700;
+}
+
+.mg-preview-details {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* A laptop is where this is used; a phone is where it may one day be glanced
+   at. Narrow, the preview goes under the form and the table loses its grid. */
+@media (max-width: 820px) {
+  .mg-wrap {
+    padding: 18px 14px 60px;
+  }
+
+  .mg-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mg-aside {
+    position: static;
+  }
+
+  .mg-list-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .mg-list-row > span:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .mg-list-head,
+  .mg-list-row > span:nth-child(4) {
+    display: none;
+  }
+
+  .mg-part {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .mg-toolbar,
+  .mg-signin .mg-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 /* Prose page. The app's classes are built for rows; this one needs headings
@@ -371,6 +1056,12 @@
   border-radius: 10px;
   object-fit: cover;
   background: var(--surface-2);
+}
+
+/* The empty square above stands in for a crest not sent yet; a real one sits
+   on the chosen plate, or on nothing. */
+img.oh-hub-crest {
+  background: var(--crest-plate, transparent);
 }
 
 .oh-hub-name {
@@ -618,4 +1309,207 @@
   color: var(--muted);
   font-size: 12px;
   text-align: center;
+}
+
+/* ---------------------------------------------------------- player card */
+
+/* The root app's card, opened on a paid page. Its sections read as lists, so
+   they sit left even when the card itself centres a lone number. */
+.oh-card {
+  text-align: left;
+}
+
+.oh-card .card-back {
+  display: block;
+}
+
+.oh-card-section {
+  margin-top: 18px;
+}
+
+.oh-card-week + .oh-card-week {
+  margin-top: 10px;
+}
+
+/*
+ * The player screen. Over the whole page, so the tab beneath it is left
+ * exactly as it was when Back closes this — but opaque, the school's own
+ * ground, because the see-through version let the keypad's digits ghost
+ * through behind a player's numbers and blurred the crest to nothing.
+ *
+ * The crest is the screen's own watermark instead (::before), stronger than
+ * what the page shows through body::after's two scrims (about a twentieth of
+ * the wallpaper at the brightest point): plainly the school's, still far
+ * enough back that the numbers over it are what you read.
+ *
+ * It scrolls itself when a long season outgrows a phone, and contains its own
+ * overscroll, so a flick at either end is not handed on to the page below.
+ * The sheet is not inside any of the page's scrolling boxes, so there is
+ * nothing for iOS to chain to but the body, which never scrolls on this page.
+ */
+.oh-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg);
+}
+
+/*
+ * The same faint crest the page behind wears: the wallpaper at cover under the
+ * same two scrims body::before and body::after lay over it (src/styles.css),
+ * so the player screen reads as the page itself rather than a picture of the
+ * crest. A bolder centred crest was tried and the owner found it too loud.
+ * Fixed, not absolute, so it stays put while the content scrolls; nothing on
+ * .oh-sheet makes it a containing block, so these cover the viewport, which is
+ * exactly the sheet's own box.
+ */
+.oh-sheet::before,
+.oh-sheet::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.oh-sheet::before {
+  z-index: 0;
+  background: var(--wallpaper) center / cover no-repeat;
+}
+
+.oh-sheet::after {
+  z-index: 1;
+  background:
+    radial-gradient(120% 85% at 50% 40%, var(--scrim-near), var(--scrim-far) 72%),
+    linear-gradient(180deg, var(--scrim-top), var(--scrim-bottom));
+}
+
+.oh-sheet > .screen {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100%;
+}
+
+/*
+ * The Schedule tab's game-day badge is the school's crest. Poland's badge is a
+ * square photo and is cropped to fill; a crest is stored padded to a square
+ * with its backdrop lifted off, so it is contained and sat on the school's own
+ * plate, as it is in the header.
+ */
+.countdown-badge.oh-countdown-crest {
+  object-fit: contain;
+  background: var(--crest-plate, transparent);
+}
+
+/* A fixture with nothing to open is a plain line, not a control. */
+.fixture-row.oh-fixture-still {
+  cursor: default;
+}
+
+/*
+ * A tie, which Poland's screen never has to draw. Neither the win's green nor
+ * the loss's red: the muted ink the rest of the row's small print uses.
+ */
+.form-chip.oh-tied {
+  background: var(--muted);
+}
+
+.oh-h2h-t {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------- light mode */
+
+/*
+ * The sun/moon at the right end of a paid page's header. A 40px square for a
+ * thumb, drawn in the line's own text color so it is part of the header
+ * rather than a badge on it.
+ */
+.oh-mode-btn {
+  flex: none;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.oh-mode-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The title line is shorter than the button; the row grows to fit it rather
+   than the button hanging below the tabs' top edge. */
+.oh-title-row > .oh-mode-btn {
+  margin-top: -6px;
+  margin-bottom: -6px;
+}
+
+/* The name block takes what the crest and the button leave, so a long school
+   name wraps instead of pushing the button off the edge. */
+.oh-hub-head > div {
+  min-width: 0;
+}
+
+/*
+ * What the light page needs that its colors alone do not give it.
+ *
+ * Almost everything in src/styles.css is drawn from the variables look.ts
+ * writes, so the light page is mostly those variables turned over. These are
+ * the few things it hard-codes for a dark page — and src/styles.css is
+ * Poland's and is not edited — so they are turned over here, only while a paid
+ * look is applied in light mode (look.ts sets the attribute, and clearLook
+ * takes it off again).
+ */
+html[data-oh-mode='light'] {
+  /* Form controls, scrollbars and the like follow the page, not the root's
+     dark. */
+  color-scheme: light;
+  /* The status colors are bright for a dark ground and wash out on white;
+     these are the same three, deep enough to read as text on near-white and
+     to carry white text when they are a chip's fill. */
+  --ok: #17753a;
+  --danger: #c0262d;
+  --warn: #8a5300;
+}
+
+/*
+ * Ink on a filled control. src/styles.css inks its text-colored fills — the
+ * active chip, the primary button, a pressed key or position pill — and the
+ * W/L chips in --accent-ink, which on Poland's page is its navy ground. A paid
+ * page's --accent-ink is now chosen for the accent and can be white, which on a
+ * white fill is nothing at all. The page's own background is what the text
+ * color was made readable against, and contrast runs both ways, so it is the
+ * ink that always reads on --text; on a dark page it is the ground, exactly
+ * what these have always been.
+ */
+html[data-oh-mode] :is(.chip.active, .btn-primary, .pos-pill[aria-pressed='true'], .seg button[aria-pressed='true'], .key:active) {
+  color: var(--bg);
+}
+
+/* The chips are kept out of the list above: :is() takes the weight of its
+   heaviest member, so the light rule below could never have beaten it. Here
+   the two carry the same weight and the later one wins. */
+html[data-oh-mode] .form-chip {
+  color: var(--bg);
+}
+
+/* On the light page the W/L/T fills are the deepened ones above, and its
+   near-white background would be a pale ink on them; white reads on all three. */
+html[data-oh-mode='light'] .form-chip {
+  color: #ffffff;
 }

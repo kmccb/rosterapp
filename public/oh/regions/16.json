@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 16,
+ "division": "IV",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Wyoming",
+   "city": "Cincinnati",
+   "average": 18.4223,
+   "qualifying": true,
+   "slug": "wyoming-cincinnati"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "London",
+   "city": "London",
+   "average": 15.55,
+   "qualifying": true,
+   "slug": "london-london"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Cincinnati Hills Christian Academy",
+   "city": "Cincinnati",
+   "average": 15.1125,
+   "qualifying": true,
+   "slug": "cincinnati-hills-christian-academy-cincinnati"
+  },
+  {
+   "rank": "4",
+   "record": "7-0",
+   "school": "North College Hill",
+   "city": "Cincinnati",
+   "average": 14.7175,
+   "qualifying": true,
+   "slug": "north-college-hill-cincinnati"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Oakwood",
+   "city": "Dayton",
+   "average": 14.55,
+   "qualifying": true,
+   "slug": "oakwood-dayton"
+  },
+  {
+   "rank": "6",
+   "record": "5-3",
+   "school": "Urbana",
+   "city": "Urbana",
+   "average": 14.5125,
+   "qualifying": true,
+   "slug": "urbana-urbana"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Valley View",
+   "city": "Germantown",
+   "average": 13.5125,
+   "qualifying": true,
+   "slug": "valley-view-germantown"
+  },
+  {
+   "rank": "8",
+   "record": "7-1",
+   "school": "Kenton Ridge",
+   "city": "Springfield",
+   "average": 10.6,
+   "qualifying": true,
+   "slug": "kenton-ridge-springfield"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Wilmington",
+   "city": "Wilmington",
+   "average": 9.7625,
+   "qualifying": true,
+   "slug": "wilmington-wilmington"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Dunbar",
+   "city": "Dayton",
+   "average": 7.4896,
+   "qualifying": true,
+   "slug": "dunbar-dayton"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Eaton",
+   "city": "Eaton",
+   "average": 7.4125,
+   "qualifying": true,
+   "slug": "eaton-eaton"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "New Richmond",
+   "city": "New Richmond",
+   "average": 7.2375,
+   "qualifying": true,
+   "slug": "new-richmond-new-richmond"
+  },
+  {
+   "rank": "13",
+   "record": "2-6",
+   "school": "Clinton-Massie",
+   "city": "Clarksville",
+   "average": 5.1375,
+   "qualifying": false,
+   "slug": "clinton-massie-clarksville"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "Washington",
+   "city": "Washington Court House",
+   "average": 4.05,
+   "qualifying": false,
+   "slug": "washington-washington-court-house"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Reading",
+   "city": "Reading",
+   "average": 3.3662,
+   "qualifying": false,
+   "slug": "reading-reading"
+  },
+  {
+   "rank": "16",
+   "record": "2-6",
+   "school": "Roger Bacon",
+   "city": "St Bernard",
+   "average": 3.275,
+   "qualifying": false,
+   "slug": "roger-bacon-st-bernard"
+  },
+  {
+   "rank": "17",
+   "record": "4-4",
+   "school": "McClain",
+   "city": "Greenfield",
+   "average": 3.2121,
+   "qualifying": false,
+   "slug": "mcclain-greenfield"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Clark Montessori",
+   "city": "Cincinnati",
+   "average": 3.1414,
+   "qualifying": false,
+   "slug": "clark-montessori-cincinnati"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Meadowdale",
+   "city": "Dayton",
+   "average": 2.4579,
+   "qualifying": false,
+   "slug": "meadowdale-dayton"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Woodward",
+   "city": "Cincinnati",
+   "average": 2.2309,
+   "qualifying": false,
+   "slug": "woodward-cincinnati"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Northridge",
+   "city": "Dayton",
+   "average": 1.75,
+   "qualifying": false,
+   "slug": "northridge-dayton"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Shawnee",
+   "city": "Springfield",
+   "average": 1.7045,
+   "qualifying": false,
+   "slug": "shawnee-springfield"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Taft",
+   "city": "Cincinnati",
+   "average": 1.1625,
+   "qualifying": false,
+   "slug": "taft-cincinnati"
+  },
+  {
+   "rank": "24",
+   "record": "1-7",
+   "school": "Taylor",
+   "city": "Cleves",
+   "average": 1.1375,
+   "qualifying": false,
+   "slug": "taylor-cleves"
+  },
+  {
+   "rank": "25",
+   "record": "1-6",
+   "school": "Shroder",
+   "city": "Cincinnati",
+   "average": 0.6429,
+   "qualifying": false,
+   "slug": "shroder-cincinnati"
+  },
+  {
+   "rank": "26",
+   "record": "1-7",
+   "school": "Norwood",
+   "city": "Norwood",
+   "average": 0.5625,
+   "qualifying": false,
+   "slug": "norwood-norwood"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

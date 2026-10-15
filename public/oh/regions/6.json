@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 6,
+ "division": "II",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "6-2",
+   "school": "Central Catholic",
+   "city": "Toledo",
+   "average": 20.523,
+   "qualifying": true,
+   "slug": "central-catholic-toledo"
+  },
+  {
+   "rank": "2",
+   "record": "6-2",
+   "school": "Avon",
+   "city": "Avon",
+   "average": 19.9665,
+   "qualifying": true,
+   "slug": "avon-avon"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Olmsted Falls",
+   "city": "Olmsted Falls",
+   "average": 18.95,
+   "qualifying": true,
+   "slug": "olmsted-falls-olmsted-falls"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Clay",
+   "city": "Oregon",
+   "average": 16.9625,
+   "qualifying": true,
+   "slug": "clay-oregon"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Lakewood",
+   "city": "Lakewood",
+   "average": 14.2375,
+   "qualifying": true,
+   "slug": "lakewood-lakewood"
+  },
+  {
+   "rank": "6",
+   "record": "4-4",
+   "school": "Findlay",
+   "city": "Findlay",
+   "average": 12.0625,
+   "qualifying": true,
+   "slug": "findlay-findlay"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Waite",
+   "city": "Toledo",
+   "average": 11.45,
+   "qualifying": true,
+   "slug": "waite-toledo"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Fremont Ross",
+   "city": "Fremont",
+   "average": 10.9125,
+   "qualifying": true,
+   "slug": "fremont-ross-fremont"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Avon Lake",
+   "city": "Avon Lake",
+   "average": 9,
+   "qualifying": true,
+   "slug": "avon-lake-avon-lake"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Rhodes",
+   "city": "Cleveland",
+   "average": 8.9247,
+   "qualifying": true,
+   "slug": "rhodes-cleveland"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Springfield",
+   "city": "Holland",
+   "average": 7.1,
+   "qualifying": true,
+   "slug": "springfield-holland"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Amherst Steele",
+   "city": "Amherst",
+   "average": 6.55,
+   "qualifying": true,
+   "slug": "amherst-steele-amherst"
+  },
+  {
+   "rank": "13",
+   "record": "4-4",
+   "school": "Anthony Wayne",
+   "city": "Whitehouse",
+   "average": 6.0593,
+   "qualifying": false,
+   "slug": "anthony-wayne-whitehouse"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Start",
+   "city": "Toledo",
+   "average": 5.075,
+   "qualifying": false,
+   "slug": "start-toledo"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "North Olmsted",
+   "city": "North Olmsted",
+   "average": 5.025,
+   "qualifying": false,
+   "slug": "north-olmsted-north-olmsted"
+  },
+  {
+   "rank": "16",
+   "record": "1-7",
+   "school": "St Francis de Sales",
+   "city": "Toledo",
+   "average": 4.2917,
+   "qualifying": false,
+   "slug": "st-francis-de-sales-toledo"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Sylvania Southview",
+   "city": "Sylvania",
+   "average": 4.2375,
+   "qualifying": false,
+   "slug": "sylvania-southview-sylvania"
+  },
+  {
+   "rank": "18",
+   "record": "2-6",
+   "school": "North Ridgeville",
+   "city": "North Ridgeville",
+   "average": 3.9,
+   "qualifying": false,
+   "slug": "north-ridgeville-north-ridgeville"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Bowsher",
+   "city": "Toledo",
+   "average": 2.525,
+   "qualifying": false,
+   "slug": "bowsher-toledo"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Rogers",
+   "city": "Toledo",
+   "average": 2.1505,
+   "qualifying": false,
+   "slug": "rogers-toledo"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Valley Forge",
+   "city": "Parma Heights",
+   "average": 1.85,
+   "qualifying": false,
+   "slug": "valley-forge-parma-heights"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Westlake",
+   "city": "Westlake",
+   "average": 1.775,
+   "qualifying": false,
+   "slug": "westlake-westlake"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "John Marshall",
+   "city": "Cleveland",
+   "average": 1.0842,
+   "qualifying": false,
+   "slug": "john-marshall-cleveland"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Normandy",
+   "city": "Parma",
+   "average": 0,
+   "qualifying": false,
+   "slug": "normandy-parma"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Sandusky",
+   "city": "Sandusky",
+   "average": 0,
+   "qualifying": false,
+   "slug": "sandusky-sandusky"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Sylvania Northview",
+   "city": "Sylvania",
+   "average": 0,
+   "qualifying": false,
+   "slug": "sylvania-northview-sylvania"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

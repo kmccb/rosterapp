@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Preview } from '../../sync/run';
 import type { SideState, SourceSide, SyncState } from '../../sync/types';
 import { checkSource, setSources, syncNow, type RosterRow } from './adminApi';
@@ -17,9 +17,20 @@ type Links = { roster: string | null; schedule: string | null; filter: string | 
 export function Sources({
   row,
   onLinked,
+  onChanged,
+  children,
 }: {
   row: RosterRow;
   onLinked: (l: { roster: boolean; schedule: boolean }) => void;
+  /**
+   * Told after every link, unlink and sync, so whoever owns `row` can read it
+   * again. This component seeds its links from `row` each time it mounts, and
+   * a card that is closed and reopened mounts it afresh: from a stale row it
+   * would come back believing a link was still unset, and the next save —
+   * which always sends both links — would quietly unlink it.
+   */
+  onChanged: () => void;
+  children: (blocks: { roster: ReactNode; schedule: ReactNode | null }) => ReactNode;
 }) {
   const [links, setLinks] = useState<Links>({
     roster: row.roster_source_url ?? null,
@@ -44,15 +55,20 @@ export function Sources({
       schedule: next.schedule === links.schedule && next.filter === links.filter ? s.schedule : undefined,
     }));
     onLinked({ roster: Boolean(next.roster), schedule: Boolean(next.schedule) });
+    onChanged();
   };
 
   const sync = async () => {
     const answer = await syncNow(row.school_slug, row.sport, row.season);
     setState(answer.state);
+    onChanged();
   };
 
-  return (
-    <>
+  // Handed back as two pieces rather than drawn here: the sheet belongs in the
+  // card's roster section and the calendar in its schedule section, but one
+  // save carries both links, so their state has to live in one place.
+  return children({
+    roster: (
       <SourceBlock
         // Remounts across a link/unlink: otherwise the input's leftover url,
         // the stale Check-link preview, and an enabled "Link this …" button
@@ -71,7 +87,9 @@ export function Sources({
         onUnlink={() => save({ ...links, roster: null })}
         onSync={sync}
       />
-      {row.sport !== 'football' && (
+    ),
+    schedule:
+      row.sport !== 'football' ? (
         <SourceBlock
           key={links.schedule ? 'schedule-linked' : 'schedule-unlinked'}
           kind="schedule"
@@ -87,9 +105,8 @@ export function Sources({
           onUnlink={() => save({ ...links, schedule: null, filter: null })}
           onSync={sync}
         />
-      )}
-    </>
-  );
+      ) : null,
+  });
 }
 
 function SourceBlock(props: {
@@ -127,25 +144,28 @@ function SourceBlock(props: {
   if (props.linked) {
     return (
       <div className="mg-source">
-        <p className="filter-line">
-          <span>
+        <p className="mg-hint">
             {noun === 'roster' ? 'Roster' : 'Schedule'} from a {source} · {sideLine(props.side, new Date())}
-          </span>
-        </p>
-        <span className="fixture-sub">
+          </p>
+        <span className="mg-hint">
           {props.linked}
           {props.filter && ` · only “${props.filter}”`}
         </span>
-        <button type="button" className="fixture-row is-plain" disabled={busy} onClick={() => run(props.onSync)}>
-          <span className="fixture-team">{busy ? 'Working…' : 'Sync now'}</span>
-        </button>
-        <button type="button" className="fixture-row is-plain" disabled={busy} onClick={() => run(props.onUnlink)}>
-          <span className="fixture-team">
+        <div className="mg-actions">
+          <button type="button" className="mg-btn is-small" disabled={busy} onClick={() => run(props.onSync)}>
+            {busy ? 'Working…' : 'Sync now'}
+          </button>
+          <button
+            type="button"
+            className="mg-btn is-small is-quiet"
+            disabled={busy}
+            title={`The last synced ${noun} stays on the page.`}
+            onClick={() => run(props.onUnlink)}
+          >
             Unlink
-            <span className="fixture-sub">The last synced {noun} stays on the page.</span>
-          </span>
-        </button>
-        {error && <p className="empty-text">{error}</p>}
+          </button>
+        </div>
+        {error && <p className="mg-error">{error}</p>}
       </div>
     );
   }
@@ -160,11 +180,9 @@ function SourceBlock(props: {
 
   return (
     <div className="mg-source">
-      <p className="filter-line">
-        <span>Or link a {source}, and the {noun} keeps itself current</span>
-      </p>
+      <p className="mg-hint">Or link a {source}, and the {noun} keeps itself current</p>
       <input
-        className="search"
+        className="mg-input"
         type="url"
         value={url}
         onChange={(e) => {
@@ -175,14 +193,14 @@ function SourceBlock(props: {
         aria-label={`${source} link`}
       />
       {props.kind === 'roster' && (
-        <span className="fixture-sub">
+        <span className="mg-hint">
           In the sheet: File → Share → Publish to web → the roster tab → Comma-separated values (.csv) → Publish,
           then copy that link.
         </span>
       )}
       {props.kind === 'schedule' && (
         <input
-          className="search"
+          className="mg-input"
           type="text"
           value={filter}
           onChange={(e) => {
@@ -193,10 +211,10 @@ function SourceBlock(props: {
           aria-label="Calendar filter"
         />
       )}
-      {problem && <p className="empty-text">{problem}</p>}
+      {problem && <p className="mg-error">{problem}</p>}
       <button
         type="button"
-        className="fixture-row is-plain"
+        className="mg-btn is-small"
         disabled={busy || !clean || Boolean(problem)}
         onClick={() =>
           run(async () => {
@@ -204,34 +222,32 @@ function SourceBlock(props: {
           })
         }
       >
-        <span className="fixture-team">{busy ? 'Working…' : 'Check link'}</span>
+        {busy ? 'Working…' : 'Check link'}
       </button>
       {check && <CheckView check={check} />}
       {check?.ok && (
         <button
           type="button"
-          className="fixture-row is-plain"
+          className="mg-btn is-small is-primary"
           disabled={busy}
           onClick={() => run(() => props.onLink(clean, filterValue))}
         >
-          <span className="fixture-team">Link this {source}</span>
+          Link this {source}
         </button>
       )}
-      {error && <p className="empty-text">{error}</p>}
+      {error && <p className="mg-error">{error}</p>}
     </div>
   );
 }
 
 function CheckView({ check }: { check: Preview }) {
-  if (!check.ok) return <p className="empty-text">Refused: {check.reason}.</p>;
+  if (!check.ok) return <p className="mg-error">Refused: {check.reason}.</p>;
   return (
     <>
-      <p className="filter-line">
-        <span>
+      <p className="mg-hint">
           {check.players ? `${check.players.length} players read` : `${check.rows?.length ?? 0} games read`}
           {check.skipped > 0 && ` · ${check.skipped} events skipped`}
-        </span>
-      </p>
+        </p>
       {check.warnings.length > 0 && (
         <div className="mg-skip">
           {check.warnings.map((w, i) => (
@@ -245,7 +261,7 @@ function CheckView({ check }: { check: Preview }) {
         {check.players?.slice(0, 60).map((p) => (
           <div className="mg-review-row" key={p.id}>
             <b>#{p.number}</b> {p.firstName} {p.lastName}
-            <span className="fixture-sub">
+            <span className="mg-hint">
               {p.position}
               {p.grade && ` · ${p.grade}`}
             </span>
@@ -254,7 +270,7 @@ function CheckView({ check }: { check: Preview }) {
         {check.rows?.slice(0, 60).map((r, i) => (
           <div className="mg-review-row" key={i}>
             <b>{r.date}</b> · {r.home ? 'vs' : 'at'} {r.opponent}
-            {r.time && <span className="fixture-sub">{r.time}</span>}
+            {r.time && <span className="mg-hint">{r.time}</span>}
           </div>
         ))}
       </div>

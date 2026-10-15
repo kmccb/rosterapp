@@ -1,0 +1,252 @@
+{
+ "year": 2026,
+ "region": 24,
+ "division": "VI",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Portsmouth West",
+   "city": "West Portsmouth",
+   "average": 14.5,
+   "qualifying": true,
+   "slug": "portsmouth-west-west-portsmouth"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Tri-Village",
+   "city": "New Madison",
+   "average": 13.8845,
+   "qualifying": true,
+   "slug": "tri-village-new-madison"
+  },
+  {
+   "rank": "3",
+   "record": "8-0",
+   "school": "Deer Park",
+   "city": "Cincinnati",
+   "average": 13.8597,
+   "qualifying": true,
+   "slug": "deer-park-cincinnati"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Cincinnati College Prep",
+   "city": "Cincinnati",
+   "average": 13.0625,
+   "qualifying": true,
+   "slug": "cincinnati-college-prep-cincinnati"
+  },
+  {
+   "rank": "5",
+   "record": "5-3",
+   "school": "Huntington",
+   "city": "Chillicothe",
+   "average": 12.512,
+   "qualifying": true,
+   "slug": "huntington-chillicothe"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Zane Trace",
+   "city": "Chillicothe",
+   "average": 12.0953,
+   "qualifying": true,
+   "slug": "zane-trace-chillicothe"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Mechanicsburg",
+   "city": "Mechanicsburg",
+   "average": 11.9634,
+   "qualifying": true,
+   "slug": "mechanicsburg-mechanicsburg"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Covington",
+   "city": "Covington",
+   "average": 11.0375,
+   "qualifying": true,
+   "slug": "covington-covington"
+  },
+  {
+   "rank": "9",
+   "record": "7-1",
+   "school": "St Bernard-Elmwood Place",
+   "city": "St Bernard",
+   "average": 10.8557,
+   "qualifying": true,
+   "slug": "st-bernard-elmwood-place-st-bernard"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "St Henry",
+   "city": "St Henry",
+   "average": 10.475,
+   "qualifying": true,
+   "slug": "st-henry-st-henry"
+  },
+  {
+   "rank": "11",
+   "record": "6-1",
+   "school": "Madison-Plains",
+   "city": "London",
+   "average": 9.9762,
+   "qualifying": true,
+   "slug": "madison-plains-london"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Versailles",
+   "city": "Versailles",
+   "average": 9.6875,
+   "qualifying": true,
+   "slug": "versailles-versailles"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Anna",
+   "city": "Anna",
+   "average": 9.3375,
+   "qualifying": false,
+   "slug": "anna-anna"
+  },
+  {
+   "rank": "14",
+   "record": "5-3",
+   "school": "Miami Valley Christian Academy",
+   "city": "Cincinnati",
+   "average": 8.1031,
+   "qualifying": false,
+   "slug": "miami-valley-christian-academy-cincinnati"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Southeastern",
+   "city": "Chillicothe",
+   "average": 4.8737,
+   "qualifying": false,
+   "slug": "southeastern-chillicothe"
+  },
+  {
+   "rank": "16",
+   "record": "5-3",
+   "school": "Valley",
+   "city": "Lucasville",
+   "average": 4.7,
+   "qualifying": false,
+   "slug": "valley-lucasville"
+  },
+  {
+   "rank": "17",
+   "record": "3-4",
+   "school": "Adena",
+   "city": "Frankfort",
+   "average": 4.3254,
+   "qualifying": false,
+   "slug": "adena-frankfort"
+  },
+  {
+   "rank": "18",
+   "record": "4-3",
+   "school": "Fayetteville",
+   "city": "Fayetteville",
+   "average": 3.3498,
+   "qualifying": false,
+   "slug": "fayetteville-fayetteville"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "National Trail",
+   "city": "New Paris",
+   "average": 2.9415,
+   "qualifying": false,
+   "slug": "national-trail-new-paris"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Minford",
+   "city": "Minford",
+   "average": 2.3125,
+   "qualifying": false,
+   "slug": "minford-minford"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Rock Hill",
+   "city": "Ironton",
+   "average": 1.7755,
+   "qualifying": false,
+   "slug": "rock-hill-ironton"
+  },
+  {
+   "rank": "22",
+   "record": "3-5",
+   "school": "Troy Christian",
+   "city": "Troy",
+   "average": 1.6848,
+   "qualifying": false,
+   "slug": "troy-christian-troy"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Northeastern",
+   "city": "South Vienna",
+   "average": 1.611,
+   "qualifying": false,
+   "slug": "northeastern-south-vienna"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Dixie",
+   "city": "New Lebanon",
+   "average": 0.875,
+   "qualifying": false,
+   "slug": "dixie-new-lebanon"
+  },
+  {
+   "rank": "25t",
+   "record": "0-7",
+   "school": "Finneytown",
+   "city": "Cincinnati",
+   "average": 0,
+   "qualifying": false,
+   "slug": "finneytown-cincinnati"
+  },
+  {
+   "rank": "25t",
+   "record": "0-8",
+   "school": "Northwest",
+   "city": "McDermott",
+   "average": 0,
+   "qualifying": false,
+   "slug": "northwest-mcdermott"
+  },
+  {
+   "rank": "25t",
+   "record": "0-8",
+   "school": "Oak Hill",
+   "city": "Oak Hill",
+   "average": 0,
+   "qualifying": false,
+   "slug": "oak-hill-oak-hill"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

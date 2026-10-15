@@ -1,0 +1,171 @@
+{
+ "year": 2026,
+ "region": 1,
+ "division": "I",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "St Edward",
+   "city": "Lakewood",
+   "average": 25.375,
+   "qualifying": true,
+   "slug": "st-edward-lakewood"
+  },
+  {
+   "rank": "2",
+   "record": "6-1",
+   "school": "Austintown-Fitch",
+   "city": "Austintown",
+   "average": 22.1823,
+   "qualifying": true,
+   "slug": "austintown-fitch-austintown"
+  },
+  {
+   "rank": "3",
+   "record": "6-2",
+   "school": "Mentor",
+   "city": "Mentor",
+   "average": 19.3845,
+   "qualifying": true,
+   "slug": "mentor-mentor"
+  },
+  {
+   "rank": "4",
+   "record": "6-2",
+   "school": "Hudson",
+   "city": "Hudson",
+   "average": 17.6168,
+   "qualifying": true,
+   "slug": "hudson-hudson"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Canton McKinley",
+   "city": "Canton",
+   "average": 17.2125,
+   "qualifying": true,
+   "slug": "canton-mckinley-canton"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Jackson",
+   "city": "Massillon",
+   "average": 15.7,
+   "qualifying": true,
+   "slug": "jackson-massillon"
+  },
+  {
+   "rank": "7",
+   "record": "5-3",
+   "school": "Strongsville",
+   "city": "Strongsville",
+   "average": 14.55,
+   "qualifying": true,
+   "slug": "strongsville-strongsville"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Berea-Midpark",
+   "city": "Berea",
+   "average": 14.5,
+   "qualifying": true,
+   "slug": "berea-midpark-berea"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "St Ignatius",
+   "city": "Cleveland",
+   "average": 14.236,
+   "qualifying": true,
+   "slug": "st-ignatius-cleveland"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Brunswick",
+   "city": "Brunswick",
+   "average": 12.55,
+   "qualifying": true,
+   "slug": "brunswick-brunswick"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Euclid",
+   "city": "Euclid",
+   "average": 8.075,
+   "qualifying": true,
+   "slug": "euclid-euclid"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Solon",
+   "city": "Solon",
+   "average": 4.7125,
+   "qualifying": true,
+   "slug": "solon-solon"
+  },
+  {
+   "rank": "13",
+   "record": "2-6",
+   "school": "Medina",
+   "city": "Medina",
+   "average": 4.6125,
+   "qualifying": false,
+   "slug": "medina-medina"
+  },
+  {
+   "rank": "14",
+   "record": "2-6",
+   "school": "Stow-Munroe Falls",
+   "city": "Stow",
+   "average": 4.1383,
+   "qualifying": false,
+   "slug": "stow-munroe-falls-stow"
+  },
+  {
+   "rank": "15",
+   "record": "2-6",
+   "school": "Lorain",
+   "city": "Lorain",
+   "average": 2.1125,
+   "qualifying": false,
+   "slug": "lorain-lorain"
+  },
+  {
+   "rank": "16",
+   "record": "1-7",
+   "school": "Cleveland Heights",
+   "city": "Cleveland Heights",
+   "average": 2.0625,
+   "qualifying": false,
+   "slug": "cleveland-heights-cleveland-heights"
+  },
+  {
+   "rank": "17",
+   "record": "1-7",
+   "school": "GlenOak",
+   "city": "Canton",
+   "average": 1.4691,
+   "qualifying": false,
+   "slug": "glenoak-canton"
+  },
+  {
+   "rank": "18",
+   "record": "0-8",
+   "school": "Elyria",
+   "city": "Elyria",
+   "average": 0,
+   "qualifying": false,
+   "slug": "elyria-elyria"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

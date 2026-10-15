@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { applyLook, clearLook, deriveVars, LOOK_VARS, resizeLogo, type StyleTarget } from './look';
+import { contrast, mix } from './contrast';
+import {
+  applyLook,
+  clearLook,
+  deriveVars,
+  derivedLight,
+  lightAccent,
+  lookGround,
+  lookNotes,
+  LOOK_VARS,
+  plateColor,
+  resizeLogo,
+  type StyleTarget,
+} from './look';
 
 const hexChannels = (hex: string): [number, number, number] => {
   const n = parseInt(hex.slice(1), 16);
@@ -31,7 +44,7 @@ describe('deriveVars', () => {
     expect(sr + sg + sb).toBeGreaterThan(gr + gg + gb);
   });
 
-  it('sets --accent-ink to the ground, having no badge to sample an ink from', () => {
+  it('sets --accent-ink to the ground when the ground reads best on the accent', () => {
     expect(deriveVars({ ground, accent })['--accent-ink']).toBe(ground);
   });
 
@@ -48,6 +61,26 @@ describe('deriveVars', () => {
 
   it('carries the accent straight through', () => {
     expect(deriveVars({ ground, accent })['--accent']).toBe(accent);
+  });
+});
+
+describe('a chosen text color', () => {
+  it('reads in white with the accent-lightened second voice when none is chosen, as before', () => {
+    const plain = deriveVars({ ground: '#0e0c0b', accent: '#f26722' });
+    expect(plain['--text']).toBe('#ffffff');
+    expect(deriveVars({ ground: '#0e0c0b', accent: '#f26722', text: undefined })).toEqual(plain);
+  });
+
+  it('sets the text, and takes the second voice from it rather than the accent', () => {
+    const vars = deriveVars({ ground: '#e8d6ca', accent: '#292929', text: '#000000' });
+    expect(vars['--text']).toBe('#000000');
+    // A third of the way from the text toward the ground: still dark on beige.
+    expect(vars['--muted']).toBe(mix('#000000', '#e8d6ca', 0.35));
+    expect(vars['--accent']).toBe('#292929');
+  });
+
+  it('ignores a text color that is not one', () => {
+    expect(deriveVars({ ground: '#0e0c0b', accent: '#f26722', text: 'red' })['--text']).toBe('#ffffff');
   });
 });
 
@@ -90,5 +123,261 @@ describe('resizeLogo', () => {
     // real canvas: jsdom is not part of this project's vitest setup.
     const file = new File([new Uint8Array([1, 2, 3])], 'badge.png', { type: 'image/png' });
     await expect(resizeLogo(file)).rejects.toThrow('Images can only be processed in a browser.');
+  });
+});
+
+describe('plateColor', () => {
+  const look = { ground: '#c75000', accent: '#111111' };
+
+  it('follows the school’s own colors when chosen by name, so a recolor carries the plate with it', () => {
+    expect(plateColor({ ...look, plate: 'ground' })).toBe('#c75000');
+    expect(plateColor({ ...look, plate: 'accent' })).toBe('#111111');
+  });
+
+  it('takes a hex as it is, and anything else as no plate', () => {
+    expect(plateColor({ ...look, plate: '#ffffff' })).toBe('#ffffff');
+    expect(plateColor(look)).toBe('transparent');
+    expect(plateColor({ ...look, plate: 'white' })).toBe('transparent');
+  });
+
+  it('reaches the page as --crest-plate', () => {
+    expect(deriveVars({ ...look, plate: '#ffffff' })['--crest-plate']).toBe('#ffffff');
+    expect(deriveVars(look)['--crest-plate']).toBe('transparent');
+  });
+});
+
+describe('readable words', () => {
+  /** The page and a card on it, the two things every word can sit on. */
+  const grounds = (ground: string) => [ground, mix(ground, mix(ground, '#ffffff', 0.16), 0.72)];
+  const worst = (fg: string, ground: string) => Math.min(...grounds(ground).map((g) => contrast(fg, g)));
+  const WORDS = ['--text', '--muted', '--accent'] as const;
+
+  it('leaves Springfield’s colors exactly as chosen', () => {
+    // As set in the panel on 2026-10-14: beige ground, near-black accent, black text.
+    const look = { ground: '#e8d6ca', accent: '#292929', text: '#000000' };
+    const vars = deriveVars(look);
+    expect(vars['--accent']).toBe('#292929');
+    expect(vars['--text']).toBe('#000000');
+    expect(lookNotes(look)).toEqual([]);
+  });
+
+  it('leaves a Poland-like navy and sky blue exactly as chosen', () => {
+    const look = { ground: '#04043a', accent: '#4fbaf7' };
+    const vars = deriveVars(look);
+    expect(vars['--accent']).toBe('#4fbaf7');
+    expect(vars['--text']).toBe('#ffffff');
+    expect(vars['--muted']).toBe(mix('#4fbaf7', '#ffffff', 0.55));
+    expect(lookNotes(look)).toEqual([]);
+  });
+
+  it('brings a too-dark accent up to 4.5 on the ground and the cards, and says so', () => {
+    const look = { ground: '#04043a', accent: '#1b3a8c' };
+    const vars = deriveVars(look);
+    expect(vars['--accent']).not.toBe('#1b3a8c');
+    expect(worst(vars['--accent'], look.ground)).toBeGreaterThanOrEqual(4.5);
+    expect(lookNotes(look)).toEqual(['Accent lightened so it reads on the ground']);
+  });
+
+  it('keeps every word readable whatever the seller picks', () => {
+    for (const look of [
+      { ground: '#04043a', accent: '#04043a' }, // accent the same as the ground
+      { ground: '#777777', accent: '#ff0000' }, // mid-grey ground
+      { ground: '#c75000', accent: '#111111' }, // mid orange, where white text falls short on the cards
+      { ground: '#ffffff', accent: '#ffff00', text: '#eeeeee' },
+      { ground: '#000000', accent: '#000080', text: '#202020' },
+    ]) {
+      const vars = deriveVars(look);
+      for (const name of WORDS) expect(worst(vars[name], look.ground), `${name} on ${look.ground}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('says which way a color moved', () => {
+    expect(lookNotes({ ground: '#04043a', accent: '#04043a' })).toEqual(['Accent lightened so it reads on the ground']);
+    expect(lookNotes({ ground: '#ffffff', accent: '#ffff00', text: '#eeeeee' })).toEqual([
+      'Accent darkened so it reads on the ground',
+      'Text darkened so it reads on the ground',
+    ]);
+  });
+
+  it('inks an accent fill in whichever of ground, near-black or white reads best', () => {
+    expect(deriveVars({ ground: '#04043a', accent: '#4fbaf7' })['--accent-ink']).toBe('#04043a');
+    // A light ground on a dark accent would be the old answer; white reads better.
+    expect(deriveVars({ ground: '#e8d6ca', accent: '#292929', text: '#000000' })['--accent-ink']).toBe('#ffffff');
+    // A dark accent on a dark ground is lightened, and then the ground reads on it.
+    const vars = deriveVars({ ground: '#04043a', accent: '#04043a' });
+    expect(contrast(vars['--accent-ink'], vars['--accent'])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('keeps the decoration in the school’s colors as chosen', () => {
+    const vars = deriveVars({ ground: '#04043a', accent: '#1b3a8c' });
+    expect(vars['--ghost']).toBe('rgba(27, 58, 140, 0.22)');
+  });
+});
+
+describe('light mode', () => {
+  const springfieldOrange = { ground: '#c75000', accent: '#111111', logo: 'data:image/png;base64,AAAA', plate: '#ffffff' };
+  const navy = { ground: '#04043a', accent: '#4fbaf7' };
+  const cards = (bg: string) => [bg, mix(bg, '#ffffff', 0.72)];
+  const worst = (fg: string, bg: string) => Math.min(...cards(bg).map((g) => contrast(fg, g)));
+
+  it('leaves the dark page as it was when no mode is given', () => {
+    expect(deriveVars(navy)).toEqual(deriveVars(navy, 'dark'));
+  });
+
+  it('paints a near-white tinted with the ground', () => {
+    const vars = deriveVars(springfieldOrange, 'light');
+    expect(vars['--bg']).toBe(mix('#c75000', '#ffffff', 0.94));
+    expect(contrast(vars['--bg'], '#ffffff')).toBeLessThan(1.15);
+  });
+
+  it('reads in near-black words, every one of them at 4.5 or better', () => {
+    for (const look of [springfieldOrange, navy, { ground: '#e8d6ca', accent: '#292929', text: '#000000' }, { ground: '#ffff00', accent: '#ffffff' }]) {
+      const vars = deriveVars(look, 'light');
+      expect(contrast(vars['--text'], '#000000')).toBeLessThan(1.6);
+      for (const name of ['--text', '--muted', '--accent'] as const) {
+        expect(worst(vars[name], vars['--bg']), `${name} for ${look.ground}`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  const hueOf = (hex: string): number => {
+    const [r, g, b] = hexChannels(hex).map((v) => v / 255);
+    const max = Math.max(r, g, b);
+    const d = max - Math.min(r, g, b);
+    if (d === 0) return NaN;
+    const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return h * 60;
+  };
+
+  it('carries the more colorful school color, so the demo stays orange rather than turning black', () => {
+    // The demo: a near-black ground with an orange accent.
+    const vars = deriveVars({ ground: '#0e0c0b', accent: '#f26722' }, 'light');
+    expect(Math.abs(hueOf(vars['--accent']) - hueOf('#f26722'))).toBeLessThan(4);
+    expect(worst(vars['--accent'], vars['--bg'])).toBeGreaterThanOrEqual(4.5);
+    // Poland's sky blue rather than its navy, darkened to read.
+    const navyVars = deriveVars(navy, 'light');
+    expect(Math.abs(hueOf(navyVars['--accent']) - hueOf('#4fbaf7'))).toBeLessThan(4);
+  });
+
+  it('prefers the ground on a near-tie in colorfulness', () => {
+    expect(lightAccent('#c75000', '#d05a10', '#ffffff')).toBe('#c75000');
+    expect(lightAccent('#c75000', '#ffd200', '#ffffff')).toBe('#ffd200');
+  });
+
+  it('gives Springfield’s beige-and-charcoal a brown from the beige', () => {
+    const vars = deriveVars({ ground: '#e8d6ca', accent: '#292929', text: '#000000' }, 'light');
+    const [r, g, b] = hexChannels(vars['--accent']);
+    expect(r).toBeGreaterThan(b);
+    expect(g).toBeGreaterThanOrEqual(b);
+    expect(worst(vars['--accent'], vars['--bg'])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('falls back to whichever stands out on near-white when both colors are greys', () => {
+    expect(lightAccent('#333333', '#cccccc', '#f8f8f8')).toBe('#333333');
+    expect(lightAccent('#dddddd', '#222222', '#f8f8f8')).toBe('#222222');
+    const vars = deriveVars({ ground: '#dddddd', accent: '#222222' }, 'light');
+    expect(vars['--accent']).toBe('#222222');
+  });
+
+  it('builds the scrims from the light background at the dark page’s strengths', () => {
+    const dark = deriveVars(springfieldOrange);
+    const light = deriveVars(springfieldOrange, 'light');
+    const alpha = (v: string) => v.match(/, ([\d.]+)\)$/)?.[1];
+    for (const name of ['--scrim-near', '--scrim-far', '--scrim-top', '--scrim-bottom', '--chrome'] as const) {
+      expect(alpha(light[name])).toBe(alpha(dark[name]));
+      expect(rgbaChannels(light[name])).toEqual(hexChannels(light['--bg']));
+    }
+  });
+
+  it('keeps the crest, its plate and the wallpaper as they are', () => {
+    const dark = deriveVars(springfieldOrange);
+    const light = deriveVars(springfieldOrange, 'light');
+    expect(light['--crest-plate']).toBe(dark['--crest-plate']);
+    expect(light['--wallpaper']).toBe(dark['--wallpaper']);
+  });
+
+  it('marks the mode on the page while a look is applied, and takes it off with the look', () => {
+    const attrs = new Map<string, string>();
+    const props = new Map<string, string>();
+    const target: StyleTarget = {
+      style: { setProperty: (n, v) => props.set(n, v), removeProperty: (n) => props.delete(n) },
+      setAttribute: (n, v) => attrs.set(n, v),
+      removeAttribute: (n) => attrs.delete(n),
+    };
+    applyLook(navy, target, 'light');
+    expect(attrs.get('data-oh-mode')).toBe('light');
+    expect(props.get('--bg')).toBe(deriveVars(navy, 'light')['--bg']);
+    applyLook(navy, target);
+    expect(attrs.get('data-oh-mode')).toBe('dark');
+    clearLook(target);
+    expect(attrs.size).toBe(0);
+    expect(props.size).toBe(0);
+  });
+});
+
+describe('light colors the seller chose', () => {
+  const orange = { ground: '#c75000', accent: '#111111', plate: 'ground', logo: 'data:image/png;base64,AAAA' };
+  const light = { ground: '#fff4ec', accent: '#a33f00', text: '#1a1a1a' };
+  const chosen = { ...orange, light };
+  const cards = (bg: string) => [bg, mix(bg, mix(bg, '#ffffff', 0.16), 0.72)];
+  const worst = (fg: string, bg: string) => Math.min(...cards(bg).map((g) => contrast(fg, g)));
+
+  it('leaves the dark page exactly as it was', () => {
+    expect(deriveVars(chosen)).toEqual(deriveVars(orange));
+    expect(deriveVars(chosen, 'dark')).toEqual(deriveVars(orange, 'dark'));
+    expect(lookNotes(chosen)).toEqual(lookNotes(orange));
+  });
+
+  it('paints the light page from them the way the dark page is painted from its own', () => {
+    const vars = deriveVars(chosen, 'light');
+    const asDark = deriveVars({ ground: light.ground, accent: light.accent, text: light.text, logo: orange.logo }, 'dark');
+    for (const name of LOOK_VARS) {
+      if (name === '--crest-plate') continue;
+      expect(vars[name], name).toBe(asDark[name]);
+    }
+    expect(vars['--bg']).toBe('#fff4ec');
+    expect(vars['--text']).toBe('#1a1a1a');
+    expect(vars['--accent']).toBe('#a33f00');
+  });
+
+  it('keeps the crest’s fill on the dark colors, as the home-screen icon has it', () => {
+    expect(deriveVars(chosen, 'light')['--crest-plate']).toBe('#c75000');
+  });
+
+  it('still keeps every word readable, and says what it moved', () => {
+    const pale = { ...orange, light: { ground: '#ffffff', accent: '#ffe066', text: '#dddddd' } };
+    const vars = deriveVars(pale, 'light');
+    for (const name of ['--text', '--muted', '--accent'] as const) {
+      expect(worst(vars[name], vars['--bg']), name).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(lookNotes(pale, 'light')).toEqual([
+      'Accent darkened so it reads on the ground',
+      'Text darkened so it reads on the ground',
+    ]);
+  });
+
+  it('works the light page out as before when there is no whole set', () => {
+    const derived = deriveVars(orange, 'light');
+    expect(deriveVars({ ...orange, light: undefined }, 'light')).toEqual(derived);
+    expect(deriveVars({ ...orange, light: { ...light, text: 'black' } }, 'light')).toEqual(derived);
+    // Nothing chosen, nothing to explain.
+    expect(lookNotes(orange, 'light')).toEqual([]);
+  });
+
+  it('starts the pickers from the light page fans already see', () => {
+    const start = derivedLight(orange);
+    const vars = deriveVars(orange, 'light');
+    expect(start).toEqual({ ground: vars['--bg'], accent: vars['--accent'], text: vars['--text'] });
+    // And a set chosen as it started paints the same words fans already read.
+    const same = deriveVars({ ...orange, light: start }, 'light');
+    expect(same['--bg']).toBe(vars['--bg']);
+    expect(same['--text']).toBe(vars['--text']);
+    expect(same['--accent']).toBe(vars['--accent']);
+  });
+
+  it('tints the address bar with the chosen light ground', () => {
+    expect(lookGround(chosen, 'light')).toBe('#fff4ec');
+    expect(lookGround(orange, 'light')).toBe(mix('#c75000', '#ffffff', 0.94));
+    expect(lookGround(chosen)).toBe('#c75000');
   });
 });

@@ -9,7 +9,7 @@ import {
   skippedRows,
   themeArg,
   toPlayers,
-} from './Activate';
+} from './saveArgs';
 
 describe('toPlayers', () => {
   it('turns a pasted spreadsheet into the app’s players', () => {

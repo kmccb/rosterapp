@@ -4,7 +4,7 @@
  * Run by hand after applying a migration — not in CI, because it needs the
  * real anon key and creates nothing. It asks the public function the
  * questions an attacker would: an unknown school, an unpublished row, an
- * expired row, 0008's four doors. The write checks assert the anon key is
+ * expired row, 0008's four doors, 0009's two. The write checks assert the anon key is
  * refused outright, and the Data API checks assert both tables —
  * school_roster and school_account, the higher-value target since it holds
  * the seller's email and is_admin — are unreachable directly, not just
@@ -113,6 +113,26 @@ check('anon cannot apply a sync', refused(anonApply), JSON.stringify(anonApply))
 
 const anonAdmin = await rpc('school_admin_check', {});
 check('anon is not the seller', refused(anonAdmin), JSON.stringify(anonAdmin));
+
+// 0009's two doors. The first is meant to be open to anon — the stats job
+// runs on GitHub with this same key — so the check is on what comes through
+// it: a list, each entry carrying the school, the sport, the MaxPreps link
+// and nothing else from the row. A database without 0009 answers 404 and
+// fails this, which is the runbook telling the truth.
+const statsKeys = ['slug', 'sport', 'stats_source_url'];
+const anonStats = await rpc('school_stats_targets', {});
+check('anon can read stats targets, and only the three keys',
+  anonStats.status === 200 && Array.isArray(anonStats.body)
+    && anonStats.body.every((row) => row !== null && typeof row === 'object'
+      && Object.keys(row).sort().join() === statsKeys.join()
+      && /^https:\/\/www\.maxpreps\.com\//.test(row.stats_source_url)),
+  JSON.stringify({ status: anonStats.status, keys: Array.isArray(anonStats.body)
+    ? [...new Set(anonStats.body.flatMap((row) => Object.keys(row ?? {})))] : anonStats.body }));
+
+const anonStatsSource = await rpc('school_roster_set_stats_source', {
+  p_slug: 'x', p_sport: 'football', p_season: 2026, p_url: null,
+});
+check('anon cannot set a stats source', refused(anonStatsSource), JSON.stringify(anonStatsSource));
 
 // With a live activation named in .env.local (VERIFY_SLUG, and VERIFY_SPORT
 // when it isn't football), prove the public answer carries no link or sync

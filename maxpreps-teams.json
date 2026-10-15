@@ -1,0 +1,11 @@
+{
+  "teams": [
+    {
+      "slug": "springfield-new-middletown",
+      "sport": "football",
+      "team": "https://www.maxpreps.com/oh/new-middletown/springfield-tigers/football/",
+      "stats": "https://www.maxpreps.com/print/team_stats.aspx?admin=0&bygame=0&league=0&print=1&schoolid=87956f71-7ff2-4132-bc29-a3c89070aaa3&ssid=2286cd80-c46d-4739-8dd1-92a67ca8daa7",
+      "roster": "https://www.maxpreps.com/oh/new-middletown/springfield-tigers/football/roster/"
+    }
+  ]
+}

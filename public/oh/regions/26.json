@@ -1,0 +1,243 @@
+{
+ "year": 2026,
+ "region": 26,
+ "division": "VII",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "8-0",
+   "school": "Hopewell-Loudon",
+   "city": "Bascom",
+   "average": 15.0375,
+   "qualifying": true,
+   "slug": "hopewell-loudon-bascom"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Leipsic",
+   "city": "Leipsic",
+   "average": 13.475,
+   "qualifying": true,
+   "slug": "leipsic-leipsic"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "McComb",
+   "city": "McComb",
+   "average": 11.5038,
+   "qualifying": true,
+   "slug": "mccomb-mccomb"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Mohawk",
+   "city": "Sycamore",
+   "average": 10.625,
+   "qualifying": true,
+   "slug": "mohawk-sycamore"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "North Baltimore",
+   "city": "North Baltimore",
+   "average": 10.4,
+   "qualifying": true,
+   "slug": "north-baltimore-north-baltimore"
+  },
+  {
+   "rank": "6",
+   "record": "7-1",
+   "school": "Edon",
+   "city": "Edon",
+   "average": 7.8021,
+   "qualifying": true,
+   "slug": "edon-edon"
+  },
+  {
+   "rank": "7",
+   "record": "3-4",
+   "school": "Gibsonburg",
+   "city": "Gibsonburg",
+   "average": 6.8413,
+   "qualifying": true,
+   "slug": "gibsonburg-gibsonburg"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "Montpelier",
+   "city": "Montpelier",
+   "average": 6.7604,
+   "qualifying": true,
+   "slug": "montpelier-montpelier"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Pandora-Gilboa",
+   "city": "Pandora",
+   "average": 6.2125,
+   "qualifying": true,
+   "slug": "pandora-gilboa-pandora"
+  },
+  {
+   "rank": "10",
+   "record": "3-5",
+   "school": "Jefferson",
+   "city": "Delphos",
+   "average": 5.3,
+   "qualifying": true,
+   "slug": "jefferson-delphos"
+  },
+  {
+   "rank": "11",
+   "record": "4-4",
+   "school": "Toledo Christian",
+   "city": "Toledo",
+   "average": 5.1963,
+   "qualifying": true,
+   "slug": "toledo-christian-toledo"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "Arcadia",
+   "city": "Arcadia",
+   "average": 4.375,
+   "qualifying": true,
+   "slug": "arcadia-arcadia"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Wayne Trace",
+   "city": "Haviland",
+   "average": 4.1125,
+   "qualifying": false,
+   "slug": "wayne-trace-haviland"
+  },
+  {
+   "rank": "14",
+   "record": "3-5",
+   "school": "North Central",
+   "city": "Pioneer",
+   "average": 3.8646,
+   "qualifying": false,
+   "slug": "north-central-pioneer"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Hilltop",
+   "city": "West Unity",
+   "average": 2.8438,
+   "qualifying": false,
+   "slug": "hilltop-west-unity"
+  },
+  {
+   "rank": "16",
+   "record": "3-5",
+   "school": "Ayersville",
+   "city": "Defiance",
+   "average": 2.7625,
+   "qualifying": false,
+   "slug": "ayersville-defiance"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Antwerp",
+   "city": "Antwerp",
+   "average": 2.7125,
+   "qualifying": false,
+   "slug": "antwerp-antwerp"
+  },
+  {
+   "rank": "18",
+   "record": "1-7",
+   "school": "Buckeye Central",
+   "city": "New Washington",
+   "average": 1.5375,
+   "qualifying": false,
+   "slug": "buckeye-central-new-washington"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Arlington",
+   "city": "Arlington",
+   "average": 1.225,
+   "qualifying": false,
+   "slug": "arlington-arlington"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Riverdale",
+   "city": "Mt Blanchard",
+   "average": 1.1375,
+   "qualifying": false,
+   "slug": "riverdale-mt-blanchard"
+  },
+  {
+   "rank": "21",
+   "record": "1-7",
+   "school": "Calvert",
+   "city": "Tiffin",
+   "average": 0.791,
+   "qualifying": false,
+   "slug": "calvert-tiffin"
+  },
+  {
+   "rank": "22t",
+   "record": "1-7",
+   "school": "Cory-Rawson",
+   "city": "Rawson",
+   "average": 0.4375,
+   "qualifying": false,
+   "slug": "cory-rawson-rawson"
+  },
+  {
+   "rank": "22t",
+   "record": "1-7",
+   "school": "St John's",
+   "city": "Delphos",
+   "average": 0.4375,
+   "qualifying": false,
+   "slug": "st-john-s-delphos"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Edgerton",
+   "city": "Edgerton",
+   "average": 0,
+   "qualifying": false,
+   "slug": "edgerton-edgerton"
+  },
+  {
+   "rank": "24t",
+   "record": "0-8",
+   "school": "Hicksville",
+   "city": "Hicksville",
+   "average": 0,
+   "qualifying": false,
+   "slug": "hicksville-hicksville"
+  },
+  {
+   "rank": "24t",
+   "record": "0-7",
+   "school": "Vanlue",
+   "city": "Vanlue",
+   "average": 0,
+   "qualifying": false,
+   "slug": "vanlue-vanlue"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

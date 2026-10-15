@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 18,
+ "division": "V",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-0",
+   "school": "Keystone",
+   "city": "La Grange",
+   "average": 18.7287,
+   "qualifying": true,
+   "slug": "keystone-la-grange"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Archbold",
+   "city": "Archbold",
+   "average": 16,
+   "qualifying": true,
+   "slug": "archbold-archbold"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Triway",
+   "city": "Wooster",
+   "average": 15.55,
+   "qualifying": true,
+   "slug": "triway-wooster"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Eastwood",
+   "city": "Pemberville",
+   "average": 15.25,
+   "qualifying": true,
+   "slug": "eastwood-pemberville"
+  },
+  {
+   "rank": "5",
+   "record": "6-2",
+   "school": "Coldwater",
+   "city": "Coldwater",
+   "average": 12.275,
+   "qualifying": true,
+   "slug": "coldwater-coldwater"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Vermilion",
+   "city": "Vermilion",
+   "average": 11.9375,
+   "qualifying": true,
+   "slug": "vermilion-vermilion"
+  },
+  {
+   "rank": "7",
+   "record": "7-1",
+   "school": "Port Clinton",
+   "city": "Port Clinton",
+   "average": 11.7418,
+   "qualifying": true,
+   "slug": "port-clinton-port-clinton"
+  },
+  {
+   "rank": "8",
+   "record": "6-2",
+   "school": "Margaretta",
+   "city": "Castalia",
+   "average": 11.675,
+   "qualifying": true,
+   "slug": "margaretta-castalia"
+  },
+  {
+   "rank": "9",
+   "record": "7-1",
+   "school": "Bluffton",
+   "city": "Bluffton",
+   "average": 11.625,
+   "qualifying": true,
+   "slug": "bluffton-bluffton"
+  },
+  {
+   "rank": "10",
+   "record": "5-3",
+   "school": "Genoa Area",
+   "city": "Genoa",
+   "average": 10.875,
+   "qualifying": true,
+   "slug": "genoa-area-genoa"
+  },
+  {
+   "rank": "11",
+   "record": "6-2",
+   "school": "North Union",
+   "city": "Richwood",
+   "average": 10.65,
+   "qualifying": true,
+   "slug": "north-union-richwood"
+  },
+  {
+   "rank": "12",
+   "record": "5-3",
+   "school": "Norwayne",
+   "city": "Creston",
+   "average": 10.5688,
+   "qualifying": true,
+   "slug": "norwayne-creston"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Indian Lake",
+   "city": "Lewistown",
+   "average": 8.5625,
+   "qualifying": false,
+   "slug": "indian-lake-lewistown"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Northwood",
+   "city": "Northwood",
+   "average": 8.3444,
+   "qualifying": false,
+   "slug": "northwood-northwood"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Galion",
+   "city": "Galion",
+   "average": 6.8625,
+   "qualifying": false,
+   "slug": "galion-galion"
+  },
+  {
+   "rank": "16",
+   "record": "4-4",
+   "school": "Oak Harbor",
+   "city": "Oak Harbor",
+   "average": 5.3375,
+   "qualifying": false,
+   "slug": "oak-harbor-oak-harbor"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Bath",
+   "city": "Lima",
+   "average": 3.9125,
+   "qualifying": false,
+   "slug": "bath-lima"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Willard",
+   "city": "Willard",
+   "average": 3.7375,
+   "qualifying": false,
+   "slug": "willard-willard"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Edison",
+   "city": "Milan",
+   "average": 3.5375,
+   "qualifying": false,
+   "slug": "edison-milan"
+  },
+  {
+   "rank": "20",
+   "record": "2-6",
+   "school": "Liberty-Benton",
+   "city": "Findlay",
+   "average": 2.5375,
+   "qualifying": false,
+   "slug": "liberty-benton-findlay"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Waynedale",
+   "city": "Apple Creek",
+   "average": 2.1375,
+   "qualifying": false,
+   "slug": "waynedale-apple-creek"
+  },
+  {
+   "rank": "22",
+   "record": "2-6",
+   "school": "Brooklyn",
+   "city": "Brooklyn",
+   "average": 1.8706,
+   "qualifying": false,
+   "slug": "brooklyn-brooklyn"
+  },
+  {
+   "rank": "23",
+   "record": "2-6",
+   "school": "Pleasant",
+   "city": "Marion",
+   "average": 1.7625,
+   "qualifying": false,
+   "slug": "pleasant-marion"
+  },
+  {
+   "rank": "24",
+   "record": "1-7",
+   "school": "Swanton",
+   "city": "Swanton",
+   "average": 1.4875,
+   "qualifying": false,
+   "slug": "swanton-swanton"
+  },
+  {
+   "rank": "25",
+   "record": "0-8",
+   "school": "Fairview",
+   "city": "Fairview Park",
+   "average": 0,
+   "qualifying": false,
+   "slug": "fairview-fairview-park"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

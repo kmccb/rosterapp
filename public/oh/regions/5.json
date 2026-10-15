@@ -1,0 +1,225 @@
+{
+ "year": 2026,
+ "region": 5,
+ "division": "II",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "6-1",
+   "school": "Walsh Jesuit",
+   "city": "Cuyahoga Falls",
+   "average": 24.8058,
+   "qualifying": true,
+   "slug": "walsh-jesuit-cuyahoga-falls"
+  },
+  {
+   "rank": "2",
+   "record": "8-0",
+   "school": "Wadsworth",
+   "city": "Wadsworth",
+   "average": 21.7875,
+   "qualifying": true,
+   "slug": "wadsworth-wadsworth"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Nordonia",
+   "city": "Macedonia",
+   "average": 21.75,
+   "qualifying": true,
+   "slug": "nordonia-macedonia"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Highland",
+   "city": "Medina",
+   "average": 21.6111,
+   "qualifying": true,
+   "slug": "highland-medina"
+  },
+  {
+   "rank": "5",
+   "record": "8-0",
+   "school": "Mayfield",
+   "city": "Mayfield",
+   "average": 18.6625,
+   "qualifying": true,
+   "slug": "mayfield-mayfield"
+  },
+  {
+   "rank": "6",
+   "record": "8-0",
+   "school": "North",
+   "city": "Eastlake",
+   "average": 16.925,
+   "qualifying": true,
+   "slug": "north-eastlake"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Villa Angela-St Joseph",
+   "city": "Cleveland",
+   "average": 14.44,
+   "qualifying": true,
+   "slug": "villa-angela-st-joseph-cleveland"
+  },
+  {
+   "rank": "8",
+   "record": "5-3",
+   "school": "Riverside",
+   "city": "Painesville",
+   "average": 13.4205,
+   "qualifying": true,
+   "slug": "riverside-painesville"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Brecksville-Broadview Heights",
+   "city": "Broadview Heights",
+   "average": 12.1125,
+   "qualifying": true,
+   "slug": "brecksville-broadview-heights-broadview-heights"
+  },
+  {
+   "rank": "10",
+   "record": "3-4",
+   "school": "Archbishop Hoban",
+   "city": "Akron",
+   "average": 11.9048,
+   "qualifying": true,
+   "slug": "archbishop-hoban-akron"
+  },
+  {
+   "rank": "11",
+   "record": "5-3",
+   "school": "Brush",
+   "city": "Lyndhurst",
+   "average": 8.975,
+   "qualifying": true,
+   "slug": "brush-lyndhurst"
+  },
+  {
+   "rank": "12",
+   "record": "4-4",
+   "school": "Warren G Harding",
+   "city": "Warren",
+   "average": 6.8264,
+   "qualifying": true,
+   "slug": "warren-g-harding-warren"
+  },
+  {
+   "rank": "13",
+   "record": "3-5",
+   "school": "North Royalton",
+   "city": "North Royalton",
+   "average": 6.3,
+   "qualifying": false,
+   "slug": "north-royalton-north-royalton"
+  },
+  {
+   "rank": "14",
+   "record": "2-5",
+   "school": "Youngstown",
+   "city": "Youngstown",
+   "average": 5.4206,
+   "qualifying": false,
+   "slug": "youngstown-youngstown"
+  },
+  {
+   "rank": "15",
+   "record": "3-5",
+   "school": "Cuyahoga Falls",
+   "city": "Cuyahoga Falls",
+   "average": 3.6375,
+   "qualifying": false,
+   "slug": "cuyahoga-falls-cuyahoga-falls"
+  },
+  {
+   "rank": "16",
+   "record": "1-7",
+   "school": "Ellet",
+   "city": "Akron",
+   "average": 2.6625,
+   "qualifying": false,
+   "slug": "ellet-akron"
+  },
+  {
+   "rank": "17",
+   "record": "2-6",
+   "school": "Garfield",
+   "city": "Akron",
+   "average": 2.55,
+   "qualifying": false,
+   "slug": "garfield-akron"
+  },
+  {
+   "rank": "18",
+   "record": "1-7",
+   "school": "Shaker Heights",
+   "city": "Shaker Heights",
+   "average": 2.3375,
+   "qualifying": false,
+   "slug": "shaker-heights-shaker-heights"
+  },
+  {
+   "rank": "19",
+   "record": "2-6",
+   "school": "Barberton",
+   "city": "Barberton",
+   "average": 2.1625,
+   "qualifying": false,
+   "slug": "barberton-barberton"
+  },
+  {
+   "rank": "20",
+   "record": "1-7",
+   "school": "Twinsburg",
+   "city": "Twinsburg",
+   "average": 2,
+   "qualifying": false,
+   "slug": "twinsburg-twinsburg"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "John Hay",
+   "city": "Cleveland",
+   "average": 1.8112,
+   "qualifying": false,
+   "slug": "john-hay-cleveland"
+  },
+  {
+   "rank": "22",
+   "record": "1-7",
+   "school": "Boardman",
+   "city": "Youngstown",
+   "average": 1.2997,
+   "qualifying": false,
+   "slug": "boardman-youngstown"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Firestone",
+   "city": "Akron",
+   "average": 1.2,
+   "qualifying": false,
+   "slug": "firestone-akron"
+  },
+  {
+   "rank": "24",
+   "record": "1-7",
+   "school": "North",
+   "city": "Akron",
+   "average": 0.5625,
+   "qualifying": false,
+   "slug": "north-akron"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

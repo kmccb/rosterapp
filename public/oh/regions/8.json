@@ -1,0 +1,234 @@
+{
+ "year": 2026,
+ "region": 8,
+ "division": "II",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "rows": [
+  {
+   "rank": "1",
+   "record": "7-1",
+   "school": "Harrison",
+   "city": "Harrison",
+   "average": 20.55,
+   "qualifying": true,
+   "slug": "harrison-harrison"
+  },
+  {
+   "rank": "2",
+   "record": "7-1",
+   "school": "Trotwood-Madison",
+   "city": "Trotwood",
+   "average": 20.25,
+   "qualifying": true,
+   "slug": "trotwood-madison-trotwood"
+  },
+  {
+   "rank": "3",
+   "record": "7-1",
+   "school": "Anderson",
+   "city": "Cincinnati",
+   "average": 19.9125,
+   "qualifying": true,
+   "slug": "anderson-cincinnati"
+  },
+  {
+   "rank": "4",
+   "record": "7-1",
+   "school": "Troy",
+   "city": "Troy",
+   "average": 17.7875,
+   "qualifying": true,
+   "slug": "troy-troy"
+  },
+  {
+   "rank": "5",
+   "record": "7-1",
+   "school": "Lima Senior",
+   "city": "Lima",
+   "average": 15.95,
+   "qualifying": true,
+   "slug": "lima-senior-lima"
+  },
+  {
+   "rank": "6",
+   "record": "6-2",
+   "school": "Talawanda",
+   "city": "Oxford",
+   "average": 12.4875,
+   "qualifying": true,
+   "slug": "talawanda-oxford"
+  },
+  {
+   "rank": "7",
+   "record": "6-2",
+   "school": "Badin",
+   "city": "Hamilton",
+   "average": 12.175,
+   "qualifying": true,
+   "slug": "badin-hamilton"
+  },
+  {
+   "rank": "8",
+   "record": "8-0",
+   "school": "West",
+   "city": "Columbus",
+   "average": 11.325,
+   "qualifying": true,
+   "slug": "west-columbus"
+  },
+  {
+   "rank": "9",
+   "record": "4-4",
+   "school": "Edgewood",
+   "city": "Trenton",
+   "average": 10.2625,
+   "qualifying": true,
+   "slug": "edgewood-trenton"
+  },
+  {
+   "rank": "10",
+   "record": "4-4",
+   "school": "Turpin",
+   "city": "Cincinnati",
+   "average": 10.1375,
+   "qualifying": true,
+   "slug": "turpin-cincinnati"
+  },
+  {
+   "rank": "11",
+   "record": "6-2",
+   "school": "Butler",
+   "city": "Vandalia",
+   "average": 10.0625,
+   "qualifying": true,
+   "slug": "butler-vandalia"
+  },
+  {
+   "rank": "12",
+   "record": "3-5",
+   "school": "La Salle",
+   "city": "Cincinnati",
+   "average": 9.025,
+   "qualifying": true,
+   "slug": "la-salle-cincinnati"
+  },
+  {
+   "rank": "13",
+   "record": "5-3",
+   "school": "Withrow",
+   "city": "Cincinnati",
+   "average": 8.2125,
+   "qualifying": false,
+   "slug": "withrow-cincinnati"
+  },
+  {
+   "rank": "14",
+   "record": "4-4",
+   "school": "Xenia",
+   "city": "Xenia",
+   "average": 8.0875,
+   "qualifying": false,
+   "slug": "xenia-xenia"
+  },
+  {
+   "rank": "15",
+   "record": "4-4",
+   "school": "Kings",
+   "city": "Kings Mills",
+   "average": 7.6375,
+   "qualifying": false,
+   "slug": "kings-kings-mills"
+  },
+  {
+   "rank": "16",
+   "record": "5-3",
+   "school": "Fairborn",
+   "city": "Fairborn",
+   "average": 7.4625,
+   "qualifying": false,
+   "slug": "fairborn-fairborn"
+  },
+  {
+   "rank": "17",
+   "record": "3-5",
+   "school": "Ross",
+   "city": "Hamilton",
+   "average": 5.725,
+   "qualifying": false,
+   "slug": "ross-hamilton"
+  },
+  {
+   "rank": "18",
+   "record": "3-5",
+   "school": "Piqua",
+   "city": "Piqua",
+   "average": 4.925,
+   "qualifying": false,
+   "slug": "piqua-piqua"
+  },
+  {
+   "rank": "19",
+   "record": "4-4",
+   "school": "Belmont",
+   "city": "Dayton",
+   "average": 4.7895,
+   "qualifying": false,
+   "slug": "belmont-dayton"
+  },
+  {
+   "rank": "20",
+   "record": "3-5",
+   "school": "Stebbins",
+   "city": "Riverside",
+   "average": 4.3125,
+   "qualifying": false,
+   "slug": "stebbins-riverside"
+  },
+  {
+   "rank": "21",
+   "record": "2-6",
+   "school": "Aiken",
+   "city": "Cincinnati",
+   "average": 3.0375,
+   "qualifying": false,
+   "slug": "aiken-cincinnati"
+  },
+  {
+   "rank": "22",
+   "record": "3-5",
+   "school": "Briggs",
+   "city": "Columbus",
+   "average": 2.7375,
+   "qualifying": false,
+   "slug": "briggs-columbus"
+  },
+  {
+   "rank": "23",
+   "record": "1-7",
+   "school": "Sidney",
+   "city": "Sidney",
+   "average": 2.4,
+   "qualifying": false,
+   "slug": "sidney-sidney"
+  },
+  {
+   "rank": "24",
+   "record": "2-6",
+   "school": "Loveland",
+   "city": "Loveland",
+   "average": 2.275,
+   "qualifying": false,
+   "slug": "loveland-loveland"
+  },
+  {
+   "rank": "25",
+   "record": "0-8",
+   "school": "Franklin Heights",
+   "city": "Columbus",
+   "average": 0,
+   "qualifying": false,
+   "slug": "franklin-heights-columbus"
+  }
+ ],
+ "fetched": "2026-10-13"
+}

@@ -27,12 +27,11 @@ import { formatHeight, formatWeight, fullName, type Player, type Side } from '..
  *
  * `Row` below reuses the root app's `.row`/`.rows-dense` classes so this
  * looks exactly like `PlayerRow`, but it isn't `PlayerRow`: that component
- * is a `<button disabled={!onSelect}>`, and every row here is a dead end —
- * there is no card to open, so nothing was ever wired to `onSelect`. A
- * screen reader reads a permanently-disabled button as "unavailable" on
- * every single row, which is worse than not being a button at all. A plain
- * `<div>` with the same classes costs a few duplicate lines and reads
- * correctly instead.
+ * is a `<button disabled={!onSelect}>`, and a screen reader reads a
+ * permanently-disabled button as "unavailable" on every single row, which is
+ * worse than not being a button at all. So a row here is a real button when
+ * the page has a card to open (a school with season stats does) and a plain
+ * `<div>` with the same classes when it has not.
  */
 
 // A number that doesn't parse (blank, "N/A") sorts to the bottom; a
@@ -49,15 +48,25 @@ const useByNumber = (players: Player[]): Player[] =>
   useMemo(() => [...players].sort((a, b) => sortKey(a.number) - sortKey(b.number)), [players]);
 
 /**
- * `footer` is the page's own way out — "Follow a different school", and the
- * privacy notice. Poland keeps neither on its Lookup screen, but `/oh/` is a
- * public fan page and Lookup is the tab every paid school lands on, so a
- * privacy link only reachable by first tapping Team would be unreachable in
- * practice. It rides inside the scrolling half of the column, above the keys
- * rather than below them: the pad owns the bottom of the screen and there is
- * nothing underneath it to scroll to.
+ * No footer, as Poland's Lookup screen has none: the way to another school
+ * and the privacy notice sit at the foot of the page's other tabs.
+ *
+ * The screen is Poland's: no readout of what has been tapped (the pad's own
+ * keys and the hits are the feedback), "Tap a jersey number." before anything
+ * is, a count above the hits, and the tapped number standing large and
+ * ghosted when nobody wears it. A hit is the name and the vitals, as
+ * `PlayerRow` draws it; a season's numbers wait on the player screen a tap
+ * away, because three stat lines under every hit pushed the second and third
+ * players off a phone's half-screen above the keys.
  */
-export function LookupTab({ players, footer }: { players: Player[]; footer?: ReactNode }) {
+export function LookupTab({
+  players,
+  onSelect,
+}: {
+  players: Player[];
+  /** Opens a player's card. Without it the rows are dead ends, as they were. */
+  onSelect?: (player: Player) => void;
+}) {
   const [query, setQuery] = useState('');
   const byNumber = useByNumber(players);
 
@@ -70,20 +79,33 @@ export function LookupTab({ players, footer }: { players: Player[]; footer?: Rea
 
   return (
     <>
-      <div className="oh-query" aria-live="polite">{query || ' '}</div>
-      {/* Everything between the readout and the keys, in one box, because the
-          column needs a single part that gives up height — the hits alone
-          cannot be it once there is a footer under them. */}
+      {/* Everything above the keys, in one box: the column needs a single
+          part that gives up height to the pad. */}
       <div className="oh-lookup-body">
-        {hits.length > 0 && (
-          <div className="rows">
-            {hits.map((p) => (
-              <Row key={p.id} player={p} />
-            ))}
+        {hits.length > 0 ? (
+          <>
+            {/* Announced on each key; the rows under it are not, or a screen
+                reader would read the whole list again at every tap. */}
+            <p className="results-count" aria-live="polite">
+              {hits.length} {hits.length === 1 ? 'player' : 'players'} starting with {query}
+            </p>
+            <div className="rows">
+              {hits.map((p) => (
+                <Row key={p.id} player={p} onSelect={onSelect ? () => onSelect(p) : undefined} />
+              ))}
+            </div>
+          </>
+        ) : query ? (
+          <div className="empty">
+            <p className="empty-number">{query}</p>
+            <p className="empty-text" aria-live="polite">Nobody on the roster wears that.</p>
+          </div>
+        ) : (
+          <div className="empty">
+            <p className="empty-text">Tap a jersey number.</p>
+            <p className="empty-hint">{players.length} players</p>
           </div>
         )}
-        {query && !hits.length && <p className="empty-text">Nobody wears {query}.</p>}
-        {footer && <div className="oh-lookup-foot">{footer}</div>}
       </div>
       <Keypad
         onDigit={(d) => setQuery((q) => (q + d).slice(0, 2))}
@@ -162,7 +184,7 @@ function Chip({
 }
 
 /** The whole roster, narrowable by side of the ball, by position and by name. */
-export function TeamTab({ players }: { players: Player[] }) {
+export function TeamTab({ players, onSelect }: { players: Player[]; onSelect?: (player: Player) => void }) {
   const [search, setSearch] = useState('');
   const [area, setArea] = useState<Side | null>(null);
   const [position, setPosition] = useState<string | null>(null);
@@ -332,7 +354,7 @@ export function TeamTab({ players }: { players: Player[] }) {
             <div key={g.label}>
               <div className="group-head">{g.label}</div>
               {g.players.map((p) => (
-                <Row key={p.id} player={p} dense />
+                <Row key={p.id} player={p} dense onSelect={onSelect ? () => onSelect(p) : undefined} />
               ))}
             </div>
           ))}
@@ -342,21 +364,43 @@ export function TeamTab({ players }: { players: Player[] }) {
   );
 }
 
-const Row = ({ player, dense = false }: { player: Player; dense?: boolean }) => {
+/*
+ * A row is a button when there is a card to open, and a plain row when there
+ * is not — never a disabled button, which a screen reader reads out as
+ * "unavailable" on every line (see the note at the top of this file).
+ */
+const Shell = ({ onSelect, children }: { onSelect?: () => void; children: ReactNode }) =>
+  onSelect ? (
+    <button type="button" className="row" onClick={onSelect}>
+      {children}
+    </button>
+  ) : (
+    <div className="row">{children}</div>
+  );
+
+const Row = ({
+  player,
+  dense = false,
+  onSelect,
+}: {
+  player: Player;
+  dense?: boolean;
+  onSelect?: () => void;
+}) => {
   if (dense) {
     const vitals = [formatHeight(player.heightIn), formatWeight(player.weightLb), player.grade]
       .filter(Boolean)
       .join(' · ');
 
     return (
-      <div className="row">
+      <Shell onSelect={onSelect}>
         <span className="row-number">{player.number || '—'}</span>
         <span className="row-who">
           <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
           {vitals && <span className="row-details">{vitals}</span>}
         </span>
         {player.position && <span className="row-pos">{player.position}</span>}
-      </div>
+      </Shell>
     );
   }
 
@@ -365,12 +409,12 @@ const Row = ({ player, dense = false }: { player: Player; dense?: boolean }) => 
     .join(' · ');
 
   return (
-    <div className="row">
+    <Shell onSelect={onSelect}>
       <span className="row-number">{player.number || '—'}</span>
       <span className="row-text">
         <span className="row-name">{fullName(player) || 'Unnamed player'}</span>
         {details && <span className="row-details">{details}</span>}
       </span>
-    </div>
+    </Shell>
   );
 };
