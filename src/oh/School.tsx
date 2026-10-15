@@ -770,7 +770,7 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
   /*
    * One quiet line saying what this is.
    *
-   * A stranger looking at Harlow Valley has to be able to tell at a glance
+   * A stranger looking at Millbrook has to be able to tell at a glance
    * that all of it is invented. It sits in the footer in the muted voice the
    * rest of the small print uses — the pitch is that this looks like a real
    * page, and a banner across the screen would spend the pitch to make the

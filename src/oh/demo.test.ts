@@ -26,6 +26,9 @@ const directoryIndex = () =>
     schools: Array<{ slug: string; name: string }>;
   };
 
+/** What the generator dresses Millbrook in, as the validators hand it back. */
+const MILLBROOK_COLORS = { ground: '#c65a12', accent: '#1a1a1a', text: '#000000', nickname: 'Tigers' };
+
 /** The invented conference, by the slugs the generator gives it. */
 const RIVALS = [
   'ashcombe-demo',
@@ -141,14 +144,14 @@ const bornInSeason = (): boolean =>
   inSeason('volleyball', Number((committed() as { generatedOn: string }).generatedOn.slice(5, 7)));
 
 describe('the committed file', () => {
-  it('reads as Harlow Valley, a school that does not exist, with three sports', async () => {
+  it('reads as Millbrook, a school that does not exist, with three sports', async () => {
     const { loadDemo, DEMO_SLUG } = await load(committed());
     const demo = await loadDemo();
 
     expect(demo).not.toBeNull();
-    expect(DEMO_SLUG).toBe('harlow-valley-demo');
+    expect(DEMO_SLUG).toBe('millbrook-demo');
     expect(demo!.slug).toBe(DEMO_SLUG);
-    expect(demo!.school).toEqual({ slug: DEMO_SLUG, name: 'Harlow Valley', city: 'Harlow' });
+    expect(demo!.school).toEqual({ slug: DEMO_SLUG, name: 'Millbrook', city: 'Millbrook' });
     expect(demo!.sportNames).toEqual(['football', 'volleyball', 'basketball']);
     for (const sport of demo!.sportNames) {
       expect(demo!.sports[sport].players.length).toBeGreaterThan(0);
@@ -157,7 +160,10 @@ describe('the committed file', () => {
 
   it('wears its own colors and a crest the database would have accepted', () => {
     const raw = committed() as { colors: unknown; logo: string };
-    expect(raw.colors).toEqual({ ground: '#2f1466', accent: '#f5b63d' });
+    // Orange and black, like the paying school it is modelled on — and not
+    // that school's own orange.
+    expect(raw.colors).toEqual(MILLBROOK_COLORS);
+    expect((raw.colors as { ground: string }).ground).not.toBe('#c75000');
     expect(raw.logo).toMatch(/^data:image\/png;base64,/);
     expect(raw.logo.length).toBeLessThan(500_000);
   });
@@ -178,7 +184,10 @@ describe('the committed file', () => {
       expect(real.has(slug), slug).toBe(false);
       expect(existsSync(dataFile(slug)), slug).toBe(false);
     }
-    expect(JSON.stringify(raw)).not.toMatch(/springfield|tigers|marcus bell/i);
+    // "Tigers" is allowed: it is Millbrook's own nickname, said after its name
+    // the way the app says a paid school's. Springfield, its crest file and its
+    // players are not.
+    expect(JSON.stringify(raw)).not.toMatch(/springfield|tigers-logo|marcus bell/i);
   });
 
   /*
@@ -230,7 +239,7 @@ describe('the committed file', () => {
    * A prospect who types a jersey number should find somebody, so the squad has
    * to read like a varsity roster and not a sketch of one.
    */
-  it('fields a believable football squad, and no stats on anybody', () => {
+  it('fields a believable football squad, with no stats carried on the players', () => {
     const raw = committed() as {
       sports: Record<string, { players: Array<Record<string, unknown>> }>;
     };
@@ -240,7 +249,8 @@ describe('the committed file', () => {
     expect(football.length).toBeGreaterThanOrEqual(25);
     expect(new Set(football.map((p) => p.number)).size).toBe(football.length);
 
-    // The app has no stats, so the demo must not smuggle any in.
+    // Stats live in their own file, as a paid school's do, and reach a player
+    // only through the page's matcher — never as fields on the roster.
     for (const [sport, entry] of Object.entries(raw.sports)) {
       for (const p of entry.players) {
         expect(Object.keys(p).some((k) => /stat/i.test(k)), `${sport} #${p.number}`).toBe(false);
@@ -483,7 +493,7 @@ describe('the calendar, weeks after it was written', () => {
       weather: { date: next, code: 2, tempF: 63, precipChance: 20, windMph: 9, day: false, at: `${next}T19:00` },
       seasons: {
         [base.slug]: {
-          school: { slug: base.slug, name: 'Harlow Valley', city: 'Harlow' },
+          school: { slug: base.slug, name: 'Millbrook', city: 'Millbrook' },
           games: [
             { week: 1, date: played, home: true, opponent: 'A', result: { us: 1, them: 0, won: true } },
             { week: 2, date: next, home: true, opponent: 'B' },
@@ -584,7 +594,7 @@ describe('the store, in demo mode', () => {
 
     const identity = await rosterStore.loadSchoolSports(DEMO_SLUG);
     expect(identity!.sports).toHaveLength(3);
-    expect(identity!.colors).toEqual({ ground: '#2f1466', accent: '#f5b63d' });
+    expect(identity!.colors).toEqual(MILLBROOK_COLORS);
     expect(identity!.logo).toMatch(/^data:image\/png;base64,/);
 
     const roster = await rosterStore.loadSchoolRoster(DEMO_SLUG, 'volleyball');
@@ -599,12 +609,12 @@ describe('the store, in demo mode', () => {
   });
 
   it('serves the season and the forecast from the file, and asks the directory for nothing', async () => {
-    await load(committed(), {}, { 'harlow-valley-demo': { date: '2026-01-01' } });
+    await load(committed(), {}, { 'millbrook-demo': { date: '2026-01-01' } });
     const { DEMO_SLUG, store } = await stores();
     localStorage.setItem('oh.school', DEMO_SLUG);
 
     const season = await store.loadSeason(DEMO_SLUG);
-    expect(season.school).toEqual({ slug: DEMO_SLUG, name: 'Harlow Valley', city: 'Harlow' });
+    expect(season.school).toEqual({ slug: DEMO_SLUG, name: 'Millbrook', city: 'Millbrook' });
     for (const rival of RIVALS) {
       expect((await store.loadSeason(rival)).school.slug).toBe(rival);
     }

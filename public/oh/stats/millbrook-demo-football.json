@@ -1,0 +1,4248 @@
+{
+ "slug": "millbrook-demo",
+ "sport": "football",
+ "source": "Sample",
+ "updated": "",
+ "games": 8,
+ "rows": [
+  {
+   "name": "Owen Carter",
+   "number": "1",
+   "category": "passing",
+   "values": {
+    "games": 2,
+    "cmp": 4,
+    "att": 7,
+    "yds": 36,
+    "cmpPct": 57.1,
+    "ydsPerGame": 18,
+    "td": 0,
+    "int": 0,
+    "lng": 13,
+    "rating": 71.1
+   }
+  },
+  {
+   "name": "Luke Danner",
+   "number": "12",
+   "category": "passing",
+   "values": {
+    "games": 8,
+    "cmp": 82,
+    "att": 142,
+    "yds": 1124,
+    "cmpPct": 57.7,
+    "ydsPerGame": 140.5,
+    "td": 10,
+    "int": 4,
+    "lng": 56,
+    "rating": 94.9
+   }
+  },
+  {
+   "name": "Kai Mercer",
+   "number": "5",
+   "category": "rushing",
+   "values": {
+    "games": 8,
+    "carries": 74,
+    "yds": 554,
+    "ydsPerCarry": 7.5,
+    "ydsPerGame": 69.3,
+    "lng": 61,
+    "td": 1
+   }
+  },
+  {
+   "name": "Sam Whitfield",
+   "number": "6",
+   "category": "rushing",
+   "values": {
+    "games": 7,
+    "carries": 12,
+    "yds": 73,
+    "ydsPerCarry": 6.1,
+    "ydsPerGame": 10.4,
+    "lng": 20,
+    "td": 0
+   }
+  },
+  {
+   "name": "Colton Hayes",
+   "number": "9",
+   "category": "rushing",
+   "values": {
+    "games": 8,
+    "carries": 32,
+    "yds": 155,
+    "ydsPerCarry": 4.8,
+    "ydsPerGame": 19.4,
+    "lng": 24,
+    "td": 2
+   }
+  },
+  {
+   "name": "Luke Danner",
+   "number": "12",
+   "category": "rushing",
+   "values": {
+    "games": 8,
+    "carries": 45,
+    "yds": 124,
+    "ydsPerCarry": 2.8,
+    "ydsPerGame": 15.5,
+    "lng": 12,
+    "td": 2
+   }
+  },
+  {
+   "name": "Darius Cole",
+   "number": "24",
+   "category": "rushing",
+   "values": {
+    "games": 8,
+    "carries": 151,
+    "yds": 1046,
+    "ydsPerCarry": 6.9,
+    "ydsPerGame": 130.8,
+    "lng": 64,
+    "td": 12
+   }
+  },
+  {
+   "name": "Eli Novak",
+   "number": "3",
+   "category": "receiving",
+   "values": {
+    "games": 8,
+    "rec": 28,
+    "yds": 396,
+    "ydsPerRec": 14.1,
+    "ydsPerGame": 49.5,
+    "lng": 56,
+    "td": 4
+   }
+  },
+  {
+   "name": "Drew Halloran",
+   "number": "4",
+   "category": "receiving",
+   "values": {
+    "games": 4,
+    "rec": 6,
+    "yds": 75,
+    "ydsPerRec": 12.5,
+    "ydsPerGame": 18.8,
+    "lng": 16,
+    "td": 1
+   }
+  },
+  {
+   "name": "Kai Mercer",
+   "number": "5",
+   "category": "receiving",
+   "values": {
+    "games": 6,
+    "rec": 7,
+    "yds": 85,
+    "ydsPerRec": 12.1,
+    "ydsPerGame": 14.2,
+    "lng": 16,
+    "td": 1
+   }
+  },
+  {
+   "name": "Tobias Kerr",
+   "number": "7",
+   "category": "receiving",
+   "values": {
+    "games": 4,
+    "rec": 5,
+    "yds": 79,
+    "ydsPerRec": 15.8,
+    "ydsPerGame": 19.8,
+    "lng": 35,
+    "td": 1
+   }
+  },
+  {
+   "name": "Nate Pryor",
+   "number": "11",
+   "category": "receiving",
+   "values": {
+    "games": 8,
+    "rec": 20,
+    "yds": 279,
+    "ydsPerRec": 14,
+    "ydsPerGame": 34.9,
+    "lng": 52,
+    "td": 1
+   }
+  },
+  {
+   "name": "Ryan Kozlowski",
+   "number": "13",
+   "category": "receiving",
+   "values": {
+    "games": 8,
+    "rec": 16,
+    "yds": 169,
+    "ydsPerRec": 10.6,
+    "ydsPerGame": 21.1,
+    "lng": 17,
+    "td": 1
+   }
+  },
+  {
+   "name": "Grant Yoder",
+   "number": "15",
+   "category": "receiving",
+   "values": {
+    "games": 4,
+    "rec": 4,
+    "yds": 77,
+    "ydsPerRec": 19.3,
+    "ydsPerGame": 19.3,
+    "lng": 50,
+    "td": 1
+   }
+  },
+  {
+   "name": "Owen Carter",
+   "number": "1",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 10,
+    "assist": 7,
+    "tackles": 17,
+    "fumRec": 1
+   }
+  },
+  {
+   "name": "Eli Novak",
+   "number": "3",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 14,
+    "assist": 8,
+    "tackles": 22,
+    "ff": 1,
+    "int": 2
+   }
+  },
+  {
+   "name": "Wyatt Brennan",
+   "number": "8",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 8,
+    "assist": 5,
+    "tackles": 13,
+    "fumRec": 1
+   }
+  },
+  {
+   "name": "Caleb Ostrowski",
+   "number": "10",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 27,
+    "assist": 17,
+    "tackles": 44,
+    "tfl": 4,
+    "sacks": 2,
+    "ff": 1
+   }
+  },
+  {
+   "name": "Isaac Moreno",
+   "number": "14",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 8,
+    "assist": 3,
+    "tackles": 11,
+    "fumRec": 1
+   }
+  },
+  {
+   "name": "Grant Yoder",
+   "number": "15",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 10,
+    "assist": 7,
+    "tackles": 17,
+    "tfl": 6,
+    "sacks": 3
+   }
+  },
+  {
+   "name": "Ethan Palmer",
+   "number": "20",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 24,
+    "assist": 12,
+    "tackles": 36,
+    "int": 1
+   }
+  },
+  {
+   "name": "Mason Kline",
+   "number": "21",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 14,
+    "assist": 11,
+    "tackles": 25
+   }
+  },
+  {
+   "name": "Logan Szabo",
+   "number": "22",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 28,
+    "assist": 16,
+    "tackles": 44,
+    "tfl": 5,
+    "sacks": 2,
+    "fumRec": 1
+   }
+  },
+  {
+   "name": "Darius Cole",
+   "number": "24",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 20,
+    "assist": 14,
+    "tackles": 34,
+    "tfl": 4,
+    "sacks": 1,
+    "fumRec": 1
+   }
+  },
+  {
+   "name": "Hunter Mazur",
+   "number": "33",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 33,
+    "assist": 21,
+    "tackles": 54,
+    "tfl": 3,
+    "sacks": 2
+   }
+  },
+  {
+   "name": "Jacob Wenzel",
+   "number": "44",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 33,
+    "assist": 21,
+    "tackles": 54,
+    "tfl": 1,
+    "sacks": 1
+   }
+  },
+  {
+   "name": "Dominic Russo",
+   "number": "50",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 20,
+    "assist": 12,
+    "tackles": 32,
+    "tfl": 2,
+    "sacks": 1,
+    "ff": 1
+   }
+  },
+  {
+   "name": "Austin Yeager",
+   "number": "55",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 19,
+    "assist": 10,
+    "tackles": 29,
+    "tfl": 7,
+    "ff": 1
+   }
+  },
+  {
+   "name": "Gavin Lutz",
+   "number": "64",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 12,
+    "assist": 7,
+    "tackles": 19,
+    "tfl": 7,
+    "sacks": 2
+   }
+  },
+  {
+   "name": "Evan Bartholomew",
+   "number": "75",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 17,
+    "assist": 9,
+    "tackles": 26,
+    "tfl": 3,
+    "sacks": 2
+   }
+  },
+  {
+   "name": "Carter Lisko",
+   "number": "88",
+   "category": "defense",
+   "values": {
+    "games": 8,
+    "solo": 14,
+    "assist": 12,
+    "tackles": 26,
+    "tfl": 7,
+    "sacks": 1
+   }
+  },
+  {
+   "name": "Brady Simmons",
+   "number": "18",
+   "category": "kicking",
+   "values": {
+    "games": 8,
+    "xpMade": 25,
+    "xpAtt": 27,
+    "fgMade": 3,
+    "fgAtt": 6,
+    "lng": 28,
+    "pts": 34
+   }
+  },
+  {
+   "name": "Brady Simmons",
+   "number": "18",
+   "category": "punting",
+   "values": {
+    "games": 8,
+    "punts": 24,
+    "yds": 846,
+    "ydsPerPunt": 35.3,
+    "lng": 46,
+    "in20": 7
+   }
+  },
+  {
+   "name": "Kai Mercer",
+   "number": "5",
+   "category": "kickReturn",
+   "values": {
+    "games": 6,
+    "returns": 9,
+    "yds": 229,
+    "ydsPerReturn": 25.4,
+    "lng": 55
+   }
+  },
+  {
+   "name": "Wyatt Brennan",
+   "number": "8",
+   "category": "kickReturn",
+   "values": {
+    "games": 8,
+    "returns": 14,
+    "yds": 273,
+    "ydsPerReturn": 19.5,
+    "lng": 28
+   }
+  },
+  {
+   "name": "Eli Novak",
+   "number": "3",
+   "category": "puntReturn",
+   "values": {
+    "games": 8,
+    "returns": 16,
+    "yds": 102,
+    "ydsPerReturn": 6.4,
+    "lng": 14
+   }
+  }
+ ],
+ "snapshots": [
+  {
+   "games": 1,
+   "rows": [
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 1,
+      "cmp": 10,
+      "att": 20,
+      "yds": 112,
+      "cmpPct": 50,
+      "ydsPerGame": 112,
+      "td": 1,
+      "int": 0,
+      "lng": 22,
+      "rating": 83.8
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 1,
+      "carries": 9,
+      "yds": 130,
+      "ydsPerCarry": 14.4,
+      "ydsPerGame": 130,
+      "lng": 61,
+      "td": 0
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 1,
+      "carries": 2,
+      "yds": 19,
+      "ydsPerCarry": 9.5,
+      "ydsPerGame": 19,
+      "lng": 19,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 1,
+      "carries": 3,
+      "yds": 11,
+      "ydsPerCarry": 3.7,
+      "ydsPerGame": 11,
+      "lng": 8,
+      "td": 0
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 1,
+      "carries": 6,
+      "yds": 15,
+      "ydsPerCarry": 2.5,
+      "ydsPerGame": 15,
+      "lng": 12,
+      "td": 0
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 1,
+      "carries": 20,
+      "yds": 198,
+      "ydsPerCarry": 9.9,
+      "ydsPerGame": 198,
+      "lng": 63,
+      "td": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 4,
+      "yds": 47,
+      "ydsPerRec": 11.8,
+      "ydsPerGame": 47,
+      "lng": 15,
+      "td": 1
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 14,
+      "ydsPerRec": 14,
+      "ydsPerGame": 14,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 3,
+      "yds": 42,
+      "ydsPerRec": 14,
+      "ydsPerGame": 42,
+      "lng": 22,
+      "td": 0
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 5,
+      "ydsPerRec": 5,
+      "ydsPerGame": 5,
+      "lng": 5,
+      "td": 0
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 4,
+      "ydsPerRec": 4,
+      "ydsPerGame": 4,
+      "lng": 4,
+      "td": 0
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "tackles": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "assist": 1,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 3,
+      "assist": 2,
+      "tackles": 5,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "assist": 1,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "tackles": 1,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "assist": 1,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 2,
+      "assist": 2,
+      "tackles": 4,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 6,
+      "assist": 4,
+      "tackles": 10
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 5,
+      "assist": 2,
+      "tackles": 7,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "assist": 1,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 2,
+      "assist": 2,
+      "tackles": 4,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 1,
+      "solo": 1,
+      "assist": 1,
+      "tackles": 2,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 1,
+      "xpMade": 2,
+      "xpAtt": 2,
+      "fgMade": 0,
+      "fgAtt": 0,
+      "lng": 0,
+      "pts": 2
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 1,
+      "punts": 2,
+      "yds": 73,
+      "ydsPerPunt": 36.5,
+      "lng": 45,
+      "in20": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 1,
+      "returns": 1,
+      "yds": 25,
+      "ydsPerReturn": 25,
+      "lng": 25
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 1,
+      "returns": 3,
+      "yds": 58,
+      "ydsPerReturn": 19.3,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 1,
+      "returns": 3,
+      "yds": 17,
+      "ydsPerReturn": 5.7,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 2,
+   "rows": [
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 2,
+      "cmp": 18,
+      "att": 33,
+      "yds": 190,
+      "cmpPct": 54.5,
+      "ydsPerGame": 95,
+      "td": 3,
+      "int": 0,
+      "lng": 22,
+      "rating": 101.8
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 15,
+      "yds": 184,
+      "ydsPerCarry": 12.3,
+      "ydsPerGame": 92,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 3,
+      "yds": 19,
+      "ydsPerCarry": 6.3,
+      "ydsPerGame": 9.5,
+      "lng": 19,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 7,
+      "yds": 47,
+      "ydsPerCarry": 6.7,
+      "ydsPerGame": 23.5,
+      "lng": 21,
+      "td": 1
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 9,
+      "yds": 35,
+      "ydsPerCarry": 3.9,
+      "ydsPerGame": 17.5,
+      "lng": 12,
+      "td": 0
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 40,
+      "yds": 257,
+      "ydsPerCarry": 6.4,
+      "ydsPerGame": 128.5,
+      "lng": 63,
+      "td": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 6,
+      "yds": 68,
+      "ydsPerRec": 11.3,
+      "ydsPerGame": 34,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 14,
+      "ydsPerRec": 14,
+      "ydsPerGame": 14,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 21,
+      "ydsPerRec": 10.5,
+      "ydsPerGame": 10.5,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 6,
+      "ydsPerRec": 6,
+      "ydsPerGame": 6,
+      "lng": 6,
+      "td": 0
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 5,
+      "yds": 56,
+      "ydsPerRec": 11.2,
+      "ydsPerGame": 28,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 21,
+      "ydsPerRec": 10.5,
+      "ydsPerGame": 10.5,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 4,
+      "ydsPerRec": 4,
+      "ydsPerGame": 4,
+      "lng": 4,
+      "td": 0
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 1,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 2,
+      "tackles": 5,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 7,
+      "assist": 4,
+      "tackles": 11,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 2,
+      "assist": 1,
+      "tackles": 3,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 3,
+      "tackles": 6
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 8,
+      "assist": 3,
+      "tackles": 11
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 3,
+      "tackles": 6,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 10,
+      "assist": 7,
+      "tackles": 17
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 9,
+      "assist": 6,
+      "tackles": 15,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 6,
+      "assist": 3,
+      "tackles": 9,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 2,
+      "assist": 2,
+      "tackles": 4,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 3,
+      "tackles": 6,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 2,
+      "solo": 3,
+      "assist": 3,
+      "tackles": 6,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 2,
+      "xpMade": 6,
+      "xpAtt": 6,
+      "fgMade": 1,
+      "fgAtt": 1,
+      "lng": 27,
+      "pts": 9
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 2,
+      "punts": 6,
+      "yds": 221,
+      "ydsPerPunt": 36.8,
+      "lng": 45,
+      "in20": 2
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 1,
+      "returns": 1,
+      "yds": 25,
+      "ydsPerReturn": 25,
+      "lng": 25
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 2,
+      "returns": 4,
+      "yds": 80,
+      "ydsPerReturn": 20,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 2,
+      "returns": 4,
+      "yds": 29,
+      "ydsPerReturn": 7.3,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 3,
+   "rows": [
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 3,
+      "cmp": 29,
+      "att": 49,
+      "yds": 349,
+      "cmpPct": 59.2,
+      "ydsPerGame": 116.3,
+      "td": 5,
+      "int": 1,
+      "lng": 56,
+      "rating": 106.6
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 3,
+      "carries": 23,
+      "yds": 247,
+      "ydsPerCarry": 10.7,
+      "ydsPerGame": 82.3,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 2,
+      "carries": 3,
+      "yds": 19,
+      "ydsPerCarry": 6.3,
+      "ydsPerGame": 9.5,
+      "lng": 19,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 3,
+      "carries": 13,
+      "yds": 84,
+      "ydsPerCarry": 6.5,
+      "ydsPerGame": 28,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 3,
+      "carries": 13,
+      "yds": 49,
+      "ydsPerCarry": 3.8,
+      "ydsPerGame": 16.3,
+      "lng": 12,
+      "td": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 3,
+      "carries": 60,
+      "yds": 351,
+      "ydsPerCarry": 5.9,
+      "ydsPerGame": 117,
+      "lng": 63,
+      "td": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 10,
+      "yds": 154,
+      "ydsPerRec": 15.4,
+      "ydsPerGame": 51.3,
+      "lng": 56,
+      "td": 2
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 14,
+      "ydsPerRec": 14,
+      "ydsPerGame": 14,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 21,
+      "ydsPerRec": 10.5,
+      "ydsPerGame": 10.5,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 6,
+      "ydsPerRec": 6,
+      "ydsPerGame": 6,
+      "lng": 6,
+      "td": 0
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 8,
+      "yds": 85,
+      "ydsPerRec": 10.6,
+      "ydsPerGame": 28.3,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 5,
+      "yds": 57,
+      "ydsPerRec": 11.4,
+      "ydsPerGame": 19,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 12,
+      "ydsPerRec": 6,
+      "ydsPerGame": 6,
+      "lng": 8,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 3,
+      "assist": 1,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 9,
+      "assist": 5,
+      "tackles": 14,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 3,
+      "assist": 1,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 7,
+      "assist": 3,
+      "tackles": 10,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 4,
+      "assist": 4,
+      "tackles": 8
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 11,
+      "assist": 5,
+      "tackles": 16,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 6,
+      "assist": 4,
+      "tackles": 10,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 13,
+      "assist": 10,
+      "tackles": 23,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 13,
+      "assist": 8,
+      "tackles": 21,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 8,
+      "assist": 4,
+      "tackles": 12,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 8,
+      "assist": 4,
+      "tackles": 12,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 4,
+      "assist": 3,
+      "tackles": 7,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 5,
+      "assist": 4,
+      "tackles": 9,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 3,
+      "solo": 5,
+      "assist": 5,
+      "tackles": 10,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 3,
+      "xpMade": 10,
+      "xpAtt": 10,
+      "fgMade": 1,
+      "fgAtt": 2,
+      "lng": 27,
+      "pts": 13
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 3,
+      "punts": 8,
+      "yds": 291,
+      "ydsPerPunt": 36.4,
+      "lng": 45,
+      "in20": 3
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 2,
+      "returns": 3,
+      "yds": 76,
+      "ydsPerReturn": 25.3,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 3,
+      "returns": 5,
+      "yds": 104,
+      "ydsPerReturn": 20.8,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 3,
+      "returns": 7,
+      "yds": 47,
+      "ydsPerReturn": 6.7,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 4,
+   "rows": [
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "passing",
+     "values": {
+      "games": 1,
+      "cmp": 1,
+      "att": 3,
+      "yds": 13,
+      "cmpPct": 33.3,
+      "ydsPerGame": 13,
+      "td": 0,
+      "int": 0,
+      "lng": 13,
+      "rating": 47.9
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 4,
+      "cmp": 39,
+      "att": 70,
+      "yds": 457,
+      "cmpPct": 55.7,
+      "ydsPerGame": 114.3,
+      "td": 6,
+      "int": 2,
+      "lng": 56,
+      "rating": 92.4
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 4,
+      "carries": 33,
+      "yds": 292,
+      "ydsPerCarry": 8.8,
+      "ydsPerGame": 73,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 3,
+      "carries": 5,
+      "yds": 47,
+      "ydsPerCarry": 9.4,
+      "ydsPerGame": 15.7,
+      "lng": 20,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 4,
+      "carries": 15,
+      "yds": 92,
+      "ydsPerCarry": 6.1,
+      "ydsPerGame": 23,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 4,
+      "carries": 19,
+      "yds": 51,
+      "ydsPerCarry": 2.7,
+      "ydsPerGame": 12.8,
+      "lng": 12,
+      "td": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 4,
+      "carries": 77,
+      "yds": 500,
+      "ydsPerCarry": 6.5,
+      "ydsPerGame": 125,
+      "lng": 63,
+      "td": 2
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 14,
+      "yds": 188,
+      "ydsPerRec": 13.4,
+      "ydsPerGame": 47,
+      "lng": 56,
+      "td": 2
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 1,
+      "rec": 1,
+      "yds": 14,
+      "ydsPerRec": 14,
+      "ydsPerGame": 14,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 3,
+      "yds": 30,
+      "ydsPerRec": 10,
+      "ydsPerGame": 10,
+      "lng": 14,
+      "td": 0
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 16,
+      "ydsPerRec": 8,
+      "ydsPerGame": 8,
+      "lng": 10,
+      "td": 1
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 11,
+      "yds": 121,
+      "ydsPerRec": 11,
+      "ydsPerGame": 30.3,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 6,
+      "yds": 74,
+      "ydsPerRec": 12.3,
+      "ydsPerGame": 18.5,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 3,
+      "yds": 27,
+      "ydsPerRec": 9,
+      "ydsPerGame": 9,
+      "lng": 15,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 7,
+      "assist": 4,
+      "tackles": 11,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 4,
+      "assist": 2,
+      "tackles": 6,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 12,
+      "assist": 7,
+      "tackles": 19,
+      "tfl": 4,
+      "sacks": 1,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 4,
+      "assist": 1,
+      "tackles": 5
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8,
+      "tfl": 3,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 10,
+      "assist": 6,
+      "tackles": 16,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 6,
+      "assist": 5,
+      "tackles": 11
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 17,
+      "assist": 8,
+      "tackles": 25,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 9,
+      "assist": 6,
+      "tackles": 15,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 17,
+      "assist": 11,
+      "tackles": 28,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 16,
+      "assist": 9,
+      "tackles": 25,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 10,
+      "assist": 6,
+      "tackles": 16,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 9,
+      "assist": 5,
+      "tackles": 14,
+      "tfl": 4
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8,
+      "tfl": 4,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 7,
+      "assist": 5,
+      "tackles": 12,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 7,
+      "assist": 6,
+      "tackles": 13,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 4,
+      "xpMade": 12,
+      "xpAtt": 12,
+      "fgMade": 2,
+      "fgAtt": 3,
+      "lng": 27,
+      "pts": 18
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 4,
+      "punts": 11,
+      "yds": 379,
+      "ydsPerPunt": 34.5,
+      "lng": 45,
+      "in20": 3
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 3,
+      "returns": 4,
+      "yds": 101,
+      "ydsPerReturn": 25.3,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 4,
+      "returns": 8,
+      "yds": 152,
+      "ydsPerReturn": 19,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 4,
+      "returns": 8,
+      "yds": 60,
+      "ydsPerReturn": 7.5,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 5,
+   "rows": [
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "passing",
+     "values": {
+      "games": 1,
+      "cmp": 1,
+      "att": 3,
+      "yds": 13,
+      "cmpPct": 33.3,
+      "ydsPerGame": 13,
+      "td": 0,
+      "int": 0,
+      "lng": 13,
+      "rating": 47.9
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 5,
+      "cmp": 46,
+      "att": 83,
+      "yds": 599,
+      "cmpPct": 55.4,
+      "ydsPerGame": 119.8,
+      "td": 6,
+      "int": 3,
+      "lng": 56,
+      "rating": 87.4
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 44,
+      "yds": 340,
+      "ydsPerCarry": 7.7,
+      "ydsPerGame": 68,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 4,
+      "carries": 6,
+      "yds": 47,
+      "ydsPerCarry": 7.8,
+      "ydsPerGame": 11.8,
+      "lng": 20,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 21,
+      "yds": 105,
+      "ydsPerCarry": 5,
+      "ydsPerGame": 21,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 27,
+      "yds": 51,
+      "ydsPerCarry": 1.9,
+      "ydsPerGame": 10.2,
+      "lng": 12,
+      "td": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 98,
+      "yds": 611,
+      "ydsPerCarry": 6.2,
+      "ydsPerGame": 122.2,
+      "lng": 63,
+      "td": 7
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 5,
+      "rec": 16,
+      "yds": 267,
+      "ydsPerRec": 16.7,
+      "ydsPerGame": 53.4,
+      "lng": 56,
+      "td": 2
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 30,
+      "ydsPerRec": 15,
+      "ydsPerGame": 15,
+      "lng": 16,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 4,
+      "yds": 46,
+      "ydsPerRec": 11.5,
+      "ydsPerGame": 11.5,
+      "lng": 16,
+      "td": 0
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 16,
+      "ydsPerRec": 8,
+      "ydsPerGame": 8,
+      "lng": 10,
+      "td": 1
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 5,
+      "rec": 12,
+      "yds": 138,
+      "ydsPerRec": 11.5,
+      "ydsPerGame": 27.6,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 5,
+      "rec": 8,
+      "yds": 88,
+      "ydsPerRec": 11,
+      "ydsPerGame": 17.6,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 3,
+      "yds": 27,
+      "ydsPerRec": 9,
+      "ydsPerGame": 9,
+      "lng": 15,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 6,
+      "assist": 4,
+      "tackles": 10
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 9,
+      "assist": 5,
+      "tackles": 14,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 5,
+      "assist": 3,
+      "tackles": 8,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 17,
+      "assist": 9,
+      "tackles": 26,
+      "tfl": 4,
+      "sacks": 2,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 5,
+      "assist": 1,
+      "tackles": 6
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 6,
+      "assist": 3,
+      "tackles": 9,
+      "tfl": 4,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 14,
+      "assist": 8,
+      "tackles": 22,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 9,
+      "assist": 6,
+      "tackles": 15
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 19,
+      "assist": 10,
+      "tackles": 29,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 12,
+      "assist": 8,
+      "tackles": 20,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 22,
+      "assist": 15,
+      "tackles": 37,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 19,
+      "assist": 12,
+      "tackles": 31,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 11,
+      "assist": 7,
+      "tackles": 18,
+      "tfl": 2,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 13,
+      "assist": 6,
+      "tackles": 19,
+      "tfl": 5
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 7,
+      "assist": 4,
+      "tackles": 11,
+      "tfl": 4,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 11,
+      "assist": 6,
+      "tackles": 17,
+      "tfl": 1,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 8,
+      "assist": 7,
+      "tackles": 15,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 5,
+      "xpMade": 17,
+      "xpAtt": 17,
+      "fgMade": 2,
+      "fgAtt": 4,
+      "lng": 27,
+      "pts": 23
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 5,
+      "punts": 15,
+      "yds": 525,
+      "ydsPerPunt": 35,
+      "lng": 45,
+      "in20": 3
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 3,
+      "returns": 4,
+      "yds": 101,
+      "ydsPerReturn": 25.3,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 5,
+      "returns": 10,
+      "yds": 189,
+      "ydsPerReturn": 18.9,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 5,
+      "returns": 10,
+      "yds": 71,
+      "ydsPerReturn": 7.1,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 6,
+   "rows": [
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "passing",
+     "values": {
+      "games": 2,
+      "cmp": 4,
+      "att": 7,
+      "yds": 36,
+      "cmpPct": 57.1,
+      "ydsPerGame": 18,
+      "td": 0,
+      "int": 0,
+      "lng": 13,
+      "rating": 71.1
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 6,
+      "cmp": 59,
+      "att": 106,
+      "yds": 791,
+      "cmpPct": 55.7,
+      "ydsPerGame": 131.8,
+      "td": 7,
+      "int": 3,
+      "lng": 56,
+      "rating": 89.8
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 6,
+      "carries": 55,
+      "yds": 392,
+      "ydsPerCarry": 7.1,
+      "ydsPerGame": 65.3,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 7,
+      "yds": 54,
+      "ydsPerCarry": 7.7,
+      "ydsPerGame": 10.8,
+      "lng": 20,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 6,
+      "carries": 24,
+      "yds": 109,
+      "ydsPerCarry": 4.5,
+      "ydsPerGame": 18.2,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 6,
+      "carries": 32,
+      "yds": 71,
+      "ydsPerCarry": 2.2,
+      "ydsPerGame": 11.8,
+      "lng": 12,
+      "td": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 6,
+      "carries": 115,
+      "yds": 740,
+      "ydsPerCarry": 6.4,
+      "ydsPerGame": 123.3,
+      "lng": 63,
+      "td": 10
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 20,
+      "yds": 306,
+      "ydsPerRec": 15.3,
+      "ydsPerGame": 51,
+      "lng": 56,
+      "td": 2
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 4,
+      "yds": 46,
+      "ydsPerRec": 11.5,
+      "ydsPerGame": 15.3,
+      "lng": 16,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 5,
+      "rec": 6,
+      "yds": 75,
+      "ydsPerRec": 12.5,
+      "ydsPerGame": 15,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 2,
+      "rec": 2,
+      "yds": 16,
+      "ydsPerRec": 8,
+      "ydsPerGame": 8,
+      "lng": 10,
+      "td": 1
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 17,
+      "yds": 203,
+      "ydsPerRec": 11.9,
+      "ydsPerGame": 33.8,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 10,
+      "yds": 104,
+      "ydsPerRec": 10.4,
+      "ydsPerGame": 17.3,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 4,
+      "yds": 77,
+      "ydsPerRec": 19.3,
+      "ydsPerGame": 19.3,
+      "lng": 50,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 8,
+      "assist": 5,
+      "tackles": 13
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 11,
+      "assist": 6,
+      "tackles": 17,
+      "ff": 1,
+      "int": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 6,
+      "assist": 3,
+      "tackles": 9,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 20,
+      "assist": 12,
+      "tackles": 32,
+      "tfl": 4,
+      "sacks": 2,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 6,
+      "assist": 1,
+      "tackles": 7,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 7,
+      "assist": 4,
+      "tackles": 11,
+      "tfl": 4,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 16,
+      "assist": 9,
+      "tackles": 25,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 10,
+      "assist": 7,
+      "tackles": 17
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 22,
+      "assist": 12,
+      "tackles": 34,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 14,
+      "assist": 10,
+      "tackles": 24,
+      "tfl": 4,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 27,
+      "assist": 18,
+      "tackles": 45,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 22,
+      "assist": 14,
+      "tackles": 36,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 14,
+      "assist": 9,
+      "tackles": 23,
+      "tfl": 2,
+      "sacks": 1,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 14,
+      "assist": 7,
+      "tackles": 21,
+      "tfl": 6
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 8,
+      "assist": 5,
+      "tackles": 13,
+      "tfl": 4,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 14,
+      "assist": 7,
+      "tackles": 21,
+      "tfl": 1,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "solo": 10,
+      "assist": 8,
+      "tackles": 18,
+      "tfl": 5,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 6,
+      "xpMade": 20,
+      "xpAtt": 21,
+      "fgMade": 2,
+      "fgAtt": 5,
+      "lng": 27,
+      "pts": 26
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 6,
+      "punts": 17,
+      "yds": 608,
+      "ydsPerPunt": 35.8,
+      "lng": 46,
+      "in20": 3
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 4,
+      "returns": 5,
+      "yds": 123,
+      "ydsPerReturn": 24.6,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 6,
+      "returns": 11,
+      "yds": 215,
+      "ydsPerReturn": 19.5,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 6,
+      "returns": 12,
+      "yds": 82,
+      "ydsPerReturn": 6.8,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 7,
+   "rows": [
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "passing",
+     "values": {
+      "games": 2,
+      "cmp": 4,
+      "att": 7,
+      "yds": 36,
+      "cmpPct": 57.1,
+      "ydsPerGame": 18,
+      "td": 0,
+      "int": 0,
+      "lng": 13,
+      "rating": 71.1
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 7,
+      "cmp": 72,
+      "att": 127,
+      "yds": 959,
+      "cmpPct": 56.7,
+      "ydsPerGame": 137,
+      "td": 9,
+      "int": 3,
+      "lng": 56,
+      "rating": 94.6
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 7,
+      "carries": 63,
+      "yds": 461,
+      "ydsPerCarry": 7.3,
+      "ydsPerGame": 65.9,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 6,
+      "carries": 8,
+      "yds": 54,
+      "ydsPerCarry": 6.8,
+      "ydsPerGame": 9,
+      "lng": 20,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 7,
+      "carries": 30,
+      "yds": 146,
+      "ydsPerCarry": 4.9,
+      "ydsPerGame": 20.9,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 7,
+      "carries": 39,
+      "yds": 105,
+      "ydsPerCarry": 2.7,
+      "ydsPerGame": 15,
+      "lng": 12,
+      "td": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 7,
+      "carries": 136,
+      "yds": 983,
+      "ydsPerCarry": 7.2,
+      "ydsPerGame": 140.4,
+      "lng": 64,
+      "td": 11
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 7,
+      "rec": 25,
+      "yds": 359,
+      "ydsPerRec": 14.4,
+      "ydsPerGame": 51.3,
+      "lng": 56,
+      "td": 3
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 6,
+      "yds": 75,
+      "ydsPerRec": 12.5,
+      "ydsPerGame": 18.8,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 7,
+      "yds": 85,
+      "ydsPerRec": 12.1,
+      "ydsPerGame": 14.2,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 3,
+      "rec": 3,
+      "yds": 51,
+      "ydsPerRec": 17,
+      "ydsPerGame": 17,
+      "lng": 35,
+      "td": 1
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 7,
+      "rec": 19,
+      "yds": 227,
+      "ydsPerRec": 11.9,
+      "ydsPerGame": 32.4,
+      "lng": 22,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 7,
+      "rec": 12,
+      "yds": 121,
+      "ydsPerRec": 10.1,
+      "ydsPerGame": 17.3,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 4,
+      "yds": 77,
+      "ydsPerRec": 19.3,
+      "ydsPerGame": 19.3,
+      "lng": 50,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 9,
+      "assist": 6,
+      "tackles": 15,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 12,
+      "assist": 7,
+      "tackles": 19,
+      "ff": 1,
+      "int": 1
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 7,
+      "assist": 4,
+      "tackles": 11,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 23,
+      "assist": 14,
+      "tackles": 37,
+      "tfl": 4,
+      "sacks": 2,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 7,
+      "assist": 2,
+      "tackles": 9,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 8,
+      "assist": 5,
+      "tackles": 13,
+      "tfl": 6,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 20,
+      "assist": 10,
+      "tackles": 30,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 12,
+      "assist": 9,
+      "tackles": 21
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 25,
+      "assist": 15,
+      "tackles": 40,
+      "tfl": 3,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 17,
+      "assist": 12,
+      "tackles": 29,
+      "tfl": 4,
+      "sacks": 1,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 30,
+      "assist": 19,
+      "tackles": 49,
+      "tfl": 3,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 25,
+      "assist": 17,
+      "tackles": 42,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 16,
+      "assist": 10,
+      "tackles": 26,
+      "tfl": 2,
+      "sacks": 1,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 17,
+      "assist": 8,
+      "tackles": 25,
+      "tfl": 6
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 10,
+      "assist": 6,
+      "tackles": 16,
+      "tfl": 6,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 15,
+      "assist": 8,
+      "tackles": 23,
+      "tfl": 3,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "solo": 12,
+      "assist": 10,
+      "tackles": 22,
+      "tfl": 5,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 7,
+      "xpMade": 23,
+      "xpAtt": 24,
+      "fgMade": 3,
+      "fgAtt": 6,
+      "lng": 28,
+      "pts": 32
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 7,
+      "punts": 21,
+      "yds": 746,
+      "ydsPerPunt": 35.5,
+      "lng": 46,
+      "in20": 5
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 5,
+      "returns": 7,
+      "yds": 201,
+      "ydsPerReturn": 28.7,
+      "lng": 55
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 7,
+      "returns": 13,
+      "yds": 262,
+      "ydsPerReturn": 20.2,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 7,
+      "returns": 14,
+      "yds": 96,
+      "ydsPerReturn": 6.9,
+      "lng": 14
+     }
+    }
+   ]
+  },
+  {
+   "games": 8,
+   "rows": [
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "passing",
+     "values": {
+      "games": 2,
+      "cmp": 4,
+      "att": 7,
+      "yds": 36,
+      "cmpPct": 57.1,
+      "ydsPerGame": 18,
+      "td": 0,
+      "int": 0,
+      "lng": 13,
+      "rating": 71.1
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "passing",
+     "values": {
+      "games": 8,
+      "cmp": 82,
+      "att": 142,
+      "yds": 1124,
+      "cmpPct": 57.7,
+      "ydsPerGame": 140.5,
+      "td": 10,
+      "int": 4,
+      "lng": 56,
+      "rating": 94.9
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 8,
+      "carries": 74,
+      "yds": 554,
+      "ydsPerCarry": 7.5,
+      "ydsPerGame": 69.3,
+      "lng": 61,
+      "td": 1
+     }
+    },
+    {
+     "name": "Sam Whitfield",
+     "number": "6",
+     "category": "rushing",
+     "values": {
+      "games": 7,
+      "carries": 12,
+      "yds": 73,
+      "ydsPerCarry": 6.1,
+      "ydsPerGame": 10.4,
+      "lng": 20,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colton Hayes",
+     "number": "9",
+     "category": "rushing",
+     "values": {
+      "games": 8,
+      "carries": 32,
+      "yds": 155,
+      "ydsPerCarry": 4.8,
+      "ydsPerGame": 19.4,
+      "lng": 24,
+      "td": 2
+     }
+    },
+    {
+     "name": "Luke Danner",
+     "number": "12",
+     "category": "rushing",
+     "values": {
+      "games": 8,
+      "carries": 45,
+      "yds": 124,
+      "ydsPerCarry": 2.8,
+      "ydsPerGame": 15.5,
+      "lng": 12,
+      "td": 2
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 8,
+      "carries": 151,
+      "yds": 1046,
+      "ydsPerCarry": 6.9,
+      "ydsPerGame": 130.8,
+      "lng": 64,
+      "td": 12
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "receiving",
+     "values": {
+      "games": 8,
+      "rec": 28,
+      "yds": 396,
+      "ydsPerRec": 14.1,
+      "ydsPerGame": 49.5,
+      "lng": 56,
+      "td": 4
+     }
+    },
+    {
+     "name": "Drew Halloran",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 6,
+      "yds": 75,
+      "ydsPerRec": 12.5,
+      "ydsPerGame": 18.8,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 7,
+      "yds": 85,
+      "ydsPerRec": 12.1,
+      "ydsPerGame": 14.2,
+      "lng": 16,
+      "td": 1
+     }
+    },
+    {
+     "name": "Tobias Kerr",
+     "number": "7",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 5,
+      "yds": 79,
+      "ydsPerRec": 15.8,
+      "ydsPerGame": 19.8,
+      "lng": 35,
+      "td": 1
+     }
+    },
+    {
+     "name": "Nate Pryor",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 8,
+      "rec": 20,
+      "yds": 279,
+      "ydsPerRec": 14,
+      "ydsPerGame": 34.9,
+      "lng": 52,
+      "td": 1
+     }
+    },
+    {
+     "name": "Ryan Kozlowski",
+     "number": "13",
+     "category": "receiving",
+     "values": {
+      "games": 8,
+      "rec": 16,
+      "yds": 169,
+      "ydsPerRec": 10.6,
+      "ydsPerGame": 21.1,
+      "lng": 17,
+      "td": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "receiving",
+     "values": {
+      "games": 4,
+      "rec": 4,
+      "yds": 77,
+      "ydsPerRec": 19.3,
+      "ydsPerGame": 19.3,
+      "lng": 50,
+      "td": 1
+     }
+    },
+    {
+     "name": "Owen Carter",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 10,
+      "assist": 7,
+      "tackles": 17,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 14,
+      "assist": 8,
+      "tackles": 22,
+      "ff": 1,
+      "int": 2
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 8,
+      "assist": 5,
+      "tackles": 13,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Caleb Ostrowski",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 27,
+      "assist": 17,
+      "tackles": 44,
+      "tfl": 4,
+      "sacks": 2,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Isaac Moreno",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 8,
+      "assist": 3,
+      "tackles": 11,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Grant Yoder",
+     "number": "15",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 10,
+      "assist": 7,
+      "tackles": 17,
+      "tfl": 6,
+      "sacks": 3
+     }
+    },
+    {
+     "name": "Ethan Palmer",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 24,
+      "assist": 12,
+      "tackles": 36,
+      "int": 1
+     }
+    },
+    {
+     "name": "Mason Kline",
+     "number": "21",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 14,
+      "assist": 11,
+      "tackles": 25
+     }
+    },
+    {
+     "name": "Logan Szabo",
+     "number": "22",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 28,
+      "assist": 16,
+      "tackles": 44,
+      "tfl": 5,
+      "sacks": 2,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Darius Cole",
+     "number": "24",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 20,
+      "assist": 14,
+      "tackles": 34,
+      "tfl": 4,
+      "sacks": 1,
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Hunter Mazur",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 33,
+      "assist": 21,
+      "tackles": 54,
+      "tfl": 3,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Jacob Wenzel",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 33,
+      "assist": 21,
+      "tackles": 54,
+      "tfl": 1,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominic Russo",
+     "number": "50",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 20,
+      "assist": 12,
+      "tackles": 32,
+      "tfl": 2,
+      "sacks": 1,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Austin Yeager",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 19,
+      "assist": 10,
+      "tackles": 29,
+      "tfl": 7,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Gavin Lutz",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 12,
+      "assist": 7,
+      "tackles": 19,
+      "tfl": 7,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Evan Bartholomew",
+     "number": "75",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 17,
+      "assist": 9,
+      "tackles": 26,
+      "tfl": 3,
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Carter Lisko",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 8,
+      "solo": 14,
+      "assist": 12,
+      "tackles": 26,
+      "tfl": 7,
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "kicking",
+     "values": {
+      "games": 8,
+      "xpMade": 25,
+      "xpAtt": 27,
+      "fgMade": 3,
+      "fgAtt": 6,
+      "lng": 28,
+      "pts": 34
+     }
+    },
+    {
+     "name": "Brady Simmons",
+     "number": "18",
+     "category": "punting",
+     "values": {
+      "games": 8,
+      "punts": 24,
+      "yds": 846,
+      "ydsPerPunt": 35.3,
+      "lng": 46,
+      "in20": 7
+     }
+    },
+    {
+     "name": "Kai Mercer",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 6,
+      "returns": 9,
+      "yds": 229,
+      "ydsPerReturn": 25.4,
+      "lng": 55
+     }
+    },
+    {
+     "name": "Wyatt Brennan",
+     "number": "8",
+     "category": "kickReturn",
+     "values": {
+      "games": 8,
+      "returns": 14,
+      "yds": 273,
+      "ydsPerReturn": 19.5,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Eli Novak",
+     "number": "3",
+     "category": "puntReturn",
+     "values": {
+      "games": 8,
+      "returns": 16,
+      "yds": 102,
+      "ydsPerReturn": 6.4,
+      "lng": 14
+     }
+    }
+   ]
+  }
+ ]
+}

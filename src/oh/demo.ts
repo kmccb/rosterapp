@@ -2,11 +2,15 @@
  * The demo school.
  *
  * /oh/demo/ is a page a seller can hand a prospect, and the page the marketing
- * site sends strangers to: Harlow Valley, a school that does not exist, as it
+ * site sends strangers to: Millbrook, a school that does not exist, as it
  * would look the day it signed up. The committed file carries everything —
  * colors, crest, sample rosters, pasted volleyball and basketball schedules,
  * the conference, and the football seasons of the school and its five invented
- * rivals — so the page asks the directory and the database for nothing.
+ * rivals — so the page asks the directory and the database for nothing. Its
+ * sample football stats are the one exception, and not really one: they sit at
+ * public/oh/stats/millbrook-demo-football.json, written by the same script, and
+ * are fetched from this origin exactly as a paid school's are (teamStats.ts,
+ * which keeps nothing in the phone for the demo).
  *
  * What matters about this module is what it is *not*: it is not a second copy
  * of the School screen. The demo page mounts the real one, and the four store
@@ -29,7 +33,7 @@ import { inSeason } from './sportSeasons';
 
 /** The one school this page is about. Suffixed so it can never collide with a
  * real directory slug: the school is invented, and so is its conference. */
-export const DEMO_SLUG = 'harlow-valley-demo';
+export const DEMO_SLUG = 'millbrook-demo';
 
 /** The raw shape of one sport in the file: a squad, and the fixtures somebody
  * would have pasted for it. Football's are null — its fixtures come from the
