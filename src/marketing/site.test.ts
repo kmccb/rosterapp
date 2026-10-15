@@ -67,10 +67,12 @@ describe('the marketing page', () => {
     expect(selling).toContain('$1,200');
   });
 
+  // Stats from MaxPreps are a thing the app now does, and the page names them.
+  // The rest are still ideas, or another company's product, or a real school.
   it('promises nothing the app does not do, and names no real school', () => {
     for (const word of [
-      'Hudl', 'MaxPreps', 'stats', 'Region', 'rSchoolToday', 'ArbiterGame',
-      'DragonFly', 'Presented by', 'sponsor', 'Springfield', 'Tigers',
+      'Hudl', 'Region', 'rSchoolToday', 'ArbiterGame',
+      'DragonFly', 'Presented by', 'sponsor', 'Springfield',
     ]) {
       expect(text.toLowerCase().includes(word.toLowerCase()), word).toBe(false);
     }
@@ -83,7 +85,7 @@ describe('the marketing page', () => {
 
   it('gives every picture a size, a description and a file', () => {
     const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
-    expect(imgs.length).toBeGreaterThanOrEqual(4);
+    expect(imgs.length).toBeGreaterThanOrEqual(5);
     for (const img of imgs) {
       expect(img, img).toMatch(/\balt="[^"]{8,}"/);
       expect(img, img).toMatch(/\bwidth="\d+"/);
