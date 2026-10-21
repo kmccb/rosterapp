@@ -27,7 +27,7 @@
    "record": "8-1",
    "school": "Toronto",
    "city": "Toronto",
-   "average": 16.4444,
+   "average": 16.798,
    "qualifying": true,
    "slug": "toronto-toronto"
   },
@@ -54,7 +54,7 @@
    "record": "6-3",
    "school": "Strasburg-Franklin",
    "city": "Strasburg",
-   "average": 9.4056,
+   "average": 10.1056,
    "qualifying": true,
    "slug": "strasburg-franklin-strasburg"
   },
@@ -69,21 +69,21 @@
   },
   {
    "rank": "8",
-   "record": "6-2",
-   "school": "Fisher Catholic",
-   "city": "Lancaster",
-   "average": 8.1301,
+   "record": "6-3",
+   "school": "Catholic Central",
+   "city": "Steubenville",
+   "average": 7.9556,
    "qualifying": true,
-   "slug": "fisher-catholic-lancaster"
+   "slug": "catholic-central-steubenville"
   },
   {
    "rank": "9",
-   "record": "5-3",
-   "school": "Conotton Valley",
-   "city": "Bowerston",
-   "average": 7.0969,
+   "record": "6-3",
+   "school": "Fisher Catholic",
+   "city": "Lancaster",
+   "average": 7.8384,
    "qualifying": true,
-   "slug": "conotton-valley-bowerston"
+   "slug": "fisher-catholic-lancaster"
   },
   {
    "rank": "10",
@@ -105,19 +105,19 @@
   },
   {
    "rank": "12",
-   "record": "5-3",
-   "school": "Catholic Central",
-   "city": "Steubenville",
-   "average": 6.0375,
+   "record": "5-4",
+   "school": "Conotton Valley",
+   "city": "Bowerston",
+   "average": 6.8469,
    "qualifying": true,
-   "slug": "catholic-central-steubenville"
+   "slug": "conotton-valley-bowerston"
   },
   {
    "rank": "13",
    "record": "4-5",
    "school": "Lucas",
    "city": "Lucas",
-   "average": 5.8667,
+   "average": 6.2167,
    "qualifying": false,
    "slug": "lucas-lucas"
   },
@@ -168,21 +168,21 @@
   },
   {
    "rank": "19",
-   "record": "3-5",
-   "school": "Tuscarawas Central Catholic",
-   "city": "New Philadelphia",
-   "average": 3.525,
-   "qualifying": false,
-   "slug": "tuscarawas-central-catholic-new-philadelphia"
-  },
-  {
-   "rank": "20",
    "record": "2-7",
    "school": "Trimble",
    "city": "Glouster",
    "average": 3.3778,
    "qualifying": false,
    "slug": "trimble-glouster"
+  },
+  {
+   "rank": "20",
+   "record": "3-6",
+   "school": "Tuscarawas Central Catholic",
+   "city": "New Philadelphia",
+   "average": 3.3722,
+   "qualifying": false,
+   "slug": "tuscarawas-central-catholic-new-philadelphia"
   },
   {
    "rank": "21",
@@ -204,10 +204,10 @@
   },
   {
    "rank": "23",
-   "record": "1-7",
+   "record": "1-8",
    "school": "Miller",
    "city": "Corning",
-   "average": 1.5875,
+   "average": 1.5505,
    "qualifying": false,
    "slug": "miller-corning"
   },
@@ -248,5 +248,5 @@
    "slug": "federal-hocking-stewart"
   }
  ],
- "fetched": "2026-10-17"
+ "fetched": "2026-10-21"
 }

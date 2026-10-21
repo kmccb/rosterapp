@@ -54,7 +54,7 @@
    "record": "6-3",
    "school": "East Canton",
    "city": "East Canton",
-   "average": 9.05,
+   "average": 9.4,
    "qualifying": true,
    "slug": "east-canton-east-canton"
   },
@@ -133,20 +133,20 @@
   {
    "rank": "15",
    "record": "3-6",
+   "school": "Malvern",
+   "city": "Malvern",
+   "average": 3.1889,
+   "qualifying": false,
+   "slug": "malvern-malvern"
+  },
+  {
+   "rank": "16",
+   "record": "3-6",
    "school": "Leetonia",
    "city": "Leetonia",
    "average": 3.161,
    "qualifying": false,
    "slug": "leetonia-leetonia"
-  },
-  {
-   "rank": "16",
-   "record": "3-6",
-   "school": "Malvern",
-   "city": "Malvern",
-   "average": 2.8389,
-   "qualifying": false,
-   "slug": "malvern-malvern"
   },
   {
    "rank": "17",
@@ -230,5 +230,5 @@
    "slug": "cardinal-middlefield"
   }
  ],
- "fetched": "2026-10-17"
+ "fetched": "2026-10-21"
 }
