@@ -2,41 +2,41 @@
  "year": 2026,
  "region": 27,
  "division": "VII",
- "caption": "Top 12 teams following week 10 qualify for playoffs",
+ "caption": "Top 12 teams following week 10 qualify for playoffs *** The Current Rank column IS NOT a projected seed, please do not interpret it as such while Friday and Saturday scores are still being entered. Use the 'Possible Seed Ranges' column instead - when enough game results have been entered, the possible seed range for a team will be replaced with either a single number (which will be the expected unofficial seed) or 'out' if a team becomes eliminated.",
  "rows": [
   {
    "rank": "1",
-   "record": "9-0",
+   "record": "10-0",
    "school": "Symmes Valley",
    "city": "Willow Wood",
-   "average": 18.2256,
+   "average": 22.6255,
    "qualifying": true,
    "slug": "symmes-valley-willow-wood"
   },
   {
    "rank": "2",
-   "record": "9-0",
+   "record": "10-0",
    "school": "Danville",
    "city": "Danville",
-   "average": 17.1717,
+   "average": 21.1727,
    "qualifying": true,
    "slug": "danville-danville"
   },
   {
    "rank": "3",
-   "record": "8-1",
+   "record": "9-1",
    "school": "Toronto",
    "city": "Toronto",
-   "average": 16.798,
+   "average": 19.2686,
    "qualifying": true,
    "slug": "toronto-toronto"
   },
   {
    "rank": "4",
-   "record": "8-1",
+   "record": "8-2",
    "school": "Shadyside",
    "city": "Shadyside",
-   "average": 13.5444,
+   "average": 13.95,
    "qualifying": true,
    "slug": "shadyside-shadyside"
   },
@@ -45,30 +45,39 @@
    "record": "7-2",
    "school": "Eastern",
    "city": "Reedsville",
-   "average": 11.3444,
+   "average": 12.3944,
    "qualifying": true,
    "slug": "eastern-reedsville"
   },
   {
    "rank": "6",
-   "record": "6-3",
+   "record": "7-3",
    "school": "Strasburg-Franklin",
    "city": "Strasburg",
-   "average": 10.1056,
+   "average": 11.75,
    "qualifying": true,
    "slug": "strasburg-franklin-strasburg"
   },
   {
    "rank": "7",
-   "record": "6-3",
+   "record": "7-3",
    "school": "Eastern",
    "city": "Beaver",
-   "average": 9.2812,
+   "average": 10.101,
    "qualifying": true,
    "slug": "eastern-beaver"
   },
   {
    "rank": "8",
+   "record": "7-3",
+   "school": "Fisher Catholic",
+   "city": "Lancaster",
+   "average": 9.7969,
+   "qualifying": true,
+   "slug": "fisher-catholic-lancaster"
+  },
+  {
+   "rank": "9",
    "record": "6-3",
    "school": "Catholic Central",
    "city": "Steubenville",
@@ -77,170 +86,161 @@
    "slug": "catholic-central-steubenville"
   },
   {
-   "rank": "9",
-   "record": "6-3",
-   "school": "Fisher Catholic",
-   "city": "Lancaster",
-   "average": 7.8384,
-   "qualifying": true,
-   "slug": "fisher-catholic-lancaster"
-  },
-  {
    "rank": "10",
-   "record": "6-3",
-   "school": "South Gallia",
-   "city": "Crown City",
-   "average": 7.0833,
-   "qualifying": true,
-   "slug": "south-gallia-crown-city"
-  },
-  {
-   "rank": "11",
-   "record": "5-4",
+   "record": "5-5",
    "school": "Frontier",
    "city": "New Matamoras",
-   "average": 7.0012,
+   "average": 7.6692,
    "qualifying": true,
    "slug": "frontier-new-matamoras"
   },
   {
-   "rank": "12",
-   "record": "5-4",
-   "school": "Conotton Valley",
-   "city": "Bowerston",
-   "average": 6.8469,
+   "rank": "11",
+   "record": "5-5",
+   "school": "Lucas",
+   "city": "Lucas",
+   "average": 7.65,
    "qualifying": true,
-   "slug": "conotton-valley-bowerston"
+   "slug": "lucas-lucas"
+  },
+  {
+   "rank": "12",
+   "record": "6-4",
+   "school": "South Gallia",
+   "city": "Crown City",
+   "average": 7.6146,
+   "qualifying": true,
+   "slug": "south-gallia-crown-city"
   },
   {
    "rank": "13",
    "record": "4-5",
-   "school": "Lucas",
-   "city": "Lucas",
-   "average": 6.2167,
-   "qualifying": false,
-   "slug": "lucas-lucas"
-  },
-  {
-   "rank": "14",
-   "record": "3-5",
    "school": "Notre Dame",
    "city": "Portsmouth",
-   "average": 5.8132,
+   "average": 6.8952,
    "qualifying": false,
    "slug": "notre-dame-portsmouth"
   },
   {
-   "rank": "15",
-   "record": "4-5",
-   "school": "Loudonville",
-   "city": "Loudonville",
-   "average": 4.899,
+   "rank": "14",
+   "record": "5-5",
+   "school": "Conotton Valley",
+   "city": "Bowerston",
+   "average": 6.6469,
    "qualifying": false,
-   "slug": "loudonville-loudonville"
+   "slug": "conotton-valley-bowerston"
   },
   {
-   "rank": "16",
+   "rank": "15",
    "record": "5-4",
    "school": "Southern",
    "city": "Racine",
-   "average": 4.7944,
+   "average": 5.4944,
    "qualifying": false,
    "slug": "southern-racine"
   },
   {
-   "rank": "17",
-   "record": "3-6",
+   "rank": "16",
+   "record": "4-6",
    "school": "Crestline",
    "city": "Crestline",
-   "average": 4.1515,
+   "average": 5.2765,
    "qualifying": false,
    "slug": "crestline-crestline"
   },
   {
+   "rank": "17",
+   "record": "4-6",
+   "school": "Loudonville",
+   "city": "Loudonville",
+   "average": 5.1364,
+   "qualifying": false,
+   "slug": "loudonville-loudonville"
+  },
+  {
    "rank": "18",
-   "record": "4-5",
+   "record": "4-6",
    "school": "Belpre",
    "city": "Belpre",
-   "average": 3.5699,
+   "average": 3.8211,
    "qualifying": false,
    "slug": "belpre-belpre"
   },
   {
    "rank": "19",
-   "record": "2-7",
+   "record": "3-7",
    "school": "Trimble",
    "city": "Glouster",
-   "average": 3.3778,
+   "average": 3.65,
    "qualifying": false,
    "slug": "trimble-glouster"
   },
   {
    "rank": "20",
-   "record": "3-6",
+   "record": "3-7",
    "school": "Tuscarawas Central Catholic",
    "city": "New Philadelphia",
-   "average": 3.3722,
+   "average": 3.25,
    "qualifying": false,
    "slug": "tuscarawas-central-catholic-new-philadelphia"
   },
   {
    "rank": "21",
-   "record": "3-6",
-   "school": "Fairfield Christian Academy",
-   "city": "Lancaster",
-   "average": 2.6778,
-   "qualifying": false,
-   "slug": "fairfield-christian-academy-lancaster"
-  },
-  {
-   "rank": "22",
-   "record": "2-7",
-   "school": "Bishop Rosecrans",
-   "city": "Zanesville",
-   "average": 1.8278,
-   "qualifying": false,
-   "slug": "bishop-rosecrans-zanesville"
-  },
-  {
-   "rank": "23",
-   "record": "1-8",
+   "record": "2-8",
    "school": "Miller",
    "city": "Corning",
-   "average": 1.5505,
+   "average": 2.5687,
    "qualifying": false,
    "slug": "miller-corning"
   },
   {
+   "rank": "22",
+   "record": "3-7",
+   "school": "Fairfield Christian Academy",
+   "city": "Lancaster",
+   "average": 2.55,
+   "qualifying": false,
+   "slug": "fairfield-christian-academy-lancaster"
+  },
+  {
+   "rank": "23",
+   "record": "2-8",
+   "school": "Bishop Rosecrans",
+   "city": "Zanesville",
+   "average": 2.1,
+   "qualifying": false,
+   "slug": "bishop-rosecrans-zanesville"
+  },
+  {
    "rank": "24",
-   "record": "2-7",
+   "record": "2-8",
    "school": "Millersport",
    "city": "Millersport",
-   "average": 1.1313,
+   "average": 1.0535,
    "qualifying": false,
    "slug": "millersport-millersport"
   },
   {
    "rank": "25",
-   "record": "1-7",
+   "record": "1-8",
    "school": "Sciotoville Community",
    "city": "Portsmouth",
-   "average": 0.8352,
+   "average": 0.7912,
    "qualifying": false,
    "slug": "sciotoville-community-portsmouth"
   },
   {
    "rank": "26",
-   "record": "1-8",
+   "record": "1-9",
    "school": "Green",
    "city": "Franklin Furnace",
-   "average": 0.3889,
+   "average": 0.35,
    "qualifying": false,
    "slug": "green-franklin-furnace"
   },
   {
    "rank": "27",
-   "record": "0-9",
+   "record": "0-10",
    "school": "Federal Hocking",
    "city": "Stewart",
    "average": 0,
@@ -248,5 +248,5 @@
    "slug": "federal-hocking-stewart"
   }
  ],
- "fetched": "2026-10-21"
+ "fetched": "2026-10-24"
 }
