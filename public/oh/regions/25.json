@@ -2,25 +2,25 @@
  "year": 2026,
  "region": 25,
  "division": "VII",
- "caption": "Top 12 teams following week 10 qualify for playoffs *** The Current Rank column IS NOT a projected seed, please do not interpret it as such while Friday and Saturday scores are still being entered. Use the 'Possible Seed Ranges' column instead - when enough game results have been entered, the possible seed range for a team will be replaced with either a single number (which will be the expected unofficial seed) or 'out' if a team becomes eliminated.",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
  "rows": [
   {
    "rank": "1",
+   "record": "9-1",
+   "school": "McDonald",
+   "city": "McDonald",
+   "average": 16.6,
+   "qualifying": true,
+   "slug": "mcdonald-mcdonald"
+  },
+  {
+   "rank": "2",
    "record": "9-1",
    "school": "Cuyahoga Heights",
    "city": "Cuyahoga Heights",
    "average": 16.4541,
    "qualifying": true,
    "slug": "cuyahoga-heights-cuyahoga-heights"
-  },
-  {
-   "rank": "2",
-   "record": "9-1",
-   "school": "McDonald",
-   "city": "McDonald",
-   "average": 16.2,
-   "qualifying": true,
-   "slug": "mcdonald-mcdonald"
   },
   {
    "rank": "3",
@@ -177,21 +177,21 @@
   },
   {
    "rank": "20",
-   "record": "1-8",
-   "school": "Wellsville",
-   "city": "Wellsville",
-   "average": 1.8535,
-   "qualifying": false,
-   "slug": "wellsville-wellsville"
-  },
-  {
-   "rank": "21",
    "record": "2-8",
    "school": "Southern",
    "city": "Salineville",
-   "average": 1.4571,
+   "average": 1.8611,
    "qualifying": false,
    "slug": "southern-salineville"
+  },
+  {
+   "rank": "21",
+   "record": "1-9",
+   "school": "Wellsville",
+   "city": "Wellsville",
+   "average": 1.8146,
+   "qualifying": false,
+   "slug": "wellsville-wellsville"
   },
   {
    "rank": "22",
@@ -230,5 +230,5 @@
    "slug": "cardinal-middlefield"
   }
  ],
- "fetched": "2026-10-24"
+ "fetched": "2026-10-28"
 }

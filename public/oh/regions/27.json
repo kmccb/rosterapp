@@ -2,7 +2,7 @@
  "year": 2026,
  "region": 27,
  "division": "VII",
- "caption": "Top 12 teams following week 10 qualify for playoffs *** The Current Rank column IS NOT a projected seed, please do not interpret it as such while Friday and Saturday scores are still being entered. Use the 'Possible Seed Ranges' column instead - when enough game results have been entered, the possible seed range for a team will be replaced with either a single number (which will be the expected unofficial seed) or 'out' if a team becomes eliminated.",
+ "caption": "Top 12 teams following week 10 qualify for playoffs",
  "rows": [
   {
    "rank": "1",
@@ -27,12 +27,21 @@
    "record": "9-1",
    "school": "Toronto",
    "city": "Toronto",
-   "average": 19.2686,
+   "average": 19.6294,
    "qualifying": true,
    "slug": "toronto-toronto"
   },
   {
    "rank": "4",
+   "record": "8-2",
+   "school": "Eastern",
+   "city": "Reedsville",
+   "average": 14.2,
+   "qualifying": true,
+   "slug": "eastern-reedsville"
+  },
+  {
+   "rank": "5",
    "record": "8-2",
    "school": "Shadyside",
    "city": "Shadyside",
@@ -41,20 +50,11 @@
    "slug": "shadyside-shadyside"
   },
   {
-   "rank": "5",
-   "record": "7-2",
-   "school": "Eastern",
-   "city": "Reedsville",
-   "average": 12.3944,
-   "qualifying": true,
-   "slug": "eastern-reedsville"
-  },
-  {
    "rank": "6",
    "record": "7-3",
    "school": "Strasburg-Franklin",
    "city": "Strasburg",
-   "average": 11.75,
+   "average": 12.1,
    "qualifying": true,
    "slug": "strasburg-franklin-strasburg"
   },
@@ -78,30 +78,30 @@
   },
   {
    "rank": "9",
-   "record": "6-3",
+   "record": "7-3",
    "school": "Catholic Central",
    "city": "Steubenville",
-   "average": 7.9556,
+   "average": 8.4,
    "qualifying": true,
    "slug": "catholic-central-steubenville"
   },
   {
    "rank": "10",
    "record": "5-5",
+   "school": "Lucas",
+   "city": "Lucas",
+   "average": 8,
+   "qualifying": true,
+   "slug": "lucas-lucas"
+  },
+  {
+   "rank": "11",
+   "record": "5-5",
    "school": "Frontier",
    "city": "New Matamoras",
    "average": 7.6692,
    "qualifying": true,
    "slug": "frontier-new-matamoras"
-  },
-  {
-   "rank": "11",
-   "record": "5-5",
-   "school": "Lucas",
-   "city": "Lucas",
-   "average": 7.65,
-   "qualifying": true,
-   "slug": "lucas-lucas"
   },
   {
    "rank": "12",
@@ -132,10 +132,10 @@
   },
   {
    "rank": "15",
-   "record": "5-4",
+   "record": "5-5",
    "school": "Southern",
    "city": "Racine",
-   "average": 5.4944,
+   "average": 5.3,
    "qualifying": false,
    "slug": "southern-racine"
   },
@@ -248,5 +248,5 @@
    "slug": "federal-hocking-stewart"
   }
  ],
- "fetched": "2026-10-24"
+ "fetched": "2026-10-28"
 }
