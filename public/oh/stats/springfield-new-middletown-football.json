@@ -2,24 +2,24 @@
  "slug": "springfield-new-middletown",
  "sport": "football",
  "source": "MaxPreps",
- "updated": "2026-10-26",
- "games": 10,
+ "updated": "2026-11-07",
+ "games": 11,
  "rows": [
   {
    "name": "Michael Tuscano",
    "number": "2",
    "category": "passing",
    "values": {
-    "games": 10,
-    "cmp": 29,
-    "att": 62,
-    "yds": 419,
-    "cmpPct": 46.8,
-    "ydsPerGame": 41.9,
+    "games": 11,
+    "cmp": 31,
+    "att": 66,
+    "yds": 442,
+    "cmpPct": 47,
+    "ydsPerGame": 40.2,
     "td": 4,
     "int": 5,
     "lng": 64,
-    "rating": 57.1
+    "rating": 57.8
    }
   },
   {
@@ -27,7 +27,7 @@
    "number": "7",
    "category": "passing",
    "values": {
-    "games": 9,
+    "games": 10,
     "cmp": 1,
     "att": 1,
     "yds": 4,
@@ -44,7 +44,7 @@
    "number": "1",
    "category": "rushing",
    "values": {
-    "games": 8,
+    "games": 9,
     "carries": 1,
     "yds": 5,
     "ydsPerCarry": 5,
@@ -58,13 +58,13 @@
    "number": "2",
    "category": "rushing",
    "values": {
-    "games": 10,
-    "carries": 68,
-    "yds": 487,
+    "games": 11,
+    "carries": 81,
+    "yds": 581,
     "ydsPerCarry": 7.2,
-    "ydsPerGame": 48.7,
+    "ydsPerGame": 52.8,
     "lng": 79,
-    "td": 11
+    "td": 12
    }
   },
   {
@@ -72,13 +72,13 @@
    "number": "4",
    "category": "rushing",
    "values": {
-    "games": 9,
-    "carries": 130,
-    "yds": 934,
-    "ydsPerCarry": 7.2,
-    "ydsPerGame": 103.8,
+    "games": 10,
+    "carries": 153,
+    "yds": 1006,
+    "ydsPerCarry": 6.6,
+    "ydsPerGame": 100.6,
     "lng": 78,
-    "td": 11
+    "td": 13
    }
   },
   {
@@ -86,13 +86,13 @@
    "number": "5",
    "category": "rushing",
    "values": {
-    "games": 10,
-    "carries": 60,
-    "yds": 506,
-    "ydsPerCarry": 8.4,
-    "ydsPerGame": 50.6,
-    "lng": 46,
-    "td": 8
+    "games": 11,
+    "carries": 70,
+    "yds": 642,
+    "ydsPerCarry": 9.2,
+    "ydsPerGame": 58.4,
+    "lng": 78,
+    "td": 10
    }
   },
   {
@@ -100,11 +100,11 @@
    "number": "7",
    "category": "rushing",
    "values": {
-    "games": 9,
+    "games": 10,
     "carries": 3,
     "yds": -22,
     "ydsPerCarry": -7.3,
-    "ydsPerGame": -2.4,
+    "ydsPerGame": -2.2,
     "lng": 3,
     "td": 1
    }
@@ -114,11 +114,11 @@
    "number": "19",
    "category": "rushing",
    "values": {
-    "games": 9,
+    "games": 10,
     "carries": 14,
     "yds": 86,
     "ydsPerCarry": 6.1,
-    "ydsPerGame": 9.6,
+    "ydsPerGame": 8.6,
     "lng": 24,
     "td": 1
    }
@@ -142,11 +142,11 @@
    "number": "33",
    "category": "rushing",
    "values": {
-    "games": 10,
-    "carries": 74,
-    "yds": 519,
-    "ydsPerCarry": 7,
-    "ydsPerGame": 51.9,
+    "games": 11,
+    "carries": 77,
+    "yds": 530,
+    "ydsPerCarry": 6.9,
+    "ydsPerGame": 48.2,
     "lng": 64,
     "td": 10
    }
@@ -156,11 +156,11 @@
    "number": "36",
    "category": "rushing",
    "values": {
-    "games": 10,
+    "games": 11,
     "carries": 10,
     "yds": 125,
     "ydsPerCarry": 12.5,
-    "ydsPerGame": 12.5,
+    "ydsPerGame": 11.4,
     "lng": 29,
     "td": 1
    }
@@ -170,12 +170,26 @@
    "number": "44",
    "category": "rushing",
    "values": {
-    "games": 4,
+    "games": 5,
     "carries": 3,
     "yds": 2,
     "ydsPerCarry": 0.7,
-    "ydsPerGame": 0.5,
+    "ydsPerGame": 0.4,
     "lng": 3,
+    "td": 0
+   }
+  },
+  {
+   "name": "Dominick Jones",
+   "number": "55",
+   "category": "rushing",
+   "values": {
+    "games": 11,
+    "carries": 1,
+    "yds": 1,
+    "ydsPerCarry": 1,
+    "ydsPerGame": 0.1,
+    "lng": 1,
     "td": 0
    }
   },
@@ -184,11 +198,11 @@
    "number": "1",
    "category": "receiving",
    "values": {
-    "games": 8,
+    "games": 9,
     "rec": 2,
     "yds": 4,
     "ydsPerRec": 2,
-    "ydsPerGame": 0.5,
+    "ydsPerGame": 0.4,
     "lng": 4,
     "td": 0
    }
@@ -198,11 +212,11 @@
    "number": "4",
    "category": "receiving",
    "values": {
-    "games": 9,
+    "games": 10,
     "rec": 1,
     "yds": -10,
     "ydsPerRec": -10,
-    "ydsPerGame": -1.1,
+    "ydsPerGame": -1,
     "lng": 0,
     "td": 0
    }
@@ -212,11 +226,11 @@
    "number": "5",
    "category": "receiving",
    "values": {
-    "games": 10,
-    "rec": 8,
-    "yds": 144,
-    "ydsPerRec": 18,
-    "ydsPerGame": 14.4,
+    "games": 11,
+    "rec": 10,
+    "yds": 167,
+    "ydsPerRec": 16.7,
+    "ydsPerGame": 15.2,
     "lng": 64,
     "td": 1
    }
@@ -226,11 +240,11 @@
    "number": "10",
    "category": "receiving",
    "values": {
-    "games": 10,
+    "games": 11,
     "rec": 10,
     "yds": 157,
     "ydsPerRec": 15.7,
-    "ydsPerGame": 15.7,
+    "ydsPerGame": 14.3,
     "lng": 58,
     "td": 2
    }
@@ -240,11 +254,11 @@
    "number": "11",
    "category": "receiving",
    "values": {
-    "games": 5,
+    "games": 6,
     "rec": 2,
     "yds": 45,
     "ydsPerRec": 22.5,
-    "ydsPerGame": 9,
+    "ydsPerGame": 7.5,
     "lng": 35,
     "td": 0
    }
@@ -254,7 +268,7 @@
    "number": "20",
    "category": "receiving",
    "values": {
-    "games": 9,
+    "games": 10,
     "rec": 1,
     "yds": 4,
     "ydsPerRec": 4,
@@ -268,7 +282,7 @@
    "number": "33",
    "category": "receiving",
    "values": {
-    "games": 10,
+    "games": 11,
     "rec": 1,
     "yds": 0,
     "ydsPerRec": 0,
@@ -282,11 +296,11 @@
    "number": "36",
    "category": "receiving",
    "values": {
-    "games": 10,
+    "games": 11,
     "rec": 5,
     "yds": 79,
     "ydsPerRec": 15.8,
-    "ydsPerGame": 7.9,
+    "ydsPerGame": 7.2,
     "lng": 39,
     "td": 1
    }
@@ -296,9 +310,9 @@
    "number": "1",
    "category": "defense",
    "values": {
-    "games": 8,
-    "solo": 2,
-    "tackles": 2
+    "games": 9,
+    "solo": 4,
+    "tackles": 4
    }
   },
   {
@@ -306,11 +320,11 @@
    "number": "2",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 24,
-    "assist": 12,
-    "tackles": 36,
-    "tfl": 2
+    "games": 11,
+    "solo": 31,
+    "assist": 16,
+    "tackles": 47,
+    "tfl": 4
    }
   },
   {
@@ -318,11 +332,11 @@
    "number": "3",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 10,
+    "games": 11,
+    "solo": 12,
     "assist": 3,
-    "tackles": 13,
-    "tfl": 2
+    "tackles": 15,
+    "tfl": 3
    }
   },
   {
@@ -330,10 +344,10 @@
    "number": "4",
    "category": "defense",
    "values": {
-    "games": 9,
-    "solo": 23,
-    "assist": 10,
-    "tackles": 33,
+    "games": 10,
+    "solo": 28,
+    "assist": 16,
+    "tackles": 44,
     "tfl": 3
    }
   },
@@ -342,11 +356,11 @@
    "number": "5",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 44,
-    "assist": 26,
-    "tackles": 70,
-    "tfl": 5
+    "games": 11,
+    "solo": 48,
+    "assist": 31,
+    "tackles": 79,
+    "tfl": 6
    }
   },
   {
@@ -354,7 +368,7 @@
    "number": "7",
    "category": "defense",
    "values": {
-    "games": 9,
+    "games": 10,
     "assist": 2,
     "tackles": 2
    }
@@ -364,10 +378,10 @@
    "number": "8",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 17,
-    "assist": 7,
-    "tackles": 24,
+    "games": 11,
+    "solo": 20,
+    "assist": 8,
+    "tackles": 28,
     "tfl": 2
    }
   },
@@ -376,7 +390,7 @@
    "number": "9",
    "category": "defense",
    "values": {
-    "games": 10,
+    "games": 11,
     "solo": 5,
     "assist": 4,
     "tackles": 9,
@@ -388,10 +402,10 @@
    "number": "10",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 23,
+    "games": 11,
+    "solo": 24,
     "assist": 8,
-    "tackles": 31,
+    "tackles": 32,
     "tfl": 3
    }
   },
@@ -400,7 +414,7 @@
    "number": "11",
    "category": "defense",
    "values": {
-    "games": 5,
+    "games": 6,
     "assist": 2,
     "tackles": 2
    }
@@ -431,10 +445,10 @@
    "number": "19",
    "category": "defense",
    "values": {
-    "games": 9,
-    "solo": 15,
+    "games": 10,
+    "solo": 16,
     "assist": 3,
-    "tackles": 18,
+    "tackles": 19,
     "tfl": 2
    }
   },
@@ -443,10 +457,10 @@
    "number": "20",
    "category": "defense",
    "values": {
-    "games": 9,
-    "solo": 10,
+    "games": 10,
+    "solo": 11,
     "assist": 5,
-    "tackles": 15
+    "tackles": 16
    }
   },
   {
@@ -454,10 +468,10 @@
    "number": "30",
    "category": "defense",
    "values": {
-    "games": 10,
+    "games": 11,
     "solo": 2,
-    "assist": 1,
-    "tackles": 3
+    "assist": 2,
+    "tackles": 4
    }
   },
   {
@@ -465,7 +479,7 @@
    "number": "31",
    "category": "defense",
    "values": {
-    "games": 5,
+    "games": 6,
     "assist": 1,
     "tackles": 1
    }
@@ -475,10 +489,10 @@
    "number": "33",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 17,
-    "assist": 6,
-    "tackles": 23,
+    "games": 11,
+    "solo": 18,
+    "assist": 8,
+    "tackles": 26,
     "tfl": 2
    }
   },
@@ -487,10 +501,10 @@
    "number": "36",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 16,
-    "assist": 9,
-    "tackles": 25,
+    "games": 11,
+    "solo": 22,
+    "assist": 11,
+    "tackles": 33,
     "tfl": 1
    }
   },
@@ -499,7 +513,7 @@
    "number": "44",
    "category": "defense",
    "values": {
-    "games": 4,
+    "games": 5,
     "solo": 4,
     "tackles": 4
    }
@@ -509,11 +523,11 @@
    "number": "52",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 17,
-    "assist": 13,
-    "tackles": 30,
-    "tfl": 3.5
+    "games": 11,
+    "solo": 20,
+    "assist": 17,
+    "tackles": 37,
+    "tfl": 4.5
    }
   },
   {
@@ -521,10 +535,10 @@
    "number": "54",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 18,
-    "assist": 11,
-    "tackles": 29,
+    "games": 11,
+    "solo": 19,
+    "assist": 14,
+    "tackles": 33,
     "tfl": 4
    }
   },
@@ -533,11 +547,11 @@
    "number": "55",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 75,
-    "assist": 38,
-    "tackles": 113,
-    "tfl": 21
+    "games": 11,
+    "solo": 84,
+    "assist": 41,
+    "tackles": 125,
+    "tfl": 22
    }
   },
   {
@@ -545,7 +559,7 @@
    "number": "60",
    "category": "defense",
    "values": {
-    "games": 9,
+    "games": 10,
     "assist": 1,
     "tackles": 1
    }
@@ -555,7 +569,7 @@
    "number": "61",
    "category": "defense",
    "values": {
-    "games": 10,
+    "games": 11,
     "solo": 3,
     "assist": 2,
     "tackles": 5
@@ -577,7 +591,7 @@
    "number": "64",
    "category": "defense",
    "values": {
-    "games": 9,
+    "games": 10,
     "assist": 2,
     "tackles": 2
    }
@@ -587,7 +601,7 @@
    "number": "66",
    "category": "defense",
    "values": {
-    "games": 8,
+    "games": 9,
     "assist": 1,
     "tackles": 1,
     "tfl": 0.5
@@ -608,16 +622,32 @@
    "number": "88",
    "category": "defense",
    "values": {
-    "games": 10,
-    "solo": 27,
-    "assist": 9,
-    "tackles": 36,
-    "tfl": 5.5
+    "games": 11,
+    "solo": 30,
+    "assist": 10,
+    "tackles": 40,
+    "tfl": 6.5
+   }
+  },
+  {
+   "name": "Michael Tuscano",
+   "number": "2",
+   "category": "defense",
+   "values": {
+    "sacks": 2
    }
   },
   {
    "name": "Isaiah Yemma",
    "number": "3",
+   "category": "defense",
+   "values": {
+    "sacks": 2
+   }
+  },
+  {
+   "name": "Marco Gentile",
+   "number": "5",
    "category": "defense",
    "values": {
     "sacks": 1
@@ -684,7 +714,7 @@
    "number": "88",
    "category": "defense",
    "values": {
-    "sacks": 2.5
+    "sacks": 3.5
    }
   },
   {
@@ -701,7 +731,7 @@
    "number": "2",
    "category": "defense",
    "values": {
-    "ff": 1
+    "ff": 2
    }
   },
   {
@@ -766,7 +796,7 @@
    "number": "52",
    "category": "defense",
    "values": {
-    "fumRec": 1
+    "fumRec": 2
    }
   },
   {
@@ -800,10 +830,10 @@
    "number": "36",
    "category": "punting",
    "values": {
-    "games": 10,
-    "punts": 17,
+    "games": 11,
+    "punts": 18,
     "yds": 223,
-    "ydsPerPunt": 13.1,
+    "ydsPerPunt": 12.4,
     "lng": 40,
     "in20": 2
    }
@@ -813,7 +843,7 @@
    "number": "1",
    "category": "kickReturn",
    "values": {
-    "games": 8,
+    "games": 9,
     "returns": 3,
     "yds": 76,
     "ydsPerReturn": 25.3,
@@ -825,7 +855,7 @@
    "number": "4",
    "category": "kickReturn",
    "values": {
-    "games": 9,
+    "games": 10,
     "returns": 1,
     "yds": 3,
     "ydsPerReturn": 3,
@@ -837,7 +867,7 @@
    "number": "5",
    "category": "kickReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 2,
     "yds": 0,
     "ydsPerReturn": 0,
@@ -849,10 +879,10 @@
    "number": "10",
    "category": "kickReturn",
    "values": {
-    "games": 10,
-    "returns": 9,
+    "games": 11,
+    "returns": 10,
     "yds": 13,
-    "ydsPerReturn": 1.4,
+    "ydsPerReturn": 1.3,
     "lng": 13
    }
   },
@@ -861,7 +891,7 @@
    "number": "10",
    "category": "puntReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 5,
     "yds": 26,
     "ydsPerReturn": 5.2,
@@ -873,7 +903,7 @@
    "number": "33",
    "category": "kickReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 3,
     "yds": 0,
     "ydsPerReturn": 0,
@@ -885,7 +915,7 @@
    "number": "33",
    "category": "puntReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 7,
     "yds": 0,
     "ydsPerReturn": 0,
@@ -897,7 +927,7 @@
    "number": "36",
    "category": "kickReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 6,
     "yds": 28,
     "ydsPerReturn": 4.7,
@@ -909,7 +939,7 @@
    "number": "88",
    "category": "kickReturn",
    "values": {
-    "games": 10,
+    "games": 11,
     "returns": 1,
     "yds": 0,
     "ydsPerReturn": 0,
@@ -921,13 +951,13 @@
    "number": "30",
    "category": "kicking",
    "values": {
-    "games": 10,
-    "xpMade": 34,
-    "xpAtt": 38,
+    "games": 11,
+    "xpMade": 38,
+    "xpAtt": 42,
     "fgMade": 0,
     "fgAtt": 0,
     "lng": 0,
-    "pts": 34
+    "pts": 38
    }
   }
  ],
@@ -3611,6 +3641,966 @@
       "fgAtt": 0,
       "lng": 0,
       "pts": 34
+     }
+    }
+   ]
+  },
+  {
+   "games": 11,
+   "rows": [
+    {
+     "name": "Michael Tuscano",
+     "number": "2",
+     "category": "passing",
+     "values": {
+      "games": 11,
+      "cmp": 31,
+      "att": 66,
+      "yds": 442,
+      "cmpPct": 47,
+      "ydsPerGame": 40.2,
+      "td": 4,
+      "int": 5,
+      "lng": 64,
+      "rating": 57.8
+     }
+    },
+    {
+     "name": "Carson Timmins",
+     "number": "7",
+     "category": "passing",
+     "values": {
+      "games": 10,
+      "cmp": 1,
+      "att": 1,
+      "yds": 4,
+      "cmpPct": 100,
+      "ydsPerGame": 0.4,
+      "td": 0,
+      "int": 0,
+      "lng": 4,
+      "rating": 102.1
+     }
+    },
+    {
+     "name": "Kaden Carruthers",
+     "number": "1",
+     "category": "rushing",
+     "values": {
+      "games": 9,
+      "carries": 1,
+      "yds": 5,
+      "ydsPerCarry": 5,
+      "ydsPerGame": 0.6,
+      "lng": 5,
+      "td": 0
+     }
+    },
+    {
+     "name": "Michael Tuscano",
+     "number": "2",
+     "category": "rushing",
+     "values": {
+      "games": 11,
+      "carries": 81,
+      "yds": 581,
+      "ydsPerCarry": 7.2,
+      "ydsPerGame": 52.8,
+      "lng": 79,
+      "td": 12
+     }
+    },
+    {
+     "name": "Alex Caldwell",
+     "number": "4",
+     "category": "rushing",
+     "values": {
+      "games": 10,
+      "carries": 153,
+      "yds": 1006,
+      "ydsPerCarry": 6.6,
+      "ydsPerGame": 100.6,
+      "lng": 78,
+      "td": 13
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "rushing",
+     "values": {
+      "games": 11,
+      "carries": 70,
+      "yds": 642,
+      "ydsPerCarry": 9.2,
+      "ydsPerGame": 58.4,
+      "lng": 78,
+      "td": 10
+     }
+    },
+    {
+     "name": "Carson Timmins",
+     "number": "7",
+     "category": "rushing",
+     "values": {
+      "games": 10,
+      "carries": 3,
+      "yds": -22,
+      "ydsPerCarry": -7.3,
+      "ydsPerGame": -2.2,
+      "lng": 3,
+      "td": 1
+     }
+    },
+    {
+     "name": "Jake Gentile",
+     "number": "19",
+     "category": "rushing",
+     "values": {
+      "games": 10,
+      "carries": 14,
+      "yds": 86,
+      "ydsPerCarry": 6.1,
+      "ydsPerGame": 8.6,
+      "lng": 24,
+      "td": 1
+     }
+    },
+    {
+     "name": "Dominic Brownlie",
+     "number": "24",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 3,
+      "yds": 7,
+      "ydsPerCarry": 2.3,
+      "ydsPerGame": 1.4,
+      "lng": 3,
+      "td": 0
+     }
+    },
+    {
+     "name": "Michael Rogenski",
+     "number": "33",
+     "category": "rushing",
+     "values": {
+      "games": 11,
+      "carries": 77,
+      "yds": 530,
+      "ydsPerCarry": 6.9,
+      "ydsPerGame": 48.2,
+      "lng": 64,
+      "td": 10
+     }
+    },
+    {
+     "name": "Brock Masello",
+     "number": "36",
+     "category": "rushing",
+     "values": {
+      "games": 11,
+      "carries": 10,
+      "yds": 125,
+      "ydsPerCarry": 12.5,
+      "ydsPerGame": 11.4,
+      "lng": 29,
+      "td": 1
+     }
+    },
+    {
+     "name": "Hunter Mellott",
+     "number": "44",
+     "category": "rushing",
+     "values": {
+      "games": 5,
+      "carries": 3,
+      "yds": 2,
+      "ydsPerCarry": 0.7,
+      "ydsPerGame": 0.4,
+      "lng": 3,
+      "td": 0
+     }
+    },
+    {
+     "name": "Dominick Jones",
+     "number": "55",
+     "category": "rushing",
+     "values": {
+      "games": 11,
+      "carries": 1,
+      "yds": 1,
+      "ydsPerCarry": 1,
+      "ydsPerGame": 0.1,
+      "lng": 1,
+      "td": 0
+     }
+    },
+    {
+     "name": "Kaden Carruthers",
+     "number": "1",
+     "category": "receiving",
+     "values": {
+      "games": 9,
+      "rec": 2,
+      "yds": 4,
+      "ydsPerRec": 2,
+      "ydsPerGame": 0.4,
+      "lng": 4,
+      "td": 0
+     }
+    },
+    {
+     "name": "Alex Caldwell",
+     "number": "4",
+     "category": "receiving",
+     "values": {
+      "games": 10,
+      "rec": 1,
+      "yds": -10,
+      "ydsPerRec": -10,
+      "ydsPerGame": -1,
+      "lng": 0,
+      "td": 0
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "receiving",
+     "values": {
+      "games": 11,
+      "rec": 10,
+      "yds": 167,
+      "ydsPerRec": 16.7,
+      "ydsPerGame": 15.2,
+      "lng": 64,
+      "td": 1
+     }
+    },
+    {
+     "name": "Tristan Temperato",
+     "number": "10",
+     "category": "receiving",
+     "values": {
+      "games": 11,
+      "rec": 10,
+      "yds": 157,
+      "ydsPerRec": 15.7,
+      "ydsPerGame": 14.3,
+      "lng": 58,
+      "td": 2
+     }
+    },
+    {
+     "name": "Steve Morlan",
+     "number": "11",
+     "category": "receiving",
+     "values": {
+      "games": 6,
+      "rec": 2,
+      "yds": 45,
+      "ydsPerRec": 22.5,
+      "ydsPerGame": 7.5,
+      "lng": 35,
+      "td": 0
+     }
+    },
+    {
+     "name": "Colt Gary",
+     "number": "20",
+     "category": "receiving",
+     "values": {
+      "games": 10,
+      "rec": 1,
+      "yds": 4,
+      "ydsPerRec": 4,
+      "ydsPerGame": 0.4,
+      "lng": 4,
+      "td": 0
+     }
+    },
+    {
+     "name": "Michael Rogenski",
+     "number": "33",
+     "category": "receiving",
+     "values": {
+      "games": 11,
+      "rec": 1,
+      "yds": 0,
+      "ydsPerRec": 0,
+      "ydsPerGame": 0,
+      "lng": 0,
+      "td": 0
+     }
+    },
+    {
+     "name": "Brock Masello",
+     "number": "36",
+     "category": "receiving",
+     "values": {
+      "games": 11,
+      "rec": 5,
+      "yds": 79,
+      "ydsPerRec": 15.8,
+      "ydsPerGame": 7.2,
+      "lng": 39,
+      "td": 1
+     }
+    },
+    {
+     "name": "Kaden Carruthers",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "games": 9,
+      "solo": 4,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Michael Tuscano",
+     "number": "2",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 31,
+      "assist": 16,
+      "tackles": 47,
+      "tfl": 4
+     }
+    },
+    {
+     "name": "Isaiah Yemma",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 12,
+      "assist": 3,
+      "tackles": 15,
+      "tfl": 3
+     }
+    },
+    {
+     "name": "Alex Caldwell",
+     "number": "4",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "solo": 28,
+      "assist": 16,
+      "tackles": 44,
+      "tfl": 3
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 48,
+      "assist": 31,
+      "tackles": 79,
+      "tfl": 6
+     }
+    },
+    {
+     "name": "Carson Timmins",
+     "number": "7",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "assist": 2,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Henry Nemenz",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 20,
+      "assist": 8,
+      "tackles": 28,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Brady Lweis",
+     "number": "9",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 5,
+      "assist": 4,
+      "tackles": 9,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Tristan Temperato",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 24,
+      "assist": 8,
+      "tackles": 32,
+      "tfl": 3
+     }
+    },
+    {
+     "name": "Steve Morlan",
+     "number": "11",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "assist": 2,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Nathaniel Garcia",
+     "number": "12",
+     "category": "defense",
+     "values": {
+      "games": 7,
+      "assist": 2,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Caden Jones",
+     "number": "14",
+     "category": "defense",
+     "values": {
+      "games": 4,
+      "solo": 2,
+      "tackles": 2,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Jake Gentile",
+     "number": "19",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "solo": 16,
+      "assist": 3,
+      "tackles": 19,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Colt Gary",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "solo": 11,
+      "assist": 5,
+      "tackles": 16
+     }
+    },
+    {
+     "name": "Brodie Crooks",
+     "number": "30",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 2,
+      "assist": 2,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Jayden Cook",
+     "number": "31",
+     "category": "defense",
+     "values": {
+      "games": 6,
+      "assist": 1,
+      "tackles": 1
+     }
+    },
+    {
+     "name": "Michael Rogenski",
+     "number": "33",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 18,
+      "assist": 8,
+      "tackles": 26,
+      "tfl": 2
+     }
+    },
+    {
+     "name": "Brock Masello",
+     "number": "36",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 22,
+      "assist": 11,
+      "tackles": 33,
+      "tfl": 1
+     }
+    },
+    {
+     "name": "Hunter Mellott",
+     "number": "44",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 4,
+      "tackles": 4
+     }
+    },
+    {
+     "name": "Carter Gimbus",
+     "number": "52",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 20,
+      "assist": 17,
+      "tackles": 37,
+      "tfl": 4.5
+     }
+    },
+    {
+     "name": "Aidan Jacobsen",
+     "number": "54",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 19,
+      "assist": 14,
+      "tackles": 33,
+      "tfl": 4
+     }
+    },
+    {
+     "name": "Dominick Jones",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 84,
+      "assist": 41,
+      "tackles": 125,
+      "tfl": 22
+     }
+    },
+    {
+     "name": "Dominic Payne",
+     "number": "60",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "assist": 1,
+      "tackles": 1
+     }
+    },
+    {
+     "name": "Bradley Martinez-Figueroa",
+     "number": "61",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 3,
+      "assist": 2,
+      "tackles": 5
+     }
+    },
+    {
+     "name": "Brady Caldwell",
+     "number": "63",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 1,
+      "tackles": 1,
+      "tfl": 0.5
+     }
+    },
+    {
+     "name": "Joseph Lyda",
+     "number": "64",
+     "category": "defense",
+     "values": {
+      "games": 10,
+      "assist": 2,
+      "tackles": 2
+     }
+    },
+    {
+     "name": "Ian Anderson",
+     "number": "66",
+     "category": "defense",
+     "values": {
+      "games": 9,
+      "assist": 1,
+      "tackles": 1,
+      "tfl": 0.5
+     }
+    },
+    {
+     "name": "Gavin Weaver",
+     "number": "68",
+     "category": "defense",
+     "values": {
+      "games": 5,
+      "solo": 1,
+      "tackles": 1
+     }
+    },
+    {
+     "name": "Drake Benson",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "games": 11,
+      "solo": 30,
+      "assist": 10,
+      "tackles": 40,
+      "tfl": 6.5
+     }
+    },
+    {
+     "name": "Michael Tuscano",
+     "number": "2",
+     "category": "defense",
+     "values": {
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Isaiah Yemma",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "sacks": 2
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "defense",
+     "values": {
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Henry Nemenz",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Brady Lweis",
+     "number": "9",
+     "category": "defense",
+     "values": {
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Carter Gimbus",
+     "number": "52",
+     "category": "defense",
+     "values": {
+      "sacks": 1.5
+     }
+    },
+    {
+     "name": "Aidan Jacobsen",
+     "number": "54",
+     "category": "defense",
+     "values": {
+      "sacks": 1
+     }
+    },
+    {
+     "name": "Dominick Jones",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "sacks": 10
+     }
+    },
+    {
+     "name": "Brady Caldwell",
+     "number": "63",
+     "category": "defense",
+     "values": {
+      "sacks": 0.5
+     }
+    },
+    {
+     "name": "Ian Anderson",
+     "number": "66",
+     "category": "defense",
+     "values": {
+      "sacks": 0.5
+     }
+    },
+    {
+     "name": "Drake Benson",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "sacks": 3.5
+     }
+    },
+    {
+     "name": "Kaden Carruthers",
+     "number": "1",
+     "category": "defense",
+     "values": {
+      "int": 1,
+      "intRetYds": 3
+     }
+    },
+    {
+     "name": "Michael Tuscano",
+     "number": "2",
+     "category": "defense",
+     "values": {
+      "ff": 2
+     }
+    },
+    {
+     "name": "Isaiah Yemma",
+     "number": "3",
+     "category": "defense",
+     "values": {
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Alex Caldwell",
+     "number": "4",
+     "category": "defense",
+     "values": {
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "defense",
+     "values": {
+      "fumRec": 1,
+      "ff": 1
+     }
+    },
+    {
+     "name": "Henry Nemenz",
+     "number": "8",
+     "category": "defense",
+     "values": {
+      "fumRec": 2
+     }
+    },
+    {
+     "name": "Brady Lweis",
+     "number": "9",
+     "category": "defense",
+     "values": {
+      "ff": 1
+     }
+    },
+    {
+     "name": "Tristan Temperato",
+     "number": "10",
+     "category": "defense",
+     "values": {
+      "int": 1
+     }
+    },
+    {
+     "name": "Colt Gary",
+     "number": "20",
+     "category": "defense",
+     "values": {
+      "fumRec": 1
+     }
+    },
+    {
+     "name": "Carter Gimbus",
+     "number": "52",
+     "category": "defense",
+     "values": {
+      "fumRec": 2
+     }
+    },
+    {
+     "name": "Aidan Jacobsen",
+     "number": "54",
+     "category": "defense",
+     "values": {
+      "ff": 1
+     }
+    },
+    {
+     "name": "Dominick Jones",
+     "number": "55",
+     "category": "defense",
+     "values": {
+      "fumRec": 2,
+      "ff": 4
+     }
+    },
+    {
+     "name": "Drake Benson",
+     "number": "88",
+     "category": "defense",
+     "values": {
+      "fumRec": 1,
+      "ff": 2
+     }
+    },
+    {
+     "name": "Brock Masello",
+     "number": "36",
+     "category": "punting",
+     "values": {
+      "games": 11,
+      "punts": 18,
+      "yds": 223,
+      "ydsPerPunt": 12.4,
+      "lng": 40,
+      "in20": 2
+     }
+    },
+    {
+     "name": "Kaden Carruthers",
+     "number": "1",
+     "category": "kickReturn",
+     "values": {
+      "games": 9,
+      "returns": 3,
+      "yds": 76,
+      "ydsPerReturn": 25.3,
+      "lng": 41
+     }
+    },
+    {
+     "name": "Alex Caldwell",
+     "number": "4",
+     "category": "kickReturn",
+     "values": {
+      "games": 10,
+      "returns": 1,
+      "yds": 3,
+      "ydsPerReturn": 3,
+      "lng": 3
+     }
+    },
+    {
+     "name": "Marco Gentile",
+     "number": "5",
+     "category": "kickReturn",
+     "values": {
+      "games": 11,
+      "returns": 2,
+      "yds": 0,
+      "ydsPerReturn": 0,
+      "lng": 0
+     }
+    },
+    {
+     "name": "Tristan Temperato",
+     "number": "10",
+     "category": "kickReturn",
+     "values": {
+      "games": 11,
+      "returns": 10,
+      "yds": 13,
+      "ydsPerReturn": 1.3,
+      "lng": 13
+     }
+    },
+    {
+     "name": "Tristan Temperato",
+     "number": "10",
+     "category": "puntReturn",
+     "values": {
+      "games": 11,
+      "returns": 5,
+      "yds": 26,
+      "ydsPerReturn": 5.2,
+      "lng": 26
+     }
+    },
+    {
+     "name": "Michael Rogenski",
+     "number": "33",
+     "category": "kickReturn",
+     "values": {
+      "games": 11,
+      "returns": 3,
+      "yds": 0,
+      "ydsPerReturn": 0,
+      "lng": 0
+     }
+    },
+    {
+     "name": "Michael Rogenski",
+     "number": "33",
+     "category": "puntReturn",
+     "values": {
+      "games": 11,
+      "returns": 7,
+      "yds": 0,
+      "ydsPerReturn": 0,
+      "lng": 0
+     }
+    },
+    {
+     "name": "Brock Masello",
+     "number": "36",
+     "category": "kickReturn",
+     "values": {
+      "games": 11,
+      "returns": 6,
+      "yds": 28,
+      "ydsPerReturn": 4.7,
+      "lng": 28
+     }
+    },
+    {
+     "name": "Drake Benson",
+     "number": "88",
+     "category": "kickReturn",
+     "values": {
+      "games": 11,
+      "returns": 1,
+      "yds": 0,
+      "ydsPerReturn": 0,
+      "lng": 0
+     }
+    },
+    {
+     "name": "Brodie Crooks",
+     "number": "30",
+     "category": "kicking",
+     "values": {
+      "games": 11,
+      "xpMade": 38,
+      "xpAtt": 42,
+      "fgMade": 0,
+      "fgAtt": 0,
+      "lng": 0,
+      "pts": 38
      }
     }
    ]
