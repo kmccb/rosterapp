@@ -7,6 +7,7 @@ import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIs
 import { colorHint, colorsChanged, DEFAULT_COLORS, panelColors } from './lookColors';
 import { capital, longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
 import { SportCard } from './SportCard';
+import { Visits } from './Visits';
 
 type Section = 'look' | 'billing';
 
@@ -310,6 +311,8 @@ export function SchoolPage({
 
       <div className="mg-grid">
         <div className="mg-main">
+          {!isNew && <Visits slug={slug} />}
+
           <section className="mg-card">
             <h2 className="mg-card-title">Look</h2>
             <div className="mg-part">

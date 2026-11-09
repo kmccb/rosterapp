@@ -31,6 +31,12 @@ export function Privacy() {
         Reading this site needs no account and creates none. Page views are counted without
         cookies and without anything that follows you between sites.
       </p>
+      <p>
+        A school that pays for its page is told how many phones opened it each day — two numbers
+        per school per day, and nothing about whose phones they were. Your phone remembers the
+        date it last opened that school so it isn&rsquo;t counted twice; that date never leaves
+        it.
+      </p>
 
       <h2>Questions, corrections, removals</h2>
       <p>
