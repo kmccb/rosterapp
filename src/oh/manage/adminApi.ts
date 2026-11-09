@@ -162,3 +162,10 @@ export const setStatsSource = async (r: {
     await signed(),
   );
 };
+
+/** One Eastern day of a school's page opens. Migration 0010. */
+export type VisitDay = { day: string; opens: number; visitors: number };
+
+/** A school's last `days` days of opens, newest first; days with none are absent. */
+export const listVisits = async (slug: string, days: number): Promise<VisitDay[]> =>
+  (await rpc<VisitDay[]>('school_visits', { p_slug: slug, p_days: days }, await signed())) ?? [];

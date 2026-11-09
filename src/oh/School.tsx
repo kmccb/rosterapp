@@ -3,6 +3,7 @@ import type { SchoolGame, SchoolSeason } from '../ohio/stateModel';
 import { SkyIcon } from '../components/SkyIcon';
 import { describeSky, worthMentioning } from '../schedule/weather';
 import { isDemo } from './demo';
+import { countVisit } from './visits';
 import { installAs } from './install';
 import { leagueTable, type LeagueRow } from './leagueTable';
 import { LookupTab, TeamTab } from './RosterTabs';
@@ -496,6 +497,12 @@ export function School({ slug, onChange }: { slug: string; onChange: () => void 
     // The browser bar takes the page's own background, light or dark.
     return installAs(slug, schoolName, ground && accent && lookGround({ ground, accent, light }, mode));
   }, [slug, paidLive, schoolName, ground, accent, mode, light]);
+
+  // The same signal says the open is worth counting for the seller's panel:
+  // one call per school per page load, nothing about who (src/oh/visits.ts).
+  useEffect(() => {
+    if (paidLive) void countVisit(slug);
+  }, [slug, paidLive]);
 
   /*
    * The conference, and the schools whose seasons it is folded out of.

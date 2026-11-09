@@ -1513,3 +1513,37 @@ html[data-oh-mode] .form-chip {
 html[data-oh-mode='light'] .form-chip {
   color: #ffffff;
 }
+
+/* The Visitors card on a school's panel page (migration 0010). */
+.mg-visit-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mg-visit-num {
+  font-size: 28px;
+  font-weight: 650;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mg-visit-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 64px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--mg-line);
+}
+
+.mg-visit-bar {
+  flex: 1;
+  min-width: 0;
+  border-radius: 3px 3px 0 0;
+  background: var(--mg-line-strong);
+}
+
+.mg-visit-bar.is-today {
+  background: var(--mg-primary);
+}

@@ -158,6 +158,16 @@ Poland's own page — a short address outside that prefix would never reach the 
   slug, sport and link for published-and-paid rows, nothing else) and one more key on
   `school_roster_list`. Additive: no deploy ordering. Until it is applied the panel's stats
   control answers with the database's own error and the job reads the file only.
+- **0010** (`supabase/migrations/0010_school_visits.sql`, written 2026-11-09, **not applied**;
+  checked on PGlite: applies twice, with or without 0009) adds `school_visit` (two counts per
+  paying school per Eastern day — `opens`, and `visitors` = a phone's first open that day — no
+  identifiers), `school_visit_count(slug, first_today)` (anon; silently ignores a school not
+  published-and-paid) and `school_visits(slug, days)` (authenticated, admin-only). The fan page
+  calls it from `src/oh/visits.ts` once per school per load (not the demo, not a browser signed in
+  to the panel); the panel's school page shows a Visitors card (`src/oh/manage/Visits.tsx`).
+  **Deliberately skips the schema-wide revoke/re-grant** so it can't fail on a database without
+  0009 — it grants only its own two functions. Additive: no deploy ordering (until it is applied
+  the fan call fails silently and the card says the function is missing).
 - Verify with `node scripts/verify-school-roster.mjs` (13 checks once 0009 is applied, 14 with `VERIFY_SLUG` set in
   `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
   against a database that only has 0006 applied; the four 0008 door checks fail the same way
@@ -165,7 +175,7 @@ Poland's own page — a short address outside that prefix would never reach the 
 
 ## Tests and CI
 
-- `npx vitest run` — 803 tests / 60 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 814 tests / 62 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
