@@ -36,7 +36,7 @@ const COLUMNS: Record<StatCategory, ColumnMap> = {
   rushing: { att: 'carries', yds: 'yds', td: 'td', long: 'lng', fum: 'fum' },
   receiving: { rec: 'rec', yds: 'yds', td: 'td', long: 'lng', fum: 'fum' },
   defense: {
-    tk: 'tackles', ast: 'assist', sck: 'sacks', tfl: 'tfl', sfty: 'safety', int: 'int',
+    tk: 'solo', ast: 'assist', sck: 'sacks', tfl: 'tfl', sfty: 'safety', int: 'int',
     fum: 'fum', blks: 'blocks', td: 'defTd',
   },
   kicking: { fg: 'fgMade', pat: 'xpMade', pts: 'pts' },
@@ -162,6 +162,13 @@ export function parseGameStats(input: string): { rows: ParsedStatRow[]; categori
       if (values[count] !== undefined && values[avg] !== undefined) {
         values.yds = Math.round(values[count] * values[avg]);
       }
+    }
+
+    // A game page's Tk is solo tackles only; the season sheet's TACKLE is solo
+    // plus assisted. Carrying both lets the summed games match the season.
+    if (category === 'defense' && (values.solo !== undefined || values.assist !== undefined)) {
+      values.solo ??= 0;
+      values.tackles = values.solo + (values.assist ?? 0);
     }
 
     if (Object.keys(values).length === 0) continue;
