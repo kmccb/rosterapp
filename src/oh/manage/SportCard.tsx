@@ -17,7 +17,8 @@ import {
   toPlayers,
 } from './saveArgs';
 import { loadLeagueSuggestion, type LeagueSuggestion } from './leagueSuggest';
-import { capital, rowIsLive, SPORTS } from './schools';
+import { sportLabel } from '../sportSeasons';
+import { rowIsLive, SPORT_CHOICES } from './schools';
 import { Sources } from './SourceLinks';
 import { rowProblems } from './sources';
 
@@ -154,7 +155,7 @@ export function SportCard({
   onSaved: () => void;
   onCancel?: () => void;
 }) {
-  const free = useMemo(() => SPORTS.filter((s) => !taken.includes(s)), [taken]);
+  const free = useMemo(() => SPORT_CHOICES.filter((s) => !taken.includes(s)), [taken]);
   const [newSport, setNewSport] = useState(free[0] ?? 'football');
   const sport = row?.sport ?? newSport;
   const season = row?.season ?? currentSeasonYear();
@@ -316,7 +317,7 @@ export function SportCard({
 
   const remove = () => {
     if (!row) return;
-    if (!confirm(`Delete ${capital(row.sport)} ${row.season} for this school? Its roster and schedule go with it.`)) {
+    if (!confirm(`Delete ${sportLabel(row.sport)} ${row.season} for this school? Its roster and schedule go with it.`)) {
       return;
     }
     setBusy(true);
@@ -344,7 +345,7 @@ export function SportCard({
   const head = (
     <button type="button" className="mg-card-head" onClick={onToggle} aria-expanded={open}>
       <span className="mg-card-title">
-        {row ? capital(sport) : 'Add a sport'}
+        {row ? sportLabel(sport) : 'Add a sport'}
         {row && row.season !== currentSeasonYear() && <span className="mg-hint"> {row.season}</span>}
       </span>
       <span className="mg-card-summary">{summary}</span>
@@ -378,7 +379,7 @@ export function SportCard({
           <select className="mg-input" aria-label="Sport" value={newSport} onChange={(e) => setNewSport(e.target.value)}>
             {free.map((s) => (
               <option key={s} value={s}>
-                {capital(s)}
+                {sportLabel(s)}
               </option>
             ))}
           </select>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { baseSport } from './sportSeasons';
 
 /*
  * A mark for every sport, drawn here rather than fetched.
@@ -205,7 +206,8 @@ const GLYPHS: Record<string, ReactNode> = {
  * depend on anything being rendered to check.
  */
 export const glyphFor = (sport: string): string => {
-  const key = sport.trim().toLowerCase();
+  // A team draws its sport's mark: boys' JV basketball is still a basketball.
+  const key = baseSport(sport);
   return Object.prototype.hasOwnProperty.call(GLYPHS, key) ? key : 'generic';
 };
 

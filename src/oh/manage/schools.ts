@@ -14,6 +14,7 @@
 
 import type { RosterRow } from './adminApi';
 import { rowProblems } from './sources';
+import { GENDERS, LEVELS, sportKey, type Gender, type Level } from '../sportSeasons';
 
 /**
  * Worst first, because that is the order to read them in:
@@ -114,3 +115,21 @@ export const SPORTS = [
   'basketball', 'wrestling', 'swimming', 'hockey', 'bowling',
   'baseball', 'softball', 'track', 'lacrosse',
 ];
+
+/*
+ * Sports a school fields as separate teams, each sold and kept as its own
+ * row. Basketball is the first; another sport joins by being listed here, and
+ * the picker, the hub and the fan page all follow from the name.
+ */
+export const TEAMED: Record<string, { genders: readonly Gender[]; levels: readonly Level[] }> = {
+  basketball: { genders: GENDERS, levels: LEVELS },
+};
+
+/** Every team the picker offers, in the order it offers them. */
+export const SPORT_CHOICES: string[] = SPORTS.flatMap((base) => {
+  const teams = TEAMED[base];
+  if (!teams) return [base];
+  return teams.genders.flatMap((gender) =>
+    teams.levels.map((level) => sportKey({ base, gender, level })),
+  );
+});

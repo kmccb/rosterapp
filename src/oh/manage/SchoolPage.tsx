@@ -5,7 +5,8 @@ import { loadSchoolSports, NICKNAME_MAX } from '../rosterStore';
 import { upsertRoster, type PanelColors, type RosterRow } from './adminApi';
 import { currentSeasonYear, defaultPaidThrough, friendlyError, themeArg, todayIso } from './saveArgs';
 import { colorHint, colorsChanged, DEFAULT_COLORS, panelColors } from './lookColors';
-import { capital, longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
+import { sportLabel } from '../sportSeasons';
+import { longDate, renewedThrough, schoolStatus, STATUS_LABEL } from './schools';
 import { SportCard } from './SportCard';
 import { Visits } from './Visits';
 
@@ -567,7 +568,7 @@ export function SchoolPage({
                     ? 'Saved with the first sport.'
                     : mixedDates
                       ? `Sports are paid to different dates: ${current
-                          .map((r) => `${capital(r.sport)} ${longDate(r.paid_through)}`)
+                          .map((r) => `${sportLabel(r.sport)} ${longDate(r.paid_through)}`)
                           .join(' · ')}. Changing this date moves all of them.`
                       : latest && latest < today
                         ? `Ran out ${longDate(latest)}. Nothing shows until this moves forward.`
@@ -652,7 +653,7 @@ export function SchoolPage({
           </a>
           {firstSport && status !== 'live' && status !== 'attention' && (
             <p className="mg-hint">
-              Fans see only the free directory page until {capital(firstSport)} or another sport is published and paid
+              Fans see only the free directory page until {sportLabel(firstSport)} or another sport is published and paid
               for.
             </p>
           )}

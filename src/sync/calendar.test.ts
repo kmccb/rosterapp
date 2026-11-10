@@ -73,6 +73,24 @@ describe('calendarToSchedule on the Eventlink capture', () => {
     expect(v.skipped).toBe(1);
   });
 
+  // One school calendar, one row per team: the level in Eventlink's brackets
+  // is the whole filter, and no team's filter may catch another's games.
+  it('gives each basketball team only its own games', () => {
+    const read = (filter: string) => {
+      const v = calendarToSchedule(eventlink, { filter, seasonYear: 2026 });
+      if (!v.ok) throw new Error(v.reason);
+      return v.rows;
+    };
+    const varsity = read('Basketball (Boys V)');
+    const jv = read('Basketball (Boys JV)');
+    const freshman = read('Basketball (Boys F)');
+    const girls = read('Basketball (Girls V)');
+    for (const rows of [jv, freshman, girls]) expect(rows.length).toBeGreaterThan(0);
+    // "(boys v)" is not a substring of "(boys jv)" — the bracket keeps them
+    // apart — so the three boys' teams split the boys' games exactly.
+    expect(varsity.length + jv.length + freshman.length).toBe(read('Basketball (Boys').length);
+  });
+
   it('refuses a filter that matches nothing, and says so', () => {
     expect(calendarToSchedule(eventlink, { filter: 'Curling (Boys V)', seasonYear: 2026 })).toEqual({
       ok: false,

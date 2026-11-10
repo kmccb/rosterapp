@@ -20,3 +20,10 @@ describe('sport glyphs', () => {
     expect(glyphFor('football')).toBe(glyphFor('Football'));
   });
 });
+
+describe('a team’s mark', () => {
+  it('is its sport’s', () => {
+    expect(glyphFor('boys jv basketball')).toBe('basketball');
+    expect(glyphFor('Girls Basketball')).toBe('basketball');
+  });
+});

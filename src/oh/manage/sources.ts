@@ -1,4 +1,5 @@
 import type { SideState, SyncState } from '../../sync/types';
+import { sportLabel } from '../sportSeasons';
 
 /*
  * What the panel says about a link before it is saved, and about a sync
@@ -47,14 +48,13 @@ export function sideLine(side: SideState | undefined, now: Date): string {
   return side.ok_at ? `synced ${ago(side.ok_at, now)}` : 'not synced yet';
 }
 
-const capital = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function rowProblems(row: { sport: string; sync_state?: SyncState }): string[] {
   const out: string[] = [];
   for (const side of ['roster', 'schedule'] as const) {
     const s = row.sync_state?.[side];
     if (s?.problem) {
-      out.push(`⚠ ${capital(row.sport)} ${side}: ${s.problem}${s.problem_since ? `, since ${when(s.problem_since)}` : ''}`);
+      out.push(`⚠ ${sportLabel(row.sport)} ${side}: ${s.problem}${s.problem_since ? `, since ${when(s.problem_since)}` : ''}`);
     }
   }
   return out;
