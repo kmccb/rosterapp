@@ -53,9 +53,30 @@ const isSeason = (v: unknown): v is SeasonStats => {
  * — so a bad game is dropped on its own and the good ones stay; `games` is
  * omitted entirely once none remain, rather than kept as an empty list.
  */
+/**
+ * Games pasted before 2026-11-09 filed a game page's Tk (solo tackles only)
+ * as `tackles`, so every defender's season came up short by his assists. Such
+ * a game has `tackles` with no `solo`; it is read the way the parser now files
+ * it, so nobody has to paste the season again.
+ */
+const upgradeGame = (g: GameStats): GameStats => {
+  let changed = false;
+  const byPlayer: Record<string, PlayerStats> = {};
+  for (const [key, player] of Object.entries(g.byPlayer)) {
+    const d = player?.defense;
+    if (d && d.tackles !== undefined && d.solo === undefined) {
+      byPlayer[key] = { ...player, defense: { ...d, solo: d.tackles, tackles: d.tackles + (d.assist ?? 0) } };
+      changed = true;
+    } else {
+      byPlayer[key] = player;
+    }
+  }
+  return changed ? { ...g, byPlayer } : g;
+};
+
 const tidySeason = (s: SeasonStats): SeasonStats => {
   const { games, ...rest } = s as SeasonStats & { games?: unknown };
-  const kept = Array.isArray(games) ? games.filter(isGame) : [];
+  const kept = Array.isArray(games) ? games.filter(isGame).map(upgradeGame) : [];
   return kept.length ? { ...rest, games: kept } : rest;
 };
 

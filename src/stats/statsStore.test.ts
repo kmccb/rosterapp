@@ -75,3 +75,19 @@ describe('games in the store', () => {
     expect(loadStats().current?.games).toEqual([good]);
   });
 });
+
+describe('games pasted before assists were counted', () => {
+  beforeEach(() => memory.clear());
+
+  it('reads an old game’s tackles as solo and adds the assists back in', () => {
+    putGame('2026-11-06', 'West Branch', { 'z|p': { defense: { tackles: 5, assist: 1, sacks: 1 } } });
+    const raw = JSON.parse([...memory.values()][0]);
+    expect(raw.stats.current.games[0].byPlayer['z|p'].defense).toEqual({ tackles: 5, assist: 1, sacks: 1 });
+    expect(loadStats().current?.games?.[0].byPlayer['z|p'].defense).toEqual({ solo: 5, tackles: 6, assist: 1, sacks: 1 });
+  });
+
+  it('leaves a game the parser already split alone', () => {
+    putGame('2026-11-06', 'West Branch', { 'z|p': { defense: { solo: 5, assist: 1, tackles: 6 } } });
+    expect(loadStats().current?.games?.[0].byPlayer['z|p'].defense).toEqual({ solo: 5, assist: 1, tackles: 6 });
+  });
+});
