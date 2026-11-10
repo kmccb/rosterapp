@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { RosterRow } from './adminApi';
-import { groupSchools, longDate, renewedThrough, schoolStatus } from './schools';
+import { groupSchools, longDate, renewedThrough, schoolStatus, SPORT_CHOICES } from './schools';
 
 const TODAY = '2026-10-13';
 
@@ -98,5 +98,18 @@ describe('dates on the panel', () => {
     expect(renewedThrough('2026-02-01', TODAY)).toBe('2027-10-13');
     expect(renewedThrough(null, TODAY)).toBe('2027-10-13');
     expect(renewedThrough('2028-02-29', TODAY)).toBe('2029-02-28');
+  });
+});
+
+describe('the sports the picker offers', () => {
+  it('offers basketball as six teams and every other sport once', () => {
+    const basketball = SPORT_CHOICES.filter((s) => s.endsWith('basketball'));
+    expect(basketball).toEqual([
+      'boys basketball', 'boys jv basketball', 'boys freshman basketball',
+      'girls basketball', 'girls jv basketball', 'girls freshman basketball',
+    ]);
+    expect(SPORT_CHOICES).toContain('football');
+    expect(SPORT_CHOICES).not.toContain('basketball');
+    expect(new Set(SPORT_CHOICES).size).toBe(SPORT_CHOICES.length);
   });
 });

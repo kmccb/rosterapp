@@ -10,7 +10,8 @@ import type { School } from '../../ohio/stateModel';
 import { loadIndex, searchSchools } from '../store';
 import { listRosters, type RosterRow } from './adminApi';
 import { todayIso } from './saveArgs';
-import { capital, groupSchools, longDate, STATUS_LABEL } from './schools';
+import { sportLabel } from '../sportSeasons';
+import { groupSchools, longDate, STATUS_LABEL } from './schools';
 import { SchoolPage } from './SchoolPage';
 
 /**
@@ -239,7 +240,7 @@ export function Manage() {
                   </span>
                   <span>
                     <span className="mg-list-sports">
-                      {g.rows.map((r) => `${capital(r.sport)} ${r.player_count}`).join(' · ')}
+                      {g.rows.map((r) => `${sportLabel(r.sport)} ${r.player_count}`).join(' · ')}
                     </span>
                     {g.problems.map((p) => (
                       <span className="mg-list-problem" key={p}>

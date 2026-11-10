@@ -121,6 +121,25 @@ not a config bug — wait for the next cron. Consequences:
 Every one lives under `/oh/`, because Poland's service worker answers any other path with
 Poland's own page — a short address outside that prefix would never reach the directory at all.
 
+**Since 2026-11 a person typing the bare `/` is sent to the marketing site** (Tom: football is
+over, sell schools) — by a Pages Function (`functions/index.ts`, decision and its reasons in
+`src/marketing/rootVisit.ts`), **never by a `_redirects` line**: the worker precaches `index.html` via
+`/index.html?__WB_REVISION__=…` → 308 → `/?…`, a path-only rule would follow that to the marketing
+site (which allows any origin) and install it as Poland's page on every home screen. The function
+redirects only a top-level navigation with no query, so the worker and `/?c=` share links get
+Poland. **Delete `functions/index.ts` before football 2027.**
+
+## Teams within a sport
+
+A school can field several teams in one sport (basketball first): each is its own `school_roster`
+row whose sport name carries the team — `boys basketball`, `boys jv basketball`,
+`girls freshman basketball`; varsity is never written, and a bare `basketball` is a school that
+never said which. `sportTeam`/`sportKey`/`baseSport` in `src/oh/sportSeasons.ts` read and write
+them; season, glyph and order ask the base sport. A sport becomes teamed by being listed in
+`TEAMED` (`src/oh/manage/schools.ts`), which is what the panel's picker offers. Each team links
+the school's calendar with its own filter (`Basketball (Boys JV)`). The space-separated names
+fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-name slug first.
+
 ## Supabase (migrations 0001–0008 APPLIED in production)
 
 - Posture everywhere: RLS on with **zero policies**, table grants revoked, access only via

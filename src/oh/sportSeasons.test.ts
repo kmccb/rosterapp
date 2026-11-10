@@ -6,6 +6,9 @@ import {
   seasonNote,
   sortSportsForNow,
   sportLabel,
+  baseSport,
+  sportKey,
+  sportTeam,
 } from './sportSeasons';
 
 describe('sport seasons', () => {
@@ -78,5 +81,63 @@ describe('sport seasons', () => {
   it('knows every sport it has a calendar for', () => {
     expect(knownSports()).toContain('football');
     expect(knownSports()).toHaveLength(16);
+  });
+});
+
+describe('a school’s teams within a sport', () => {
+  it('reads gender and level out of the name, and varsity out of their absence', () => {
+    expect(sportTeam('boys jv basketball')).toEqual({ base: 'basketball', gender: 'boys', level: 'jv' });
+    expect(sportTeam('Girls  Freshman Basketball')).toEqual({ base: 'basketball', gender: 'girls', level: 'freshman' });
+    expect(sportTeam('boys basketball')).toEqual({ base: 'basketball', gender: 'boys', level: 'varsity' });
+    expect(sportTeam('basketball')).toEqual({ base: 'basketball', gender: null, level: 'varsity' });
+    expect(sportTeam('cross country')).toEqual({ base: 'cross country', gender: null, level: 'varsity' });
+    expect(sportTeam('boys')).toEqual({ base: 'boys', gender: null, level: 'varsity' });
+    expect(sportTeam('boys varsity basketball')).toEqual({ base: 'basketball', gender: 'boys', level: 'varsity' });
+  });
+
+  it('writes a name back that reads the same', () => {
+    for (const name of ['boys jv basketball', 'girls basketball', 'basketball', 'girls freshman basketball']) {
+      expect(sportKey(sportTeam(name))).toBe(name);
+    }
+    expect(sportKey({ base: 'basketball', gender: 'boys', level: 'varsity' })).toBe('boys basketball');
+  });
+
+  it('asks the season and the hub about the sport, not the team', () => {
+    expect(baseSport('girls jv basketball')).toBe('basketball');
+    expect(inSeason('boys freshman basketball', 12)).toBe(true);
+    expect(inSeason('boys freshman basketball', 9)).toBe(false);
+    expect(seasonNote('girls basketball', new Date('2026-09-15T12:00:00'))).toBe('Starts in November');
+  });
+
+  it('prints JV as an initialism', () => {
+    expect(sportLabel('boys jv basketball')).toBe('Boys JV Basketball');
+    expect(sportLabel('girls freshman basketball')).toBe('Girls Freshman Basketball');
+  });
+
+  it('keeps three teams as three tiles', () => {
+    expect(hubSports(['boys basketball', 'boys jv basketball', 'boys freshman basketball'])).toEqual([
+      'boys basketball',
+      'boys jv basketball',
+      'boys freshman basketball',
+      'football',
+    ]);
+  });
+
+  it('lists a sport’s teams the way a program does', () => {
+    const november = new Date('2026-11-15T12:00:00');
+    expect(
+      sortSportsForNow(
+        ['girls jv basketball', 'football', 'boys freshman basketball', 'girls basketball', 'boys jv basketball', 'boys basketball', 'wrestling'],
+        november,
+      ),
+    ).toEqual([
+      'boys basketball',
+      'boys jv basketball',
+      'boys freshman basketball',
+      'girls basketball',
+      'girls jv basketball',
+      'football',
+      'wrestling',
+    ]);
   });
 });

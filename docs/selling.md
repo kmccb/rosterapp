@@ -15,7 +15,7 @@ coach before promising another sport a Stats tab.
 These lines are the one place those numbers live — change them here and on
 the site (`marketing/index.html`) together, and quote whatever they say.
 
-One roster per sport today: the panel has no separate entry for a second level or for boys’ and girls’ teams of the same sport. Say so before a school assumes otherwise.
+Basketball is sold by team: boys’ and girls’, each as varsity, JV and freshman, every one its own card with its own roster and schedule (one team is $400; the whole-school price covers them all). Every other sport is still one roster per sport — say so before a school assumes otherwise.
 
 ## What to show a prospect
 
@@ -123,6 +123,10 @@ school has two sports live, or any live sport that isn't football, its /oh/
 page opens on a hub instead of straight to the roster. The whole-school
 price at the top covers it.
 
+For basketball, pick the team in the sport list — “Boys JV Basketball”, “Girls
+Basketball” (varsity), and so on — and add a card for each team the school
+wants. Each shows on the hub as its own tile.
+
 ### Playoff rankings
 
 A paid football page shows its playoff region on the League tab — Division,
@@ -181,7 +185,9 @@ the sheet owns it now.
 Ask for the calendar's iCal/subscribe link from whoever keeps the school's
 schedule. Check link with a filter naming the sport and level the way the
 calendar itself writes it — for Eventlink that reads like
-`Volleyball (Girls V)`. Only promise this for a scheduling system that has a
+`Volleyball (Girls V)`. A school calendar that lists every level links once per
+team, each with its own filter: `Basketball (Boys V)`, `Basketball (Boys JV)`,
+`Basketball (Boys F)` — the bracket keeps varsity from catching JV. Only promise this for a scheduling system that has a
 passing sample in `src/sync/fixtures/` — today that's ScheduleStar and
 Eventlink; anything else, paste the schedule by hand as before.
 
