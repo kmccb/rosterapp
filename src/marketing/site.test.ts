@@ -59,13 +59,13 @@ describe('the marketing page', () => {
   });
 
   it('quotes the prices docs/selling.md quotes', () => {
-    expect(text).toMatch(/\$400\s*\/ season/);
-    expect(text).toMatch(/\$1,800\s*\/ year/);
+    expect(text).toMatch(/\$1,200\s*\/ year/);
+    expect(text).toMatch(/\$2,000\s*\/ year/);
     expect(text).toMatch(/\$150\s*\/ sport \/ season/);
     expect(text).toMatch(/\$600\s*\/ year, every sport with stats/);
     expect(text).toMatch(/first season is free/i);
     const selling = readFileSync(new URL('../../docs/selling.md', import.meta.url), 'utf8');
-    for (const price of ['$400', '$1,800', '$150', '$600']) expect(selling).toContain(price);
+    for (const price of ['$1,200', '$2,000', '$150', '$600']) expect(selling).toContain(price);
   });
 
   // Stats are an add-on the seller sets up from wherever a team keeps them —

@@ -5,8 +5,11 @@ First time? Work through docs/going-live.md before the first sale.
 The system stores a paid-through date and a note. Everything else — the
 pitch, the invoice, the check — happens between people.
 
-One team is $400 a season. A whole school — every sport — is $1,800
-a year. A district or conference is quoted. A school's first season is free.
+Varsity — every varsity sport, fall, winter and spring, under one school
+link — is $1,200 a year. All high school — freshman, JV and varsity for every
+sport, with QR flyers, gym signs and the website button — is $2,000 a year.
+A district (middle school teams, or several schools on one invoice) is quoted.
+A school's first season is free.
 Stats are an add-on: $150 per sport per season, or $600 a year for every
 sport that keeps stats. They come from wherever the team keeps them —
 MaxPreps (football runs on its own, below), Hudl, or the coach's spreadsheet —
@@ -15,7 +18,7 @@ coach before promising another sport a Stats tab.
 These lines are the one place those numbers live — change them here and on
 the site (`marketing/index.html`) together, and quote whatever they say.
 
-Basketball is sold by team: boys’ and girls’, each as varsity, JV and freshman, every one its own card with its own roster and schedule (one team is $400; the whole-school price covers them all). Every other sport is still one roster per sport — say so before a school assumes otherwise.
+Basketball is sold by team: boys’ and girls’, each as varsity, JV and freshman, every one its own card with its own roster and schedule (Varsity covers the varsity cards; All high school covers them all). Every other sport is still one roster per sport — say so before a school assumes otherwise.
 
 ## What to show a prospect
 
