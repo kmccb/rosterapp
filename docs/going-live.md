@@ -322,10 +322,16 @@ line saying so and reads the file's teams alone.
 
 1. **Migration 0009.** Paste `supabase/migrations/0009_stats_source.sql`
    into the dashboard SQL editor, run it, run it again (apply-twice gate),
-   then `node scripts/verify-school-roster.mjs` — expect 13 ok lines (14
-   with `VERIFY_SLUG` set in `.env.local`). The two new ones: anon can read
-   the stats targets and gets only `slug`, `sport` and `stats_source_url`;
-   anon cannot set a stats source.
+   then `node scripts/verify-school-roster.mjs`. Without 0011 it prints 18
+   checks, 15 ok (16 with `VERIFY_SLUG` set in `.env.local`), and three FAIL
+   lines for 0011's purge and two helpers; that is expected until 0011 is in.
+   The two 0009 ones: anon can read the stats targets and gets only `slug`,
+   `sport` and `stats_source_url`; anon cannot set a stats source.
+
+   **Apply pending migrations in numeric order.** 0010 deliberately skips the
+   schema-wide re-grant, and 0009's re-grant list does not name
+   `school_visit_count` or `school_visits`, so running 0010 before 0009 would
+   silently revoke the fan page's visit counting.
 
 2. **The repo variables.** GitHub → Settings → Secrets and variables →
    Actions → Variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
@@ -354,3 +360,96 @@ warns and falls back to the file's teams, so a school that exists only in
 the database simply isn't refreshed that run — its committed file stays,
 under its last date. A page that cannot be read still fails the run and
 keeps the committed file, as before.
+
+## v7: share-code limits
+
+One caller can now make ten new share codes a day, ahead of the global 200,
+so a script can no longer spend the day's codes for every coach. Re-publishing
+an existing code is not counted. Expired codes and old counts are cleared
+nightly.
+
+There is no deploy ordering. 0011 replaces `roster_create` and `roster_delete`
+in place with the same parameters, and the app needs no change: a refusal uses
+the errcode the global limit already uses, and the coach reads its message as
+written.
+
+1. **Migration 0011.** Paste `supabase/migrations/0011_share_limits.sql` into
+   the dashboard SQL editor, run it, run it again (apply-twice gate), then
+   `node scripts/verify-school-roster.mjs` — expect 18 checks, all ok with 0009
+   applied (19 with `VERIFY_SLUG` set in `.env.local`); without 0009 the two stats
+   checks print FAIL, leaving 16 ok (17 with the slug). Apply 0009 and 0010 first
+   if they are pending, in numeric order. The five new ones: anon cannot run the
+   purge or either helper, and neither new table is exposed (the two table checks
+   also pass before 0011, so only the three function checks notice it is missing).
+
+2. **Prove each caller is counted separately.** This is the one thing the
+   migration cannot check for itself, so do it straight after applying, at a quiet
+   hour. On a phone, publish a new roster over wifi and press Stop sharing. Turn
+   wifi off, publish again over cellular, and press Stop sharing. Then in the SQL
+   editor run:
+
+   ```sql
+   select caller_hash, n from public.share_caller_quota where day = current_date;
+   ```
+
+   - **Two rows with `n` of 1 each:** correct. Carry on.
+   - **One row with `n` of 2: stop and roll back.** The database is seeing one
+     shared address for different networks, so every coach in the state would
+     share ten codes a day. Run this in the SQL editor:
+
+     ```sql
+     create or replace function public.share_caller_hash()
+     returns text
+     language sql
+     set search_path = public, pg_temp
+     as $$ select null::text $$;
+     ```
+
+     Publishing then falls back to the global 200 alone, as it did before 0011,
+     and takes effect at once. Nothing else needs undoing. Do not re-run 0011,
+     which puts the limit back, until the address is understood.
+   - **No rows:** the requests carried no usable address. Coaches are not harmed,
+     they are held by the global 200 alone, but the limit is doing nothing.
+   - **More than two rows:** a coach probably published at the same moment. Run
+     the two publishes again later and compare the new rows.
+
+3. **Schedule the purge.** `pg_cron` is already on (the sync job runs on it), so just run
+   `supabase/cron/share-limits-purge.sql` once in the SQL editor. To see it work
+   without waiting for the night, run `select public.share_limits_purge();` —
+   it answers with how many rosters, quota rows and caller rows it removed.
+
+**What this costs if it breaks.** A request with a missing or unreadable address
+still publishes, under the global limit alone. If the purge never runs, nothing
+visible changes: expired codes already read as missing, and the tables just grow.
+A coach whose code went 400 days without an upload and was purged sees Upload
+refused with “that code and key do not match a shared roster”. They press **Stop
+sharing**, which now succeeds for a code that is already gone, then **Publish**,
+and send out the new code.
+
+## v8: slug and sport names
+
+The database now refuses a paid-school row whose slug is not the directory's
+shape (lowercase letters, digits, hyphens) or whose sport is not lowercase words
+with one space between (`football`, `cross country`, `girls jv basketball`).
+Everything the panel offers already passes, so nothing in the app changes and
+there is no deploy ordering. 0012 does not depend on 0009–0011.
+
+1. **Migration 0012.** Paste `supabase/migrations/0012_school_roster_names.sql`
+   into the dashboard SQL editor, run it, and run it again (apply-twice gate).
+   If an existing row breaks the rules the file stops before changing anything
+   and names each one as `slug / sport`. Rename or delete those rows in the panel,
+   then run it again.
+
+2. **Check it.** In the SQL editor:
+
+   ```sql
+   select conname from pg_constraint where conname like 'school_roster_%_shape';
+   ```
+
+   Two rows: `school_roster_slug_shape` and `school_roster_sport_shape`.
+   `node scripts/verify-school-roster.mjs` is unchanged by this and should give
+   the same count as before.
+
+**What this costs if it breaks.** A save with a bad name is refused with a
+sentence saying which rule it broke; the panel shows it as it shows any refusal.
+No fan page reads these rules.

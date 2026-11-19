@@ -354,6 +354,59 @@ describe('loadSchoolRoster', () => {
     const got = await loadSchoolRoster('hubbard-hubbard', 'football');
     expect(got?.logo).toBe(dataUri);
   });
+
+  // A private window, or a browser blocking site data, throws from storage.
+  // The answer the server gave must still be the answer the page gets.
+  it('still answers no roster when storage refuses to forget the old copy', async () => {
+    const cached = { season: 2025, players: [], colors: null, logo: null };
+    localStorageMock.set(cacheKey('hubbard-hubbard', 'football'), JSON.stringify(cached));
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => localStorageMock.get(key) ?? null,
+      setItem: () => {
+        throw new Error('QuotaExceededError');
+      },
+      removeItem: () => {
+        throw new Error('SecurityError');
+      },
+    });
+    mockedRpc.mockResolvedValue(null);
+
+    // Not the retired copy: the throw must not land in the no-signal fallback.
+    await expect(loadSchoolRoster('hubbard-hubbard', 'football')).resolves.toBeNull();
+  });
+
+  it('still hands over a roster the server answered when storage refuses every touch', async () => {
+    const refuse = () => {
+      throw new Error('SecurityError');
+    };
+    vi.stubGlobal('localStorage', { getItem: refuse, setItem: refuse, removeItem: refuse });
+    const roster = { season: 2026, players: [{ id: '1', number: '7' }], colors: null };
+    mockedRpc.mockResolvedValue(roster);
+
+    await expect(loadSchoolRoster('hubbard-hubbard', 'football')).resolves.toEqual({
+      ...roster,
+      logo: null,
+      schedule: null,
+      league: null,
+    });
+  });
+
+  it('answers no roster, rather than throwing, when the fetch fails and storage refuses a read', async () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('SecurityError');
+      },
+      setItem: () => {
+        throw new Error('SecurityError');
+      },
+      removeItem: () => {
+        throw new Error('SecurityError');
+      },
+    });
+    mockedRpc.mockRejectedValue(new Error('Network error'));
+
+    await expect(loadSchoolRoster('hubbard-hubbard', 'football')).resolves.toBeNull();
+  });
 });
 
 describe('loadSchoolSports', () => {

@@ -256,22 +256,34 @@ export async function loadSchoolRoster(slug: string, sport: string): Promise<Sch
         schedule: validSchedule(body.schedule),
         league: validLeague(body.league),
       };
-      if (slug === chosenSlug()) {
-        try {
-          localStorage.setItem(cacheKey(slug, sport), JSON.stringify(clean));
-        } catch {
-          // A full jar must not fail the fetch that succeeded.
-        }
+      // The followed-school check reads storage too, so it sits inside the
+      // same try: a jar that refuses even a read must not turn the server's
+      // answer into the no-signal path below.
+      try {
+        if (slug === chosenSlug()) localStorage.setItem(cacheKey(slug, sport), JSON.stringify(clean));
+      } catch {
+        // A full or refusing jar must not fail the fetch that succeeded.
       }
       return clean;
     }
     // The function answered null: no live roster. Clear a stale cache so an
     // expired school goes dark on phones too, not just on the server.
-    if (slug === chosenSlug()) localStorage.removeItem(cacheKey(slug, sport));
+    // A storage that refuses the removal must not turn this into the catch
+    // below, which would hand back the very copy the server just retired.
+    try {
+      if (slug === chosenSlug()) localStorage.removeItem(cacheKey(slug, sport));
+    } catch {
+      // Nothing could have been kept, so nothing stale can be shown.
+    }
     return null;
   } catch {
-    // No signal — the kept copy is the point of keeping one.
-    return parseCached(localStorage.getItem(cacheKey(slug, sport)));
+    // No signal — the kept copy is the point of keeping one. A storage that
+    // refuses even a read (a private window) has no copy to give.
+    try {
+      return parseCached(localStorage.getItem(cacheKey(slug, sport)));
+    } catch {
+      return null;
+    }
   }
 }
 

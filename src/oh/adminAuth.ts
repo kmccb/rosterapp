@@ -59,8 +59,26 @@ export const loadSession = (): Session | null => {
   }
 };
 
-export const saveSession = (s: Session): void => localStorage.setItem(SESSION, JSON.stringify(s));
-export const clearSession = (): void => localStorage.removeItem(SESSION);
+/*
+ * Storage can refuse outright — a private window, a browser set to block site
+ * data — and a throw here would land in the middle of sign-in or sign-out.
+ * Losing the session to a refusal only means signing in again next visit,
+ * which is far better than a panel that will not open or will not let go.
+ */
+export const saveSession = (s: Session): void => {
+  try {
+    localStorage.setItem(SESSION, JSON.stringify(s));
+  } catch {
+    // Signed in for this page only.
+  }
+};
+export const clearSession = (): void => {
+  try {
+    localStorage.removeItem(SESSION);
+  } catch {
+    // Nothing could have been kept, so there is nothing to clear.
+  }
+};
 
 /**
  * A token that will still be alive when the request lands. Refreshed with

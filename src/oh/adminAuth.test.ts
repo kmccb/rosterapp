@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { sessionFromUrl, freshToken, saveSession, loadSession } from './adminAuth';
+import { sessionFromUrl, freshToken, saveSession, loadSession, clearSession } from './adminAuth';
 
 describe('sessionFromUrl', () => {
   it('reads the tokens a magic link lands with', () => {
@@ -100,5 +100,29 @@ describe('freshToken', () => {
     const token = await freshToken();
     expect(token).toBeNull();
     expect(loadSession()).toBeNull();
+  });
+});
+
+describe('a storage that refuses', () => {
+  // What a private window or blocked site data looks like from the page:
+  // every touch of storage throws.
+  beforeEach(() => {
+    const refuse = () => {
+      throw new Error('SecurityError');
+    };
+    vi.stubGlobal('localStorage', { getItem: refuse, setItem: refuse, removeItem: refuse });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('lets sign-in carry on without keeping the session', () => {
+    expect(() => saveSession({ accessToken: 'a', refreshToken: 'r', expiresAt: Date.now() + 60_000 })).not.toThrow();
+    expect(loadSession()).toBeNull();
+  });
+
+  it('lets sign-out carry on', () => {
+    expect(() => clearSession()).not.toThrow();
   });
 });

@@ -10,7 +10,8 @@
 import { scopedKey, teamScope } from '../scope';
 import type { StatsStore } from '../stats/statsStore';
 import type { Theme } from '../theme/theme';
-import type { Player, Roster } from '../types';
+import type { Roster } from '../types';
+import { cleanFetched, type FetchedRoster } from './sharedRoster';
 
 const BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -309,27 +310,7 @@ const rpcWithExtras = async <T>(
   return { result: await rpc<T>(fn, body), statsShared: false, themeShared: false };
 };
 
-type FetchedRow = {
-  team_name: string;
-  season: string;
-  players: Player[];
-  /** Absent until the database carries the stats column. */
-  stats?: StatsStore;
-  /** Absent until the database carries the theme column. */
-  theme?: Theme | Record<string, never>;
-  updated_at: string;
-};
-
-export type FetchedRoster = {
-  teamName: string;
-  season: string;
-  players: Player[];
-  /** Empty when the publisher had none, or the database predates the column. */
-  stats: StatsStore;
-  /** Null when the publisher set no badge, or the database predates the column. */
-  theme: Theme | null;
-  updatedAt: string;
-};
+export type { FetchedRoster };
 
 /** Null when the code doesn't match anything, which includes expired codes. */
 export const fetchShared = async (
@@ -341,26 +322,9 @@ export const fetchShared = async (
     throw new ShareError('A share code is 8 characters, like BXQ4-T9KM.');
   }
 
-  const rows = await rpc<FetchedRow[]>('roster_fetch', { p_code: normalized }, timeoutMs);
+  const rows = await rpc<Array<Record<string, unknown>>>('roster_fetch', { p_code: normalized }, timeoutMs);
   const row = rows?.[0];
-  if (!row) return null;
-
-  return {
-    teamName: row.team_name ?? '',
-    season: row.season ?? '',
-    // Re-id on the way in: ids came off another phone and only have to be
-    // unique here, and the review table keys rows by them.
-    players: (Array.isArray(row.players) ? row.players : []).map((p) => ({
-      ...p,
-      id: crypto.randomUUID(),
-    })),
-    stats: row.stats && typeof row.stats === 'object' ? row.stats : {},
-    theme:
-      row.theme && typeof row.theme === 'object' && 'logo' in row.theme
-        ? (row.theme as Theme)
-        : null,
-    updatedAt: row.updated_at,
-  };
+  return row ? cleanFetched(row) : null;
 };
 
 export const createShare = async (

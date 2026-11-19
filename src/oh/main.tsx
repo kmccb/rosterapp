@@ -1,8 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { DEMO_SLUG, isDemo } from './demo';
 import { Directory } from './Directory';
 import { Manage } from './manage/Manage';
+import { PageCrash } from './PageCrash';
 import { Privacy } from './Privacy';
 import { School } from './School';
 import '../styles.css';
@@ -39,4 +41,10 @@ const page = isDemo() ? (
   <Directory />
 );
 
-createRoot(document.getElementById('root')!).render(<StrictMode>{page}</StrictMode>);
+const showsSchool = !isDemo() && !params.has('manage') && !params.has('privacy');
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ErrorBoundary fallback={<PageCrash school={showsSchool} />}>{page}</ErrorBoundary>
+  </StrictMode>,
+);

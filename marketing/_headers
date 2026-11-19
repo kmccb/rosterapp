@@ -1,0 +1,8 @@
+# Security headers for getroster.scottforge.ai. Nothing embeds this page and
+# it embeds nothing, so framing is refused outright.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Content-Security-Policy: frame-ancestors 'none'
