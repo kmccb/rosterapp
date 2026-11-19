@@ -187,7 +187,16 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
   **Deliberately skips the schema-wide revoke/re-grant** so it can't fail on a database without
   0009 — it grants only its own two functions. Additive: no deploy ordering (until it is applied
   the fan call fails silently and the card says the function is missing).
-- Verify with `node scripts/verify-school-roster.mjs` (13 checks once 0009 is applied, 14 with `VERIFY_SLUG` set in
+- **0011** (`supabase/migrations/0011_share_limits.sql`, written 2026-11-18, **not applied**; checked on
+  PGlite: applies twice, with or without 0009/0010) limits each caller to 10 new share codes a day ahead of
+  the global 200. `roster_create` is replaced in place (same five parameters, so its grants stand) and counts
+  a salted, per-day hash of the address in `share_caller_quota`: `cf-connecting-ip` first, then the first
+  `x-forwarded-for` entry, IPv6 by /64; no usable address means the global fuse alone, never an error.
+  `share_limits_purge()` (no anon or authenticated grant) deletes expired rosters and old counts, scheduled
+  by `supabase/cron/share-limits-purge.sql`. `roster_delete` now answers quietly for a code that no longer
+  exists, so a coach holding a purged code can Stop sharing and Publish again. Skips the schema-wide revoke/re-grant like 0010. Additive: no
+  deploy ordering. Runbook, including the check that the address header really arrives: `docs/going-live.md` v7.
+- Verify with `node scripts/verify-school-roster.mjs` (18 checks once 0009 and 0011 are applied, 19 with `VERIFY_SLUG` set in
   `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
   against a database that only has 0006 applied; the four 0008 door checks fail the same way
   against a database that doesn't have 0008 yet — that's the runbook telling the truth, not a bug.

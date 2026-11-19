@@ -354,3 +354,65 @@ warns and falls back to the file's teams, so a school that exists only in
 the database simply isn't refreshed that run — its committed file stays,
 under its last date. A page that cannot be read still fails the run and
 keeps the committed file, as before.
+
+## v7: share-code limits
+
+One caller can now make ten new share codes a day, ahead of the global 200,
+so a script can no longer spend the day's codes for every coach. Re-publishing
+an existing code is not counted. Expired codes and old counts are cleared
+nightly.
+
+There is no deploy ordering. 0011 replaces `roster_create` and `roster_delete`
+in place with the same parameters, and the app needs no change: a refusal uses
+the errcode the global limit already uses, and the coach reads its message as
+written.
+
+1. **Migration 0011.** Paste `supabase/migrations/0011_share_limits.sql` into
+   the dashboard SQL editor, run it, run it again (apply-twice gate), then
+   `node scripts/verify-school-roster.mjs` — expect 18 ok lines with 0009
+   applied (19 with `VERIFY_SLUG` set in `.env.local`). The five new ones: anon
+   cannot run the purge or either helper, and neither new table is exposed.
+
+2. **Prove each caller is counted separately.** This is the one thing the
+   migration cannot check for itself, so do it straight after applying, at a quiet
+   hour. On a phone, publish a new roster over wifi and press Stop sharing. Turn
+   wifi off, publish again over cellular, and press Stop sharing. Then in the SQL
+   editor run:
+
+   ```sql
+   select caller_hash, n from public.share_caller_quota where day = current_date;
+   ```
+
+   - **Two rows with `n` of 1 each:** correct. Carry on.
+   - **One row with `n` of 2: stop and roll back.** The database is seeing one
+     shared address for different networks, so every coach in the state would
+     share ten codes a day. Run this in the SQL editor:
+
+     ```sql
+     create or replace function public.share_caller_hash()
+     returns text
+     language sql
+     set search_path = public, pg_temp
+     as $$ select null::text $$;
+     ```
+
+     Publishing then falls back to the global 200 alone, as it did before 0011,
+     and takes effect at once. Nothing else needs undoing. Do not re-run 0011,
+     which puts the limit back, until the address is understood.
+   - **No rows:** the requests carried no usable address. Coaches are not harmed,
+     they are held by the global 200 alone, but the limit is doing nothing.
+   - **More than two rows:** a coach probably published at the same moment. Run
+     the two publishes again later and compare the new rows.
+
+3. **Schedule the purge.** Database → Extensions → enable `pg_cron`, then run
+   `supabase/cron/share-limits-purge.sql` once in the SQL editor. To see it work
+   without waiting for the night, run `select public.share_limits_purge();` —
+   it answers with how many rosters, quota rows and caller rows it removed.
+
+**What this costs if it breaks.** A request with a missing or unreadable address
+still publishes, under the global limit alone. If the purge never runs, nothing
+visible changes: expired codes already read as missing, and the tables just grow.
+A coach whose code went 400 days without an upload and was purged sees Upload
+refused with “that code and key do not match a shared roster”. They press **Stop
+sharing**, which now succeeds for a code that is already gone, then **Publish**,
+and send out the new code.
