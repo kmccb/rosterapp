@@ -416,3 +416,31 @@ A coach whose code went 400 days without an upload and was purged sees Upload
 refused with “that code and key do not match a shared roster”. They press **Stop
 sharing**, which now succeeds for a code that is already gone, then **Publish**,
 and send out the new code.
+
+## v8: slug and sport names
+
+The database now refuses a paid-school row whose slug is not the directory's
+shape (lowercase letters, digits, hyphens) or whose sport is not lowercase words
+with one space between (`football`, `cross country`, `girls jv basketball`).
+Everything the panel offers already passes, so nothing in the app changes and
+there is no deploy ordering. 0012 does not depend on 0009–0011.
+
+1. **Migration 0012.** Paste `supabase/migrations/0012_school_roster_names.sql`
+   into the dashboard SQL editor, run it, and run it again (apply-twice gate).
+   If an existing row breaks the rules the file stops before changing anything
+   and names each one as `slug / sport`. Rename or delete those rows in the panel,
+   then run it again.
+
+2. **Check it.** In the SQL editor:
+
+   ```sql
+   select conname from pg_constraint where conname like 'school_roster_%_shape';
+   ```
+
+   Two rows: `school_roster_slug_shape` and `school_roster_sport_shape`.
+   `node scripts/verify-school-roster.mjs` is unchanged by this and should give
+   the same count as before.
+
+**What this costs if it breaks.** A save with a bad name is refused with a
+sentence saying which rule it broke; the panel shows it as it shows any refusal.
+No fan page reads these rules.

@@ -106,7 +106,15 @@ export const saveTheme = (theme: Theme): void => {
   }
 };
 
-export const clearTheme = (): void => localStorage.removeItem(KEY());
+// initialTheme calls this on launch, so a storage that refuses (a private
+// window, blocked site data) must not take the whole page down with it.
+export const clearTheme = (): void => {
+  try {
+    localStorage.removeItem(KEY());
+  } catch {
+    // Nothing could have been kept, so there is nothing to clear.
+  }
+};
 
 /*
  * The teams baked into the page at build time, for sites serving more than one.

@@ -198,6 +198,13 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
   by `supabase/cron/share-limits-purge.sql`. `roster_delete` now answers quietly for a code that no longer
   exists, so a coach holding a purged code can Stop sharing and Publish again. Skips the schema-wide revoke/re-grant like 0010. Additive: no
   deploy ordering. Runbook, including the check that the address header really arrives: `docs/going-live.md` v7.
+- **0012** (`supabase/migrations/0012_school_roster_names.sql`, written 2026-11-19, **not applied**; checked on
+  PGlite: applies twice with or without 0009–0011) adds two check constraints on `school_roster` —
+  `school_roster_slug_shape` (`^[a-z0-9-]+$`, at most 80) and `school_roster_sport_shape` (`^[a-z]+( [a-z]+)*$`,
+  at most 40: a shape, not a list, so a new sport or teamed sport needs no migration) — and a trigger in front
+  of them that refuses in a sentence. A database already holding a bad row stops the file, which names the
+  rows and changes nothing. Its own file so such a row cannot hold back 0011. Additive: no deploy ordering.
+  Runbook: `docs/going-live.md` v8.
 - Verify with `node scripts/verify-school-roster.mjs` (18 checks once 0009 and 0011 are applied, 19 with `VERIFY_SLUG` set in
   `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
   against a database that only has 0006 applied; the four 0008 door checks fail the same way
