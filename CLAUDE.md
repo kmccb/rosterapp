@@ -4,7 +4,7 @@ Four things live in this repo; the first three share one deployment (Cloudflare 
 
 1. **The root PWA** (`/`, `/ysu/`, `/victorychristian/`) — the original "who is #17" app.
    Poland Seminary is the root team; installed on real phones; used offline at games.
-2. **The Ohio directory** (`/oh/`) — every OH school (717), searchable, schedules + scores,
+2. **The Ohio directory** (`/oh/`) — every OH school (716), searchable, schedules + scores,
    built as a **separate Vite pass** (`vite.oh.config.ts`), no service worker of its own.
 3. **The paid tier** — a school pays ($1,200/year for every varsity sport, $2,000/year for
    freshman, JV and varsity in every sport, first season free; Stats an add-on at $150/sport/season or $600/year for every sport with stats; concierge: the seller does everything), its `/oh/` page gains Lookup/Team/Schedule tabs, full two-color theming, uploaded crest, and
@@ -37,7 +37,10 @@ not a config bug — wait for the next cron. Consequences:
   `src/components/Keypad`, `src/ohio/*`). `src/oh/look.ts` deliberately DUPLICATES
   `src/theme/theme.ts`'s color math for this reason.
 - A **deliberate** root-app change is the one time the baseline is re-recorded (last done
-  2026-09-19: the Schools view on the League tab). Prove it first: normalise all three live
+  2026-11-19, twice on the security-hardening branch: the share/theme hardening, then the storage
+  guards; before that 2026-09-19, the Schools view on the League tab). The baseline's `root`, `ysu`
+  and `vc` are the sha256 of the raw Windows-built dist bytes (CRLF, beacon placeholder left in);
+  the guard reads only the `*Lf`, `*Shell` and `precache` values (`scripts/check-untouched.mjs`). Prove it first: normalise all three live
   pages (`/`, `/ysu/`, `/victorychristian/`) and their built counterparts the guard's way
   (`\r` stripped, beacon token blanked) and diff them — the only line allowed to differ in each
   is the `<script src="/assets/index-*.js">`
@@ -46,6 +49,18 @@ not a config bug — wait for the next cron. Consequences:
   live side before diffing. Then recompute the nine hashes with the guard's own `normalise`/`withoutTeams`, write
   them to the baseline, and re-run `node scripts/check-untouched.mjs`. The precache count must
   not move. Anything else in that diff is a regression, not a re-record.
+
+## Security headers
+
+`public/_headers` covers `/*`: nosniff, a strict referrer policy, `X-Frame-Options: DENY`, a locked
+Permissions-Policy, an **enforcing** `Content-Security-Policy: frame-ancestors 'none'` (the directive
+is ignored in a report-only policy), and a `Content-Security-Policy-Report-Only` whose inline script
+and style hashes `scripts/stamp-csp.mjs` stamps into `dist/_headers` after `build-teams --post` and
+before the guard (`src/security/csp.ts`; the build fails if the slot is missing). The Supabase origin
+is hand-written into `_headers`, so it must change with the project URL, and should be derived or
+checked by a test before the policy is enforced. `marketing/_headers` carries the same non-CSP
+headers. Installed Poland phones keep the precached `index.html`'s old headers until the next
+deliberate root re-record, so switching the CSP to enforcing reaches them late.
 
 ## Data sources
 
@@ -74,7 +89,7 @@ not a config bug — wait for the next cron. Consequences:
 - **ScheduleStar iCal** (uuid in `teams/poland/team.json`) feeds Poland's fixtures + kickoff
   times. Other sports statewide would come from ScheduleStar uuids obtained through the
   concierge relationship (phase 3 — no scrapeable source exists).
-- Directory data is **committed** (`public/oh/`, 717 school JSONs) — no database for it.
+- Directory data is **committed** (`public/oh/`, 716 school JSONs) — no database for it.
   Refreshed by `.github/workflows/directory.yml` (Sat+Wed 07:00 UTC), which commits to main
   → triggers deploy. `refresh.yml` (every 6h) POSTs a Cloudflare deploy hook (`CF_PAGES_DEPLOY_HOOK`
   secret) — a rebuild of the same commit that re-fetches Poland's schedule/league/weather.
@@ -187,7 +202,9 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
   calls it from `src/oh/visits.ts` once per school per load (not the demo, not a browser signed in
   to the panel); the panel's school page shows a Visitors card (`src/oh/manage/Visits.tsx`).
   **Deliberately skips the schema-wide revoke/re-grant** so it can't fail on a database without
-  0009 — it grants only its own two functions. Additive: no deploy ordering (until it is applied
+  0009 — it grants only its own two functions. **Apply pending migrations in numeric order:** 0009's
+  re-grant list does not name `school_visit_count` or `school_visits`, so 0010 before 0009 would
+  silently revoke the fan page's visit counting. Additive: no deploy ordering (until it is applied
   the fan call fails silently and the card says the function is missing).
 - **0011** (`supabase/migrations/0011_share_limits.sql`, written 2026-11-18, **not applied**; checked on
   PGlite: applies twice, with or without 0009/0010) limits each caller to 10 new share codes a day ahead of
@@ -205,14 +222,15 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
   of them that refuses in a sentence. A database already holding a bad row stops the file, which names the
   rows and changes nothing. Its own file so such a row cannot hold back 0011. Additive: no deploy ordering.
   Runbook: `docs/going-live.md` v8.
-- Verify with `node scripts/verify-school-roster.mjs` (18 checks once 0009 and 0011 are applied, 19 with `VERIFY_SLUG` set in
-  `.env.local`, needs `.env.local`). The sports check expects the identity object, so it fails
+- Verify with `node scripts/verify-school-roster.mjs` (needs `.env.local`). It runs 18 checks, 19 with
+  `VERIFY_SLUG` set, and all are ok only with both 0009 and 0011 applied. With 0009 only, the three 0011 checks
+  FAIL (15 ok); with 0011 only, the two 0009 checks FAIL (16 ok; one more ok in each case with the slug). The sports check expects the identity object, so it fails
   against a database that only has 0006 applied; the four 0008 door checks fail the same way
   against a database that doesn't have 0008 yet — that's the runbook telling the truth, not a bug.
 
 ## Tests and CI
 
-- `npx vitest run` — 814 tests / 62 files, all green. `npx tsc --noEmit` clean.
+- `npx vitest run` — 1008 tests / 73 files, all green. `npx tsc --noEmit` clean.
 - **Tests must pass env-free**: CI runs `npm test` with no Supabase vars (forks contract).
   Mock `./supa` (`vi.mock`), never stub env or global fetch for supa-dependent code.
 - CI = Cloudflare Pages' own build (project `rosterapp`, git-connected): every push to main
@@ -230,13 +248,14 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
 
 - `docs/selling.md` — the seller's runbook (activate a school in ~3 min; price lives here).
 - `docs/going-live.md` — first-time checklist + v2 (crest/tabs), v3 (all-sports), v4
-  (identity/league), and v5 (live sources) verification, each with its own deploy ordering (v5
-  has none — 0008 is additive). **The original 17-item 0004 sweep has never been run
+  (identity/league), v5 (live sources), v6 (stats source, 0009), v7 (share-code limits, 0011) and v8
+  (slug and sport names, 0012) verification, each with its own deploy ordering (v5–v8 have none —
+  the migrations are additive). **The original 17-item 0004 sweep has never been run
   end-to-end** — partial coverage exists (verify script, share-code smoke, theme contract
   partially).
 - Specs/plans in `docs/superpowers/{specs,plans}/` — the design history, in order.
 
-## Where things stand (2026-10-14)
+## Where things stand (2026-11-19)
 
 **Springfield (New Middletown) is the first real school, activated by the seller 2026-10-13/14** —
 football live on `/oh/springfield` (`/oh/?school=springfield-new-middletown`), real 41-player
@@ -271,6 +290,13 @@ re-run of `scripts/build-demo.mjs` by 17 November and on 1 December (`docs/selli
   paid school; `?school=` now stays in the address.
 
 **Open right now:**
+0. **The security-hardening branch** (share limits, constraints, security headers, storage guards): **0011 and
+   0012 are written, not applied** — apply each twice in the SQL editor, in numeric order (with 0009 and
+   0010 pending, those first), then schedule the purge from `supabase/cron/share-limits-purge.sql`. On the PR
+   preview, check whether `_headers` reach `/` (served through `functions/index.ts` `context.next()`). The CSP
+   is report-only until that is checked and the console is quiet. Vite is held at 8.2.1 to keep Poland's
+   bundle, which leaves a dev-server advisory: don't run `npm run dev` (it uses `--host`) on untrusted wifi
+   until vite is bumped with a re-record.
 1. **Re-upload Springfield's crest** (panel → Look → Replace crest, the full logo —
    `docs/design/springfield-video/tigers-logo.png` — then Save look). Since PR #22 (Poland-style
    icons) and the transparent-crest change, an upload is padded (not cropped) and its flat backdrop
@@ -280,7 +306,9 @@ re-run of `scripts/build-demo.mjs` by 17 November and on 1 December (`docs/selli
 2. **Migration 0009 is NOT applied** — the panel's Stats link box errors ("Could not find the
    function … school_roster_set_stats_source"). Springfield doesn't need it. To apply: paste
    `supabase/migrations/0009_stats_source.sql` into the Supabase SQL editor, run twice, then
-   `node scripts/verify-school-roster.mjs` (expect 13). Never run against Postgres yet.
+   `node scripts/verify-school-roster.mjs` — on a database without 0011 it prints 18 checks, 15 ok (16 with
+   `VERIFY_SLUG`) and three FAIL lines for 0011's purge and helpers, which is the runbook telling the truth.
+   Never run against Postgres yet.
 3. **Unproven in production:** the MaxPreps workflow has never run on a GitHub runner (first
    scheduled run Sat 2026-10-17 14:00 UTC — check Actions); whether the repo variables
    `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` still exist (unset = job reads the file only); a

@@ -322,10 +322,16 @@ line saying so and reads the file's teams alone.
 
 1. **Migration 0009.** Paste `supabase/migrations/0009_stats_source.sql`
    into the dashboard SQL editor, run it, run it again (apply-twice gate),
-   then `node scripts/verify-school-roster.mjs` — expect 13 ok lines (14
-   with `VERIFY_SLUG` set in `.env.local`). The two new ones: anon can read
-   the stats targets and gets only `slug`, `sport` and `stats_source_url`;
-   anon cannot set a stats source.
+   then `node scripts/verify-school-roster.mjs`. Without 0011 it prints 18
+   checks, 15 ok (16 with `VERIFY_SLUG` set in `.env.local`), and three FAIL
+   lines for 0011's purge and two helpers; that is expected until 0011 is in.
+   The two 0009 ones: anon can read the stats targets and gets only `slug`,
+   `sport` and `stats_source_url`; anon cannot set a stats source.
+
+   **Apply pending migrations in numeric order.** 0010 deliberately skips the
+   schema-wide re-grant, and 0009's re-grant list does not name
+   `school_visit_count` or `school_visits`, so running 0010 before 0009 would
+   silently revoke the fan page's visit counting.
 
 2. **The repo variables.** GitHub → Settings → Secrets and variables →
    Actions → Variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
@@ -369,9 +375,12 @@ written.
 
 1. **Migration 0011.** Paste `supabase/migrations/0011_share_limits.sql` into
    the dashboard SQL editor, run it, run it again (apply-twice gate), then
-   `node scripts/verify-school-roster.mjs` — expect 18 ok lines with 0009
-   applied (19 with `VERIFY_SLUG` set in `.env.local`). The five new ones: anon
-   cannot run the purge or either helper, and neither new table is exposed.
+   `node scripts/verify-school-roster.mjs` — expect 18 checks, all ok with 0009
+   applied (19 with `VERIFY_SLUG` set in `.env.local`); without 0009 the two stats
+   checks print FAIL, leaving 16 ok (17 with the slug). Apply 0009 and 0010 first
+   if they are pending, in numeric order. The five new ones: anon cannot run the
+   purge or either helper, and neither new table is exposed (the two table checks
+   also pass before 0011, so only the three function checks notice it is missing).
 
 2. **Prove each caller is counted separately.** This is the one thing the
    migration cannot check for itself, so do it straight after applying, at a quiet
@@ -404,7 +413,7 @@ written.
    - **More than two rows:** a coach probably published at the same moment. Run
      the two publishes again later and compare the new rows.
 
-3. **Schedule the purge.** Database → Extensions → enable `pg_cron`, then run
+3. **Schedule the purge.** `pg_cron` is already on (the sync job runs on it), so just run
    `supabase/cron/share-limits-purge.sql` once in the SQL editor. To see it work
    without waiting for the night, run `select public.share_limits_purge();` —
    it answers with how many rosters, quota rows and caller rows it removed.

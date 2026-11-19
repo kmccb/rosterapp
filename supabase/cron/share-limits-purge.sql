@@ -1,9 +1,8 @@
 -- Clears expired share codes and old publishing counts every night. Applied by
 -- hand, once, in the dashboard SQL editor, after migration 0011. Not a numbered
--- migration: pg_cron has to be switched on first, and 0011 must not fail on a
--- database where it isn't.
+-- migration, so 0011 cannot fail on a database where pg_cron is off.
 --
--- Before running: Database → Extensions → enable pg_cron.
+-- pg_cron is already enabled: sync-sources runs on it (see sync-sources.sql).
 -- 08:17 UTC is the small hours in Ohio, well away from anyone publishing.
 
 select cron.schedule(
