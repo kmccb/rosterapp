@@ -41,7 +41,9 @@ not a config bug — wait for the next cron. Consequences:
   pages (`/`, `/ysu/`, `/victorychristian/`) and their built counterparts the guard's way
   (`\r` stripped, beacon token blanked) and diff them — the only line allowed to differ in each
   is the `<script src="/assets/index-*.js">`
-  tag. Then recompute the nine hashes with the guard's own `normalise`/`withoutTeams`, write
+  tag. Cloudflare injects a `<!-- Cloudflare Pages Analytics -->…<!-- Cloudflare Pages Analytics -->`
+  beacon block into the live pages at the edge (it is never in `dist/`), so strip it from the
+  live side before diffing. Then recompute the nine hashes with the guard's own `normalise`/`withoutTeams`, write
   them to the baseline, and re-run `node scripts/check-untouched.mjs`. The precache count must
   not move. Anything else in that diff is a regression, not a re-record.
 
@@ -211,8 +213,9 @@ fail `scripts/maxpreps.mjs`' `plainName`, so basketball stats will need a file-n
   (in the Pages dashboard, and in README's Deploying section) runs env-free `npm test` →
   `paid-weather.mjs` (fail-soft) → `npm run build` (+guard). Env vars live in the Pages project,
   **Production and Preview separately**, plain text — they ship in the bundle by design
-  (`NODE_VERSION`=22, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; `VITE_CF_BEACON` empty —
-  the beacon is off). The GitHub repo *variables* of the same names are read by one thing: `maxpreps.yml`, to ask
+  (`NODE_VERSION`=22, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; `VITE_CF_BEACON` empty, so
+  the page's own beacon is off — but Cloudflare's Web Analytics beacon is on, injected at the edge
+  into every live page). The GitHub repo *variables* of the same names are read by one thing: `maxpreps.yml`, to ask
   the database which teams have a stats link (public values; if they are unset the job reads
   `maxpreps-teams.json` only).
 

@@ -34,18 +34,56 @@ const KEY = () => scopedKey('rosterapp.theme.v1');
 
 type Stored = { schema: 1; theme: Theme };
 
+/*
+ * The logo is written into `url("…")` on a CSS variable, so these match the whole
+ * string: a value that merely starts well can close the quote and name a second
+ * address behind it. Duplicates LOGO_DATA_URI in src/oh/rosterStore.ts, because
+ * the directory may not import the root app's runtime, nor this file its.
+ */
+const LOGO_DATA_URI = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/;
+const BAKED_BADGE = /^\/(?:[a-z0-9-]+\/)*badge\.jpg$/;
+const HEX = /^#[0-9a-f]{6}$/i;
+
+/** Every colour applyTheme paints with; a missing one throws partway through. */
+const PAINTED = ['ground', 'surface', 'text', 'muted', 'accent', 'accentInk'] as const;
+
 const looksLikeTheme = (v: unknown): v is Theme => {
   if (typeof v !== 'object' || v === null) return false;
   const t = v as Record<string, unknown>;
-  const p = t.palette as Record<string, unknown> | undefined;
+  const p = t.palette as Record<string, unknown> | null | undefined;
   // Either an uploaded badge (a data URI) or one baked into the build (a path).
   const logo = typeof t.logo === 'string' ? t.logo : '';
   return (
-    (logo.startsWith('data:image/') || logo.startsWith('/')) &&
-    !!p &&
-    typeof p.ground === 'string' &&
-    typeof p.accent === 'string'
+    (LOGO_DATA_URI.test(logo) || BAKED_BADGE.test(logo)) &&
+    typeof p === 'object' &&
+    p !== null &&
+    PAINTED.every((name) => typeof p[name] === 'string' && HEX.test(p[name] as string))
   );
+};
+
+/**
+ * A theme that arrived in a share, rebuilt from its parts.
+ *
+ * Only an uploaded badge can travel: a path means nothing on another team's page.
+ * `origin` is left behind because it is this device's claim to have chosen the
+ * badge, and a share that could make that claim would outrank the page's own.
+ */
+export const sharedTheme = (v: unknown): Theme | null => {
+  if (!looksLikeTheme(v) || !LOGO_DATA_URI.test(v.logo)) return null;
+  const { ground, surface, line, text, muted, accent, accentInk } = v.palette;
+  return {
+    logo: v.logo,
+    palette: {
+      ground,
+      surface,
+      line: typeof line === 'string' && HEX.test(line) ? line : muted,
+      text,
+      muted,
+      accent,
+      accentInk,
+    },
+    seedHue: typeof v.seedHue === 'number' && Number.isFinite(v.seedHue) ? v.seedHue : -1,
+  };
 };
 
 export const loadTheme = (): Theme | null => {

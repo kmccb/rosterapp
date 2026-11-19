@@ -35,17 +35,53 @@ const KEY = () => scopedKey('rosterapp.stats.v1');
 
 type Stored = { schema: 1; stats: StatsStore };
 
-const isGame = (v: unknown): v is GameStats => {
-  if (typeof v !== 'object' || v === null) return false;
-  const g = v as Record<string, unknown>;
-  return typeof g.date === 'string' && typeof g.opponent === 'string' && typeof g.byPlayer === 'object' && g.byPlayer !== null;
+const isPlain = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const isGame = (v: unknown): v is GameStats =>
+  isPlain(v) && typeof v.date === 'string' && typeof v.opponent === 'string' && isPlain(v.byPlayer);
+
+const isSeason = (v: unknown): v is SeasonStats =>
+  isPlain(v) && typeof v.label === 'string' && isPlain(v.byPlayer);
+
+/*
+ * Stats travel in shares, so these names can be anybody's. seasonTotals builds
+ * its answer by assigning to whatever key it is given, and JSON.parse makes
+ * `__proto__` an ordinary key: one crafted game would write onto Object.prototype
+ * for the whole page.
+ */
+const UNSAFE_KEY = new Set(['__proto__', 'constructor', 'prototype']);
+
+const safeEntries = (v: Record<string, unknown>): Array<[string, unknown]> =>
+  Object.entries(v).filter(([key]) => !UNSAFE_KEY.has(key));
+
+/** Numbers only: the card calls toFixed on these, and a null or a string throws there. */
+const cleanValues = (v: Record<string, unknown>): Record<string, number> => {
+  const out: Record<string, number> = {};
+  for (const [field, value] of safeEntries(v)) {
+    if (typeof value === 'number' && Number.isFinite(value)) out[field] = value;
+  }
+  return out;
 };
 
-const isSeason = (v: unknown): v is SeasonStats => {
-  if (typeof v !== 'object' || v === null) return false;
-  const s = v as Record<string, unknown>;
-  return typeof s.label === 'string' && typeof s.byPlayer === 'object' && s.byPlayer !== null;
+const cleanByPlayer = (v: Record<string, unknown>): Record<string, PlayerStats> => {
+  const out: Record<string, PlayerStats> = {};
+  for (const [key, player] of safeEntries(v)) {
+    if (!isPlain(player)) continue;
+    const categories: PlayerStats = {};
+    for (const [category, values] of safeEntries(player)) {
+      if (isPlain(values)) categories[category] = cleanValues(values);
+    }
+    out[key] = categories;
+  }
+  return out;
 };
+
+const cleanGame = (g: GameStats): GameStats => ({
+  date: g.date.slice(0, 20),
+  opponent: g.opponent.slice(0, 80),
+  byPlayer: cleanByPlayer(g.byPlayer),
+});
 
 /**
  * A season as stored, keeping only the well-formed games. One corrupt entry
@@ -75,9 +111,14 @@ const upgradeGame = (g: GameStats): GameStats => {
 };
 
 const tidySeason = (s: SeasonStats): SeasonStats => {
-  const { games, ...rest } = s as SeasonStats & { games?: unknown };
-  const kept = Array.isArray(games) ? games.filter(isGame).map(upgradeGame) : [];
-  return kept.length ? { ...rest, games: kept } : rest;
+  const games: unknown = s.games;
+  const kept = Array.isArray(games) ? games.filter(isGame).map(cleanGame).map(upgradeGame) : [];
+  const season: SeasonStats = {
+    label: s.label.slice(0, 60),
+    byPlayer: cleanByPlayer(s.byPlayer),
+    updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : '',
+  };
+  return kept.length ? { ...season, games: kept } : season;
 };
 
 /** Applies the same season/game rules `loadStats` uses to stats already in memory. */

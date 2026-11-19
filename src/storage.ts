@@ -1,17 +1,15 @@
+import { repairStoredPlayers } from './rosterGuard';
 import { scopedKey } from './scope';
-import { emptyRoster, type Player, type Roster } from './types';
+import { emptyRoster, type Roster } from './types';
 
 const KEY = () => scopedKey('rosterapp.v1');
 
 type Stored = { schema: 1; roster: Roster };
 
-const isPlayer = (v: unknown): v is Player => {
-  if (typeof v !== 'object' || v === null) return false;
-  const p = v as Record<string, unknown>;
-  return typeof p.id === 'string' && typeof p.number === 'string';
-};
-
-/** Anything unreadable is treated as "no roster yet" rather than crashing the app. */
+/**
+ * Anything unreadable is treated as "no roster yet" rather than crashing the app,
+ * and a bad player saved by an older version is repaired here, on every launch.
+ */
 export const loadRoster = (): Roster => {
   try {
     const raw = localStorage.getItem(KEY());
@@ -22,7 +20,7 @@ export const loadRoster = (): Roster => {
     return {
       teamName: typeof roster.teamName === 'string' ? roster.teamName : '',
       season: typeof roster.season === 'string' ? roster.season : '',
-      players: roster.players.filter(isPlayer),
+      players: repairStoredPlayers(roster.players),
       updatedAt: typeof roster.updatedAt === 'string' ? roster.updatedAt : new Date().toISOString(),
     };
   } catch {
