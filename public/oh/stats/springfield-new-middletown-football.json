@@ -2,7 +2,7 @@
  "slug": "springfield-new-middletown",
  "sport": "football",
  "source": "MaxPreps",
- "updated": "2026-11-14",
+ "updated": "2026-11-21",
  "games": 12,
  "rows": [
   {
@@ -831,11 +831,11 @@
    "category": "punting",
    "values": {
     "games": 12,
-    "punts": 18,
-    "yds": 223,
-    "ydsPerPunt": 12.4,
-    "lng": 40,
-    "in20": 2
+    "punts": 17,
+    "yds": 551,
+    "ydsPerPunt": 32.4,
+    "lng": 52,
+    "in20": 5
    }
   },
   {
@@ -5434,11 +5434,11 @@
      "category": "punting",
      "values": {
       "games": 12,
-      "punts": 18,
-      "yds": 223,
-      "ydsPerPunt": 12.4,
-      "lng": 40,
-      "in20": 2
+      "punts": 17,
+      "yds": 551,
+      "ydsPerPunt": 32.4,
+      "lng": 52,
+      "in20": 5
      }
     },
     {
