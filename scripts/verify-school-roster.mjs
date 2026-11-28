@@ -4,7 +4,7 @@
  * Run by hand after applying a migration — not in CI, because it needs the
  * real anon key and creates nothing. It asks the public function the
  * questions an attacker would: an unknown school, an unpublished row, an
- * expired row, 0008's four doors, 0009's two. The write checks assert the anon key is
+ * expired row, 0008's four doors, 0009's two, 0011's three. The write checks assert the anon key is
  * refused outright, and the Data API checks assert both tables —
  * school_roster and school_account, the higher-value target since it holds
  * the seller's email and is_admin — are unreachable directly, not just
@@ -134,6 +134,18 @@ const anonStatsSource = await rpc('school_roster_set_stats_source', {
 });
 check('anon cannot set a stats source', refused(anonStatsSource), JSON.stringify(anonStatsSource));
 
+// 0011's purge and its two helpers. None is a door, and a database without 0011
+// answers 404 and fails these, which is the runbook telling the truth. roster_create
+// itself is not probed: a real call would publish a roster and spend today's quota.
+const anonPurge = await rpc('share_limits_purge', {});
+check('anon cannot purge share codes', refused(anonPurge), JSON.stringify(anonPurge));
+
+const anonCallerHash = await rpc('share_caller_hash', {});
+check('anon cannot ask for a caller hash', refused(anonCallerHash), JSON.stringify(anonCallerHash));
+
+const anonCallerAddress = await rpc('share_caller_address', { p_raw: '192.0.2.1' });
+check('anon cannot call the address helper', refused(anonCallerAddress), JSON.stringify(anonCallerAddress));
+
 // With a live activation named in .env.local (VERIFY_SLUG, and VERIFY_SPORT
 // when it isn't football), prove the public answer carries no link or sync
 // history. Optional because the paid tier can have no live rows at all.
@@ -165,6 +177,10 @@ await checkNotExposed('school_roster');
 // The higher-value target: this table holds the seller's email and the
 // is_admin flag. Same door, same requirement.
 await checkNotExposed('school_account');
+// 0011's two. A database without 0011 answers 404 here, so these pass there;
+// the three function checks above are the ones that notice it is missing.
+await checkNotExposed('share_caller_quota');
+await checkNotExposed('share_limit_salt');
 
 // A fixed count here so the runbook's "expected N ok lines" can't drift out
 // of sync with this file — the script states its own total instead.
